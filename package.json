@@ -1,0 +1,34 @@
+{
+	"name": "mdank",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "",
+	"author": "",
+	"license": "MIT",
+	"packageManager": "pnpm@9.1.2+sha512.127dc83b9ea10c32be65d22a8efb4a65fb952e8fefbdfded39bdc3c97efc32d31b48b00420df2c1187ace28c921c902f0cb5a134a4d032b8b5295cbfa2c681e2",
+	"main": "index.js",
+	"keywords": [],
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"devDependencies": {
+		"@kitschpatrol/remark-obsidian-link": "file:../remark-obsidian-link",
+		"@kitschpatrol/shared-config": "^4.6.6",
+		"@types/mdast": "^4.0.4",
+		"@types/node": "^20.12.12",
+		"@types/unist": "^3.0.2",
+		"remark": "^15.0.1",
+		"remark-frontmatter": "^5.0.0",
+		"remark-gfm": "^4.0.0",
+		"remark-html": "^16.0.1",
+		"remark-parse": "^11.0.0",
+		"remark-wiki-link": "^2.0.1",
+		"tsx": "^4.11.0",
+		"unified": "^11.0.4",
+		"unist-builder": "^4.0.0",
+		"unist-util-visit": "^5.0.0",
+		"vitest": "^1.6.0",
+		"yaml": "^2.4.2",
+		"zod": "^3.23.8"
+	}
+}
