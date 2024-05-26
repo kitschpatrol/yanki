@@ -3,6 +3,7 @@
 	"import": "@kitschpatrol/cspell-config",
 	"words": [
 		"Anki",
-		"cloze"
+		"cloze",
+		"mdank"
 	]
 }
