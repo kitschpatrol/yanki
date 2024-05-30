@@ -1,4 +1,6 @@
-// Adaptation of https://github.com/aegatlin/remark-obsidian-link
+/**
+ * Adaptation of https://github.com/aegatlin/remark-obsidian-link with some minor fixes.
+ */
 
 import type { Parent, Root } from 'mdast'
 import remarkWikiLink from 'remark-wiki-link'

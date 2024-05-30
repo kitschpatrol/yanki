@@ -1,6 +1,5 @@
 ---
-id: 341412431234
-deck: implicit
+deckName: Default
 tags:
   - mdank
   - yes

@@ -1,17 +1,18 @@
 ---
-id: 341412431234
-deck: Something::New
+deckName: Something::New
 tags:
   - mdank
   - yes
+noteId: 1717033955202
+
 ---
 
 I'm the prompt
 
-# What an amzing
+# What an amazing
 
-- _thing_
-- that
-- is
+* *thing*
+* that
+* is
 
-_I'm the thing you need to type on the card_
+*I'm the thing you need to type on the card*

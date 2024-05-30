@@ -1,16 +1,17 @@
 ---
-id: 341412431234
-deck: implicit
+deckName: Default
 tags:
   - mdank
   - yes
+noteId: 1717048531692
+
 ---
 
 I'm the front of the card
 
-[[Yes|Obsidian]]
+\[\[Yes|Obsidian]]
 
-[[Yes/It/Is|Obsidian]]
+\[\[Yes/It/Is|Obsidian]]
 
 ---
 

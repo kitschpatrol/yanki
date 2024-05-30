@@ -20,6 +20,9 @@ importers:
       '@types/unist':
         specifier: ^3.0.2
         version: 3.0.2
+      add:
+        specifier: ^2.0.6
+        version: 2.0.6
       remark:
         specifier: ^15.0.1
         version: 15.0.1
@@ -35,12 +38,18 @@ importers:
       remark-parse:
         specifier: ^11.0.0
         version: 11.0.0
+      remark-stringify:
+        specifier: ^11.0.0
+        version: 11.0.0
       remark-wiki-link:
         specifier: ^2.0.1
         version: 2.0.1
       tsx:
         specifier: ^4.11.0
         version: 4.11.0
+      type-fest:
+        specifier: ^4.18.3
+        version: 4.18.3
       unified:
         specifier: ^11.0.4
         version: 11.0.4
@@ -56,6 +65,9 @@ importers:
       yaml:
         specifier: ^2.4.2
         version: 2.4.2
+      yanki-connect:
+        specifier: link:../yanki-connect
+        version: link:../yanki-connect
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -918,6 +930,9 @@ packages:
     resolution: {integrity: sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  add@2.0.6:
+    resolution: {integrity: sha512-j5QzrmsokwWWp6kUcJQySpbG+xfOBqqKnup3OIk1pz+kB/80SLorZ9V8zHFLO92Lcd+hbvq8bT+zOGoPkmBV0Q==}
 
   agent-base@7.1.1:
     resolution: {integrity: sha512-H0TSyFNDMomMNJQBn8wFV5YC/2eJ+VXECwOadZJT554xP6cODZHPX3H9QMQECxvrgiSOP1pHjy1sMWQVYJOUOA==}
@@ -5198,6 +5213,8 @@ snapshots:
   acorn-walk@8.3.2: {}
 
   acorn@8.11.3: {}
+
+  add@2.0.6: {}
 
   agent-base@7.1.1:
     dependencies:

@@ -1,13 +1,20 @@
-import type { AnkiNoteType } from '../types/anki-note'
+/**
+ * Helpers for working with the Markdown AST.
+ */
+
+import type { YankiModelName } from '../types/anki-note'
+import type { Frontmatter } from '../types/frontmatter'
 import remarkObsidianLink from './remark-obsidian-link'
 import type { Node, Parent, Root, Text } from 'mdast'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
 import remarkHtml from 'remark-html'
 import remarkParse from 'remark-parse'
+import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
 import { CONTINUE, EXIT, visit } from 'unist-util-visit'
+import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
 
 // Processor shared across operations
 const processor = unified()
@@ -154,36 +161,48 @@ export function splitTreeAtThematicBreak(tree: Root): [Root, Root | undefined] {
 	return [firstPart, secondPart]
 }
 
-// Precedence: basic-and-reversed > basic > cloze > basic-type-in-the-answer
+// Precedence: basic-type-in-the-answer > cloze > basic-and-reversed > basic
 // If  and of the sub-indicators are in the markdown, then the higher-precedence type wins
 // If nothing matches, then we just get a basic note with all the markdown on the front, and nothing on the back
-export function getAnkiNoteTypeFromTree(ast: Root): AnkiNoteType {
-	let probableType: AnkiNoteType | undefined
+export function getYankiModelNameFromTree(ast: Root): YankiModelName {
+	let probableType: YankiModelName | undefined
 
-	let lastNode: Node | undefined
-	visit(ast, 'thematicBreak', (node, index, parent) => {
-		if (parent === null || index === null) return CONTINUE
+	// Cloze must come before thematic break
+	visit(ast, (node) => {
+		if (node.type === 'thematicBreak') {
+			probableType = undefined
+			return EXIT
+		}
 
-		probableType =
-			lastNode?.type === 'thematicBreak' && node.type === 'thematicBreak'
-				? 'Basic (and reversed card)'
-				: 'Basic'
-
-		lastNode = node
+		if (node.type === 'delete') {
+			probableType = 'Yanki - Cloze'
+			return EXIT
+		}
 	})
+	if (probableType !== undefined) return probableType
 
-	// If we didn't find a thematic break, we might have a cloze or type-in-the-answer note
+	// Type in the answer must not have a thematic break at all, and the emphasis must be the last node
+
+	// Check last node type
+	visit(ast.children.at(-1) as Parent, (node) => {
+		if (node.type === 'emphasis') {
+			probableType = 'Yanki - Basic (type in the answer)'
+		}
+	})
+	if (probableType !== undefined) return probableType
+
+	// If we didn't find a signs of cloze or type in the answer, it must be a basic card
 	if (probableType === undefined) {
-		visit(ast, (node) => {
-			if (node.type === 'delete') {
-				probableType = 'Cloze'
-				return EXIT
-			}
+		let lastNode: Node | undefined
+		visit(ast, 'thematicBreak', (node, index, parent) => {
+			if (parent === null || index === null) return CONTINUE
 
-			if (node.type === 'emphasis') {
-				probableType = 'Basic (type in the answer)'
-				// Do not exit, cloze should win
-			}
+			probableType =
+				lastNode?.type === 'thematicBreak' && node.type === 'thematicBreak'
+					? 'Yanki - Basic (and reversed card)'
+					: 'Yanki - Basic'
+
+			lastNode = node
 		})
 	}
 
@@ -191,5 +210,43 @@ export function getAnkiNoteTypeFromTree(ast: Root): AnkiNoteType {
 		console.warn('Could not determine note type. Defaulting to basic.')
 	}
 
-	return probableType ?? 'Basic'
+	return probableType ?? 'Yanki - Basic'
+}
+
+export function getFrontmatterFromTree(ast: Root): Frontmatter {
+	let rawYaml: string | undefined
+	visit(ast, 'yaml', (node) => {
+		rawYaml = node.value
+		return EXIT
+	})
+
+	if (rawYaml === undefined) {
+		console.warn('No frontmatter found')
+		return {}
+	}
+
+	return yamlParse(rawYaml) as Frontmatter
+}
+
+export async function setNoteIdInFrontmatter(markdown: string, noteId: number): Promise<string> {
+	const ast = await getAstFromMarkdown(markdown)
+	const newFrontmatter = { ...getFrontmatterFromTree(ast), noteId }
+	const newAst = setFrontmatterInTree(ast, newFrontmatter)
+	return processor()
+		.use(remarkStringify, {
+			emphasis: '_',
+			rule: '-',
+			strong: '*',
+		})
+		.stringify(newAst)
+		.trim()
+}
+
+export function setFrontmatterInTree(ast: Root, frontmatter: Frontmatter): Root {
+	visit(ast, 'yaml', (node) => {
+		node.value = yamlStringify(frontmatter)
+		return EXIT
+	})
+
+	return ast
 }
