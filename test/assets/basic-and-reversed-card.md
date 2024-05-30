@@ -1,5 +1,4 @@
 ---
-deckName: Why::Yes
 tags:
   - mdank
   - test

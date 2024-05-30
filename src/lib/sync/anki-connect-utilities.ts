@@ -47,6 +47,11 @@ export async function addNote(client: YankiConnect, note: YankiNote): Promise<nu
 
 				if (error.message === `deck was not found: ${note.deckName}`) {
 					// Create the deck and try again
+
+					if (note.deckName === undefined) {
+						throw new Error('Deck name is undefined')
+					}
+
 					await client.deck.createDeck({ deck: note.deckName })
 					return addNote(client, note)
 				}
@@ -105,6 +110,10 @@ export async function updateNote(
 
 	// Check if decks are different
 	if (localNote.deckName !== remoteNote.deckName) {
+		if (localNote.deckName === undefined) {
+			throw new Error('Local deck name is undefined')
+		}
+
 		await client.deck.changeDeck({ cards: remoteNote.cards, deck: localNote.deckName })
 		updated = true
 	}

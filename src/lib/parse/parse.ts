@@ -56,7 +56,7 @@ export async function getNoteFromMarkdown(markdown: string): Promise<YankiNote> 
 	}
 
 	const note: YankiNote = {
-		deckName: frontmatter.deckName ?? 'Default',
+		deckName: frontmatter.deckName,
 		fields: {
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			Back: back,

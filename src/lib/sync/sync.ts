@@ -3,9 +3,15 @@ import { type YankiNote } from '../model/yanki-note'
 import { getNoteFromMarkdown } from '../parse/parse'
 import { addNote, getRemoteNotes, updateNote } from './anki-connect-utilities'
 import fs from 'node:fs/promises'
+import path from 'node:path'
 import { YankiConnect, type YankiConnectOptions } from 'yanki-connect'
 
 type SyncedNote = { action: 'created' | 'recreated' | 'unchanged' | 'updated'; note: YankiNote }
+
+type SyncNoteOptions = {
+	ankiConnectOptions?: YankiConnectOptions
+	defaultDeckName?: string
+}
 
 /**
  * Syncs local notes to Anki.
@@ -16,7 +22,7 @@ type SyncedNote = { action: 'created' | 'recreated' | 'unchanged' | 'updated'; n
  */
 export async function syncNotes(
 	allLocalNotes: YankiNote[],
-	ankiConnectOptions?: YankiConnectOptions,
+	options?: SyncNoteOptions,
 ): Promise<{
 	deleted: number[]
 	duration: number
@@ -25,6 +31,13 @@ export async function syncNotes(
 	const startTime = performance.now()
 	const synced: SyncedNote[] = []
 	const replaced: number[] = []
+
+	const {
+		ankiConnectOptions = {
+			autoLaunchAnki: true,
+		},
+		defaultDeckName = 'Yanki',
+	} = options ?? {}
 
 	const client = new YankiConnect(ankiConnectOptions)
 
@@ -35,6 +48,14 @@ export async function syncNotes(
 		(note) => !allLocalNotes.some((localNote) => localNote.noteId === note),
 	)
 	await client.note.deleteNotes({ notes: orphans })
+
+	// Set undefined local note decks to the default
+	for (const note of allLocalNotes) {
+		if (note.deckName === undefined) {
+			console.log('Setting deck name')
+			note.deckName = defaultDeckName
+		}
+	}
 
 	// Set undefined local note IDs to bogus ones to ensure we create them
 	const localNoteIds = allLocalNotes.map((note) => note.noteId).map((id) => id ?? -1)
@@ -98,6 +119,10 @@ type SyncedNoteFile = {
 	filePath: string
 } & SyncedNote
 
+type SyncNoteFilesOptions = {
+	ankiConnectOptions?: YankiConnectOptions
+}
+
 /**
  * Sync a list of local yanki-md files to Anki.
  *
@@ -112,19 +137,25 @@ type SyncedNoteFile = {
  */
 export async function syncNoteFiles(
 	allLocalFilePaths: string[],
-	ankiConnectOptions?: YankiConnectOptions,
+	options?: SyncNoteFilesOptions,
 ): Promise<{ deleted: number[]; duration: number; synced: SyncedNoteFile[] }> {
 	const startTime = performance.now()
 
 	const allLocalMarkdown: string[] = []
 	const allLocalNotes: YankiNote[] = []
-	for (const filePath of allLocalFilePaths) {
+
+	// Use file paths as deck names if they're not provided in the frontmatter
+	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths, true)
+
+	for (const [index, filePath] of allLocalFilePaths.entries()) {
 		const markdown = await fs.readFile(filePath, 'utf8')
 		allLocalMarkdown.push(markdown)
-		allLocalNotes.push(await getNoteFromMarkdown(markdown))
+		const note = await getNoteFromMarkdown(markdown)
+		note.deckName ??= deckNamesFromFilePaths[index]
+		allLocalNotes.push(note)
 	}
 
-	const { deleted, synced } = await syncNotes(allLocalNotes, ankiConnectOptions)
+	const { deleted, synced } = await syncNotes(allLocalNotes, options)
 
 	// Write IDs to the local files as necessary Can't just get markdown from the
 	// note because there might be extra frontmatter from e.g. obsidian, which is
@@ -154,4 +185,46 @@ export async function syncNoteFiles(
 		duration: performance.now() - startTime,
 		synced: syncedFiles,
 	}
+}
+
+function getDeckNamesFromFilePaths(filePaths: string[], prune: boolean) {
+	const filePathSegments = filePaths.map((filePath) =>
+		path.dirname(path.resolve(filePath)).split(path.sep),
+	)
+
+	const deckNames = filePathSegments.map((pathSegments) => {
+		if (prune) {
+			// Walk right to left, only go as far as you find another file
+			// This means "islands" become their own root if there aren't and
+			// markdown files in the parent directory
+			for (let index = pathSegments.length - 2; index >= 0; index--) {
+				// See if the segment is the "last path" in another file
+				if (
+					!filePathSegments.some(
+						(otherPathSegments) => otherPathSegments.at(-1) === pathSegments[index],
+					)
+				) {
+					return pathSegments.slice(index + 1).join('::')
+				}
+			}
+		} else {
+			console.log('empty-allowed')
+			// Walk from left to right, stop when you find the first segment with a file
+			for (let index = 0; index < pathSegments.length; index++) {
+				if (
+					filePathSegments.some(
+						(otherPathSegments) => otherPathSegments.at(-1) === pathSegments[index],
+					)
+				) {
+					return pathSegments.slice(index).join('::')
+				}
+			}
+		}
+
+		// If we didn't find another file, return the whole path
+		// This should not happen...
+		return pathSegments.join('::')
+	})
+
+	return deckNames
 }
