@@ -20,3 +20,4 @@ pnpm-lock.yaml
 package-lock.json
 
 # Customizations
+bin/

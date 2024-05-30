@@ -1,5 +1,6 @@
 /**
- * Adaptation of https://github.com/aegatlin/remark-obsidian-link with some minor fixes.
+ * Handle Obsidian-style wiki links in Markdown files. Adaptation of
+ * https://github.com/aegatlin/remark-obsidian-link with some minor fixes.
  */
 
 import type { Parent, Root } from 'mdast'

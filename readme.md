@@ -2,38 +2,26 @@
 
 <!-- title -->
 
-# mdank
+# yanki-md
 
 <!-- /title -->
 
-<!-- banner -->
-
 <!-- badges -->
 
+[![NPM Package yanki-md](https://img.shields.io/npm/v/yanki-md.svg)](https://npmjs.com/package/yanki-md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <!-- /badges -->
 
 <!-- short-description -->
 
+**An ultra simple CLI tool and library for syncing from Markdown to Anki.**
+
+<!-- /short-description -->
+
 ## Overview
 
-Possible interface:
-
-```ts
-async mdankSync(files:string[] | file:string, root: string, footer: string, commonTag: 'mdank') {
-
-}
-```
-
-Default card types:
-
-- Basic
-- Basic (and reversed card)
-- Basic (optional reversed card)
-- Basic (type in the answer)
-- Cloze
-- Image Occlusion
+The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools.
 
 ## Getting started
 
@@ -41,17 +29,59 @@ Default card types:
 
 ### Installation
 
+Invoke directly:
+
+```sh
+npx yanki-md ./folder-to-sync/**/*.md
+```
+
+...or install globally:
+
+```sh
+npm install --global yanki-md
+```
+
+...or install locally in your JavaScript or TypeScript project to use the exported APIs:
+
+```sh
+npm install --save-dev yanki-md
+```
+
 ## Usage
+
+### CLI
+
+<!-- cli-help -->
+
+#### Command: `yanki`
+
+Process markdown files
+
+Usage:
+
+```txt
+yanki <pattern>
+```
+
+| Positional Argument | Description                                   | Type     |
+| ------------------- | --------------------------------------------- | -------- |
+| `pattern`           | Glob pattern for markdown files _(Optional.)_ | `string` |
+
+| Option      | Alias | Description                    | Type      |
+| ----------- | ----- | ------------------------------ | --------- |
+| `--dry-run` | `-d`  | Run without making any changes | `boolean` |
+| `--help`    | `-h`  | Show help                      | `boolean` |
+| `--version` | `-v`  | Show version number            | `boolean` |
+
+<!-- /cli-help -->
+
+#### Commands
+
+#### Examples
 
 ### Library
 
 #### API
-
-#### Examples
-
-### CLI
-
-#### Commands
 
 #### Examples
 
@@ -65,14 +95,28 @@ Default card types:
 
 ## The future
 
+Image support would be nice.
+
 ## Maintainers
 
-_List maintainer(s) for a repository, along with one way of contacting them (e.g. GitHub link or email)._
+[@kitschpatrol](https://github.com/kitschpatrol)
 
 ## Acknowledgements
 
-_State anyone or anything that significantly helped with the development of your project. State public contact hyper-links if applicable._
+Thanks to Alex Yatskov for creating [Anki-Connect](https://foosoft.net/projects/anki-connect/).
 
 <!-- contributing -->
 
+## Contributing
+
+[Issues](https://github.com/kitschpatrol/yanki-md/issues) and pull requests are welcome.
+
+<!-- /contributing -->
+
 <!-- license -->
+
+## License
+
+[MIT](license.txt) © Eric Mika
+
+<!-- /license -->

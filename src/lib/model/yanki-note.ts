@@ -2,12 +2,6 @@
 import { type Simplify } from 'type-fest'
 import { type YankiParamsForAction } from 'yanki-connect'
 
-// Export type AnkiNoteModelName =
-// 	| 'Yanki - Basic (and reversed card)'
-// 	| 'Yanki - Basic (type in the answer)'
-// 	| 'Yanki - Basic'
-// 	| 'Yanki - Cloze'
-
 export const yankiModels = [
 	{
 		cardTemplates: [

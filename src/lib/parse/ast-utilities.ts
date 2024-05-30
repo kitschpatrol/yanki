@@ -2,19 +2,18 @@
  * Helpers for working with the Markdown AST.
  */
 
-import type { YankiModelName } from '../types/anki-note'
-import type { Frontmatter } from '../types/frontmatter'
+import type { Frontmatter } from '../model/frontmatter'
+import type { YankiModelName } from '../model/yanki-note'
 import remarkObsidianLink from './remark-obsidian-link'
 import type { Node, Parent, Root, Text } from 'mdast'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
 import remarkHtml from 'remark-html'
 import remarkParse from 'remark-parse'
-import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
 import { CONTINUE, EXIT, visit } from 'unist-util-visit'
-import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
+import { parse as yamlParse } from 'yaml'
 
 // Processor shared across operations
 const processor = unified()
@@ -89,7 +88,7 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 // For Basic (type in the answer) notes
 export function splitTreeAtEmphasis(tree: Root): [Root, string] {
 	let splitIndex: number | undefined
-	let typeInText: string | undefined = 'bla bla bla'
+	let typeInText: string | undefined
 
 	// Find the index of the last thematicBreak node
 	visit(tree, 'emphasis', (node, index, parent) => {
@@ -105,7 +104,7 @@ export function splitTreeAtEmphasis(tree: Root): [Root, string] {
 	})
 
 	if (splitIndex === undefined) {
-		throw new Error('Could not find thematic break in Basic or Basic (and reversed card) note AST.')
+		throw new Error('Could not find emphasis in Basic (type in the answer) note AST.')
 	}
 
 	if (typeInText === undefined) {
@@ -143,7 +142,8 @@ export function splitTreeAtThematicBreak(tree: Root): [Root, Root | undefined] {
 	})
 
 	if (splitIndex === undefined) {
-		console.warn('Could not find thematic break in Basic or Basic (and reversed card) note AST.')
+		// Normal for cards without an answer... console.warn('Could not find
+		// thematic break in Basic or Basic (and reversed card) note AST.')
 		return [tree, undefined]
 	}
 
@@ -161,9 +161,10 @@ export function splitTreeAtThematicBreak(tree: Root): [Root, Root | undefined] {
 	return [firstPart, secondPart]
 }
 
-// Precedence: basic-type-in-the-answer > cloze > basic-and-reversed > basic
-// If  and of the sub-indicators are in the markdown, then the higher-precedence type wins
-// If nothing matches, then we just get a basic note with all the markdown on the front, and nothing on the back
+// Precedence: basic-type-in-the-answer > cloze > basic-and-reversed > basic If
+// and of the sub-indicators are in the markdown, then the higher-precedence
+// type wins If nothing matches, then we just get a basic note with all the
+// markdown on the front, and nothing on the back
 export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 	let probableType: YankiModelName | undefined
 
@@ -181,7 +182,8 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 	})
 	if (probableType !== undefined) return probableType
 
-	// Type in the answer must not have a thematic break at all, and the emphasis must be the last node
+	// Type in the answer must not have a thematic break at all, and the emphasis
+	// must be the last node
 
 	// Check last node type
 	visit(ast.children.at(-1) as Parent, (node) => {
@@ -191,7 +193,8 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 	})
 	if (probableType !== undefined) return probableType
 
-	// If we didn't find a signs of cloze or type in the answer, it must be a basic card
+	// If we didn't find a signs of cloze or type in the answer, it must be a
+	// basic card
 	if (probableType === undefined) {
 		let lastNode: Node | undefined
 		visit(ast, 'thematicBreak', (node, index, parent) => {
@@ -206,9 +209,8 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 		})
 	}
 
-	if (probableType === undefined) {
-		console.warn('Could not determine note type. Defaulting to basic.')
-	}
+	// Not noteworthy... if (probableType === undefined) { Console.warn('Could not
+	// determine note type. Defaulting to basic.') }
 
 	return probableType ?? 'Yanki - Basic'
 }
@@ -226,27 +228,4 @@ export function getFrontmatterFromTree(ast: Root): Frontmatter {
 	}
 
 	return yamlParse(rawYaml) as Frontmatter
-}
-
-export async function setNoteIdInFrontmatter(markdown: string, noteId: number): Promise<string> {
-	const ast = await getAstFromMarkdown(markdown)
-	const newFrontmatter = { ...getFrontmatterFromTree(ast), noteId }
-	const newAst = setFrontmatterInTree(ast, newFrontmatter)
-	return processor()
-		.use(remarkStringify, {
-			emphasis: '_',
-			rule: '-',
-			strong: '*',
-		})
-		.stringify(newAst)
-		.trim()
-}
-
-export function setFrontmatterInTree(ast: Root, frontmatter: Frontmatter): Root {
-	visit(ast, 'yaml', (node) => {
-		node.value = yamlStringify(frontmatter)
-		return EXIT
-	})
-
-	return ast
 }

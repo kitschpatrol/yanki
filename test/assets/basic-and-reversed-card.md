@@ -1,13 +1,14 @@
 ---
-deckName: Something::New
+deckName: Why::Yes
 tags:
   - mdank
   - test
-noteId: 1717049545362
-
+noteId: 1717053387133
 ---
 
 I'm _question_ which is sometimes the answer
+
+---
 
 ---
 

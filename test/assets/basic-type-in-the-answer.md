@@ -3,16 +3,15 @@ deckName: Something::New
 tags:
   - mdank
   - yes
-noteId: 1717033955202
-
+noteId: 1717053387155
 ---
 
 I'm the prompt
 
 # What an amazing
 
-* *thing*
-* that
-* is
+- _thing_
+- that
+- is
 
-*I'm the thing you need to type on the card*
+_I'm the thing you need to type on the card_

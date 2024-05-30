@@ -1,8 +1,8 @@
 /**
- * Turns a markdown string into an Anki note object.
+ * Turns a markdown string into a YankiNote object.
  */
 
-import type { YankiNote } from '../types/anki-note'
+import type { YankiNote } from '../model/yanki-note'
 import {
 	deleteFirstNodeOfType,
 	getAstFromMarkdown,
@@ -15,7 +15,7 @@ import {
 import remarkHtml from 'remark-html'
 import { unified } from 'unified'
 
-export async function getAnkiJsonFromMarkdown(markdown: string): Promise<YankiNote> {
+export async function getNoteFromMarkdown(markdown: string): Promise<YankiNote> {
 	let ast = await getAstFromMarkdown(markdown)
 	const modelName = getYankiModelNameFromTree(ast)
 	const frontmatter = getFrontmatterFromTree(ast)
@@ -56,7 +56,7 @@ export async function getAnkiJsonFromMarkdown(markdown: string): Promise<YankiNo
 	}
 
 	const note: YankiNote = {
-		deckName: frontmatter.deck ?? 'Default',
+		deckName: frontmatter.deckName ?? 'Default',
 		fields: {
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			Back: back,

@@ -1,37 +1,95 @@
 {
-	"name": "mdank",
-	"version": "1.0.0",
+	"name": "yanki-md",
+	"version": "0.0.0",
 	"type": "module",
-	"description": "",
-	"author": "",
+	"description": "An ultra simple CLI tool and library for syncing from Markdown to Anki.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kitschpatrol/yanki-md.git"
+	},
+	"homepage": "https://github.com/kitschpatrol/yanki-md",
+	"bugs": {
+		"url": "https://github.com/kitschpatrol/yanki-md/issues",
+		"email": "eric@ericmika.com"
+	},
+	"author": {
+		"name": "Eric Mika",
+		"email": "eric@ericmika.com",
+		"url": "https://ericmika.com"
+	},
 	"license": "MIT",
-	"packageManager": "pnpm@9.1.2+sha512.127dc83b9ea10c32be65d22a8efb4a65fb952e8fefbdfded39bdc3c97efc32d31b48b00420df2c1187ace28c921c902f0cb5a134a4d032b8b5295cbfa2c681e2",
-	"main": "index.js",
-	"keywords": [],
+	"packageManager": "pnpm@9.1.3",
+	"engines": {
+		"node": ">=18.0.0",
+		"pnpm": ">=8.0.0"
+	},
+	"bin": {
+		"yanki-cli": "bin/cli.js",
+		"yanki": "bin/cli.js"
+	},
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"types": "./dist/index.d.ts",
+	"files": [
+		"bin/*",
+		"dist/*"
+	],
+	"keywords": [
+		"anki",
+		"spaced-repetition",
+		"anki-connect",
+		"markdown",
+		"cli",
+		"sync",
+		"npm-package"
+	],
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"build": "pnpm run build:lib && pnpm run build:cli",
+		"build:cli": "tsx ./scripts/build-cli.ts",
+		"build:lib": "tsx ./scripts/build-lib.ts && tsc -p tsconfig.lib.json",
+		"fix": "shared-config --fix",
+		"lint": "shared-config --lint",
+		"release": "pnpm build && pnpm bumpp --commit 'Release: %s' && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^4.6.6",
 		"@types/mdast": "^4.0.4",
-		"@types/node": "^20.12.12",
+		"@types/node": "^20.12.13",
 		"@types/unist": "^3.0.2",
+		"@types/yargs": "^17.0.32",
 		"add": "^2.0.6",
+		"bumpp": "^9.4.1",
+		"chalk": "^5.3.0",
+		"esbuild": "^0.21.4",
+		"pretty-ms": "^9.0.0",
 		"remark": "^15.0.1",
 		"remark-frontmatter": "^5.0.0",
 		"remark-gfm": "^4.0.0",
 		"remark-html": "^16.0.1",
 		"remark-parse": "^11.0.0",
-		"remark-stringify": "^11.0.0",
 		"remark-wiki-link": "^2.0.1",
 		"tsx": "^4.11.0",
 		"type-fest": "^4.18.3",
 		"unified": "^11.0.4",
 		"unist-builder": "^4.0.0",
 		"unist-util-visit": "^5.0.0",
+		"untildify": "^5.0.0",
 		"vitest": "^1.6.0",
 		"yaml": "^2.4.2",
 		"yanki-connect": "link:../yanki-connect",
 		"zod": "^3.23.8"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }
