@@ -9,17 +9,27 @@ import {
 	getRemoteNotes,
 	updateNote,
 } from './anki-connect-utilities'
+import { deepmerge } from 'deepmerge-ts'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { YankiConnect, type YankiConnectOptions } from 'yanki-connect'
 
 type SyncedNote = { action: 'created' | 'recreated' | 'unchanged' | 'updated'; note: YankiNote }
 
-type SyncNoteOptions = {
+export type SyncOptions = {
 	ankiConnectOptions: YankiConnectOptions
 	defaultDeckName: string
 	dryRun: boolean
 	modelPrefix: string
+}
+
+const defaultSyncOptions: SyncOptions = {
+	ankiConnectOptions: {
+		autoLaunchAnki: true,
+	},
+	defaultDeckName: 'Yanki',
+	dryRun: false,
+	modelPrefix: 'Yanki - ',
 }
 
 /**
@@ -31,7 +41,7 @@ type SyncNoteOptions = {
  */
 export async function syncNotes(
 	allLocalNotes: YankiNote[],
-	options?: Partial<SyncNoteOptions>,
+	options?: Partial<SyncOptions>,
 ): Promise<{
 	deleted: number[]
 	duration: number
@@ -40,14 +50,10 @@ export async function syncNotes(
 	const startTime = performance.now()
 
 	// Defaults
-	const {
-		ankiConnectOptions = {
-			autoLaunchAnki: true,
-		},
-		defaultDeckName = 'Yanki',
-		dryRun = false,
-		modelPrefix = 'Yanki - ',
-	} = options ?? {}
+	const { ankiConnectOptions, defaultDeckName, dryRun, modelPrefix } = deepmerge(
+		defaultSyncOptions,
+		options ?? {},
+	)
 
 	const synced: SyncedNote[] = []
 	const replaced: number[] = []
@@ -144,8 +150,6 @@ type SyncedNoteFile = {
 	filePath: string
 } & SyncedNote
 
-type SyncFilesOptions = Omit<SyncNoteOptions, 'defaultDeckName'>
-
 /**
  * Sync a list of local yanki-md files to Anki.
  *
@@ -160,11 +164,12 @@ type SyncFilesOptions = Omit<SyncNoteOptions, 'defaultDeckName'>
  */
 export async function syncFiles(
 	allLocalFilePaths: string[],
-	options?: Partial<SyncFilesOptions>,
+	options?: Partial<SyncOptions>,
 ): Promise<{ deleted: number[]; duration: number; synced: SyncedNoteFile[] }> {
 	const startTime = performance.now()
 
-	const { dryRun = false, modelPrefix = 'Yanki - ' } = options ?? {}
+	const resolvedOptions = deepmerge(defaultSyncOptions, options ?? {})
+	const { dryRun, modelPrefix } = resolvedOptions
 
 	const allLocalMarkdown: string[] = []
 	const allLocalNotes: YankiNote[] = []
@@ -180,7 +185,7 @@ export async function syncFiles(
 		allLocalNotes.push(note)
 	}
 
-	const { deleted, synced } = await syncNotes(allLocalNotes, { ...options, dryRun, modelPrefix })
+	const { deleted, synced } = await syncNotes(allLocalNotes, resolvedOptions)
 
 	// Write IDs to the local files as necessary Can't just get markdown from the
 	// note because there might be extra frontmatter from e.g. obsidian, which is
