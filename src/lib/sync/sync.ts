@@ -187,6 +187,32 @@ export async function syncNoteFiles(
 	}
 }
 
+/**
+ * Helper function to infer deck names from file paths if `deckName` not defined in the note's frontmatter.
+ *
+ * `deckName` will always override the inferred deck name.
+ *
+ * Depends on the context of _all_ file paths passed to `syncNoteFiles`.
+ *
+ * Examples of paths -> deck names with `prune` set to `false`:
+ * /base/foo/note.md -> foo
+ * /base/foo/baz/note.md -> foo::baz
+ * /base/foo/baz/rud/pap/note.md -> foo::baz::rud::pap
+ * /base/bla/note.md -> bla
+ * /base/bla/note.md -> bla
+ * /base/bla/blo/note.md -> bla::blo
+ *
+ * Examples of paths -> deck names with `prune` set to `true`:
+ * /base/foo/note.md -> foo
+ * /base/foo/baz/note.md -> foo::baz
+ * /base/foo/baz/rud/pap/note.md -> pap
+ * /base/bla/note.md -> bla
+ * /base/bla/blo/note.md -> bla::blo
+ *
+ * @param filePaths Paths to all markdown Anki note files
+ * @param prune If true, deck names are not allowed to "jump" over empty directories, even if there are other note files somewhere up the hierarchy
+ * @returns array of ::-delimited deck paths
+ */
 function getDeckNamesFromFilePaths(filePaths: string[], prune: boolean) {
 	const filePathSegments = filePaths.map((filePath) =>
 		path.dirname(path.resolve(filePath)).split(path.sep),
@@ -208,7 +234,6 @@ function getDeckNamesFromFilePaths(filePaths: string[], prune: boolean) {
 				}
 			}
 		} else {
-			console.log('empty-allowed')
 			// Walk from left to right, stop when you find the first segment with a file
 			for (let index = 0; index < pathSegments.length; index++) {
 				if (
