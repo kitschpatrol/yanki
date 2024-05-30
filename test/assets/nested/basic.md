@@ -2,7 +2,7 @@
 tags:
   - mdank
   - yes
-noteId: 1717093843476
+noteId: 1717099614224
 ---
 
 I get my name from my folder.

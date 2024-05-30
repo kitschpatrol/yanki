@@ -3,7 +3,7 @@ deckName: Something::New
 tags:
   - mdank
   - yes
-noteId: 1717093843580
+noteId: 1717099614022
 ---
 
 I'm the prompt

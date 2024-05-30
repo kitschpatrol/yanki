@@ -5,8 +5,9 @@ import {
 	addNote,
 	deleteNote,
 	deleteNotes,
-	findNotes,
+	deleteOrphanedDecks,
 	getRemoteNotes,
+	getRemoteNotesById,
 	updateNote,
 } from './anki-connect-utilities'
 import { deepmerge } from 'deepmerge-ts'
@@ -43,7 +44,8 @@ export async function syncNotes(
 	allLocalNotes: YankiNote[],
 	options?: Partial<SyncOptions>,
 ): Promise<{
-	deleted: number[]
+	deletedDecks: string[]
+	deletedNotes: YankiNote[]
 	duration: number
 	synced: SyncedNote[]
 }> {
@@ -56,18 +58,17 @@ export async function syncNotes(
 	)
 
 	const synced: SyncedNote[] = []
-	const replaced: number[] = []
+	const replacedNotes: YankiNote[] = []
 
 	const client = new YankiConnect(ankiConnectOptions)
 
-	const remoteNoteIds = await findNotes(client, modelPrefix)
-
-	// Deletion pass
-	const orphans = remoteNoteIds.filter(
-		(note) => !allLocalNotes.some((localNote) => localNote.noteId === note),
+	// Deletion pass, we need the full info to do deck cleanup later on
+	const existingRemoteNotes = await getRemoteNotes(client, modelPrefix)
+	const orphanedNotes = existingRemoteNotes.filter(
+		(remoteNote) => !allLocalNotes.some((localNote) => localNote.noteId === remoteNote?.noteId),
 	)
 
-	await deleteNotes(client, orphans, dryRun)
+	await deleteNotes(client, orphanedNotes, dryRun)
 
 	// Set undefined local note decks to the default
 	for (const note of allLocalNotes) {
@@ -79,7 +80,7 @@ export async function syncNotes(
 
 	// Set undefined local note IDs to bogus ones to ensure we create them
 	const localNoteIds = allLocalNotes.map((note) => note.noteId).map((id) => id ?? -1)
-	const remoteNotes = await getRemoteNotes(client, localNoteIds, modelPrefix)
+	const remoteNotes = await getRemoteNotesById(client, modelPrefix, localNoteIds)
 
 	// Creation and update pass
 	for (const [index, remoteNote] of remoteNotes.entries()) {
@@ -120,7 +121,7 @@ export async function syncNotes(
 				throw new Error('Remote note ID is undefined')
 			}
 
-			replaced.push(remoteNote.noteId)
+			replacedNotes.push(remoteNote)
 			await deleteNote(client, remoteNote, dryRun)
 			const newNoteId = await addNote(
 				client,
@@ -139,8 +140,15 @@ export async function syncNotes(
 		}
 	}
 
+	// Purge empty yanki-related decks
+	const deletedNotes = [...orphanedNotes, ...replacedNotes]
+
+	const syncedNotes = synced.map((synced) => synced.note)
+	const deletedDecks = await deleteOrphanedDecks(client, syncedNotes, deletedNotes, dryRun)
+
 	return {
-		deleted: [...orphans, ...replaced],
+		deletedDecks,
+		deletedNotes,
 		duration: performance.now() - startTime,
 		synced,
 	}
@@ -165,11 +173,16 @@ type SyncedNoteFile = {
 export async function syncFiles(
 	allLocalFilePaths: string[],
 	options?: Partial<SyncOptions>,
-): Promise<{ deleted: number[]; duration: number; synced: SyncedNoteFile[] }> {
+): Promise<{
+	deletedDecks: string[]
+	deletedNotes: YankiNote[]
+	duration: number
+	synced: SyncedNoteFile[]
+}> {
 	const startTime = performance.now()
 
 	const resolvedOptions = deepmerge(defaultSyncOptions, options ?? {})
-	const { dryRun, modelPrefix } = resolvedOptions
+	const { modelPrefix } = resolvedOptions
 
 	const allLocalMarkdown: string[] = []
 	const allLocalNotes: YankiNote[] = []
@@ -185,7 +198,7 @@ export async function syncFiles(
 		allLocalNotes.push(note)
 	}
 
-	const { deleted, synced } = await syncNotes(allLocalNotes, resolvedOptions)
+	const { deletedDecks, deletedNotes, synced } = await syncNotes(allLocalNotes, resolvedOptions)
 
 	// Write IDs to the local files as necessary Can't just get markdown from the
 	// note because there might be extra frontmatter from e.g. obsidian, which is
@@ -211,7 +224,8 @@ export async function syncFiles(
 	}))
 
 	return {
-		deleted,
+		deletedDecks,
+		deletedNotes,
 		duration: performance.now() - startTime,
 		synced: syncedFiles,
 	}
@@ -282,4 +296,38 @@ function getDeckNamesFromFilePaths(filePaths: string[], prune: boolean) {
 	})
 
 	return deckNames
+}
+
+type CleanOptions = {
+	ankiConnectOptions?: YankiConnectOptions
+	dryRun: boolean
+	modelPrefix?: string
+}
+
+/**
+ * Deletes all remote notes in Anki associated with the given model prefix.
+ *
+ * Use with significant caution. Mostly useful for testing.
+ *
+ * @returns The IDs of the notes that were deleted
+ * @param options
+ * @throws
+ */
+export async function clean(
+	options: CleanOptions,
+): Promise<{ decks: string[]; notes: YankiNote[] }> {
+	const { ankiConnectOptions, dryRun, modelPrefix = defaultSyncOptions.modelPrefix } = options ?? {}
+
+	const client = new YankiConnect(ankiConnectOptions)
+
+	const remoteNotes = await getRemoteNotes(client, modelPrefix)
+
+	// Deletion pass
+	await deleteNotes(client, remoteNotes, dryRun)
+	const deletedDecks = await deleteOrphanedDecks(client, [], remoteNotes, dryRun)
+
+	return {
+		decks: deletedDecks,
+		notes: remoteNotes,
+	}
 }

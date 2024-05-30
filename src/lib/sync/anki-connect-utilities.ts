@@ -1,14 +1,14 @@
 import { type YankiNote, getYankiModelNames, getYankiModels } from '../model/yanki-note'
 import { type YankiConnect } from 'yanki-connect'
 
-export async function findNotes(client: YankiConnect, modelPrefix: string): Promise<number[]> {
-	return client.note.findNotes({ query: `note:"${modelPrefix}*"` })
-}
-
-export async function deleteNotes(client: YankiConnect, noteIds: number[], dryRun = false) {
+export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryRun = false) {
 	if (dryRun) {
 		return
 	}
+
+	const noteIds = notes
+		.map((note) => note.noteId)
+		.filter((noteId) => noteId !== undefined) as number[]
 
 	await client.note.deleteNotes({ notes: noteIds })
 }
@@ -173,6 +173,25 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 }
 
 /**
+ * Get all notes from Anki that match the model prefix.
+ *
+ * @param client An instance of YankiConnect
+ * @param modelPrefix The prefix of the model name to search for
+ * @returns An array of YankiNote objects
+ * @throws
+ */
+export async function getRemoteNotes(
+	client: YankiConnect,
+	modelPrefix: string,
+): Promise<YankiNote[]> {
+	const noteIds = await client.note.findNotes({ query: `note:"${modelPrefix}*"` })
+
+	// We can trust that these are defined, since the list of notes is coming
+	// straight from Anki
+	return (await getRemoteNotesById(client, modelPrefix, noteIds)) as YankiNote[]
+}
+
+/**
  * Get all data from Anki required to populate the YankiNote type.
  *
  * Handles some extra footwork to identify the deck name and validate the model
@@ -182,14 +201,15 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
  * notes that need to be created.
  *
  * @param client An instance of YankiConnect
- * @param noteIds An array of local note IDs to (attempt) to fetch @returns
+ * @param noteIds
+ * @param modelPrefix An array of local note IDs to (attempt) to fetch @returns
  * Array of YankiNote objects, with undefined for notes that could not be found.
  * @throws
  */
-export async function getRemoteNotes(
+export async function getRemoteNotesById(
 	client: YankiConnect,
-	noteIds: number[],
 	modelPrefix: string,
+	noteIds: number[],
 ): Promise<Array<YankiNote | undefined>> {
 	const ankiNotes = await client.note.notesInfo({ notes: noteIds })
 	const yankiNotes: Array<YankiNote | undefined> = []
@@ -258,4 +278,83 @@ export async function getRemoteNotes(
 	}
 
 	return yankiNotes
+}
+
+export async function deleteOrphanedDecks(
+	client: YankiConnect,
+	activeNotes: YankiNote[],
+	recentlyDeletedNotes: YankiNote[],
+	dryRun: boolean,
+): Promise<string[]> {
+	const activeNoteDeckNames = [...new Set(activeNotes.map((note) => note.deckName))].filter(
+		Boolean,
+	) as string[]
+
+	const recentlyDeletedNoteDeckNames = [
+		...new Set(recentlyDeletedNotes.map((note) => note.deckName)),
+	].filter(Boolean) as string[]
+
+	// Set that's excluded from set of notes deck names and recently deleted notes deck names
+	const orphanedDeckNames = recentlyDeletedNoteDeckNames.filter(
+		(deckName) => !activeNoteDeckNames.includes(deckName),
+	)
+
+	// Check the parent deck of each orphaned deck
+	const orphanedParentDeckNames: string[] = []
+	for (const orphanedDeckName of orphanedDeckNames) {
+		const parts = orphanedDeckName.split('::')
+		if (parts.length === 1) {
+			continue
+		}
+
+		while (parts.length > 1) {
+			parts.pop()
+			const parentDeckName = parts.join('::')
+			if (activeNoteDeckNames.some((deckName) => parentDeckName.includes(deckName))) {
+				break
+			}
+
+			orphanedParentDeckNames.push(parentDeckName)
+		}
+	}
+
+	const deckDeletionCandidates = [
+		...new Set([...orphanedDeckNames, ...orphanedParentDeckNames]),
+	] as string[]
+
+	// Ensure all decks are actually empty
+	const deckStats = await client.deck.getDeckStats({ decks: deckDeletionCandidates })
+	const decksToDelete = Object.values(deckStats).reduce<string[]>((acc, deckStat) => {
+		if (dryRun) {
+			// Dry run is a special occasion...
+			// The notes will still be there, so the deckStat's won't reflect emptiness
+			// See if the number of notes in the deck is equal to the number of recently deleted
+			// notes with that same deck
+			const noteCount = recentlyDeletedNotes.reduce<number>((acc, note) => {
+				if (note.deckName !== undefined) {
+					const lastPart = note.deckName.split('::').at(-1)
+
+					if (lastPart === deckStat.name) {
+						return acc + 1
+					}
+				}
+
+				return acc
+			}, 0)
+
+			if (noteCount === deckStat.total_in_deck) {
+				acc.push(deckStat.name)
+			}
+		} else if (deckStat.total_in_deck === 0 && !acc.includes(deckStat.name)) {
+			acc.push(deckStat.name)
+		}
+
+		return acc
+	}, [])
+
+	if (!dryRun) {
+		await client.deck.deleteDecks({ cardsToo: true, decks: decksToDelete })
+	}
+
+	return decksToDelete
 }
