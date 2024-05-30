@@ -1,7 +1,14 @@
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
 import { type YankiNote } from '../model/yanki-note'
 import { getNoteFromMarkdown } from '../parse/parse'
-import { addNote, getRemoteNotes, updateNote } from './anki-connect-utilities'
+import {
+	addNote,
+	deleteNote,
+	deleteNotes,
+	findNotes,
+	getRemoteNotes,
+	updateNote,
+} from './anki-connect-utilities'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { YankiConnect, type YankiConnectOptions } from 'yanki-connect'
@@ -9,8 +16,10 @@ import { YankiConnect, type YankiConnectOptions } from 'yanki-connect'
 type SyncedNote = { action: 'created' | 'recreated' | 'unchanged' | 'updated'; note: YankiNote }
 
 type SyncNoteOptions = {
-	ankiConnectOptions?: YankiConnectOptions
-	defaultDeckName?: string
+	ankiConnectOptions: YankiConnectOptions
+	defaultDeckName: string
+	dryRun: boolean
+	modelPrefix: string
 }
 
 /**
@@ -22,32 +31,37 @@ type SyncNoteOptions = {
  */
 export async function syncNotes(
 	allLocalNotes: YankiNote[],
-	options?: SyncNoteOptions,
+	options?: Partial<SyncNoteOptions>,
 ): Promise<{
 	deleted: number[]
 	duration: number
 	synced: SyncedNote[]
 }> {
 	const startTime = performance.now()
-	const synced: SyncedNote[] = []
-	const replaced: number[] = []
 
+	// Defaults
 	const {
 		ankiConnectOptions = {
 			autoLaunchAnki: true,
 		},
 		defaultDeckName = 'Yanki',
+		dryRun = false,
+		modelPrefix = 'Yanki - ',
 	} = options ?? {}
+
+	const synced: SyncedNote[] = []
+	const replaced: number[] = []
 
 	const client = new YankiConnect(ankiConnectOptions)
 
-	const remoteNoteIds = await client.note.findNotes({ query: 'note:"Yanki - *"' })
+	const remoteNoteIds = await findNotes(client, modelPrefix)
 
 	// Deletion pass
 	const orphans = remoteNoteIds.filter(
 		(note) => !allLocalNotes.some((localNote) => localNote.noteId === note),
 	)
-	await client.note.deleteNotes({ notes: orphans })
+
+	await deleteNotes(client, orphans, dryRun)
 
 	// Set undefined local note decks to the default
 	for (const note of allLocalNotes) {
@@ -59,7 +73,7 @@ export async function syncNotes(
 
 	// Set undefined local note IDs to bogus ones to ensure we create them
 	const localNoteIds = allLocalNotes.map((note) => note.noteId).map((id) => id ?? -1)
-	const remoteNotes = await getRemoteNotes(client, localNoteIds)
+	const remoteNotes = await getRemoteNotes(client, localNoteIds, modelPrefix)
 
 	// Creation and update pass
 	for (const [index, remoteNote] of remoteNotes.entries()) {
@@ -69,7 +83,13 @@ export async function syncNotes(
 		if (remoteNote === undefined) {
 			// Ensure id is undefined, in case the local id is corrupted (e.g. changed
 			// by hand)
-			const newNoteId = await addNote(client, { ...localNote, noteId: undefined })
+
+			const newNoteId = await addNote(
+				client,
+				{ ...localNote, noteId: undefined },
+				modelPrefix,
+				dryRun,
+			)
 
 			synced.push({
 				action: 'created',
@@ -80,7 +100,7 @@ export async function syncNotes(
 			})
 		} else if (localNote.modelName === remoteNote.modelName) {
 			// Update remote notes if they differ
-			const wasUpdated = await updateNote(client, localNote, remoteNote)
+			const wasUpdated = await updateNote(client, localNote, remoteNote, dryRun)
 
 			synced.push({
 				action: wasUpdated ? 'updated' : 'unchanged',
@@ -95,8 +115,13 @@ export async function syncNotes(
 			}
 
 			replaced.push(remoteNote.noteId)
-			await client.note.deleteNotes({ notes: [remoteNote.noteId] })
-			const newNoteId = await addNote(client, { ...localNote, noteId: undefined })
+			await deleteNote(client, remoteNote, dryRun)
+			const newNoteId = await addNote(
+				client,
+				{ ...localNote, noteId: undefined },
+				modelPrefix,
+				dryRun,
+			)
 
 			synced.push({
 				action: 'recreated',
@@ -119,9 +144,7 @@ type SyncedNoteFile = {
 	filePath: string
 } & SyncedNote
 
-type SyncNoteFilesOptions = {
-	ankiConnectOptions?: YankiConnectOptions
-}
+type SyncFilesOptions = Omit<SyncNoteOptions, 'defaultDeckName'>
 
 /**
  * Sync a list of local yanki-md files to Anki.
@@ -131,15 +154,17 @@ type SyncNoteFilesOptions = {
  * Most importantly, it updates the note IDs in the frontmatter of the local
  * files.
  *
- * @param allLocalFilePaths
+ * @param allLocalFilePaths Array of paths to the local markdown files
  * @returns The synced files (with new IDs where applicable), plus some stats
  * about the sync @throws
  */
-export async function syncNoteFiles(
+export async function syncFiles(
 	allLocalFilePaths: string[],
-	options?: SyncNoteFilesOptions,
+	options?: Partial<SyncFilesOptions>,
 ): Promise<{ deleted: number[]; duration: number; synced: SyncedNoteFile[] }> {
 	const startTime = performance.now()
+
+	const { dryRun = false, modelPrefix = 'Yanki - ' } = options ?? {}
 
 	const allLocalMarkdown: string[] = []
 	const allLocalNotes: YankiNote[] = []
@@ -150,12 +175,12 @@ export async function syncNoteFiles(
 	for (const [index, filePath] of allLocalFilePaths.entries()) {
 		const markdown = await fs.readFile(filePath, 'utf8')
 		allLocalMarkdown.push(markdown)
-		const note = await getNoteFromMarkdown(markdown)
+		const note = await getNoteFromMarkdown(markdown, modelPrefix)
 		note.deckName ??= deckNamesFromFilePaths[index]
 		allLocalNotes.push(note)
 	}
 
-	const { deleted, synced } = await syncNotes(allLocalNotes, options)
+	const { deleted, synced } = await syncNotes(allLocalNotes, { ...options, dryRun, modelPrefix })
 
 	// Write IDs to the local files as necessary Can't just get markdown from the
 	// note because there might be extra frontmatter from e.g. obsidian, which is

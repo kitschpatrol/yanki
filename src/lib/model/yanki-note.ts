@@ -2,64 +2,67 @@
 import { type Simplify } from 'type-fest'
 import { type YankiParamsForAction } from 'yanki-connect'
 
-export const yankiModels = [
-	{
-		cardTemplates: [
-			{
-				Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}',
-				Front: '{{Front}}',
-			},
-		],
-		inOrderFields: ['Front', 'Back'],
-		modelName: 'Yanki - Basic',
-	},
-	{
-		cardTemplates: [
-			{
-				Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}',
-				Front: '{{Front}}',
-			},
-			{
-				Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Front}}',
-				Front: '{{Back}}',
-			},
-		],
-		inOrderFields: ['Front', 'Back'],
-		modelName: 'Yanki - Basic (and reversed card)',
-	},
-	{
-		// Changing the template structure slightly from the Anki defaults for
-		// simplicity (instead of Text and Back Extra, we just have Back and Front)
-		cardTemplates: [
-			{
-				Back: '{{cloze:Front}}<br>\n{{Back}}',
-				Front: '{{cloze:Front}}',
-			},
-		],
-		inOrderFields: ['Front', 'Back'],
-		isCloze: true,
-		modelName: 'Yanki - Cloze',
-	},
-	{
-		cardTemplates: [
-			{
-				Back: '{{Front}}\n\n<hr id=answer>\n\n{{type:Back}}',
-				Front: '{{Front}}\n\n{{type:Back}}',
-			},
-		],
-		inOrderFields: ['Front', 'Back'],
-		modelName: 'Yanki - Basic (type in the answer)',
-	},
-] as const satisfies Array<YankiParamsForAction<'createModel'>>
+export function getYankiModels(prefix: string): Array<YankiParamsForAction<'createModel'>> {
+	return [
+		{
+			cardTemplates: [
+				{
+					Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}',
+					Front: '{{Front}}',
+				},
+			],
+			inOrderFields: ['Front', 'Back'],
+			modelName: `${prefix}Basic`,
+		},
+		{
+			cardTemplates: [
+				{
+					Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}',
+					Front: '{{Front}}',
+				},
+				{
+					Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Front}}',
+					Front: '{{Back}}',
+				},
+			],
+			inOrderFields: ['Front', 'Back'],
+			modelName: `${prefix}Basic (and reversed card)`,
+		},
+		{
+			// Changing the template structure slightly from the Anki defaults for
+			// simplicity (instead of Text and Back Extra, we just have Back and Front)
+			cardTemplates: [
+				{
+					Back: '{{cloze:Front}}<br>\n{{Back}}',
+					Front: '{{cloze:Front}}',
+				},
+			],
+			inOrderFields: ['Front', 'Back'],
+			isCloze: true,
+			modelName: `${prefix}Cloze`,
+		},
+		{
+			cardTemplates: [
+				{
+					Back: '{{Front}}\n\n<hr id=answer>\n\n{{type:Back}}',
+					Front: '{{Front}}\n\n{{type:Back}}',
+				},
+			],
+			inOrderFields: ['Front', 'Back'],
+			modelName: `${prefix}Basic (type in the answer)`,
+		},
+	]
+}
 
-export type YankiModelName = (typeof yankiModels)[number]['modelName']
-export const yankiModelNames: YankiModelName[] = yankiModels.map((model) => model.modelName)
+export function getYankiModelNames(prefix: string): string[] {
+	return getYankiModels(prefix).map((model) => model.modelName)
+}
 
 export type YankiNote = Simplify<
 	{
 		cards?: number[]
 		fields: { Back: string; Front: string }
-		modelName: YankiModelName
+		modelName: string
 		noteId: number | undefined
 	} & Omit<YankiParamsForAction<'addNote'>['note'], 'fields' | 'modelName' | 'options'>
 >

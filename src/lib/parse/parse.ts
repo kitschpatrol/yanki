@@ -15,9 +15,12 @@ import {
 import remarkHtml from 'remark-html'
 import { unified } from 'unified'
 
-export async function getNoteFromMarkdown(markdown: string): Promise<YankiNote> {
+export async function getNoteFromMarkdown(
+	markdown: string,
+	modelPrefix: string,
+): Promise<YankiNote> {
 	let ast = await getAstFromMarkdown(markdown)
-	const modelName = getYankiModelNameFromTree(ast)
+	const modelName = getYankiModelNameFromTree(ast, modelPrefix)
 	const frontmatter = getFrontmatterFromTree(ast)
 
 	// Remove the frontmatter from the AST
@@ -27,8 +30,8 @@ export async function getNoteFromMarkdown(markdown: string): Promise<YankiNote> 
 	let back = ''
 
 	switch (modelName) {
-		case 'Yanki - Basic':
-		case 'Yanki - Basic (and reversed card)': {
+		case `${modelPrefix}Basic`:
+		case `${modelPrefix}Basic (and reversed card)`: {
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
 			front = unified().use(remarkHtml).stringify(firstPart)
 			back =
@@ -38,7 +41,7 @@ export async function getNoteFromMarkdown(markdown: string): Promise<YankiNote> 
 			break
 		}
 
-		case 'Yanki - Cloze': {
+		case `${modelPrefix}Cloze`: {
 			ast = replaceDeleteNodesWithClozeMarkup(ast)
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
 			front = unified().use(remarkHtml).stringify(firstPart)
@@ -46,13 +49,16 @@ export async function getNoteFromMarkdown(markdown: string): Promise<YankiNote> 
 			break
 		}
 
-		case 'Yanki - Basic (type in the answer)': {
+		case `${modelPrefix}Basic (type in the answer)`: {
 			const [firstPart, secondPart] = splitTreeAtEmphasis(ast)
 			front = unified().use(remarkHtml).stringify(firstPart)
 			back = secondPart
 			break
 		}
-		// No default
+
+		default: {
+			throw new Error(`Unknown model name: ${modelName}`)
+		}
 	}
 
 	const note: YankiNote = {

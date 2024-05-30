@@ -1,10 +1,29 @@
-import {
-	type YankiModelName,
-	type YankiNote,
-	yankiModelNames,
-	yankiModels,
-} from '../model/yanki-note'
+import { type YankiNote, getYankiModelNames, getYankiModels } from '../model/yanki-note'
 import { type YankiConnect } from 'yanki-connect'
+
+export async function findNotes(client: YankiConnect, modelPrefix: string): Promise<number[]> {
+	return client.note.findNotes({ query: `note:"${modelPrefix}*"` })
+}
+
+export async function deleteNotes(client: YankiConnect, noteIds: number[], dryRun = false) {
+	if (dryRun) {
+		return
+	}
+
+	await client.note.deleteNotes({ notes: noteIds })
+}
+
+export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun = false) {
+	if (note.noteId === undefined) {
+		throw new Error('Note ID is undefined')
+	}
+
+	if (dryRun) {
+		return
+	}
+
+	await client.note.deleteNotes({ notes: [note.noteId] })
+}
 
 /**
  * Add a note to Anki.
@@ -18,9 +37,18 @@ import { type YankiConnect } from 'yanki-connect'
  * @param note The note to add @returns The ID of the newly created note in Anki
  * @throws
  */
-export async function addNote(client: YankiConnect, note: YankiNote): Promise<number> {
+export async function addNote(
+	client: YankiConnect,
+	note: YankiNote,
+	modelPrefix: string,
+	dryRun: boolean,
+): Promise<number> {
 	if (note.noteId !== undefined) {
 		throw new Error('Note already has an ID')
+	}
+
+	if (dryRun) {
+		return 0
 	}
 
 	const newNote = await client.note
@@ -35,6 +63,7 @@ export async function addNote(client: YankiConnect, note: YankiNote): Promise<nu
 		.catch(async (error) => {
 			if (error instanceof Error) {
 				if (error.message === `model was not found: ${note.modelName}`) {
+					const yankiModels = getYankiModels(modelPrefix)
 					// Create the model and try again
 					const model = yankiModels.find((model) => model.modelName === note.modelName)
 					if (model === undefined) {
@@ -42,7 +71,7 @@ export async function addNote(client: YankiConnect, note: YankiNote): Promise<nu
 					}
 
 					await client.model.createModel(model)
-					return addNote(client, note)
+					return addNote(client, note, modelPrefix, dryRun)
 				}
 
 				if (error.message === `deck was not found: ${note.deckName}`) {
@@ -53,7 +82,7 @@ export async function addNote(client: YankiConnect, note: YankiNote): Promise<nu
 					}
 
 					await client.deck.createDeck({ deck: note.deckName })
-					return addNote(client, note)
+					return addNote(client, note, modelPrefix, dryRun)
 				}
 
 				throw error
@@ -84,6 +113,7 @@ export async function updateNote(
 	client: YankiConnect,
 	localNote: YankiNote,
 	remoteNote: YankiNote,
+	dryRun: boolean,
 ): Promise<boolean> {
 	// Check if tags are different
 	if (localNote.noteId === undefined) {
@@ -101,9 +131,11 @@ export async function updateNote(
 		localNote.fields.Back !== remoteNote.fields.Back ||
 		localNote.fields.Front !== remoteNote.fields.Front
 	) {
-		await client.note.updateNote({
-			note: { ...localNote, id: localNote.noteId },
-		})
+		if (!dryRun) {
+			await client.note.updateNote({
+				note: { ...localNote, id: localNote.noteId },
+			})
+		}
 
 		updated = true
 	}
@@ -114,7 +146,10 @@ export async function updateNote(
 			throw new Error('Local deck name is undefined')
 		}
 
-		await client.deck.changeDeck({ cards: remoteNote.cards, deck: localNote.deckName })
+		if (!dryRun) {
+			await client.deck.changeDeck({ cards: remoteNote.cards, deck: localNote.deckName })
+		}
+
 		updated = true
 	}
 
@@ -154,6 +189,7 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 export async function getRemoteNotes(
 	client: YankiConnect,
 	noteIds: number[],
+	modelPrefix: string,
 ): Promise<Array<YankiNote | undefined>> {
 	const ankiNotes = await client.note.notesInfo({ notes: noteIds })
 	const yankiNotes: Array<YankiNote | undefined> = []
@@ -177,8 +213,10 @@ export async function getRemoteNotes(
 		}
 	}
 
+	const yankiModelNames = getYankiModelNames(modelPrefix)
 	for (const ankiNote of ankiNotes) {
-		if (ankiNote.noteId === undefined) {
+		// If the model name is changed in Anki, a bunch of notes might end up being created again
+		if (ankiNote.noteId === undefined || !yankiModelNames.includes(ankiNote.modelName)) {
 			yankiNotes.push(undefined)
 			continue
 		}
@@ -202,10 +240,6 @@ export async function getRemoteNotes(
 			throw new Error(`Multiple decks found for note ${ankiNote.noteId}`)
 		}
 
-		if (!yankiModelNames.includes(ankiNote.modelName as YankiModelName)) {
-			throw new Error(`Unknown model name ${ankiNote.modelName} for note ${ankiNote.noteId}`)
-		}
-
 		// Picture, sound, etc. fields are never provided
 
 		yankiNotes.push({
@@ -217,7 +251,7 @@ export async function getRemoteNotes(
 				// eslint-disable-next-line @typescript-eslint/naming-convention
 				Front: ankiNote.fields.Front.value ?? '',
 			},
-			modelName: ankiNote.modelName as YankiModelName, // Checked above
+			modelName: ankiNote.modelName, // Checked above
 			noteId: ankiNote.noteId,
 			tags: ankiNote.tags,
 		})
