@@ -4,29 +4,21 @@ import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stableResults } from './utilities/stable-sync-results'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
-import { YankiConnect } from 'yanki-connect'
+import sortKeys from 'sort-keys'
+import { expect, it } from 'vitest'
 
-describe('anki connect actions', () => {
-	it('finds cards with YankiNamespace fields', async () => {
-		const client = new YankiConnect({ autoLaunchAnki: true })
+// Scratch
+// describe('anki connect actions', () => {
+// 	it('finds cards with YankiNamespace fields', async () => {
+// 		const client = new YankiConnect({ autoLaunchAnki: true })
 
-		const allYankiNotes = await client.note.findNotes({ query: '"YankiNamespace:*"' })
+// 		const allYankiNotes = await client.note.findNotes({ query: '"YankiNamespace:*"' })
+// 		const specificYankiNotes = await client.note.findNotes({
+// 			query: '"YankiNamespace:Yanki Basic Sync Test"',
+// 		})
 
-		console.log('----------------------------------')
-		console.log(allYankiNotes)
-
-		const specificYankiNotes = await client.note.findNotes({
-			query: '"YankiNamespace:Yanki Basic Sync Test"',
-		})
-
-		// 1717134423287
-		// 1717134423387
-		console.log('----------------------------------')
-		console.log('----------------------------------')
-		console.log(specificYankiNotes)
-	})
-})
+// 	})
+// })
 
 describeWithFileFixture(
 	'model types',
@@ -44,14 +36,14 @@ describeWithFileFixture(
 				results[path.basename(filePath)] = modelName
 			}
 
-			expect(results).toMatchInlineSnapshot(`
+			expect(sortKeys(results, { deep: true })).toMatchInlineSnapshot(`
 				{
-				  "basic-and-reversed-card.md": "YankiModelTypeTest - Basic (and reversed card)",
-				  "basic-no-back.md": "YankiModelTypeTest - Basic",
-				  "basic-type-in-the-answer.md": "YankiModelTypeTest - Basic (type in the answer)",
-				  "basic.md": "YankiModelTypeTest - Basic",
-				  "cloze-extra.md": "YankiModelTypeTest - Cloze",
-				  "cloze.md": "YankiModelTypeTest - Cloze",
+				  "basic-and-reversed-card.md": "Yanki - Basic (and reversed card)",
+				  "basic-no-back.md": "Yanki - Basic",
+				  "basic-type-in-the-answer.md": "Yanki - Basic (type in the answer)",
+				  "basic.md": "Yanki - Basic",
+				  "cloze-extra.md": "Yanki - Cloze",
+				  "cloze.md": "Yanki - Cloze",
 				}
 			`)
 		})
@@ -152,16 +144,15 @@ describeWithFileFixture(
 
 			expect(pathToDeckMap).toMatchInlineSnapshot(`
 				{
-				  "/complex-tree/deep-contiguous/basic.md": "deep-contiguous",
-				  "/complex-tree/deep-contiguous/within/basic.md": "deep-contiguous::within",
-				  "/complex-tree/deep-contiguous/within/within/basic.md": "deep-contiguous::within::within",
-				  "/complex-tree/deep-contiguous/within/within/within/basic.md": "deep-contiguous::within::within::within",
-				  "/complex-tree/deep-island/basic.md": "deep-island",
-				  "/complex-tree/deep-island/within/within/within/basic.md": "deep-island::within::within::within",
-				  "/complex-tree/deep-non-contiguous/within/within/basic.md": "within::within",
-				  "/complex-tree/sibling-folders/brother/basic.md": "brother",
-				  "/complex-tree/sibling-folders/sister/basic.md": "sister",
-				  "/complex-tree/solo-note/basic.md": "solo-note",
+				  "/complex-tree/deep-contiguous/basic.md": "complex-tree::deep-contiguous",
+				  "/complex-tree/deep-contiguous/within/basic.md": "complex-tree::deep-contiguous::within",
+				  "/complex-tree/deep-contiguous/within/within/basic.md": "complex-tree::deep-contiguous::within::within",
+				  "/complex-tree/deep-contiguous/within/within/within/basic.md": "complex-tree::deep-contiguous::within::within::within",
+				  "/complex-tree/deep-island/within/within/within/basic.md": "complex-tree::deep-island::within::within::within",
+				  "/complex-tree/deep-non-contiguous/within/within/basic.md": "complex-tree::deep-non-contiguous::within::within",
+				  "/complex-tree/sibling-folders/brother/basic.md": "complex-tree::sibling-folders::brother",
+				  "/complex-tree/sibling-folders/sister/basic.md": "complex-tree::sibling-folders::sister",
+				  "/complex-tree/solo-note/basic.md": "complex-tree::solo-note",
 				}
 			`)
 

@@ -127,14 +127,15 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "deep-contiguous",
+        "deckName": "complex-tree::deep-contiguous",
         "fields": {
           "Back": "<p><em>Intentionally blank.</em></p>
 ",
           "Front": "<p>I'm just a note, you know?</p>
 ",
+          "YankiNamespace": "Yanki Complex Tree Test",
         },
-        "modelName": "YankiComplexTreeTest - Basic",
+        "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [],
       },
@@ -143,14 +144,15 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "deep-island",
+        "deckName": "complex-tree::solo-note",
         "fields": {
           "Back": "<p><em>Intentionally blank.</em></p>
 ",
           "Front": "<p>I'm just a note, you know?</p>
 ",
+          "YankiNamespace": "Yanki Complex Tree Test",
         },
-        "modelName": "YankiComplexTreeTest - Basic",
+        "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [],
       },
@@ -159,14 +161,95 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "solo-note",
+        "deckName": "complex-tree::deep-contiguous::within",
+        "fields": {
+          "Back": "<p><em>Intentionally blank.</em></p>
+",
+          "Front": "<p>I should be in the deck 'another'</p>
+",
+          "YankiNamespace": "Yanki Complex Tree Test",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "complex-tree::sibling-folders::brother",
+        "fields": {
+          "Back": "<p><em>Intentionally blank.</em></p>
+",
+          "Front": "<p>I should be in the deck 'another'</p>
+",
+          "YankiNamespace": "Yanki Complex Tree Test",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "complex-tree::sibling-folders::sister",
+        "fields": {
+          "Back": "<p><em>Intentionally blank.</em></p>
+",
+          "Front": "<p>I should be in the deck 'another'</p>
+",
+          "YankiNamespace": "Yanki Complex Tree Test",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "complex-tree::deep-contiguous::within::within",
+        "fields": {
+          "Back": "<p><em>Intentionally blank.</em></p>
+",
+          "Front": "<p>I should be in the deck 'another'</p>
+",
+          "YankiNamespace": "Yanki Complex Tree Test",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "complex-tree::deep-non-contiguous::within::within",
         "fields": {
           "Back": "<p><em>Intentionally blank.</em></p>
 ",
           "Front": "<p>I'm just a note, you know?</p>
 ",
+          "YankiNamespace": "Yanki Complex Tree Test",
         },
-        "modelName": "YankiComplexTreeTest - Basic",
+        "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [],
       },
@@ -175,14 +258,15 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "deep-contiguous::within",
+        "deckName": "complex-tree::deep-contiguous::within::within::within",
         "fields": {
           "Back": "<p><em>Intentionally blank.</em></p>
 ",
           "Front": "<p>I should be in the deck 'another'</p>
 ",
+          "YankiNamespace": "Yanki Complex Tree Test",
         },
-        "modelName": "YankiComplexTreeTest - Basic",
+        "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [
           "mdank",
@@ -194,106 +278,15 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "brother",
-        "fields": {
-          "Back": "<p><em>Intentionally blank.</em></p>
-",
-          "Front": "<p>I should be in the deck 'another'</p>
-",
-        },
-        "modelName": "YankiComplexTreeTest - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "basic.md",
-      "note": {
-        "deckName": "sister",
-        "fields": {
-          "Back": "<p><em>Intentionally blank.</em></p>
-",
-          "Front": "<p>I should be in the deck 'another'</p>
-",
-        },
-        "modelName": "YankiComplexTreeTest - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "basic.md",
-      "note": {
-        "deckName": "deep-contiguous::within::within",
-        "fields": {
-          "Back": "<p><em>Intentionally blank.</em></p>
-",
-          "Front": "<p>I should be in the deck 'another'</p>
-",
-        },
-        "modelName": "YankiComplexTreeTest - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "basic.md",
-      "note": {
-        "deckName": "within::within",
+        "deckName": "complex-tree::deep-island::within::within::within",
         "fields": {
           "Back": "<p><em>Intentionally blank.</em></p>
 ",
           "Front": "<p>I'm just a note, you know?</p>
 ",
+          "YankiNamespace": "Yanki Complex Tree Test",
         },
-        "modelName": "YankiComplexTreeTest - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "basic.md",
-      "note": {
-        "deckName": "deep-contiguous::within::within::within",
-        "fields": {
-          "Back": "<p><em>Intentionally blank.</em></p>
-",
-          "Front": "<p>I should be in the deck 'another'</p>
-",
-        },
-        "modelName": "YankiComplexTreeTest - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "basic.md",
-      "note": {
-        "deckName": "deep-island::within::within::within",
-        "fields": {
-          "Back": "<p><em>Intentionally blank.</em></p>
-",
-          "Front": "<p>I'm just a note, you know?</p>
-",
-        },
-        "modelName": "YankiComplexTreeTest - Basic",
+        "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [],
       },
@@ -318,8 +311,9 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
 ",
           "Front": "<p>I'm a note</p>
 ",
+          "YankiNamespace": "Yanki Surplus Frontmatter Test",
         },
-        "modelName": "YankiSurplusFrontmatterTest - Basic",
+        "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [],
       },
@@ -334,8 +328,9 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
 ",
           "Front": "<p>I'm a note</p>
 ",
+          "YankiNamespace": "Yanki Surplus Frontmatter Test",
         },
-        "modelName": "YankiSurplusFrontmatterTest - Basic",
+        "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [],
       },
