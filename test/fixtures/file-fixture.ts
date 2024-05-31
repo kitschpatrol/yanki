@@ -14,6 +14,7 @@ type FixtureOptions = {
 }
 
 type TestContext = {
+	assetPath: string
 	files: string[]
 	testModelPrefix: string
 	yankiConnect: YankiConnect
@@ -26,15 +27,17 @@ export function describeWithFileFixture(
 ) {
 	describe(description, () => {
 		const context: TestContext = {
+			assetPath: '',
 			files: [],
 			testModelPrefix: 'YankiTestUndefined - ',
-			yankiConnect: new YankiConnect(),
+			yankiConnect: new YankiConnect({ autoLaunchAnki: true }),
 		}
 		let tempAssetPath: string
 		let initialCardCount: number
 
 		beforeAll(async () => {
 			// Setup logic before all tests
+			context.assetPath = assetPath
 			tempAssetPath = path.join(os.tmpdir(), Date.now().toString(), path.basename(assetPath))
 			await fs.cp(assetPath, tempAssetPath, { force: true, recursive: true })
 			context.files = await globby(`${tempAssetPath}/**/*.md`)

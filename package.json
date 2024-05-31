@@ -80,6 +80,7 @@
 		"remark-html": "^16.0.1",
 		"remark-parse": "^11.0.0",
 		"remark-wiki-link": "^2.0.1",
+		"sort-keys": "^5.0.0",
 		"tsx": "^4.11.0",
 		"type-fest": "^4.18.3",
 		"unified": "^11.0.4",

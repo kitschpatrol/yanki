@@ -188,7 +188,7 @@ export async function syncFiles(
 	const allLocalNotes: YankiNote[] = []
 
 	// Use file paths as deck names if they're not provided in the frontmatter
-	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths, true)
+	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths)
 
 	for (const [index, filePath] of allLocalFilePaths.entries()) {
 		const markdown = await fs.readFile(filePath, 'utf8')
@@ -257,13 +257,37 @@ export async function syncFiles(
  * @param prune If true, deck names are not allowed to "jump" over empty directories, even if there are other note files somewhere up the hierarchy
  * @returns array of ::-delimited deck paths
  */
-function getDeckNamesFromFilePaths(filePaths: string[], prune: boolean) {
+function getDeckNamesFromFilePaths(
+	filePaths: string[],
+	mode: 'common' | 'jump' | 'stop' = 'common',
+) {
 	const filePathSegments = filePaths.map((filePath) =>
 		path.dirname(path.resolve(filePath)).split(path.sep),
 	)
 
+	// Trim to the shortest common path
+	if (mode === 'common') {
+		const commonPathSegments = filePathSegments.reduce((acc, pathSegments) => {
+			const commonPath = acc.filter((segment, index) => segment === pathSegments[index])
+			return commonPath
+		})
+
+		const deckNamesWithShortestCommonPath = filePathSegments.map((pathSegments) => {
+			const deckName = pathSegments.slice(commonPathSegments.length - 1).join('::')
+			return deckName
+		})
+
+		console.log('----------------------------------')
+		console.log(deckNamesWithShortestCommonPath)
+
+		return deckNamesWithShortestCommonPath
+	}
+
+	// TODO These are kind of broken...
+
 	const deckNames = filePathSegments.map((pathSegments) => {
-		if (prune) {
+		// TODO broken if other paths have same file name
+		if (mode === 'stop') {
 			// Walk right to left, only go as far as you find another file
 			// This means "islands" become their own root if there aren't and
 			// markdown files in the parent directory
@@ -277,7 +301,7 @@ function getDeckNamesFromFilePaths(filePaths: string[], prune: boolean) {
 					return pathSegments.slice(index + 1).join('::')
 				}
 			}
-		} else {
+		} else if (mode === 'jump') {
 			// Walk from left to right, stop when you find the first segment with a file
 			for (let index = 0; index < pathSegments.length; index++) {
 				if (

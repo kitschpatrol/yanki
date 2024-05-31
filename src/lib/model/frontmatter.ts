@@ -25,13 +25,11 @@ export async function setNoteIdInFrontmatter(
 	markdown: string,
 	noteId: number | undefined,
 ): Promise<string> {
-	const lines = markdown.split('\n')
-	const frontmatterStart = lines.findIndex((line) => line.startsWith('---'))
-	const frontmatterEnd = lines.findIndex(
-		(line, index) => index > frontmatterStart && line.startsWith('---'),
-	)
+	const [frontmatterStart, frontmatterEnd] = getFrontmatterRange(markdown)
 
-	if (frontmatterStart === -1 || frontmatterEnd === -1) {
+	const lines = markdown.split('\n')
+
+	if (frontmatterStart === undefined || frontmatterEnd === undefined) {
 		// No nothing if no noteId is provided
 		if (noteId === undefined) {
 			return markdown
@@ -43,7 +41,7 @@ export async function setNoteIdInFrontmatter(
 	}
 
 	const frontmatter = lines.slice(frontmatterStart + 1, frontmatterEnd).join('\n')
-	const parsedFrontmatter = ((await yamlParse(frontmatter)) ?? {}) as Frontmatter
+	const parsedFrontmatter = ((await yamlParse(frontmatter)) ?? {}) as Record<string, unknown>
 
 	if (noteId === undefined) {
 		delete parsedFrontmatter.noteId
@@ -58,4 +56,41 @@ export async function setNoteIdInFrontmatter(
 		newFrontmatter,
 		...lines.slice(frontmatterEnd),
 	].join('\n')
+}
+
+function getFrontmatterRange(
+	markdown: string,
+): [start: number | undefined, end: number | undefined] {
+	const lines = markdown.split('\n')
+
+	// Ensure that the frontmatter is at the top of the file
+	if (!lines.join('').trim().startsWith('---')) {
+		return [undefined, undefined]
+	}
+
+	const frontmatterStart = lines.findIndex((line) => line.startsWith('---'))
+	const frontmatterEnd = lines.findIndex(
+		(line, index) => index > frontmatterStart && line.startsWith('---'),
+	)
+
+	if (frontmatterStart === -1 || frontmatterEnd === -1) {
+		return [undefined, undefined]
+	}
+
+	return [frontmatterStart, frontmatterEnd]
+}
+
+export async function getAllFrontmatter(markdown: string): Promise<Record<string, unknown>> {
+	const [frontmatterStart, frontmatterEnd] = getFrontmatterRange(markdown)
+
+	if (frontmatterStart === undefined || frontmatterEnd === undefined) {
+		return {}
+	}
+
+	const frontmatter = markdown
+		.split('\n')
+		.slice(frontmatterStart + 1, frontmatterEnd)
+		.join('\n')
+
+	return ((await yamlParse(frontmatter)) ?? {}) as Record<string, unknown>
 }

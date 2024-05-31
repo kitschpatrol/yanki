@@ -66,6 +66,9 @@ importers:
       remark-wiki-link:
         specifier: ^2.0.1
         version: 2.0.1
+      sort-keys:
+        specifier: ^5.0.0
+        version: 5.0.0
       tsx:
         specifier: ^4.11.0
         version: 4.11.0
@@ -3918,6 +3921,10 @@ packages:
   socks@2.8.3:
     resolution: {integrity: sha512-l5x7VUUWbjVFbafGLxPWkYsHIhEvmF85tbIeFZWc8ZPtoMyybuEhL7Jye/ooC4/d48FgOjSJXgsF/AJPYCW8Zw==}
     engines: {node: '>= 10.0.0', npm: '>= 3.0.0'}
+
+  sort-keys@5.0.0:
+    resolution: {integrity: sha512-Pdz01AvCAottHTPQGzndktFNdbRA75BgOfeT1hH+AMnJFv8lynkPi42rfeEhpx1saTEI3YNMWxfqu0sFD1G8pw==}
+    engines: {node: '>=12'}
 
   source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
@@ -9401,6 +9408,10 @@ snapshots:
     dependencies:
       ip-address: 9.0.5
       smart-buffer: 4.2.0
+
+  sort-keys@5.0.0:
+    dependencies:
+      is-plain-obj: 4.1.0
 
   source-map-js@1.2.0: {}
 

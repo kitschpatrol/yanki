@@ -1,5 +1,6 @@
 import { type syncFiles } from '../../src/lib'
 import path from 'node:path'
+import sortKeys from 'sort-keys'
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
 
@@ -12,5 +13,6 @@ export function stableResults(results: SyncResults): SyncResults {
 		return note
 	})
 
-	return results
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+	return sortKeys(results, { deep: true }) as SyncResults
 }
