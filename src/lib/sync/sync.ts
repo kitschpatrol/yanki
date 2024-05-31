@@ -15,7 +15,10 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { YankiConnect, type YankiConnectOptions } from 'yanki-connect'
 
-type SyncedNote = { action: 'created' | 'recreated' | 'unchanged' | 'updated'; note: YankiNote }
+type SyncedNote = {
+	action: 'created' | 'deleted' | 'recreated' | 'unchanged' | 'updated'
+	note: YankiNote
+}
 
 export type SyncOptions = {
 	ankiConnectOptions: YankiConnectOptions
@@ -26,7 +29,7 @@ export type SyncOptions = {
 
 const defaultSyncOptions: SyncOptions = {
 	ankiConnectOptions: {
-		autoLaunchAnki: true,
+		autoLaunch: true,
 	},
 	defaultDeckName: 'Yanki',
 	dryRun: false,
@@ -45,7 +48,6 @@ export async function syncNotes(
 	options?: Partial<SyncOptions>,
 ): Promise<{
 	deletedDecks: string[]
-	deletedNotes: YankiNote[]
 	duration: number
 	synced: SyncedNote[]
 }> {
@@ -69,7 +71,6 @@ export async function syncNotes(
 	}
 
 	const synced: SyncedNote[] = []
-	const replacedNotes: YankiNote[] = []
 
 	const client = new YankiConnect(ankiConnectOptions)
 
@@ -80,6 +81,13 @@ export async function syncNotes(
 	)
 
 	await deleteNotes(client, orphanedNotes, dryRun)
+
+	for (const orphanedNote of orphanedNotes) {
+		synced.push({
+			action: 'deleted',
+			note: orphanedNote,
+		})
+	}
 
 	// Set undefined local note decks to the default
 	for (const note of allLocalNotes) {
@@ -127,7 +135,10 @@ export async function syncNotes(
 				throw new Error('Remote note ID is undefined')
 			}
 
-			replacedNotes.push(remoteNote)
+			synced.push({
+				action: 'deleted',
+				note: remoteNote,
+			})
 			await deleteNote(client, remoteNote, dryRun)
 			const newNoteId = await addNote(client, { ...localNote, noteId: undefined }, dryRun)
 
@@ -142,21 +153,27 @@ export async function syncNotes(
 	}
 
 	// Purge empty yanki-related decks
-	const deletedNotes = [...orphanedNotes, ...replacedNotes]
+	const liveNotes: YankiNote[] = []
+	const deletedNotes: YankiNote[] = []
+	for (const entry of synced) {
+		if (entry.action === 'deleted') {
+			deletedNotes.push(entry.note)
+		} else {
+			liveNotes.push(entry.note)
+		}
+	}
 
-	const syncedNotes = synced.map((synced) => synced.note)
-	const deletedDecks = await deleteOrphanedDecks(client, syncedNotes, deletedNotes, dryRun)
+	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, deletedNotes, dryRun)
 
 	return {
 		deletedDecks,
-		deletedNotes,
 		duration: performance.now() - startTime,
 		synced,
 	}
 }
 
 type SyncedNoteFile = {
-	filePath: string
+	filePath: string | undefined
 } & SyncedNote
 
 /**
@@ -176,7 +193,6 @@ export async function syncFiles(
 	options?: Partial<SyncOptions>,
 ): Promise<{
 	deletedDecks: string[]
-	deletedNotes: YankiNote[]
 	duration: number
 	synced: SyncedNoteFile[]
 }> {
@@ -202,15 +218,18 @@ export async function syncFiles(
 		allLocalNotes.push(note)
 	}
 
-	const { deletedDecks, deletedNotes, synced } = await syncNotes(allLocalNotes, resolvedOptions)
+	const { deletedDecks, synced } = await syncNotes(allLocalNotes, resolvedOptions)
 
 	// Write IDs to the local files as necessary Can't just get markdown from the
 	// note because there might be extra frontmatter from e.g. obsidian, which is
 	// not captured in the YankiNote type
+
+	const liveNotes = synced.filter((note) => note.action !== 'deleted')
+
 	for (const [index, note] of allLocalNotes.entries()) {
-		const syncedNoteId = synced[index].note.noteId
-		if (note.noteId === undefined || note.noteId !== syncedNoteId) {
-			note.noteId = syncedNoteId
+		const liveNoteId = liveNotes[index].note.noteId
+		if (note.noteId === undefined || note.noteId !== liveNoteId) {
+			note.noteId = liveNoteId
 
 			if (note.noteId === undefined) {
 				throw new Error('Note ID is still undefined')
@@ -221,17 +240,25 @@ export async function syncFiles(
 		}
 	}
 
-	const syncedFiles: SyncedNoteFile[] = allLocalNotes.map((note, index) => ({
-		action: synced[index].action,
+	const liveFiles: SyncedNoteFile[] = allLocalNotes.map((note, index) => ({
+		action: liveNotes[index].action,
 		filePath: allLocalFilePaths[index],
 		note,
 	}))
 
+	// Add undefined file path to deleted notes, since they only ever existed in Anki
+	const deletedNotes: SyncedNoteFile[] = synced
+		.filter((note) => note.action === 'deleted')
+		.map((note) => ({
+			action: 'deleted',
+			filePath: undefined,
+			note: note.note,
+		}))
+
 	return {
 		deletedDecks,
-		deletedNotes,
 		duration: performance.now() - startTime,
-		synced: syncedFiles,
+		synced: [...deletedNotes, ...liveFiles],
 	}
 }
 
@@ -330,7 +357,7 @@ type CleanOptions = {
 }
 
 /**
- * Deletes all remote notes in Anki associated with the given model prefix.
+ * Deletes all remote notes in Anki associated with the given namespace.
  *
  * Use with significant caution. Mostly useful for testing.
  *
