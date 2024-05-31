@@ -21,11 +21,143 @@
 
 ## Overview
 
+Many solutions exist for turning a local Markdown files into Anki flashcards, Yanki MD takes a simple and opinionated approach that maps existing Markdown semantics to generate and synchronize limited number of Anki note / card types.
+
 The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools.
+
+## Quick start
+
+Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) with the[Anki-Connect](https://foosoft.net/projects/anki-connect/)) plugin is open:
+
+```sh
+npx yanki ./folder-of-markdown
+```
+
+This will turn the folder's Markdown files into Anki notes and send them up to the Anki database.
+
+## Features
+
+#### One Markdown file = one Anki note
+
+Avoid the complexity of mixing and matching multi-note and single-note syntaxes. One local Markdown file always yields one Anki note.
+
+#### Folder hierarchy = Anki deck hierarchy
+
+Yanki MD uses the source Markdown file's parent directory name as the deck name. Complex folder hierarchies are also supported — Anki decks will be created and nested as needed to match the structure of the local file system.
+
+#### Leverage the default Anki note types
+
+Yanki only supports turning Markdown into the "Basic", "Basic (and reversed card)" , "Basic (type in the answer)", and "Cloze" note types that ship as defaults in the Anki App.
+
+#### Anki note type inferred from Markdown structure
+
+Since the number of supported note types is small, the type of Anki note to create from a given document can be inferred from a few simple rules about the structure of the Markdown.
+
+For example, a Basic note is any Markdown file with a `---` horizontal rule splitting the front and back of the card:
+
+```md
+I'm the front.
+
+---
+
+I'm the back.
+```
+
+That's it, no extra metadata or Anki-specific markup is required. You can add whatever additional Markdown syntax you'd like to style the note.
+
+The structural cues for the four supported note types are described [later in this document](#markdown-note-types).
+
+#### Tags in frontmatter
+
+Optionally, you can add a `tags` array to your Markdown file's frontmatter and have it automatically synchronized to the Anki database. Frontmatter is also used to store the Anki note's ID after an initial synchronization.
+
+#### Intelligent synchronization
+
+Your local Markdown files are the single point of truth for what will and up in Anki, but Yanki MD knows to leave your other Anki notes alone.
+
+When you edit a local markdown note, Yanki MD makes every effort to update rather than delete it in the Anki database so that progress is preserved.
+
+But when you do want to delete something, it's as simple as deleting the local Markdown note from the file system and running `yanki sync` to remove it from the Anki database. Protections are in place to prevent deleting Anki notes that weren't initially created by Yanki MD.
+
+## Markdown note types
+
+Yanki MD automatically infers the _type_ of Note you'd like to create in Anki based on the presence or absence of certain element in your Markdown files.
+
+The rules were designed with the semantic and visual nature of Markdown in mind.
+
+The most minimal examples to "trigger" different note types are shown below, but the implementation can handle additional weirdness and will generally do the right thing if it encounters elements that might indicate conflicting note types.
+
+You're free to use additional Markdown in your note files to style and structure the front and back of your flashcards, but note that embedding images is currently not supported.
+
+### Basic
+
+A basic card is created from any file with a `---`:
+
+```md
+This is the front of the card
+
+---
+
+This is the back of the card
+```
+
+### Basic (and reversed card)
+
+Doubling up the `---` identifies the note as being reversible (and will result in the generation of two cards in Anki).
+
+```md
+Sometimes the answer is the question
+
+---
+
+---
+
+Sometimes the question is the answer
+```
+
+_Mnemonic: Twice the `---` for twice the cards._
+
+### Basic (type in the answer)
+
+If the last statement in the Markdown file is `_emphasized like this_`, it becomes the type-in-the-answer text in Anki:
+
+```md
+Jazz isn't dead
+
+_It just smells funny_
+```
+
+_Mnemonic: The `_` syntax resembles a `_blank to be filled in_`._
+
+---
+
+### Cloze
+
+Text that is `~~struck through~~` with the [somewhat esoteric double-tilde syntax](https://github.github.com/gfm/#strikethrough-extension-) will be hidden in the resulting cloze Note:
+
+```md
+All will be ~~revealed~~.
+```
+
+Multiple clozes are supported, which will create additional cards. You can add a `---` to include back-of-card information as well. Hints are also supported via a parenthetical.
+
+```md
+~~All~~ will be ~~revealed(shown)~~.
+
+---
+
+Additional revelations on the back of the card.
+```
+
+_Mnemonic: The `~~strike through~~` implies redaction._
 
 ## Getting started
 
 ### Dependencies
+
+The `yanki` CLI tool requires Node 18+. The exported TypeScript / JavaScript APIs are ESM-only and share the Node 18+ requirement. Yanki MD is implemented in TypeScript and bundles a complete set of type definitions.
+
+The [Anki](https://apps.ankiweb.net) desktop app with the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on installed and configured is also required to do anything useful with the library.
 
 ### Installation
 
@@ -48,6 +180,32 @@ npm install --save-dev yanki-md
 ```
 
 ## Usage
+
+### Basic
+
+#### Setup
+
+Create a folder of Markdown files that you'd like to use as Anki notes. (See the [section on Markdown notes](#markdown-note-types) for details on how to structure different note types.)
+
+Launch the Anki desktop app. Ensure that the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on is installed and set up.
+
+#### Create
+
+Pass the path to a folder of Markdown notes to turn them into Anki notes and send them to the Anki database:
+
+```sh
+yanki ./your-deck-folder
+```
+
+You'll now see your Markdown files as HTML-rendered notes in the Anki desktop app.
+
+#### Update
+
+Edit the Markdown file locally (not in Anki!) and run `yanki ./your-deck-folder` again.
+
+#### Delete
+
+Delete the Markdown file locally (not in Anki!) and run `yanki ./your-deck-folder` again.
 
 ### CLI
 
@@ -143,15 +301,9 @@ yanki delete
 
 <!-- /cli-help -->
 
-#### Commands
-
-#### Examples
-
 ### Library
 
 #### API
-
-#### Examples
 
 ## Background
 

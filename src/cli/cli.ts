@@ -26,7 +26,7 @@ await yargsInstance
 	// `yanki sync` (default)
 	.command(
 		['$0 <directory> [options]', 'sync <directory> [options]'],
-		'Perform a one-way synchronization from a local directory of Markdown files to the Anki database.',
+		'Perform a one-way synchronization from a local directory of Markdown files to the Anki database. Any Markdown files in subdirectories are included as well.',
 		(yargs) =>
 			yargs
 				.positional('directory', {
@@ -34,11 +34,12 @@ await yargsInstance
 					describe: 'The path to the local directory of Markdown files to sync.',
 					type: 'string',
 				})
-				.option('recursive', {
-					alias: 'r',
-					describe: 'Include Markdown files in subdirectories of <directory>.',
-					type: 'boolean',
-				})
+				// Use recursive by default
+				// .option('recursive', {
+				// 	alias: 'r',
+				// 	describe: 'Include Markdown files in subdirectories of <directory>.',
+				// 	type: 'boolean',
+				// })
 				.option(dryRun)
 				.option(
 					namespaceOption(
@@ -56,7 +57,8 @@ await yargsInstance
 			dryRun,
 			json,
 			namespace,
-			recursive,
+			// Not exposing this option for now
+			recursive = true,
 			verbose,
 		}) => {
 			log.verbose = verbose
@@ -94,7 +96,7 @@ await yargsInstance
 	// `yanki list`
 	.command(
 		'list',
-		'List Yanki-created notes in the Anki database.',
+		'Utility command to list Yanki-created notes in the Anki database.',
 		(yargs) =>
 			yargs
 				.option(
@@ -129,7 +131,7 @@ await yargsInstance
 	// `yanki delete`
 	.command(
 		'delete',
-		'Delete Yanki-created notes in the Anki database. Careful.',
+		"Utility command to manually delete Yanki-created notes in the Anki database. This is for advanced use cases, usually the `sync` command takes care of deleting files from Anki Database once they're removed from the local file system.",
 		(yargs) =>
 			yargs
 				.option(dryRun)

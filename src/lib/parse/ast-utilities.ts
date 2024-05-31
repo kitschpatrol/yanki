@@ -61,6 +61,8 @@ export function deleteFirstNodeOfType(tree: Root, nodeType: string): Root {
 
 // For Cloze notes
 export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
+	let clozeIndex = 1
+
 	visit(ast, 'delete', (node, index, parent) => {
 		if (parent === undefined || index === undefined) {
 			return CONTINUE
@@ -74,12 +76,14 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 		const matches = /(.+)(\(.+\)*)/g.exec(innerText)
 		if (matches) {
 			const [, text, hint] = matches
-			const newNode = u('text', `{{c1::${text.trim()}::${hint.trim()}}}`)
+			const newNode = u('text', `{{c${clozeIndex}::${text.trim()}::${hint.trim()}}}`)
 			parent.children.splice(index, 1, newNode)
 		} else {
-			const newNode = u('text', `{{c1::${innerText}}}`)
+			const newNode = u('text', `{{c${clozeIndex}::${innerText}}}`)
 			parent.children.splice(index, 1, newNode)
 		}
+
+		clozeIndex += 1
 	})
 
 	return ast
