@@ -331,22 +331,24 @@ export async function deleteOrphanedDecks(
 	const decksToDelete = Object.values(deckStats).reduce<string[]>((acc, deckStat) => {
 		if (dryRun) {
 			// Dry run is a special occasion...
-			// The notes will still be there, so the deckStat's won't reflect emptiness
-			// See if the number of notes in the deck is equal to the number of recently deleted
-			// notes with that same deck
-			const noteCount = recentlyDeletedNotes.reduce<number>((acc, note) => {
+			// The notes will still be there, so the deckStat's won't reflect
+			// emptiness See if the number of cards in the deck is equal to the number
+			// of cards in the recently deleted notes with that same deck
+			const cardCount = recentlyDeletedNotes.reduce<number>((acc, note) => {
 				if (note.deckName !== '') {
 					const lastPart = note.deckName.split('::').at(-1)
 
+					const cards = note.cards ?? []
+
 					if (lastPart === deckStat.name) {
-						return acc + 1
+						return acc + cards.length
 					}
 				}
 
 				return acc
 			}, 0)
 
-			if (noteCount === deckStat.total_in_deck) {
+			if (cardCount === deckStat.total_in_deck) {
 				acc.push(deckStat.name)
 			}
 		} else if (deckStat.total_in_deck === 0 && !acc.includes(deckStat.name)) {
