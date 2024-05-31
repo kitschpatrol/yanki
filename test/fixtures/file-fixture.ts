@@ -30,7 +30,7 @@ export function describeWithFileFixture(
 			assetPath: '',
 			files: [],
 			namespace: 'YankiTestUndefined - ',
-			yankiConnect: new YankiConnect({ autoLaunchAnki: true }),
+			yankiConnect: new YankiConnect({ autoLaunch: true }),
 		}
 		let tempAssetPath: string
 		let initialCardCount: number
@@ -48,7 +48,7 @@ export function describeWithFileFixture(
 
 			// Clean up anki first
 			if (cleanUpAnki) {
-				await clean({ ankiConnectOptions: { autoLaunchAnki: true }, dryRun: false, namespace })
+				await clean({ ankiConnectOptions: { autoLaunch: true }, dryRun: false, namespace })
 				const allNotes = await context.yankiConnect.note.findNotes({
 					query: '*',
 				})
@@ -67,7 +67,7 @@ export function describeWithFileFixture(
 
 			// Clean up anki
 			if (cleanUpAnki) {
-				await clean({ ankiConnectOptions: { autoLaunchAnki: true }, dryRun: false, namespace })
+				await clean({ ankiConnectOptions: { autoLaunch: true }, dryRun: false, namespace })
 				const allNotes = await context.yankiConnect.note.findNotes({ query: '*' })
 				const finalCardCount = allNotes.length
 

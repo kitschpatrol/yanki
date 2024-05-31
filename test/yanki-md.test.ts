@@ -10,7 +10,7 @@ import { expect, it } from 'vitest'
 // Scratch
 // describe('anki connect actions', () => {
 // 	it('finds cards with YankiNamespace fields', async () => {
-// 		const client = new YankiConnect({ autoLaunchAnki: true })
+// 		const client = new YankiConnect({ autoLaunch: true })
 
 // 		const allYankiNotes = await client.note.findNotes({ query: '"YankiNamespace:*"' })
 // 		const specificYankiNotes = await client.note.findNotes({
