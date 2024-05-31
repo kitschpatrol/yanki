@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import path from 'node:path'
+import prettyMilliseconds from 'pretty-ms'
+import untildify from 'untildify'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
@@ -7,44 +10,96 @@ const yargsInstance = yargs(hideBin(process.argv))
 
 await yargsInstance
 	.scriptName('yanki')
+	.usage('$0 [command]', 'Run a Yanki command. Defaults to `sync` if a command is not provided.')
+	// `yanki sync` (default)
 	.command(
-		'$0 <pattern>',
-		'Process markdown files',
+		['$0 <directory> [options]', 'sync <directory> [options]'],
+		'Perform a one-way synchronization of a local directory of Markdown files to Anki.',
 		(yargs) =>
 			yargs
-				.positional('pattern', {
-					describe: 'Glob pattern for markdown files',
+				.positional('directory', {
+					default: undefined,
+					demandOption: true,
+					describe: 'The path to the local directory of Markdown files to sync.',
+					type: 'string',
+				})
+				.option('recursive', {
+					alias: 'r',
+					describe: 'Include Markdown files in subdirectories of <directory>.',
+					type: 'boolean',
+				})
+				.option('dry-run', {
+					alias: 'd',
+					default: false,
+					describe:
+						'Run the synchronization without making any changes. See a report of what would have been done.',
+					type: 'boolean',
+				})
+				.option('namespace', {
+					alias: 'n',
+					default: 'Yanki CLI',
+					describe:
+						'Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.',
+					type: 'string',
+				})
+				.option('verbose', {
+					default: false,
+					describe:
+						'Enable verbose logging. All verbose logs and prefixed with their log level and are printed to `stderr` for ease of redirection.',
+					type: 'boolean',
+				}),
+		({ directory, dryRun, namespace, recursive, verbose }) => {
+			console.log(dryRun, directory, namespace, recursive, verbose)
+			console.log('TODO implementation')
+			process.exitCode = 0
+		},
+	)
+	.command(
+		'list',
+		'List all Yanki notes in the Anki database.',
+		(yargs) =>
+			yargs.option('namespace', {
+				alias: 'n',
+				default: undefined,
+				describe:
+					'Limit the list to a specific namespace. Case insensitive. All notes are listed by default.',
+				type: 'string',
+			}),
+		({ namespace }) => {
+			console.log(namespace)
+			console.log('TODO implementation')
+			process.exitCode = 0
+		},
+	)
+	.command(
+		'delete',
+		'Delete all Yanki notes in the Anki database. Careful.',
+		(yargs) =>
+			yargs
+				.option('namespace', {
+					alias: 'n',
+					default: undefined,
+					describe:
+						'Limit the deletion to a specific namespace. Case insensitive. All notes are listed by default.',
 					type: 'string',
 				})
 				.option('dry-run', {
 					alias: 'd',
-					description: 'Run without making any changes',
+					default: false,
+					describe:
+						'Run the synchronization without making any changes. See a report of what would have been done.',
+					type: 'boolean',
+				})
+				.option('yes', {
+					alias: 'y',
+					default: false,
+					describe: 'No questions asked.',
 					type: 'boolean',
 				}),
-		({ dryRun, pattern }) => {
-			console.log(`Processing files matching pattern: ${pattern}`)
-			if (dryRun) {
-				console.log('--dry-run mode enabled, no changes will be made.')
-			}
-
-			// Glob(pattern, (error, files) => {
-			// 	if (error) {
-			// 		console.error('Error while matching pattern:', error)
-			// 		process.exit(1)
-			// 	}
-
-			// 	for (const file of files) {
-			// 		if (dryRun) {
-			// 			console.log(`Would process file: ${file}`)
-			// 		} else {
-			// 			// Process the file (e.g., read, modify, write)
-			// 			console.log(`Processing file: ${file}`)
-			// 			const content = fs.readFileSync(file, 'utf8')
-			// 			// Perform operations on the content
-			// 			// fs.writeFileSync(file, modifiedContent);
-			// 		}
-			// 	}
-			// })
+		({ dryRun, namespace, yes }) => {
+			console.log(namespace, yes, dryRun)
+			console.log('TODO implementation')
+			process.exitCode = 0
 		},
 	)
 	.demandCommand(1)
