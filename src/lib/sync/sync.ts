@@ -1,6 +1,7 @@
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
-import { type YankiNote } from '../model/yanki-note'
+import { type YankiNote, yankiDefaultNamespace } from '../model/yanki-note'
 import { getNoteFromMarkdown } from '../parse/parse'
+import { capitalize } from '../utilities/string'
 import {
 	addNote,
 	deleteNote,
@@ -13,10 +14,13 @@ import {
 import { deepmerge } from 'deepmerge-ts'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import plur from 'plur'
+import prettyMilliseconds from 'pretty-ms'
 import { YankiConnect, type YankiConnectOptions } from 'yanki-connect'
 
-type SyncedNote = {
+export type SyncedNote = {
 	action: 'created' | 'deleted' | 'recreated' | 'unchanged' | 'updated'
+	filePath?: string // Not always applicable
 	note: YankiNote
 }
 
@@ -33,7 +37,15 @@ const defaultSyncOptions: SyncOptions = {
 	},
 	defaultDeckName: 'Yanki',
 	dryRun: false,
-	namespace: 'Yanki CLI',
+	namespace: yankiDefaultNamespace,
+}
+
+export type SyncReport = {
+	deletedDecks: string[]
+	dryRun: boolean
+	duration: number
+	namespace: string
+	synced: SyncedNote[]
 }
 
 /**
@@ -46,11 +58,7 @@ const defaultSyncOptions: SyncOptions = {
 export async function syncNotes(
 	allLocalNotes: YankiNote[],
 	options?: Partial<SyncOptions>,
-): Promise<{
-	deletedDecks: string[]
-	duration: number
-	synced: SyncedNote[]
-}> {
+): Promise<SyncReport> {
 	const startTime = performance.now()
 
 	// Defaults
@@ -60,14 +68,14 @@ export async function syncNotes(
 	)
 
 	// Namespace validation
-	const cleanNamespace = namespace.trim()
+	const validNamespace = namespace.trim()
 
-	if (cleanNamespace === '') {
+	if (validNamespace === '') {
 		throw new Error('Namespace must not be empty')
 	}
 
-	if (cleanNamespace.includes('*') || cleanNamespace.includes(':')) {
-		throw new Error(`Namespace may not contain the characters '*' or ':'`)
+	if (validNamespace.includes('*') || validNamespace.includes(':')) {
+		throw new Error(`Namespace for sync may not contain the characters '*' or ':'`)
 	}
 
 	const synced: SyncedNote[] = []
@@ -76,6 +84,7 @@ export async function syncNotes(
 
 	// Deletion pass, we need the full info to do deck cleanup later on
 	const existingRemoteNotes = await getRemoteNotes(client, namespace)
+
 	const orphanedNotes = existingRemoteNotes.filter(
 		(remoteNote) => !allLocalNotes.some((localNote) => localNote.noteId === remoteNote?.noteId),
 	)
@@ -92,7 +101,6 @@ export async function syncNotes(
 	// Set undefined local note decks to the default
 	for (const note of allLocalNotes) {
 		if (note.deckName === '') {
-			console.log('Setting deck name')
 			note.deckName = defaultDeckName
 		}
 	}
@@ -106,7 +114,11 @@ export async function syncNotes(
 		const localNote = allLocalNotes[index]
 
 		// Undefined means the note only exists locally
-		if (remoteNote === undefined) {
+		// Same ID, but different namespace, create a new note with a new ID, leave the old one alone
+		if (
+			remoteNote === undefined ||
+			localNote.fields.YankiNamespace !== remoteNote.fields.YankiNamespace
+		) {
 			// Ensure id is undefined, in case the local id is corrupted (e.g. changed
 			// by hand)
 
@@ -167,14 +179,12 @@ export async function syncNotes(
 
 	return {
 		deletedDecks,
+		dryRun,
 		duration: performance.now() - startTime,
+		namespace,
 		synced,
 	}
 }
-
-type SyncedNoteFile = {
-	filePath: string | undefined
-} & SyncedNote
 
 /**
  * Sync a list of local yanki-md files to Anki.
@@ -191,11 +201,7 @@ type SyncedNoteFile = {
 export async function syncFiles(
 	allLocalFilePaths: string[],
 	options?: Partial<SyncOptions>,
-): Promise<{
-	deletedDecks: string[]
-	duration: number
-	synced: SyncedNoteFile[]
-}> {
+): Promise<SyncReport> {
 	const startTime = performance.now()
 
 	const resolvedOptions = deepmerge(defaultSyncOptions, options ?? {})
@@ -218,7 +224,7 @@ export async function syncFiles(
 		allLocalNotes.push(note)
 	}
 
-	const { deletedDecks, synced } = await syncNotes(allLocalNotes, resolvedOptions)
+	const { deletedDecks, dryRun, synced } = await syncNotes(allLocalNotes, resolvedOptions)
 
 	// Write IDs to the local files as necessary Can't just get markdown from the
 	// note because there might be extra frontmatter from e.g. obsidian, which is
@@ -240,24 +246,25 @@ export async function syncFiles(
 		}
 	}
 
-	const liveFiles: SyncedNoteFile[] = allLocalNotes.map((note, index) => ({
+	const liveFiles: SyncedNote[] = allLocalNotes.map((note, index) => ({
 		action: liveNotes[index].action,
 		filePath: allLocalFilePaths[index],
 		note,
 	}))
 
 	// Add undefined file path to deleted notes, since they only ever existed in Anki
-	const deletedNotes: SyncedNoteFile[] = synced
+	const deletedNotes: SyncedNote[] = synced
 		.filter((note) => note.action === 'deleted')
 		.map((note) => ({
 			action: 'deleted',
-			filePath: undefined,
 			note: note.note,
 		}))
 
 	return {
 		deletedDecks,
+		dryRun,
 		duration: performance.now() - startTime,
+		namespace,
 		synced: [...deletedNotes, ...liveFiles],
 	}
 }
@@ -350,36 +357,41 @@ function getDeckNamesFromFilePaths(
 	return deckNames
 }
 
-type CleanOptions = {
-	ankiConnectOptions?: YankiConnectOptions
-	dryRun: boolean
-	namespace: string
-}
+export function formatSyncReport(report: SyncReport, verbose = false): string {
+	const lines: string[] = []
+	const { synced } = report
 
-/**
- * Deletes all remote notes in Anki associated with the given namespace.
- *
- * Use with significant caution. Mostly useful for testing.
- *
- * @returns The IDs of the notes that were deleted
- * @param options
- * @throws
- */
-export async function clean(
-	options: CleanOptions,
-): Promise<{ decks: string[]; notes: YankiNote[] }> {
-	const { ankiConnectOptions, dryRun, namespace } = options
+	// Aggregate the counts of each action:
+	const actionCounts = synced.reduce<Record<string, number>>((acc, note) => {
+		acc[note.action] = (acc[note.action] || 0) + 1
+		return acc
+	}, {})
 
-	const client = new YankiConnect(ankiConnectOptions)
+	const totalSynced = synced.filter((note) => note.action !== 'deleted').length
 
-	const remoteNotes = await getRemoteNotes(client, namespace)
+	lines.push(
+		`${report.dryRun ? 'Would have' : 'Successfully'} synced ${totalSynced} ${plur('note', totalSynced)} to Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}`,
+	)
 
-	// Deletion pass
-	await deleteNotes(client, remoteNotes, dryRun)
-	const deletedDecks = await deleteOrphanedDecks(client, [], remoteNotes, dryRun)
+	if (verbose) {
+		lines.push('', report.dryRun ? 'Sync Plan Summary:' : 'Sync Summary:')
+		for (const [action, count] of Object.entries(actionCounts)) {
+			lines.push(`  ${capitalize(action)}: ${count}`)
+		}
 
-	return {
-		decks: deletedDecks,
-		notes: remoteNotes,
+		if (report.deletedDecks.length > 0) {
+			lines.push('', `Decks pruned: ${report.deletedDecks.length}`)
+		}
+
+		lines.push('', report.dryRun ? 'Sync Plan Details:' : 'Sync Details:')
+		for (const { action, filePath, note } of synced) {
+			if (filePath === undefined) {
+				lines.push(`  Note ID ${note.noteId} ${capitalize(action)} (From Anki)`)
+			} else {
+				lines.push(`  Note ID ${note.noteId} ${capitalize(action)} ${filePath}`)
+			}
+		}
 	}
+
+	return lines.join('\n')
 }

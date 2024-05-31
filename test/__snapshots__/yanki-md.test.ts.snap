@@ -3,8 +3,9 @@
 exports[`basic synchronization > synchronizes notes to anki and has he correct deck name 1`] = `
 {
   "deletedDecks": [],
-  "deletedNotes": [],
+  "dryRun": false,
   "duration": 0,
+  "namespace": "Yanki Basic Sync Test",
   "synced": [
     {
       "action": "created",
@@ -120,8 +121,9 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
 exports[`complex trees > makes the right decisions about deck naming 2`] = `
 {
   "deletedDecks": [],
-  "deletedNotes": [],
+  "dryRun": false,
   "duration": 0,
+  "namespace": "Yanki Complex Tree Test",
   "synced": [
     {
       "action": "created",
@@ -298,8 +300,9 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
 exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatter 1`] = `
 {
   "deletedDecks": [],
-  "deletedNotes": [],
+  "dryRun": false,
   "duration": 0,
+  "namespace": "Yanki Surplus Frontmatter Test",
   "synced": [
     {
       "action": "created",

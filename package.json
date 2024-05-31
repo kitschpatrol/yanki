@@ -2,7 +2,7 @@
 	"name": "yanki-md",
 	"version": "0.0.0",
 	"type": "module",
-	"description": "An ultra simple CLI tool and library for syncing from Markdown to Anki.",
+	"description": "An ultra simple CLI tool and TypeScript library for syncing from Markdown to Anki. No customization. No configuration. No fuss.",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/kitschpatrol/yanki-md.git"
@@ -18,13 +18,13 @@
 		"url": "https://ericmika.com"
 	},
 	"license": "MIT",
-	"packageManager": "pnpm@9.1.3",
+	"packageManager": "pnpm@9.1.4",
 	"engines": {
 		"node": ">=18.0.0",
 		"pnpm": ">=8.0.0"
 	},
 	"bin": {
-		"yanki-cli": "bin/cli.js",
+		"yanki-md": "bin/cli.js",
 		"yanki": "bin/cli.js"
 	},
 	"main": "./dist/index.js",
@@ -64,7 +64,7 @@
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^4.6.6",
 		"@types/mdast": "^4.0.4",
-		"@types/node": "^20.12.13",
+		"@types/node": "^20.13.0",
 		"@types/unist": "^3.0.2",
 		"@types/yargs": "^17.0.32",
 		"add": "^2.0.6",
@@ -73,6 +73,7 @@
 		"deepmerge-ts": "^7.0.1",
 		"esbuild": "^0.21.4",
 		"globby": "^14.0.1",
+		"plur": "^5.1.0",
 		"pretty-ms": "^9.0.0",
 		"remark": "^15.0.1",
 		"remark-frontmatter": "^5.0.0",
@@ -81,6 +82,7 @@
 		"remark-parse": "^11.0.0",
 		"remark-wiki-link": "^2.0.1",
 		"sort-keys": "^5.0.0",
+		"string-strip-html": "^13.4.8",
 		"tsx": "^4.11.0",
 		"type-fest": "^4.18.3",
 		"unified": "^11.0.4",

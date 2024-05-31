@@ -1,6 +1,7 @@
 import {
 	type YankiModelName,
 	type YankiNote,
+	yankiDefaultNamespace,
 	yankiModelNames,
 	yankiModels,
 } from '../model/yanki-note'
@@ -181,11 +182,14 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
  * Get all notes from Anki that match the model prefix.
  *
  * @param client An instance of YankiConnect
- * @param namespace The value of the YankiNamespace field, or search with '*' to get all notes
+ * @param namespace The value of the YankiNamespace field, or search with '*' to get all notes. Defaults to the global default namespace.
  * @returns An array of YankiNote objects
  * @throws
  */
-export async function getRemoteNotes(client: YankiConnect, namespace = '*'): Promise<YankiNote[]> {
+export async function getRemoteNotes(
+	client: YankiConnect,
+	namespace = yankiDefaultNamespace,
+): Promise<YankiNote[]> {
 	const noteIds = await client.note.findNotes({ query: `"YankiNamespace:${namespace}"` })
 
 	// We can trust that these are defined, since the list of notes is coming

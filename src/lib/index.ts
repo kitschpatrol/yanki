@@ -1,3 +1,5 @@
 export { type YankiNote } from './model/yanki-note'
 export { getNoteFromMarkdown } from './parse/parse'
-export { clean, syncFiles, syncNotes } from './sync/sync'
+export { cleanNotes } from './sync/clean'
+export { listNotes } from './sync/list'
+export { syncFiles, syncNotes } from './sync/sync'

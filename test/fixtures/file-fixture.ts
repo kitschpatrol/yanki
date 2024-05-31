@@ -1,5 +1,5 @@
 // MyFixture.ts
-import { clean } from '../../src/lib'
+import { cleanNotes } from '../../src/lib'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
@@ -48,7 +48,7 @@ export function describeWithFileFixture(
 
 			// Clean up anki first
 			if (cleanUpAnki) {
-				await clean({ ankiConnectOptions: { autoLaunch: true }, dryRun: false, namespace })
+				await cleanNotes({ ankiConnectOptions: { autoLaunch: true }, dryRun: false, namespace })
 				const allNotes = await context.yankiConnect.note.findNotes({
 					query: '*',
 				})
@@ -67,7 +67,7 @@ export function describeWithFileFixture(
 
 			// Clean up anki
 			if (cleanUpAnki) {
-				await clean({ ankiConnectOptions: { autoLaunch: true }, dryRun: false, namespace })
+				await cleanNotes({ ankiConnectOptions: { autoLaunch: true }, dryRun: false, namespace })
 				const allNotes = await context.yankiConnect.note.findNotes({ query: '*' })
 				const finalCardCount = allNotes.length
 

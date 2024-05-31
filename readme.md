@@ -15,7 +15,7 @@
 
 <!-- short-description -->
 
-**An ultra simple CLI tool and library for syncing from Markdown to Anki.**
+**An ultra simple CLI tool and TypeScript library for syncing from Markdown to Anki. No customization. No configuration. No fuss.**
 
 <!-- /short-description -->
 
@@ -55,23 +55,91 @@ npm install --save-dev yanki-md
 
 #### Command: `yanki`
 
-Process markdown files
+Run a Yanki command. Defaults to `sync` if a command is not provided.
+
+This section lists top-level commands for `yanki`.
+
+If no command is provided, `yanki sync` is run by default.
 
 Usage:
 
 ```txt
-yanki <pattern>
+yanki [command]
 ```
 
-| Positional Argument | Description                                   | Type     |
-| ------------------- | --------------------------------------------- | -------- |
-| `pattern`           | Glob pattern for markdown files _(Optional.)_ | `string` |
+| Command  | Argument                  | Description                                                                                                           |
+| -------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `sync`   | `<directory>` `[options]` | Perform a one-way synchronization from a local directory of Markdown files to the Anki database. _(Default command.)_ |
+| `list`   |                           | List Yanki-created notes in the Anki database.                                                                        |
+| `delete` |                           | Delete Yanki-created notes in the Anki database. Careful.                                                             |
 
-| Option      | Alias | Description                    | Type      |
-| ----------- | ----- | ------------------------------ | --------- |
-| `--dry-run` | `-d`  | Run without making any changes | `boolean` |
-| `--help`    | `-h`  | Show help                      | `boolean` |
-| `--version` | `-v`  | Show version number            | `boolean` |
+_See the sections below for more information on each subcommand._
+
+#### Subcommand: `yanki sync`
+
+Perform a one-way synchronization from a local directory of Markdown files to the Anki database.
+
+Usage:
+
+```txt
+yanki sync <directory> [options]
+```
+
+| Positional Argument | Description                                                              | Type     |
+| ------------------- | ------------------------------------------------------------------------ | -------- |
+| `directory`         | The path to the local directory of Markdown files to sync. _(Required.)_ | `string` |
+
+| Option               | Alias | Description                                                                                                                     | Type      | Default                   |
+| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
+| `--recursive`        | `-r`  | Include Markdown files in subdirectories of <directory>.                                                                        | `boolean` |                           |
+| `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                 | `boolean` | `false`                   |
+| `--namespace`        | `-n`  | Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.      | `string`  | "Yanki CLI"               |
+| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information. | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-auto-launch` |       | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                   | `boolean` | `false`                   |
+| `--json`             |       | Output the sync report as JSON.                                                                                                 | `boolean` | `false`                   |
+| `--verbose`          |       | Enable verbose logging.                                                                                                         | `boolean` | `false`                   |
+| `--help`             | `-h`  | Show help                                                                                                                       | `boolean` |                           |
+| `--version`          | `-v`  | Show version number                                                                                                             | `boolean` |                           |
+
+#### Subcommand: `yanki list`
+
+List Yanki-created notes in the Anki database.
+
+Usage:
+
+```txt
+yanki list
+```
+
+| Option               | Alias | Description                                                                                                                                                                                                | Type      | Default                   |
+| -------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
+| `--namespace`        | `-n`  | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to list all Yanki-created notes in the Anki database. | `string`  | "Yanki CLI"               |
+| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                            | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-auto-launch` |       | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                                                                                              | `boolean` | `false`                   |
+| `--json`             |       | Output the list of notes as JSON to stdout.                                                                                                                                                                | `boolean` | `false`                   |
+| `--help`             | `-h`  | Show help                                                                                                                                                                                                  | `boolean` |                           |
+| `--version`          | `-v`  | Show version number                                                                                                                                                                                        | `boolean` |                           |
+
+#### Subcommand: `yanki delete`
+
+Delete Yanki-created notes in the Anki database. Careful.
+
+Usage:
+
+```txt
+yanki delete
+```
+
+| Option               | Alias | Description                                                                                                                                                                                                  | Type      | Default                   |
+| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ------------------------- |
+| `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                              | `boolean` | `false`                   |
+| `--namespace`        | `-n`  | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to delete all Yanki-created notes in the Anki database. | `string`  | "Yanki CLI"               |
+| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                              | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-auto-launch` |       | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                                                                                                | `boolean` | `false`                   |
+| `--json`             |       | Output the list of deleted notes as JSON to stdout.                                                                                                                                                          | `boolean` | `false`                   |
+| `--verbose`          |       | Enable verbose logging.                                                                                                                                                                                      | `boolean` | `false`                   |
+| `--help`             | `-h`  | Show help                                                                                                                                                                                                    | `boolean` |                           |
+| `--version`          | `-v`  | Show version number                                                                                                                                                                                          | `boolean` |                           |
 
 <!-- /cli-help -->
 
