@@ -3,7 +3,7 @@ import esbuild from 'esbuild'
 await esbuild.build({
 	bundle: true,
 	entryPoints: ['src/cli/cli.ts'],
-	external: ['yargs'],
+	external: ['yargs', 'globby'],
 	format: 'esm',
 	minify: false,
 	outfile: 'bin/cli.js',

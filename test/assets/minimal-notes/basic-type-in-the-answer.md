@@ -1,3 +1,7 @@
+---
+noteId: 1717147102625
+---
+
 I'm the prompt
 
 # What an amazing

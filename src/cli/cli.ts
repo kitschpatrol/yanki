@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
-import path from 'node:path'
-import prettyMilliseconds from 'pretty-ms'
+import { syncFiles } from '../lib/sync/sync'
+import log from '../lib/utilities/log'
+import { globby } from 'globby'
+// Import path from 'node:path'
 import untildify from 'untildify'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -18,7 +20,6 @@ await yargsInstance
 		(yargs) =>
 			yargs
 				.positional('directory', {
-					default: undefined,
 					demandOption: true,
 					describe: 'The path to the local directory of Markdown files to sync.',
 					type: 'string',
@@ -48,9 +49,29 @@ await yargsInstance
 						'Enable verbose logging. All verbose logs and prefixed with their log level and are printed to `stderr` for ease of redirection.',
 					type: 'boolean',
 				}),
-		({ directory, dryRun, namespace, recursive, verbose }) => {
-			console.log(dryRun, directory, namespace, recursive, verbose)
-			console.log('TODO implementation')
+		async ({ directory, dryRun, namespace, recursive, verbose }) => {
+			log.verbose = verbose
+			const expandedDirectory = untildify(directory)
+			const globPattern = recursive ? `${expandedDirectory}/**/*.md` : `${expandedDirectory}/*.md`
+			const paths = await globby(globPattern, { absolute: true })
+			log.info(paths)
+
+			if (paths.length === 0) {
+				log.error(`No Markdown files found in "${expandedDirectory}".`)
+				process.exitCode = 1
+				return
+			}
+
+			const result = await syncFiles(paths, {
+				ankiConnectOptions: {
+					autoLaunchAnki: true,
+				},
+				dryRun,
+				namespace,
+			})
+
+			log.info(result)
+
 			process.exitCode = 0
 		},
 	)

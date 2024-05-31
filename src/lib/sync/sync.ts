@@ -9,7 +9,7 @@ import {
 	getRemoteNotes,
 	getRemoteNotesById,
 	updateNote,
-} from './anki-connect-utilities'
+} from './anki-connect'
 import { deepmerge } from 'deepmerge-ts'
 import fs from 'node:fs/promises'
 import path from 'node:path'

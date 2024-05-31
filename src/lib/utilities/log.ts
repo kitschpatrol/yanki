@@ -2,7 +2,6 @@
 // Staying basic, always log to stderr
 
 import chalk from 'chalk'
-import { oraPromise } from 'ora'
 
 const isNode = process?.versions?.node !== undefined
 
@@ -36,13 +35,6 @@ const log = {
 	},
 	infoPrefixed(prefix: string, ...data: unknown[]): void {
 		this.info(chalk.blue(`[${prefix}]`), ...data)
-	},
-	async infoSpin<T>(promise: Promise<T>, message: string): Promise<T> {
-		return oraPromise(promise, {
-			prefixText: chalk.green('[Info]'),
-			stream: process.stderr,
-			text: message,
-		})
 	},
 
 	warn(...data: unknown[]): void {
