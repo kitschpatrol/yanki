@@ -1,4 +1,9 @@
-import { type YankiNote, getYankiModelNames, getYankiModels } from '../model/yanki-note'
+import {
+	type YankiModelName,
+	type YankiNote,
+	yankiModelNames,
+	yankiModels,
+} from '../model/yanki-note'
 import { type YankiConnect } from 'yanki-connect'
 
 export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryRun = false) {
@@ -35,12 +40,13 @@ export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun =
  *
  * @param client An instance of YankiConnect
  * @param note The note to add @returns The ID of the newly created note in Anki
+ * @param dryRun If true, the note will not be created and an ID of 0 will be returned
+ * @returns The ID of the newly created note in Anki
  * @throws
  */
 export async function addNote(
 	client: YankiConnect,
 	note: YankiNote,
-	modelPrefix: string,
 	dryRun: boolean,
 ): Promise<number> {
 	if (note.noteId !== undefined) {
@@ -63,7 +69,6 @@ export async function addNote(
 		.catch(async (error) => {
 			if (error instanceof Error) {
 				if (error.message === `model was not found: ${note.modelName}`) {
-					const yankiModels = getYankiModels(modelPrefix)
 					// Create the model and try again
 					const model = yankiModels.find((model) => model.modelName === note.modelName)
 					if (model === undefined) {
@@ -71,18 +76,18 @@ export async function addNote(
 					}
 
 					await client.model.createModel(model)
-					return addNote(client, note, modelPrefix, dryRun)
+					return addNote(client, note, dryRun)
 				}
 
 				if (error.message === `deck was not found: ${note.deckName}`) {
 					// Create the deck and try again
 
-					if (note.deckName === undefined) {
-						throw new Error('Deck name is undefined')
+					if (note.deckName === '') {
+						throw new Error('Deck name is empty')
 					}
 
 					await client.deck.createDeck({ deck: note.deckName })
-					return addNote(client, note, modelPrefix, dryRun)
+					return addNote(client, note, dryRun)
 				}
 
 				throw error
@@ -142,8 +147,8 @@ export async function updateNote(
 
 	// Check if decks are different
 	if (localNote.deckName !== remoteNote.deckName) {
-		if (localNote.deckName === undefined) {
-			throw new Error('Local deck name is undefined')
+		if (localNote.deckName === '') {
+			throw new Error('Local deck name is empty')
 		}
 
 		if (!dryRun) {
@@ -176,19 +181,16 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
  * Get all notes from Anki that match the model prefix.
  *
  * @param client An instance of YankiConnect
- * @param modelPrefix The prefix of the model name to search for
+ * @param namespace The value of the YankiNamespace field, or search with '*' to get all notes
  * @returns An array of YankiNote objects
  * @throws
  */
-export async function getRemoteNotes(
-	client: YankiConnect,
-	modelPrefix: string,
-): Promise<YankiNote[]> {
-	const noteIds = await client.note.findNotes({ query: `note:"${modelPrefix}*"` })
+export async function getRemoteNotes(client: YankiConnect, namespace = '*'): Promise<YankiNote[]> {
+	const noteIds = await client.note.findNotes({ query: `"YankiNamespace:${namespace}"` })
 
 	// We can trust that these are defined, since the list of notes is coming
 	// straight from Anki
-	return (await getRemoteNotesById(client, modelPrefix, noteIds)) as YankiNote[]
+	return (await getRemoteNotesById(client, noteIds)) as YankiNote[]
 }
 
 /**
@@ -201,14 +203,13 @@ export async function getRemoteNotes(
  * notes that need to be created.
  *
  * @param client An instance of YankiConnect
- * @param noteIds
- * @param modelPrefix An array of local note IDs to (attempt) to fetch @returns
+ * @param namespace An instance of YankiConnect
+ * @param noteIds An array of local note IDs to (attempt) to fetch @returns
  * Array of YankiNote objects, with undefined for notes that could not be found.
  * @throws
  */
 export async function getRemoteNotesById(
 	client: YankiConnect,
-	modelPrefix: string,
 	noteIds: number[],
 ): Promise<Array<YankiNote | undefined>> {
 	const ankiNotes = await client.note.notesInfo({ notes: noteIds })
@@ -233,10 +234,8 @@ export async function getRemoteNotesById(
 		}
 	}
 
-	const yankiModelNames = getYankiModelNames(modelPrefix)
 	for (const ankiNote of ankiNotes) {
-		// If the model name is changed in Anki, a bunch of notes might end up being created again
-		if (ankiNote.noteId === undefined || !yankiModelNames.includes(ankiNote.modelName)) {
+		if (ankiNote.noteId === undefined) {
 			yankiNotes.push(undefined)
 			continue
 		}
@@ -260,6 +259,11 @@ export async function getRemoteNotesById(
 			throw new Error(`Multiple decks found for note ${ankiNote.noteId}`)
 		}
 
+		if (!yankiModelNames.includes(ankiNote.modelName as YankiModelName)) {
+			// Alternately, check if the model name is in the list of models and recreate by setting to undefined?
+			throw new Error(`Unknown model name ${ankiNote.modelName} for note ${ankiNote.noteId}`)
+		}
+
 		// Picture, sound, etc. fields are never provided
 
 		yankiNotes.push({
@@ -270,8 +274,10 @@ export async function getRemoteNotesById(
 				Back: ankiNote.fields.Back.value ?? '',
 				// eslint-disable-next-line @typescript-eslint/naming-convention
 				Front: ankiNote.fields.Front.value ?? '',
+				// eslint-disable-next-line @typescript-eslint/naming-convention
+				YankiNamespace: ankiNote.fields.YankiNamespace.value ?? '',
 			},
-			modelName: ankiNote.modelName, // Checked above
+			modelName: ankiNote.modelName as YankiModelName, // Checked above
 			noteId: ankiNote.noteId,
 			tags: ankiNote.tags,
 		})
@@ -286,13 +292,11 @@ export async function deleteOrphanedDecks(
 	recentlyDeletedNotes: YankiNote[],
 	dryRun: boolean,
 ): Promise<string[]> {
-	const activeNoteDeckNames = [...new Set(activeNotes.map((note) => note.deckName))].filter(
-		Boolean,
-	) as string[]
+	const activeNoteDeckNames = [...new Set(activeNotes.map((note) => note.deckName))].filter(Boolean)
 
 	const recentlyDeletedNoteDeckNames = [
 		...new Set(recentlyDeletedNotes.map((note) => note.deckName)),
-	].filter(Boolean) as string[]
+	].filter(Boolean)
 
 	// Set that's excluded from set of notes deck names and recently deleted notes deck names
 	const orphanedDeckNames = recentlyDeletedNoteDeckNames.filter(
@@ -331,7 +335,7 @@ export async function deleteOrphanedDecks(
 			// See if the number of notes in the deck is equal to the number of recently deleted
 			// notes with that same deck
 			const noteCount = recentlyDeletedNotes.reduce<number>((acc, note) => {
-				if (note.deckName !== undefined) {
+				if (note.deckName !== '') {
 					const lastPart = note.deckName.split('::').at(-1)
 
 					if (lastPart === deckStat.name) {

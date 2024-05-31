@@ -2,5 +2,5 @@
 	"$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
 	"ignorePaths": ["bin/"],
 	"import": "@kitschpatrol/cspell-config",
-	"words": ["Anki", "cloze", "mdank", "Yanki", "Yatskov", "duplicative"]
+	"words": ["Anki", "cloze", "duplicative", "mdank", "obrigado", "Yanki", "Yatskov"]
 }

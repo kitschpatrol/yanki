@@ -4,21 +4,43 @@ import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stableResults } from './utilities/stable-sync-results'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { YankiConnect } from 'yanki-connect'
+
+describe('anki connect actions', () => {
+	it('finds cards with YankiNamespace fields', async () => {
+		const client = new YankiConnect({ autoLaunchAnki: true })
+
+		const allYankiNotes = await client.note.findNotes({ query: '"YankiNamespace:*"' })
+
+		console.log('----------------------------------')
+		console.log(allYankiNotes)
+
+		const specificYankiNotes = await client.note.findNotes({
+			query: '"YankiNamespace:Yanki Basic Sync Test"',
+		})
+
+		// 1717134423287
+		// 1717134423387
+		console.log('----------------------------------')
+		console.log('----------------------------------')
+		console.log(specificYankiNotes)
+	})
+})
 
 describeWithFileFixture(
 	'model types',
 	{
 		assetPath: './test/assets/minimal-notes/',
 		cleanUpAnki: false,
-		testModelPrefix: 'YankiModelTypeTest - ',
+		namespace: 'Yanki Model Type Test',
 	},
 	(context) => {
 		it('correctly infers Anki model types from markdown', async () => {
 			const results: Record<string, string> = {}
 			for (const filePath of context.files) {
 				const markdown = await fs.readFile(filePath, 'utf8')
-				const { modelName } = await getNoteFromMarkdown(markdown, context.testModelPrefix)
+				const { modelName } = await getNoteFromMarkdown(markdown, context.namespace)
 				results[path.basename(filePath)] = modelName
 			}
 
@@ -41,11 +63,11 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/minimal-notes/',
 		cleanUpAnki: true,
-		testModelPrefix: 'YankiBasicSyncTest - ',
+		namespace: 'Yanki Basic Sync Test',
 	},
 	(context) => {
 		it('synchronizes notes to anki and has he correct deck name', async () => {
-			const results = await syncFiles(context.files, { modelPrefix: context.testModelPrefix })
+			const results = await syncFiles(context.files, { namespace: context.namespace })
 
 			// Check the stuff that's elided from the stable results snapshot
 			expect(results.duration).toBeDefined()
@@ -69,7 +91,7 @@ describeWithFileFixture(
 		it('writes anki note IDs to the markdown files frontmatter', async () => {
 			for (const filePath of context.files) {
 				const markdown = await fs.readFile(filePath, 'utf8')
-				const note = await getNoteFromMarkdown(markdown, context.testModelPrefix)
+				const note = await getNoteFromMarkdown(markdown, context.namespace)
 
 				expect(note.noteId).toBeDefined()
 				expect(note.noteId).toBeGreaterThan(0)
@@ -83,16 +105,16 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/surplus-frontmatter/',
 		cleanUpAnki: true,
-		testModelPrefix: 'YankiSurplusFrontmatterTest - ',
+		namespace: 'Yanki Surplus Frontmatter Test',
 	},
 	(context) => {
 		it('preserves and merges unrelated surplus frontmatter', async () => {
-			const results = await syncFiles(context.files, { modelPrefix: context.testModelPrefix })
+			const results = await syncFiles(context.files, { namespace: context.namespace })
 			expect(stableResults(results)).toMatchSnapshot()
 
 			for (const filePath of context.files) {
 				const markdown = await fs.readFile(filePath, 'utf8')
-				const note = await getNoteFromMarkdown(markdown, context.testModelPrefix)
+				const note = await getNoteFromMarkdown(markdown, context.namespace)
 				expect(note.noteId).toBeDefined()
 				expect(note.noteId).toBeGreaterThan(0)
 
@@ -115,11 +137,11 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/complex-tree/',
 		cleanUpAnki: true,
-		testModelPrefix: 'YankiComplexTreeTest - ',
+		namespace: 'Yanki Complex Tree Test',
 	},
 	(context) => {
 		it('makes the right decisions about deck naming', async () => {
-			const results = await syncFiles(context.files, { modelPrefix: context.testModelPrefix })
+			const results = await syncFiles(context.files, { namespace: context.namespace })
 
 			// Log inline for legibility
 			const pathToDeckMap: Record<string, string | undefined> = {}

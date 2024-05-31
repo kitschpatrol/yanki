@@ -16,8 +16,9 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
 ",
           "Front": "<p>I'm <em>question</em> which is sometimes the answer</p>
 ",
+          "YankiNamespace": "Yanki Basic Sync Test",
         },
-        "modelName": "YankiBasicSyncTest - Basic (and reversed card)",
+        "modelName": "Yanki - Basic (and reversed card)",
         "noteId": 0,
         "tags": [],
       },
@@ -33,8 +34,9 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
           "Front": "<p>I'm the front of the card</p>
 <p>I have no back.</p>
 ",
+          "YankiNamespace": "Yanki Basic Sync Test",
         },
-        "modelName": "YankiBasicSyncTest - Basic",
+        "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [],
       },
@@ -54,8 +56,9 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
 <li>is</li>
 </ul>
 ",
+          "YankiNamespace": "Yanki Basic Sync Test",
         },
-        "modelName": "YankiBasicSyncTest - Basic (type in the answer)",
+        "modelName": "Yanki - Basic (type in the answer)",
         "noteId": 0,
         "tags": [],
       },
@@ -70,8 +73,9 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
 ",
           "Front": "<p>I'm the front of the card</p>
 ",
+          "YankiNamespace": "Yanki Basic Sync Test",
         },
-        "modelName": "YankiBasicSyncTest - Basic",
+        "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [],
       },
@@ -86,8 +90,9 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
 ",
           "Front": "<p>This card has a {{c1::cloze}} or {{c1::two::(here's a hint)}}.</p>
 ",
+          "YankiNamespace": "Yanki Basic Sync Test",
         },
-        "modelName": "YankiBasicSyncTest - Cloze",
+        "modelName": "Yanki - Cloze",
         "noteId": 0,
         "tags": [],
       },
@@ -101,8 +106,9 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
           "Back": "",
           "Front": "<p>This card has a {{c1::cloze}} or {{c1::two::(here's a hint)}}.</p>
 ",
+          "YankiNamespace": "Yanki Basic Sync Test",
         },
-        "modelName": "YankiBasicSyncTest - Cloze",
+        "modelName": "Yanki - Cloze",
         "noteId": 0,
         "tags": [],
       },

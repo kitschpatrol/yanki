@@ -3,6 +3,7 @@
  */
 
 import type { Frontmatter } from '../model/frontmatter'
+import type { YankiModelName } from '../model/yanki-note'
 import remarkObsidianLink from './remark-obsidian-link'
 import type { Node, Parent, Root, Text } from 'mdast'
 import remarkFrontmatter from 'remark-frontmatter'
@@ -164,8 +165,8 @@ export function splitTreeAtThematicBreak(tree: Root): [Root, Root | undefined] {
 // and of the sub-indicators are in the markdown, then the higher-precedence
 // type wins If nothing matches, then we just get a basic note with all the
 // markdown on the front, and nothing on the back
-export function getYankiModelNameFromTree(ast: Root, modelPrefix: string): string {
-	let probableType: string | undefined
+export function getYankiModelNameFromTree(ast: Root): YankiModelName {
+	let probableType: YankiModelName | undefined
 
 	// Cloze must come before thematic break
 	visit(ast, (node) => {
@@ -175,7 +176,7 @@ export function getYankiModelNameFromTree(ast: Root, modelPrefix: string): strin
 		}
 
 		if (node.type === 'delete') {
-			probableType = `${modelPrefix}Cloze`
+			probableType = `Yanki - Cloze`
 			return EXIT
 		}
 	})
@@ -187,7 +188,7 @@ export function getYankiModelNameFromTree(ast: Root, modelPrefix: string): strin
 	// Check last node type
 	visit(ast.children.at(-1) as Parent, (node) => {
 		if (node.type === 'emphasis') {
-			probableType = `${modelPrefix}Basic (type in the answer)`
+			probableType = `Yanki - Basic (type in the answer)`
 		}
 	})
 	if (probableType !== undefined) return probableType
@@ -201,8 +202,8 @@ export function getYankiModelNameFromTree(ast: Root, modelPrefix: string): strin
 
 			probableType =
 				lastNode?.type === 'thematicBreak' && node.type === 'thematicBreak'
-					? `${modelPrefix}Basic (and reversed card)`
-					: `${modelPrefix}Basic`
+					? `Yanki - Basic (and reversed card)`
+					: `Yanki - Basic`
 
 			lastNode = node
 		})
@@ -211,7 +212,7 @@ export function getYankiModelNameFromTree(ast: Root, modelPrefix: string): strin
 	// Not noteworthy... if (probableType === undefined) { Console.warn('Could not
 	// determine note type. Defaulting to basic.') }
 
-	return probableType ?? `${modelPrefix}Basic`
+	return probableType ?? `Yanki - Basic`
 }
 
 export function getFrontmatterFromTree(ast: Root): Frontmatter {

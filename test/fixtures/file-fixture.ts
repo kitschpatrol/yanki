@@ -10,26 +10,26 @@ import { YankiConnect } from 'yanki-connect'
 type FixtureOptions = {
 	assetPath: string
 	cleanUpAnki: boolean
-	testModelPrefix: string
+	namespace: string
 }
 
 type TestContext = {
 	assetPath: string
 	files: string[]
-	testModelPrefix: string
+	namespace: string
 	yankiConnect: YankiConnect
 }
 
 export function describeWithFileFixture(
 	description: string,
-	{ assetPath, cleanUpAnki, testModelPrefix }: FixtureOptions,
+	{ assetPath, cleanUpAnki, namespace }: FixtureOptions,
 	tests: (context: TestContext) => void,
 ) {
 	describe(description, () => {
 		const context: TestContext = {
 			assetPath: '',
 			files: [],
-			testModelPrefix: 'YankiTestUndefined - ',
+			namespace: 'YankiTestUndefined - ',
 			yankiConnect: new YankiConnect({ autoLaunchAnki: true }),
 		}
 		let tempAssetPath: string
@@ -43,14 +43,14 @@ export function describeWithFileFixture(
 			context.files = await globby(`${tempAssetPath}/**/*.md`)
 			expect(context.files.length).toBeGreaterThan(0)
 
-			// Expose the model prefix to the contest
-			context.testModelPrefix = testModelPrefix
+			// Expose the namespace to the tests
+			context.namespace = namespace
 
 			// Clean up anki first
 			if (cleanUpAnki) {
-				await clean({ dryRun: false, modelPrefix: testModelPrefix })
+				await clean({ ankiConnectOptions: { autoLaunchAnki: true }, dryRun: false, namespace })
 				const allNotes = await context.yankiConnect.note.findNotes({
-					query: `deck:"${testModelPrefix}"`,
+					query: '*',
 				})
 				initialCardCount = allNotes.length
 			}
@@ -67,8 +67,8 @@ export function describeWithFileFixture(
 
 			// Clean up anki
 			if (cleanUpAnki) {
-				await clean({ dryRun: false, modelPrefix: testModelPrefix })
-				const allNotes = await context.yankiConnect.note.findNotes({ query: `*` })
+				await clean({ ankiConnectOptions: { autoLaunchAnki: true }, dryRun: false, namespace })
+				const allNotes = await context.yankiConnect.note.findNotes({ query: '*' })
 				const finalCardCount = allNotes.length
 
 				expect(initialCardCount).toEqual(finalCardCount)

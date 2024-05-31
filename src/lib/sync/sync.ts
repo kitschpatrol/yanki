@@ -21,7 +21,7 @@ export type SyncOptions = {
 	ankiConnectOptions: YankiConnectOptions
 	defaultDeckName: string
 	dryRun: boolean
-	modelPrefix: string
+	namespace: string
 }
 
 const defaultSyncOptions: SyncOptions = {
@@ -30,7 +30,7 @@ const defaultSyncOptions: SyncOptions = {
 	},
 	defaultDeckName: 'Yanki',
 	dryRun: false,
-	modelPrefix: 'Yanki - ',
+	namespace: 'Global',
 }
 
 /**
@@ -52,7 +52,7 @@ export async function syncNotes(
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, defaultDeckName, dryRun, modelPrefix } = deepmerge(
+	const { ankiConnectOptions, defaultDeckName, dryRun, namespace } = deepmerge(
 		defaultSyncOptions,
 		options ?? {},
 	)
@@ -63,7 +63,7 @@ export async function syncNotes(
 	const client = new YankiConnect(ankiConnectOptions)
 
 	// Deletion pass, we need the full info to do deck cleanup later on
-	const existingRemoteNotes = await getRemoteNotes(client, modelPrefix)
+	const existingRemoteNotes = await getRemoteNotes(client, namespace)
 	const orphanedNotes = existingRemoteNotes.filter(
 		(remoteNote) => !allLocalNotes.some((localNote) => localNote.noteId === remoteNote?.noteId),
 	)
@@ -72,7 +72,7 @@ export async function syncNotes(
 
 	// Set undefined local note decks to the default
 	for (const note of allLocalNotes) {
-		if (note.deckName === undefined) {
+		if (note.deckName === '') {
 			console.log('Setting deck name')
 			note.deckName = defaultDeckName
 		}
@@ -80,7 +80,7 @@ export async function syncNotes(
 
 	// Set undefined local note IDs to bogus ones to ensure we create them
 	const localNoteIds = allLocalNotes.map((note) => note.noteId).map((id) => id ?? -1)
-	const remoteNotes = await getRemoteNotesById(client, modelPrefix, localNoteIds)
+	const remoteNotes = await getRemoteNotesById(client, localNoteIds)
 
 	// Creation and update pass
 	for (const [index, remoteNote] of remoteNotes.entries()) {
@@ -91,12 +91,7 @@ export async function syncNotes(
 			// Ensure id is undefined, in case the local id is corrupted (e.g. changed
 			// by hand)
 
-			const newNoteId = await addNote(
-				client,
-				{ ...localNote, noteId: undefined },
-				modelPrefix,
-				dryRun,
-			)
+			const newNoteId = await addNote(client, { ...localNote, noteId: undefined }, dryRun)
 
 			synced.push({
 				action: 'created',
@@ -123,12 +118,7 @@ export async function syncNotes(
 
 			replacedNotes.push(remoteNote)
 			await deleteNote(client, remoteNote, dryRun)
-			const newNoteId = await addNote(
-				client,
-				{ ...localNote, noteId: undefined },
-				modelPrefix,
-				dryRun,
-			)
+			const newNoteId = await addNote(client, { ...localNote, noteId: undefined }, dryRun)
 
 			synced.push({
 				action: 'recreated',
@@ -182,7 +172,7 @@ export async function syncFiles(
 	const startTime = performance.now()
 
 	const resolvedOptions = deepmerge(defaultSyncOptions, options ?? {})
-	const { modelPrefix } = resolvedOptions
+	const { namespace } = resolvedOptions
 
 	const allLocalMarkdown: string[] = []
 	const allLocalNotes: YankiNote[] = []
@@ -193,8 +183,11 @@ export async function syncFiles(
 	for (const [index, filePath] of allLocalFilePaths.entries()) {
 		const markdown = await fs.readFile(filePath, 'utf8')
 		allLocalMarkdown.push(markdown)
-		const note = await getNoteFromMarkdown(markdown, modelPrefix)
-		note.deckName ??= deckNamesFromFilePaths[index]
+		const note = await getNoteFromMarkdown(markdown, namespace)
+		if (note.deckName === '') {
+			note.deckName = deckNamesFromFilePaths[index]
+		}
+
 		allLocalNotes.push(note)
 	}
 
@@ -277,9 +270,6 @@ function getDeckNamesFromFilePaths(
 			return deckName
 		})
 
-		console.log('----------------------------------')
-		console.log(deckNamesWithShortestCommonPath)
-
 		return deckNamesWithShortestCommonPath
 	}
 
@@ -325,7 +315,7 @@ function getDeckNamesFromFilePaths(
 type CleanOptions = {
 	ankiConnectOptions?: YankiConnectOptions
 	dryRun: boolean
-	modelPrefix?: string
+	namespace: string
 }
 
 /**
@@ -340,11 +330,14 @@ type CleanOptions = {
 export async function clean(
 	options: CleanOptions,
 ): Promise<{ decks: string[]; notes: YankiNote[] }> {
-	const { ankiConnectOptions, dryRun, modelPrefix = defaultSyncOptions.modelPrefix } = options ?? {}
+	const { ankiConnectOptions, dryRun, namespace } = options
 
 	const client = new YankiConnect(ankiConnectOptions)
 
-	const remoteNotes = await getRemoteNotes(client, modelPrefix)
+	const remoteNotes = await getRemoteNotes(client, namespace)
+
+	console.log('----------------------------------')
+	console.log(remoteNotes)
 
 	// Deletion pass
 	await deleteNotes(client, remoteNotes, dryRun)

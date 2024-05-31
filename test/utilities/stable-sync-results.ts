@@ -13,6 +13,5 @@ export function stableResults(results: SyncResults): SyncResults {
 		return note
 	})
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-	return sortKeys(results, { deep: true }) as SyncResults
+	return sortKeys(results, { deep: true })
 }

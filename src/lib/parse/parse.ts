@@ -2,7 +2,7 @@
  * Turns a markdown string into a YankiNote object.
  */
 
-import type { YankiNote } from '../model/yanki-note'
+import { type YankiNote } from '../model/yanki-note'
 import {
 	deleteFirstNodeOfType,
 	getAstFromMarkdown,
@@ -15,12 +15,9 @@ import {
 import remarkHtml from 'remark-html'
 import { unified } from 'unified'
 
-export async function getNoteFromMarkdown(
-	markdown: string,
-	modelPrefix: string,
-): Promise<YankiNote> {
+export async function getNoteFromMarkdown(markdown: string, namespace: string): Promise<YankiNote> {
 	let ast = await getAstFromMarkdown(markdown)
-	const modelName = getYankiModelNameFromTree(ast, modelPrefix)
+	const modelName = getYankiModelNameFromTree(ast)
 	const frontmatter = getFrontmatterFromTree(ast)
 
 	// Remove the frontmatter from the AST
@@ -30,8 +27,8 @@ export async function getNoteFromMarkdown(
 	let back = ''
 
 	switch (modelName) {
-		case `${modelPrefix}Basic`:
-		case `${modelPrefix}Basic (and reversed card)`: {
+		case `Yanki - Basic`:
+		case `Yanki - Basic (and reversed card)`: {
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
 			front = unified().use(remarkHtml).stringify(firstPart)
 			back =
@@ -41,7 +38,7 @@ export async function getNoteFromMarkdown(
 			break
 		}
 
-		case `${modelPrefix}Cloze`: {
+		case `Yanki - Cloze`: {
 			ast = replaceDeleteNodesWithClozeMarkup(ast)
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
 			front = unified().use(remarkHtml).stringify(firstPart)
@@ -49,25 +46,23 @@ export async function getNoteFromMarkdown(
 			break
 		}
 
-		case `${modelPrefix}Basic (type in the answer)`: {
+		case `Yanki - Basic (type in the answer)`: {
 			const [firstPart, secondPart] = splitTreeAtEmphasis(ast)
 			front = unified().use(remarkHtml).stringify(firstPart)
 			back = secondPart
 			break
 		}
-
-		default: {
-			throw new Error(`Unknown model name: ${modelName}`)
-		}
 	}
 
 	const note: YankiNote = {
-		deckName: frontmatter.deckName,
+		deckName: frontmatter.deckName ?? '', // Set later based on file path if undefined
 		fields: {
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			Back: back,
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			Front: front,
+			// eslint-disable-next-line @typescript-eslint/naming-convention
+			YankiNamespace: namespace,
 		},
 		modelName,
 		noteId: frontmatter.noteId ?? undefined,
