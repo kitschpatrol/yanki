@@ -1,0 +1,112 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`basic synchronization > synchronizes notes to Anki 1`] = `
+{
+  "deletedDecks": [],
+  "deletedNotes": [],
+  "duration": 0,
+  "synced": [
+    {
+      "action": "created",
+      "filePath": "basic-and-reversed-card.md",
+      "note": {
+        "deckName": "minimal-notes",
+        "fields": {
+          "Back": "<p>I'm an <strong>answer</strong> which is sometimes the question</p>
+",
+          "Front": "<p>I'm <em>question</em> which is sometimes the answer</p>
+",
+        },
+        "modelName": "YankiBasicSyncTest - Basic (and reversed card)",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic-no-back.md",
+      "note": {
+        "deckName": "minimal-notes",
+        "fields": {
+          "Back": "<p><em>Intentionally blank.</em></p>
+",
+          "Front": "<p>I'm the front of the card</p>
+<p>I have no back.</p>
+",
+        },
+        "modelName": "YankiBasicSyncTest - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic-type-in-the-answer.md",
+      "note": {
+        "deckName": "minimal-notes",
+        "fields": {
+          "Back": "I'm the thing you need to type on the card",
+          "Front": "<p>I'm the prompt</p>
+<h1>What an amazing</h1>
+<ul>
+<li><em>thing</em></li>
+<li>that</li>
+<li>is</li>
+</ul>
+",
+        },
+        "modelName": "YankiBasicSyncTest - Basic (type in the answer)",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "minimal-notes",
+        "fields": {
+          "Back": "<p>I'm the back of the card</p>
+",
+          "Front": "<p>I'm the front of the card</p>
+",
+        },
+        "modelName": "YankiBasicSyncTest - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "cloze-extra.md",
+      "note": {
+        "deckName": "minimal-notes",
+        "fields": {
+          "Back": "<p>And some extra stuff.</p>
+",
+          "Front": "<p>This card has a {{c1::cloze}} or {{c1::two::(here's a hint)}}.</p>
+",
+        },
+        "modelName": "YankiBasicSyncTest - Cloze",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "cloze.md",
+      "note": {
+        "deckName": "minimal-notes",
+        "fields": {
+          "Back": "",
+          "Front": "<p>This card has a {{c1::cloze}} or {{c1::two::(here's a hint)}}.</p>
+",
+        },
+        "modelName": "YankiBasicSyncTest - Cloze",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+  ],
+}
+`;

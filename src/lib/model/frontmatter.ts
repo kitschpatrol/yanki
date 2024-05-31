@@ -43,7 +43,7 @@ export async function setNoteIdInFrontmatter(
 	}
 
 	const frontmatter = lines.slice(frontmatterStart + 1, frontmatterEnd).join('\n')
-	const parsedFrontmatter = (await yamlParse(frontmatter)) as Frontmatter
+	const parsedFrontmatter = ((await yamlParse(frontmatter)) ?? {}) as Frontmatter
 
 	if (noteId === undefined) {
 		delete parsedFrontmatter.noteId
