@@ -30,7 +30,7 @@ const defaultSyncOptions: SyncOptions = {
 	},
 	defaultDeckName: 'Yanki',
 	dryRun: false,
-	namespace: 'Global',
+	namespace: 'Yanki CLI',
 }
 
 /**
@@ -56,6 +56,17 @@ export async function syncNotes(
 		defaultSyncOptions,
 		options ?? {},
 	)
+
+	// Namespace validation
+	const cleanNamespace = namespace.trim()
+
+	if (cleanNamespace === '') {
+		throw new Error('Namespace must not be empty')
+	}
+
+	if (cleanNamespace.includes('*') || cleanNamespace.includes(':')) {
+		throw new Error(`Namespace may not contain the characters '*' or ':'`)
+	}
 
 	const synced: SyncedNote[] = []
 	const replacedNotes: YankiNote[] = []
@@ -335,9 +346,6 @@ export async function clean(
 	const client = new YankiConnect(ankiConnectOptions)
 
 	const remoteNotes = await getRemoteNotes(client, namespace)
-
-	console.log('----------------------------------')
-	console.log(remoteNotes)
 
 	// Deletion pass
 	await deleteNotes(client, remoteNotes, dryRun)
