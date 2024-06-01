@@ -15,19 +15,19 @@
 
 <!-- short-description -->
 
-**An ultra simple CLI tool and TypeScript library for syncing from Markdown to Anki. No customization. No configuration. No fuss.**
+**An ultra-simple CLI tool and TypeScript library for syncing Markdown to Anki flashcards. No customization. No configuration. No fuss.**
 
 <!-- /short-description -->
 
 ## Overview
 
-Many solutions exist for turning a local Markdown files into Anki flashcards, Yanki MD takes a simple and opinionated approach that maps existing Markdown semantics to generate and synchronize limited number of Anki note / card types.
+Yanki MD simply syncs a folder of Markdown notes to Anki.
 
 The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools.
 
 ## Quick start
 
-Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) with the[Anki-Connect](https://foosoft.net/projects/anki-connect/)) plugin is open:
+Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on installed:
 
 ```sh
 npx yanki ./folder-of-markdown
@@ -47,9 +47,9 @@ Yanki MD uses the source Markdown file's parent directory name as the deck name.
 
 #### Leverage the default Anki note types
 
-Yanki only supports turning Markdown into the "Basic", "Basic (and reversed card)" , "Basic (type in the answer)", and "Cloze" note types that ship as defaults in the Anki App.
+Yanki _only_ supports turning Markdown into the "Basic", "Basic (and reversed card)" , "Basic (type in the answer)", and "Cloze" note types that ship as defaults in the Anki App.
 
-#### Anki note type inferred from Markdown structure
+#### Anki note type is inferred from Markdown structure
 
 Since the number of supported note types is small, the type of Anki note to create from a given document can be inferred from a few simple rules about the structure of the Markdown.
 
@@ -65,7 +65,7 @@ I'm the back.
 
 That's it, no extra metadata or Anki-specific markup is required. You can add whatever additional Markdown syntax you'd like to style the note.
 
-The structural cues for the four supported note types are described [later in this document](#markdown-note-types).
+The structural cues for all four supported note types are described [later in this document](#markdown-note-types).
 
 #### Tags in frontmatter
 
@@ -105,6 +105,8 @@ This is the back of the card
 
 Doubling up the `---` identifies the note as being reversible (and will result in the generation of two cards in Anki).
 
+_Mnemonic: Twice the `---` for twice the cards._
+
 ```md
 Sometimes the answer is the question
 
@@ -115,11 +117,11 @@ Sometimes the answer is the question
 Sometimes the question is the answer
 ```
 
-_Mnemonic: Twice the `---` for twice the cards._
-
 ### Basic (type in the answer)
 
-If the last statement in the Markdown file is `_emphasized like this_`, it becomes the type-in-the-answer text in Anki:
+If the last statement in the Markdown file is `_emphasized like this_`, it becomes the type-in-the-answer text in Anki.
+
+_Mnemonic: The `_` syntax resembles a `_blank to be filled in_`._
 
 ```md
 Jazz isn't dead
@@ -127,13 +129,13 @@ Jazz isn't dead
 _It just smells funny_
 ```
 
-_Mnemonic: The `_` syntax resembles a `_blank to be filled in_`._
-
----
+***
 
 ### Cloze
 
 Text that is `~~struck through~~` with the [somewhat esoteric double-tilde syntax](https://github.github.com/gfm/#strikethrough-extension-) will be hidden in the resulting cloze Note:
+
+_Mnemonic: The `~~strike through~~` implies redaction._
 
 ```md
 All will be ~~revealed~~.
@@ -149,9 +151,10 @@ Multiple clozes are supported, which will create additional cards. You can add a
 Additional revelations on the back of the card.
 ```
 
-_Mnemonic: The `~~strike through~~` implies redaction._
-
 ## Getting started
+
+> \[!WARNING]
+> Yanki MD is still in develop. Please back up your Anki library if you intend to use it, and please expect changes to commands and the exported APIs until the 1.0.0 release.
 
 ### Dependencies
 
@@ -185,7 +188,7 @@ npm install --save-dev yanki-md
 
 #### Setup
 
-Create a folder of Markdown files that you'd like to use as Anki notes. (See the [section on Markdown notes](#markdown-note-types) for details on how to structure different note types.)
+Create a folder of Markdown files that you'd like to use as Anki notes. (See the [section on Markdown notes](#markdown-note-types) for details on how to structure your document to create different card types in Anki.)
 
 Launch the Anki desktop app. Ensure that the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on is installed and set up.
 
@@ -209,6 +212,8 @@ Delete the Markdown file locally (not in Anki!) and run `yanki ./your-deck-folde
 
 ### CLI
 
+All available commands and options for advanced use cases are described below, but shouldn't typically be necessary.
+
 <!-- cli-help -->
 
 #### Command: `yanki`
@@ -225,17 +230,17 @@ Usage:
 yanki [command]
 ```
 
-| Command  | Argument                  | Description                                                                                                           |
-| -------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `sync`   | `<directory>` `[options]` | Perform a one-way synchronization from a local directory of Markdown files to the Anki database. _(Default command.)_ |
-| `list`   |                           | List Yanki-created notes in the Anki database.                                                                        |
-| `delete` |                           | Delete Yanki-created notes in the Anki database. Careful.                                                             |
+| Command  | Argument                  | Description                                                                                                                                                                                                                              |
+| -------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sync`   | `<directory>` `[options]` | Perform a one-way synchronization from a local directory of Markdown files to the Anki database. Any Markdown files in subdirectories are included as well. _(Default command.)_                                                         |
+| `list`   |                           | Utility command to list Yanki-created notes in the Anki database.                                                                                                                                                                        |
+| `delete` |                           | Utility command to manually delete Yanki-created notes in the Anki database. This is for advanced use cases, usually the `sync` command takes care of deleting files from Anki Database once they're removed from the local file system. |
 
 _See the sections below for more information on each subcommand._
 
 #### Subcommand: `yanki sync`
 
-Perform a one-way synchronization from a local directory of Markdown files to the Anki database.
+Perform a one-way synchronization from a local directory of Markdown files to the Anki database. Any Markdown files in subdirectories are included as well.
 
 Usage:
 
@@ -249,7 +254,6 @@ yanki sync <directory> [options]
 
 | Option               | Alias | Description                                                                                                                     | Type      | Default                   |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
-| `--recursive`        | `-r`  | Include Markdown files in subdirectories of <directory>.                                                                        | `boolean` |                           |
 | `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                 | `boolean` | `false`                   |
 | `--namespace`        | `-n`  | Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.      | `string`  | "Yanki CLI"               |
 | `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information. | `string`  | `"http://127.0.0.1:8765"` |
@@ -261,7 +265,7 @@ yanki sync <directory> [options]
 
 #### Subcommand: `yanki list`
 
-List Yanki-created notes in the Anki database.
+Utility command to list Yanki-created notes in the Anki database.
 
 Usage:
 
@@ -280,7 +284,7 @@ yanki list
 
 #### Subcommand: `yanki delete`
 
-Delete Yanki-created notes in the Anki database. Careful.
+Utility command to manually delete Yanki-created notes in the Anki database. This is for advanced use cases, usually the `sync` command takes care of deleting files from Anki Database once they're removed from the local file system.
 
 Usage:
 
@@ -305,13 +309,44 @@ yanki delete
 
 #### API
 
+This package also exposes an API for integrating syncing capability programmatically in other context. (For example, in [yanki-obsidian](https://github.com/kitschpatrol/yanki-obsidian).)
+
+The following functions are exported:
+
+```ts
+syncFiles(allLocalFilePaths: string[], options?: Partial<SyncOptions>): Promise<SyncReport>
+
+getNoteFromMarkdown(markdown: string, namespace: string): Promise<YankiNote>
+
+syncNotes(allLocalNotes: YankiNote[], options?: Partial<SyncOptions>): Promise<SyncReport>
+
+listNotes(options?: ListOptions): Promise<ListReport>
+
+cleanNotes(options: CleanOptions): Promise<CleanReport>
+```
+
+See the source code for additional inline documentation.
+
 ## Background
 
 ### Motivation
 
 ### Implementation notes
 
-### Similar projects
+The excellent [unified](https://unifiedjs.com) / [remark](https://remark.js.org) / mdast libraries are used extensively to traverse and render the underlying Markdown ASTs.
+
+[Anki-Connect](https://foosoft.net/projects/anki-connect/) provides access to Anki's database.
+
+For type safety, access to Anki-Connect is managed through my wrapper library, [yanki-connect](https://github.com/kitschpatrol/yanki-connect).
+
+Behind the scenes, Yanki MD creates new note type models to match the four default Anki types. It keeps track of the notes it has ownership of via a hidden `YankiNamespace` field in each note.
+
+### Other projects
+
+- Luke Murray's [markdown-anki-decks](https://github.com/lukesmurray/markdown-anki-decks)
+- Oleksandr Shlinchak's [mdanki](https://github.com/ashlinchak/mdanki).
+- Ben Weinstein-Raun's [ankidown](https://github.com/ankicommunity/ankidown/)
+- Alex Biosa's [Markdown2Anki](https://github.com/Mochitto/Markdown2Anki)
 
 ## The future
 
