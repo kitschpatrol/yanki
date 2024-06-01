@@ -32,17 +32,36 @@ describeWithFileFixture(
 			const results: Record<string, string> = {}
 			for (const filePath of context.files) {
 				const markdown = await fs.readFile(filePath, 'utf8')
-				const { modelName } = await getNoteFromMarkdown(markdown, context.namespace)
+				const { modelName } = await getNoteFromMarkdown(markdown, {
+					namespace: context.namespace,
+				})
 				results[path.basename(filePath)] = modelName
 			}
 
 			expect(sortKeys(results, { deep: true })).toMatchInlineSnapshot(`
 				{
+				  "basic-and-reversed-card-with-no-back.md": "Yanki - Basic (and reversed card)",
+				  "basic-and-reversed-card-with-no-front.md": "Yanki - Basic (and reversed card)",
 				  "basic-and-reversed-card.md": "Yanki - Basic (and reversed card)",
-				  "basic-no-back.md": "Yanki - Basic",
+				  "basic-type-in-the-answer-with-empty-frontmatter.md": "Yanki - Basic (type in the answer)",
+				  "basic-type-in-the-answer-with-frontmatter.md": "Yanki - Basic (type in the answer)",
+				  "basic-type-in-the-answer-with-multiple-emphasis.md": "Yanki - Basic (type in the answer)",
 				  "basic-type-in-the-answer.md": "Yanki - Basic (type in the answer)",
+				  "basic-with-cloze-like-back.md": "Yanki - Basic",
+				  "basic-with-empty-everything.md": "Yanki - Basic",
+				  "basic-with-empty-frontmatter.md": "Yanki - Basic",
+				  "basic-with-no-back.md": "Yanki - Basic",
+				  "basic-with-no-front-empty-frontmatter.md": "Yanki - Basic",
+				  "basic-with-no-front.md": "Yanki - Basic",
+				  "basic-with-type-in-like-answer-and-no-back.md": "Yanki - Basic",
+				  "basic-with-type-in-like-answer-and-no-front.md": "Yanki - Basic",
+				  "basic-with-type-in-like-single-line-with-empty-frontmatter.md": "Yanki - Basic",
+				  "basic-with-type-in-like-single-line-with-frontmatter.md": "Yanki - Basic",
+				  "basic-with-type-in-like-single-line.md": "Yanki - Basic",
 				  "basic.md": "Yanki - Basic",
-				  "cloze-extra.md": "Yanki - Cloze",
+				  "cloze-with-extra-empty.md": "Yanki - Cloze",
+				  "cloze-with-extra.md": "Yanki - Cloze",
+				  "cloze-with-style.md": "Yanki - Cloze",
 				  "cloze.md": "Yanki - Cloze",
 				}
 			`)
@@ -54,7 +73,7 @@ describeWithFileFixture(
 	'basic synchronization',
 	{
 		assetPath: './test/assets/minimal-notes/',
-		cleanUpAnki: true,
+		cleanUpAnki: false,
 		namespace: 'Yanki Basic Sync Test',
 	},
 	(context) => {
@@ -83,7 +102,7 @@ describeWithFileFixture(
 		it('writes anki note IDs to the markdown files frontmatter', async () => {
 			for (const filePath of context.files) {
 				const markdown = await fs.readFile(filePath, 'utf8')
-				const note = await getNoteFromMarkdown(markdown, context.namespace)
+				const note = await getNoteFromMarkdown(markdown, { namespace: context.namespace })
 
 				expect(note.noteId).toBeDefined()
 				expect(note.noteId).toBeGreaterThan(0)
@@ -106,7 +125,7 @@ describeWithFileFixture(
 
 			for (const filePath of context.files) {
 				const markdown = await fs.readFile(filePath, 'utf8')
-				const note = await getNoteFromMarkdown(markdown, context.namespace)
+				const note = await getNoteFromMarkdown(markdown, { namespace: context.namespace })
 				expect(note.noteId).toBeDefined()
 				expect(note.noteId).toBeGreaterThan(0)
 
@@ -138,7 +157,10 @@ describeWithFileFixture(
 			// Log inline for legibility
 			const pathToDeckMap: Record<string, string | undefined> = {}
 			for (const synced of results.synced) {
-				const cleanPath = `/${path.basename(context.assetPath)}${synced.filePath.split(path.basename(context.assetPath), 2).pop() ?? ''}`
+				const cleanPath =
+					synced.filePath === undefined
+						? `(Note is in Anki, no file path.)`
+						: `/${path.basename(context.assetPath)}${synced.filePath.split(path.basename(context.assetPath), 2).pop() ?? ''}`
 				pathToDeckMap[cleanPath] = synced.note.deckName
 			}
 
