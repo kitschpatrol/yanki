@@ -37,19 +37,19 @@ This will turn the folder's Markdown files into Anki notes and send them up to t
 
 ## Features
 
-#### One Markdown file = one Anki note
+### One Markdown file = one Anki note
 
 Avoid the complexity of mixing and matching multi-note and single-note syntaxes. One local Markdown file always yields one Anki note.
 
-#### Folder hierarchy = Anki deck hierarchy
+### Folder hierarchy = Anki deck hierarchy
 
 Yanki MD uses the source Markdown file's parent directory name as the deck name. Complex folder hierarchies are also supported — Anki decks will be created and nested as needed to match the structure of the local file system.
 
-#### Leverage the default Anki note types
+### Leverage the default Anki note types
 
 Yanki _only_ supports turning Markdown into the "Basic", "Basic (and reversed card)" , "Basic (type in the answer)", and "Cloze" note types that ship as defaults in the Anki App.
 
-#### Anki note type is inferred from Markdown structure
+### Anki note type is inferred from Markdown structure
 
 Since the number of supported note types is small, the type of Anki note to create from a given document can be inferred from a few simple rules about the structure of the Markdown.
 
@@ -67,11 +67,11 @@ That's it, no extra metadata or Anki-specific markup is required. You can add wh
 
 The structural cues for all four supported note types are described [later in this document](#markdown-note-types).
 
-#### Tags in frontmatter
+### Tags in frontmatter
 
 Optionally, you can add a `tags` array to your Markdown file's frontmatter and have it automatically synchronized to the Anki database. Frontmatter is also used to store the Anki note's ID after an initial synchronization.
 
-#### Intelligent synchronization
+### Intelligent synchronization
 
 Your local Markdown files are the single point of truth for what will and up in Anki, but Yanki MD knows to leave your other Anki notes alone.
 
@@ -79,7 +79,7 @@ When you edit a local markdown note, Yanki MD makes every effort to update rathe
 
 But when you do want to delete something, it's as simple as deleting the local Markdown note from the file system and running `yanki sync` to remove it from the Anki database. Protections are in place to prevent deleting Anki notes that weren't initially created by Yanki MD.
 
-#### Fancy markdown
+### Fancy markdown
 
 Write your notes with [GitHub Flavored Markdown](https://github.github.com/gfm/), syntax-highlighted code blocks via [Shiki](https://shiki.style), [GitHub style Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts), [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md), and [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via [MathJax](https://www.mathjax.org).
 
@@ -125,7 +125,7 @@ Sometimes the question is the answer
 
 If the last statement in the Markdown file is `_emphasized like this_`, it becomes the type-in-the-answer text in Anki.
 
-_Mnemonic: The `_` syntax resembles a `_blank to be filled in_`._
+_Mnemonic: The `_`syntax resembles a`_blank to be filled in_`.\_
 
 ```md
 Jazz isn't dead
@@ -145,15 +145,17 @@ _Mnemonic: The `~~strike through~~` implies redaction._
 All will be ~~revealed~~.
 ```
 
-Multiple clozes are supported, which will create additional cards. You can add a `---` to include back-of-card information as well. Hints are also supported via a parenthetical.
+Multiple clozes are supported, which will create additional cards. You can add a `---` to include back-of-card information as well. Hints are also supported, and are indicated by giving the hint text `_emphasis_` at the end of the cloze strike-through:
 
 ```md
-~~All~~ will be ~~revealed(shown)~~.
+~~All~~ will be ~~revealed _here's a hint: "shown"_~~.
 
 ---
 
 Additional revelations on the back of the card.
 ```
+
+Clozing a block element is not currently supported.
 
 ## Getting started
 

@@ -32,7 +32,7 @@ export async function cleanNotes(options: CleanOptions): Promise<CleanReport> {
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, dryRun = true, namespace = yankiDefaultNamespace } = options ?? {}
+	const { ankiConnectOptions, dryRun = false, namespace = yankiDefaultNamespace } = options ?? {}
 
 	const client = new YankiConnect(ankiConnectOptions)
 

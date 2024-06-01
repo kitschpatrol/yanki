@@ -91,6 +91,19 @@ export async function addNote(
 					return addNote(client, note, dryRun)
 				}
 
+				// Do this in parse.ts instead to simplify future local / remote diffs
+				// Anki won't create notes if the front field is blank, but we want
+				// parity between markdown files and notes at all costs, so we'll put
+				// in a placeholder if the front is empty.
+				// if (error.message === 'cannot create note because it is empty') {
+				// 	return addNote(
+				// 		client,
+				// 		// eslint-disable-next-line @typescript-eslint/naming-convention
+				// 		{ ...note, fields: { ...note.fields, Front: '<p><em>(Empty)</em></p>' } },
+				// 		dryRun,
+				// 	)
+				// }
+
 				throw error
 			} else {
 				throw new TypeError('Unknown error')
@@ -134,8 +147,7 @@ export async function updateNote(
 
 	if (
 		!areTagsEqual(localNote.tags ?? [], remoteNote.tags ?? []) ||
-		localNote.fields.Back !== remoteNote.fields.Back ||
-		localNote.fields.Front !== remoteNote.fields.Front
+		!areFieldsEqual(localNote.fields, remoteNote.fields)
 	) {
 		if (!dryRun) {
 			await client.note.updateNote({
@@ -160,6 +172,34 @@ export async function updateNote(
 	}
 
 	return updated
+}
+
+/**
+ * Helper to compare field contents.
+ *
+ * @param localFields
+ * @param remoteFields
+ * @returns
+ */
+function areFieldsEqual(
+	localFields: Record<string, string>,
+	remoteFields: Record<string, string>,
+): boolean {
+	// Limit to front and back keys at the moment
+	const keys = ['Front', 'Back']
+
+	for (const key of keys) {
+		if (localFields[key] !== remoteFields[key]) {
+			console.log('Field mismatch----------------------------------')
+			console.log(localFields[key])
+			console.log(remoteFields[key])
+
+			// Could be due to html, so dig in further...
+			return false
+		}
+	}
+
+	return true
 }
 
 /**

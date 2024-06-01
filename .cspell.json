@@ -1,18 +1,24 @@
 {
 	"$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
-	"ignorePaths": [
-		"bin/"
-	],
+	"ignorePaths": ["bin/"],
 	"import": "@kitschpatrol/cspell-config",
 	"words": [
 		"Anki",
+		"ankidown",
+		"Biosa",
 		"cloze",
 		"clozes",
+		"clozing",
 		"duplicative",
 		"Mathjax",
 		"mdank",
+		"mdanki",
 		"obrigado",
+		"Oleksandr",
+		"Schwarz",
 		"shikijs",
+		"Shlinchak",
+		"Weinstein-Raun",
 		"Yanki",
 		"Yatskov"
 	]

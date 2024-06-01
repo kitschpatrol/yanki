@@ -27,16 +27,25 @@ export async function setNoteIdInFrontmatter(
 ): Promise<string> {
 	const [frontmatterStart, frontmatterEnd] = getFrontmatterRange(markdown)
 
+	console.log('----------------- setNoteIdInFrontmatter -----------------')
+	console.log(noteId)
+	console.log(frontmatterStart)
+	console.log(frontmatterEnd)
+
 	const lines = markdown.split('\n')
 
 	if (frontmatterStart === undefined || frontmatterEnd === undefined) {
-		// No nothing if no noteId is provided
+		// No frontmatter if no noteId is provided
 		if (noteId === undefined) {
 			return markdown
 		}
 
 		// Add frontmatter with noteID
 		const newFrontmatter = yamlStringify({ noteId }).trim()
+
+		console.log('----------------- newFrontmatter -----------------')
+		console.log(newFrontmatter)
+
 		return ['---', newFrontmatter, '---\n', ...lines].join('\n')
 	}
 
@@ -80,6 +89,11 @@ function getFrontmatterRange(
 	return [frontmatterStart, frontmatterEnd]
 }
 
+/**
+ * Currently used in testing only.
+ * @param markdown
+ * @returns All frontmatter in the markdown as an object, or an empty object if no frontmatter is found.
+ */
 export async function getAllFrontmatter(markdown: string): Promise<Record<string, unknown>> {
 	const [frontmatterStart, frontmatterEnd] = getFrontmatterRange(markdown)
 

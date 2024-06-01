@@ -65,7 +65,7 @@ export async function syncNotes(
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, defaultDeckName, dryRun, namespace, obsidianVault } = deepmerge(
+	const { ankiConnectOptions, defaultDeckName, dryRun, namespace } = deepmerge(
 		defaultSyncOptions,
 		options ?? {},
 	)

@@ -9,7 +9,6 @@ import type { Node, Parent, Root, Text } from 'mdast'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
 import remarkGithubBetaBlockquoteAdmonitions from 'remark-github-beta-blockquote-admonitions'
-import remarkHtml from 'remark-html'
 import remarkMath from 'remark-math'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
@@ -29,10 +28,13 @@ export async function getAstFromMarkdown(
 ): Promise<Root> {
 	const { obsidianVault } = options ?? {}
 
+	// Not seeing huge improvements from reusing this...
+	// And there's the issue of passing the options
 	const processor = unified()
 		.use(remarkParse)
-		.use(remarkMath)
+		.use(remarkFrontmatter, [{ anywhere: false, marker: '-', type: 'yaml' }])
 		.use(remarkGfm)
+		.use(remarkMath)
 		.use(remarkGithubBetaBlockquoteAdmonitions, {
 			titleTextMap(title) {
 				const bareTitle = title.slice(2, -1)
@@ -51,7 +53,6 @@ export async function getAstFromMarkdown(
 				}
 			},
 		})
-		.use(remarkFrontmatter, ['yaml'])
 		.use(remarkObsidianLink, {
 			toLink(wikiLink) {
 				return {
@@ -96,25 +97,29 @@ export function deleteFirstNodeOfType(tree: Root, nodeType: string): Root {
 export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 	let clozeIndex = 1
 
+	console.log('----------------- mdast -----------------')
+	console.log(`ast: ${JSON.stringify(ast, undefined, 2)}`)
+
 	visit(ast, 'delete', (node, index, parent) => {
 		if (parent === undefined || index === undefined) {
 			return CONTINUE
 		}
 
-		// Render the children of the delete node as a string...
-		const children = u('root', node.children)
-		const innerText = unified().use(remarkHtml).stringify(children).trim()
+		// If the last node is an emphasis node, we treat it as a hint
+		const lastNode = node.children.at(-1)
+		const clozeNodes =
+			node.children.length > 1 && lastNode?.type === 'emphasis'
+				? [
+						u('text', `{{c${clozeIndex}::`),
+						...node.children.slice(0, -1),
+						u('text', '::'),
+						...node.children.slice(-1),
+						u('text', '}}'),
+					]
+				: [u('text', `{{c${clozeIndex}::`), ...node.children, u('text', '}}')]
 
-		// Check for hints
-		const matches = /(.+)(\(.+\)*)/g.exec(innerText)
-		if (matches) {
-			const [, text, hint] = matches
-			const newNode = u('text', `{{c${clozeIndex}::${text.trim()}::${hint.trim()}}}`)
-			parent.children.splice(index, 1, newNode)
-		} else {
-			const newNode = u('text', `{{c${clozeIndex}::${innerText}}}`)
-			parent.children.splice(index, 1, newNode)
-		}
+		// Add the cloze markup around the kids
+		parent.children.splice(index, 1, ...clozeNodes)
 
 		clozeIndex += 1
 	})
@@ -220,14 +225,18 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 	if (probableType !== undefined) return probableType
 
 	// Type in the answer must not have a thematic break at all, and the emphasis
-	// must be the last node
+	// must be the last node, but it also must have more than one line
 
 	// Check last node type
-	visit(ast.children.at(-1) as Parent, (node) => {
-		if (node.type === 'emphasis') {
-			probableType = `Yanki - Basic (type in the answer)`
-		}
-	})
+	if ('children' in ast && ast.children.length >= 2) {
+		const lastNodeInDocument = ast.children.at(-1) as Parent
+		visit(lastNodeInDocument, (node) => {
+			if (node && node.type === 'emphasis') {
+				probableType = `Yanki - Basic (type in the answer)`
+			}
+		})
+	}
+
 	if (probableType !== undefined) return probableType
 
 	// If we didn't find a signs of cloze or type in the answer, it must be a
@@ -252,6 +261,7 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 	return probableType ?? `Yanki - Basic`
 }
 
+// TODO not great edge cases
 export function getFrontmatterFromTree(ast: Root): Frontmatter {
 	let rawYaml: string | undefined
 	visit(ast, 'yaml', (node) => {
@@ -259,11 +269,17 @@ export function getFrontmatterFromTree(ast: Root): Frontmatter {
 		return EXIT
 	})
 
-	if (rawYaml === undefined) {
+	if (!rawYaml) {
 		// Unremarkable
-		// console.warn('No frontmatter found')
+		console.warn('No frontmatter found')
 		return {}
 	}
 
-	return yamlParse(rawYaml) as Frontmatter
+	const parsedYaml = yamlParse(rawYaml) as Frontmatter
+
+	if (!parsedYaml) {
+		throw new Error('Could not parse frontmatter')
+	}
+
+	return parsedYaml
 }

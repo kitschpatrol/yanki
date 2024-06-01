@@ -1,1 +1,1 @@
-This card has a ~~cloze~~ or ~~two (here's a hint)~~.
+This card has a ~~cloze~~ or ~~two _here's a hint_~~.
