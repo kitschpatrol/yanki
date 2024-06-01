@@ -55,7 +55,8 @@ export function describeWithFileFixture(
 				initialCardCount = allNotes.length
 			}
 
-			console.log(`Setup before all tests: ${JSON.stringify(context, undefined, 2)}`)
+			// Setup logic before all tests
+			// console.log(`Setup before all tests: ${JSON.stringify(context, undefined, 2)}`)
 		})
 
 		// Call the tests function and pass the context to it
@@ -63,7 +64,7 @@ export function describeWithFileFixture(
 
 		afterAll(async () => {
 			// Teardown logic after all tests
-			console.log(`Teardown after all tests: ${JSON.stringify(context, undefined, 2)}`)
+			// console.log(`Teardown after all tests: ${JSON.stringify(context, undefined, 2)}`)
 
 			// Clean up anki
 			if (cleanUpAnki) {

@@ -27,11 +27,6 @@ export async function setNoteIdInFrontmatter(
 ): Promise<string> {
 	const [frontmatterStart, frontmatterEnd] = getFrontmatterRange(markdown)
 
-	console.log('----------------- setNoteIdInFrontmatter -----------------')
-	console.log(noteId)
-	console.log(frontmatterStart)
-	console.log(frontmatterEnd)
-
 	const lines = markdown.split('\n')
 
 	if (frontmatterStart === undefined || frontmatterEnd === undefined) {
@@ -42,9 +37,6 @@ export async function setNoteIdInFrontmatter(
 
 		// Add frontmatter with noteID
 		const newFrontmatter = yamlStringify({ noteId }).trim()
-
-		console.log('----------------- newFrontmatter -----------------')
-		console.log(newFrontmatter)
 
 		return ['---', newFrontmatter, '---\n', ...lines].join('\n')
 	}

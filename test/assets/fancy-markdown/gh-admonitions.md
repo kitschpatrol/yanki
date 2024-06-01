@@ -1,16 +1,16 @@
-> \[!CAUTION]
+> [!CAUTION]
 > Be careful
 
-> \[!IMPORTANT]
+> [!IMPORTANT]
 > So, so important
 
-> \[!NOTE]
+> [!NOTE]
 > How meta
 
 ---
 
-> \[!TIP]
+> [!TIP]
 > Nothing more
 
-> \[!WARNING]
+> [!WARNING]
 > I'm not liable

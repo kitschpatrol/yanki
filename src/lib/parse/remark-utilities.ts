@@ -13,7 +13,7 @@ import remarkMath from 'remark-math'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
-import { CONTINUE, EXIT, visit } from 'unist-util-visit'
+import { CONTINUE, EXIT, SKIP, visit } from 'unist-util-visit'
 import { parse as yamlParse } from 'yaml'
 
 // Processor shared across operations
@@ -96,9 +96,6 @@ export function deleteFirstNodeOfType(tree: Root, nodeType: string): Root {
 // For Cloze notes
 export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 	let clozeIndex = 1
-
-	console.log('----------------- mdast -----------------')
-	console.log(`ast: ${JSON.stringify(ast, undefined, 2)}`)
 
 	visit(ast, 'delete', (node, index, parent) => {
 		if (parent === undefined || index === undefined) {
@@ -227,33 +224,53 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 	// Type in the answer must not have a thematic break at all, and the emphasis
 	// must be the last node, but it also must have more than one line
 
-	// Check last node type
-	if ('children' in ast && ast.children.length >= 2) {
-		const lastNodeInDocument = ast.children.at(-1) as Parent
-		visit(lastNodeInDocument, (node) => {
-			if (node && node.type === 'emphasis') {
-				probableType = `Yanki - Basic (type in the answer)`
-			}
-		})
-	}
+	// Walk for stats
+	let thematicBreakCount = 0
+	let emphasisCount = 0
+	let contentElementCount = 0
+	visit(ast, (node, index, parent) => {
+		if (parent === null || index === null) {
+			return CONTINUE
+		}
 
-	if (probableType !== undefined) return probableType
+		if (node.type === 'thematicBreak') {
+			thematicBreakCount++
+			return EXIT
+		}
+
+		if (node.type === 'emphasis') {
+			emphasisCount++
+			return SKIP
+		}
+
+		if (node.type === 'yaml') {
+			return SKIP
+		}
+
+		if (isEmptyOrWhitespace(node)) {
+			return CONTINUE
+		}
+
+		contentElementCount++
+	})
+
+	if (thematicBreakCount === 0 && emphasisCount >= 1 && contentElementCount >= 3) {
+		return `Yanki - Basic (type in the answer)`
+	}
 
 	// If we didn't find a signs of cloze or type in the answer, it must be a
 	// basic card
-	if (probableType === undefined) {
-		let lastNode: Node | undefined
-		visit(ast, 'thematicBreak', (node, index, parent) => {
-			if (parent === null || index === null) return CONTINUE
+	let lastNode: Node | undefined
+	visit(ast, 'thematicBreak', (node, index, parent) => {
+		if (parent === null || index === null) return CONTINUE
 
-			probableType =
-				lastNode?.type === 'thematicBreak' && node.type === 'thematicBreak'
-					? `Yanki - Basic (and reversed card)`
-					: `Yanki - Basic`
+		probableType =
+			lastNode?.type === 'thematicBreak' && node.type === 'thematicBreak'
+				? `Yanki - Basic (and reversed card)`
+				: `Yanki - Basic`
 
-			lastNode = node
-		})
-	}
+		lastNode = node
+	})
 
 	// Not noteworthy... if (probableType === undefined) { Console.warn('Could not
 	// determine note type. Defaulting to basic.') }
@@ -282,4 +299,17 @@ export function getFrontmatterFromTree(ast: Root): Frontmatter {
 	}
 
 	return parsedYaml
+}
+
+// Utility function to check if a node is empty, whitespace, or a break
+function isEmptyOrWhitespace(node: Node): boolean {
+	if (node.type === 'break') {
+		return true
+	}
+
+	if (node.type === 'text' && 'value' in node && typeof node.value === 'string') {
+		return node.value.trim().length > 0
+	}
+
+	return false
 }

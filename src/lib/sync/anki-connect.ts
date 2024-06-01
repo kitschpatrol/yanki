@@ -190,11 +190,6 @@ function areFieldsEqual(
 
 	for (const key of keys) {
 		if (localFields[key] !== remoteFields[key]) {
-			console.log('Field mismatch----------------------------------')
-			console.log(localFields[key])
-			console.log(remoteFields[key])
-
-			// Could be due to html, so dig in further...
 			return false
 		}
 	}
