@@ -3,6 +3,7 @@
  */
 
 import { type YankiNote } from '../model/yanki-note'
+import { mdastToHtml } from './rehype-utilities'
 import {
 	deleteFirstNodeOfType,
 	getAstFromMarkdown,
@@ -11,9 +12,7 @@ import {
 	replaceDeleteNodesWithClozeMarkup,
 	splitTreeAtEmphasis,
 	splitTreeAtThematicBreak,
-} from './ast-utilities'
-import remarkHtml from 'remark-html'
-import { unified } from 'unified'
+} from './remark-utilities'
 
 export async function getNoteFromMarkdown(markdown: string, namespace: string): Promise<YankiNote> {
 	let ast = await getAstFromMarkdown(markdown)
@@ -30,25 +29,25 @@ export async function getNoteFromMarkdown(markdown: string, namespace: string): 
 		case `Yanki - Basic`:
 		case `Yanki - Basic (and reversed card)`: {
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
-			front = unified().use(remarkHtml).stringify(firstPart)
+			front = await mdastToHtml(firstPart)
 			back =
 				secondPart === undefined
 					? '<p><em>Intentionally blank.</em></p>\n'
-					: unified().use(remarkHtml).stringify(secondPart)
+					: await mdastToHtml(secondPart)
 			break
 		}
 
 		case `Yanki - Cloze`: {
 			ast = replaceDeleteNodesWithClozeMarkup(ast)
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
-			front = unified().use(remarkHtml).stringify(firstPart)
-			back = secondPart === undefined ? '' : unified().use(remarkHtml).stringify(secondPart)
+			front = await mdastToHtml(firstPart)
+			back = secondPart === undefined ? '' : await mdastToHtml(secondPart)
 			break
 		}
 
 		case `Yanki - Basic (type in the answer)`: {
 			const [firstPart, secondPart] = splitTreeAtEmphasis(ast)
-			front = unified().use(remarkHtml).stringify(firstPart)
+			front = await mdastToHtml(firstPart)
 			back = secondPart
 			break
 		}

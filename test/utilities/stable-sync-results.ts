@@ -8,7 +8,7 @@ type SyncResults = UnwrapPromise<ReturnType<typeof syncFiles>>
 export function stableResults(results: SyncResults): SyncResults {
 	results.duration = 0
 	results.synced = results.synced.map((note) => {
-		note.filePath = path.basename(note.filePath)
+		note.filePath = note.filePath === undefined ? undefined : path.basename(note.filePath)
 		note.note.noteId = 0
 		return note
 	})

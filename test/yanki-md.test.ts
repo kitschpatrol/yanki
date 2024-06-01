@@ -160,3 +160,19 @@ describeWithFileFixture(
 		})
 	},
 )
+
+describeWithFileFixture(
+	'syntax highlighting',
+	{
+		assetPath: './test/assets/syntax-highlighting/',
+		cleanUpAnki: false,
+		namespace: 'Yanki Complex Tree Test',
+	},
+	(context) => {
+		it('highlight typescript code blocks', async () => {
+			const results = await syncFiles(context.files, { namespace: context.namespace })
+
+			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
+)
