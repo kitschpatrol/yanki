@@ -79,6 +79,10 @@ When you edit a local markdown note, Yanki MD makes every effort to update rathe
 
 But when you do want to delete something, it's as simple as deleting the local Markdown note from the file system and running `yanki sync` to remove it from the Anki database. Protections are in place to prevent deleting Anki notes that weren't initially created by Yanki MD.
 
+#### Fancy markdown
+
+Write your notes with [GitHub Flavored Markdown](https://github.github.com/gfm/), syntax-highlighted code blocks via [Shiki](https://shiki.style), [GitHub style Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts), [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md), and [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via [MathJax](https://www.mathjax.org).
+
 ## Markdown note types
 
 Yanki MD automatically infers the _type_ of Note you'd like to create in Anki based on the presence or absence of certain element in your Markdown files.
@@ -129,7 +133,7 @@ Jazz isn't dead
 _It just smells funny_
 ```
 
-***
+---
 
 ### Cloze
 

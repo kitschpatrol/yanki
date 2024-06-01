@@ -297,6 +297,111 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
 }
 `;
 
+exports[`fancy markdown > handles fancy markdown 1`] = `
+{
+  "deletedDecks": [
+    "syntax-highlighting",
+  ],
+  "dryRun": false,
+  "duration": 0,
+  "namespace": "Yanki Complex Tree Test",
+  "synced": [
+    {
+      "action": "deleted",
+      "filePath": undefined,
+      "note": {
+        "cards": [
+          1717220425064,
+        ],
+        "deckName": "syntax-highlighting",
+        "fields": {
+          "Back": "<p>How about a bit more!</p>
+<pre class="shiki shiki-themes vitesse-light vitesse-dark" style="background-color:#ffffff;--shiki-dark-bg:#121212;color:#393a34;--shiki-dark:#dbd7caee" tabindex="0"><code><span class="line"><span style="color:#1E754F;--shiki-dark:#4D9375">export</span><span style="color:#AB5959;--shiki-dark:#CB7676"> function</span><span style="color:#59873A;--shiki-dark:#80A665"> deleteFirstNodeOfType</span><span style="color:#999999;--shiki-dark:#666666">(</span><span style="color:#B07D48;--shiki-dark:#BD976A">tree</span><span style="color:#999999;--shiki-dark:#666666">: </span><span style="color:#2E8F82;--shiki-dark:#5DA994">Root</span><span style="color:#999999;--shiki-dark:#666666">,</span><span style="color:#B07D48;--shiki-dark:#BD976A"> nodeType</span><span style="color:#999999;--shiki-dark:#666666">: </span><span style="color:#2E8F82;--shiki-dark:#5DA994">string</span><span style="color:#999999;--shiki-dark:#666666">):</span><span style="color:#2E8F82;--shiki-dark:#5DA994"> Root</span><span style="color:#999999;--shiki-dark:#666666"> {</span></span>
+<span class="line"><span style="color:#59873A;--shiki-dark:#80A665">  visit</span><span style="color:#999999;--shiki-dark:#666666">(</span><span style="color:#B07D48;--shiki-dark:#BD976A">tree</span><span style="color:#999999;--shiki-dark:#666666">,</span><span style="color:#B07D48;--shiki-dark:#BD976A"> nodeType</span><span style="color:#999999;--shiki-dark:#666666">,</span><span style="color:#999999;--shiki-dark:#666666"> (</span><span style="color:#B07D48;--shiki-dark:#BD976A">_</span><span style="color:#999999;--shiki-dark:#666666">,</span><span style="color:#B07D48;--shiki-dark:#BD976A"> index</span><span style="color:#999999;--shiki-dark:#666666">,</span><span style="color:#B07D48;--shiki-dark:#BD976A"> parent</span><span style="color:#999999;--shiki-dark:#666666">)</span><span style="color:#999999;--shiki-dark:#666666"> =></span><span style="color:#999999;--shiki-dark:#666666"> {</span></span>
+<span class="line"><span style="color:#1E754F;--shiki-dark:#4D9375">    if</span><span style="color:#999999;--shiki-dark:#666666"> (</span><span style="color:#B07D48;--shiki-dark:#BD976A">parent</span><span style="color:#AB5959;--shiki-dark:#CB7676"> &#x26;&#x26;</span><span style="color:#B07D48;--shiki-dark:#BD976A"> index</span><span style="color:#AB5959;--shiki-dark:#CB7676"> !==</span><span style="color:#AB5959;--shiki-dark:#CB7676"> undefined</span><span style="color:#999999;--shiki-dark:#666666">)</span><span style="color:#999999;--shiki-dark:#666666"> {</span></span>
+<span class="line"><span style="color:#B07D48;--shiki-dark:#BD976A">      parent</span><span style="color:#999999;--shiki-dark:#666666">.</span><span style="color:#B07D48;--shiki-dark:#BD976A">children</span><span style="color:#999999;--shiki-dark:#666666">.</span><span style="color:#59873A;--shiki-dark:#80A665">splice</span><span style="color:#999999;--shiki-dark:#666666">(</span><span style="color:#B07D48;--shiki-dark:#BD976A">index</span><span style="color:#999999;--shiki-dark:#666666">,</span><span style="color:#2F798A;--shiki-dark:#4C9A91"> 1</span><span style="color:#999999;--shiki-dark:#666666">)</span></span>
+<span class="line"><span style="color:#1E754F;--shiki-dark:#4D9375">      return</span><span style="color:#B07D48;--shiki-dark:#BD976A"> EXIT</span></span>
+<span class="line"><span style="color:#999999;--shiki-dark:#666666">    }</span></span>
+<span class="line"><span style="color:#999999;--shiki-dark:#666666">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#1E754F;--shiki-dark:#4D9375">  return</span><span style="color:#B07D48;--shiki-dark:#BD976A"> tree</span></span>
+<span class="line"><span style="color:#999999;--shiki-dark:#666666">}</span></span>
+<span class="line"></span></code></pre>",
+          "Front": "<p>The highlight of my day:</p>
+<pre class="shiki shiki-themes vitesse-light vitesse-dark" style="background-color:#ffffff;--shiki-dark-bg:#121212;color:#393a34;--shiki-dark:#dbd7caee" tabindex="0"><code><span class="line"><span style="color:#1E754F;--shiki-dark:#4D9375">export</span><span style="color:#AB5959;--shiki-dark:#CB7676"> type</span><span style="color:#2E8F82;--shiki-dark:#5DA994"> YankiNote</span><span style="color:#999999;--shiki-dark:#666666"> =</span><span style="color:#2E8F82;--shiki-dark:#5DA994"> Simplify</span><span style="color:#999999;--shiki-dark:#666666">&#x3C;</span></span>
+<span class="line"><span style="color:#999999;--shiki-dark:#666666">  {</span></span>
+<span class="line"><span style="color:#B07D48;--shiki-dark:#BD976A">    cards</span><span style="color:#AB5959;--shiki-dark:#CB7676">?</span><span style="color:#999999;--shiki-dark:#666666">: </span><span style="color:#2E8F82;--shiki-dark:#5DA994">number</span><span style="color:#999999;--shiki-dark:#666666">[]</span></span>
+<span class="line"><span style="color:#B07D48;--shiki-dark:#BD976A">    fields</span><span style="color:#999999;--shiki-dark:#666666">: { </span><span style="color:#B07D48;--shiki-dark:#BD976A">Back</span><span style="color:#999999;--shiki-dark:#666666">: </span><span style="color:#2E8F82;--shiki-dark:#5DA994">string</span><span style="color:#999999;--shiki-dark:#666666">; </span><span style="color:#B07D48;--shiki-dark:#BD976A">Front</span><span style="color:#999999;--shiki-dark:#666666">: </span><span style="color:#2E8F82;--shiki-dark:#5DA994">string</span><span style="color:#999999;--shiki-dark:#666666">; </span><span style="color:#B07D48;--shiki-dark:#BD976A">YankiNamespace</span><span style="color:#999999;--shiki-dark:#666666">: </span><span style="color:#2E8F82;--shiki-dark:#5DA994">string</span><span style="color:#999999;--shiki-dark:#666666"> }</span></span>
+<span class="line"><span style="color:#B07D48;--shiki-dark:#BD976A">    modelName</span><span style="color:#999999;--shiki-dark:#666666">: </span><span style="color:#2E8F82;--shiki-dark:#5DA994">YankiModelName</span></span>
+<span class="line"><span style="color:#B07D48;--shiki-dark:#BD976A">    noteId</span><span style="color:#999999;--shiki-dark:#666666">: </span><span style="color:#2E8F82;--shiki-dark:#5DA994">number</span><span style="color:#999999;--shiki-dark:#666666"> | </span><span style="color:#AB5959;--shiki-dark:#CB7676">undefined</span></span>
+<span class="line"><span style="color:#999999;--shiki-dark:#666666">  }</span><span style="color:#999999;--shiki-dark:#666666"> &#x26;</span><span style="color:#2E8F82;--shiki-dark:#5DA994"> Omit</span><span style="color:#999999;--shiki-dark:#666666">&#x3C;</span><span style="color:#2E8F82;--shiki-dark:#5DA994">YankiParamsForAction</span><span style="color:#999999;--shiki-dark:#666666">&#x3C;</span><span style="color:#B5695999;--shiki-dark:#C98A7D99">'</span><span style="color:#B56959;--shiki-dark:#C98A7D">addNote</span><span style="color:#B5695999;--shiki-dark:#C98A7D99">'</span><span style="color:#999999;--shiki-dark:#666666">>[</span><span style="color:#B5695999;--shiki-dark:#C98A7D99">'</span><span style="color:#B56959;--shiki-dark:#C98A7D">note</span><span style="color:#B5695999;--shiki-dark:#C98A7D99">'</span><span style="color:#999999;--shiki-dark:#666666">],</span><span style="color:#B5695999;--shiki-dark:#C98A7D99"> '</span><span style="color:#B56959;--shiki-dark:#C98A7D">fields</span><span style="color:#B5695999;--shiki-dark:#C98A7D99">'</span><span style="color:#999999;--shiki-dark:#666666"> |</span><span style="color:#B5695999;--shiki-dark:#C98A7D99"> '</span><span style="color:#B56959;--shiki-dark:#C98A7D">modelName</span><span style="color:#B5695999;--shiki-dark:#C98A7D99">'</span><span style="color:#999999;--shiki-dark:#666666"> |</span><span style="color:#B5695999;--shiki-dark:#C98A7D99"> '</span><span style="color:#B56959;--shiki-dark:#C98A7D">options</span><span style="color:#B5695999;--shiki-dark:#C98A7D99">'</span><span style="color:#999999;--shiki-dark:#666666">></span></span>
+<span class="line"><span style="color:#999999;--shiki-dark:#666666">></span></span>
+<span class="line"></span></code></pre>",
+          "YankiNamespace": "Yanki Complex Tree Test",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "syntax-highlighting.md",
+      "note": {
+        "deckName": "fancy-markdown",
+        "fields": {
+          "Back": "<p>How about a bit more!</p>
+<pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> function</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> deleteFirstNodeOfType</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">tree</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Root</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">nodeType</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Root</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">  visit</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(tree, nodeType, (</span><span style="color:#E36209;--shiki-dark:#FFAB70">_</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">index</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">=></span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (parent </span><span style="color:#D73A49;--shiki-dark:#F97583">&#x26;&#x26;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> index </span><span style="color:#D73A49;--shiki-dark:#F97583">!==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      parent.children.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">splice</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(index, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">      return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> EXIT</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tree</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span></code></pre>",
+          "Front": "<p>The highlight of my day:</p>
+<pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> YankiNote</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Simplify</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&#x3C;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  {</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    cards</span><span style="color:#D73A49;--shiki-dark:#F97583">?:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> number</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[]</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    fields</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> { </span><span style="color:#E36209;--shiki-dark:#FFAB70">Back</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; </span><span style="color:#E36209;--shiki-dark:#FFAB70">Front</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; </span><span style="color:#E36209;--shiki-dark:#FFAB70">YankiNamespace</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    modelName</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> YankiModelName</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    noteId</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> number</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  } </span><span style="color:#D73A49;--shiki-dark:#F97583">&#x26;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Omit</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&#x3C;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">YankiParamsForAction</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&#x3C;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'addNote'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">>[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'note'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">], </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'fields'</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'modelName'</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'options'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">></span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">></span></span>
+<span class="line"></span></code></pre>",
+          "YankiNamespace": "Yanki Complex Tree Test",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "wiki-links.md",
+      "note": {
+        "deckName": "fancy-markdown",
+        "fields": {
+          "Back": "<p><em>Intentionally blank.</em></p>
+",
+          "Front": "<p>Let's link to Obsidian:</p>
+<p><a href="Technology%20%E2%9A%99%EF%B8%8F/Languages/TypeScript/Tackling%20TypeScript%20Book%20Notes" title="Tackling TypeScript Book Notes">Tackling TypeScript Book Notes</a></p>
+<p><a href="Technology%20%E2%9A%99%EF%B8%8F/Languages/TypeScript/TypeScript%20Cheat%20Sheets%20Notes" title="TypeScript Cheat Sheets Notes">TypeScript Cheat Sheets Notes</a></p>
+<p><a href="Technology%20%E2%9A%99%EF%B8%8F/Languages/TypeScript/TypeScript%20Cheat%20Sheets%20Notes" title="Technology ⚙️/Languages/TypeScript/TypeScript Cheat Sheets Notes">Technology ⚙️/Languages/TypeScript/TypeScript Cheat Sheets Notes</a></p>",
+          "YankiNamespace": "Yanki Complex Tree Test",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+  ],
+}
+`;
+
 exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatter 1`] = `
 {
   "deletedDecks": [],

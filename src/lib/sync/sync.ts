@@ -29,6 +29,8 @@ export type SyncOptions = {
 	defaultDeckName: string
 	dryRun: boolean
 	namespace: string
+	/** Ensures that wiki-style links work correctly */
+	obsidianVault: string | undefined
 }
 
 const defaultSyncOptions: SyncOptions = {
@@ -38,6 +40,7 @@ const defaultSyncOptions: SyncOptions = {
 	defaultDeckName: 'Yanki',
 	dryRun: false,
 	namespace: yankiDefaultNamespace,
+	obsidianVault: undefined,
 }
 
 export type SyncReport = {
@@ -62,7 +65,7 @@ export async function syncNotes(
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, defaultDeckName, dryRun, namespace } = deepmerge(
+	const { ankiConnectOptions, defaultDeckName, dryRun, namespace, obsidianVault } = deepmerge(
 		defaultSyncOptions,
 		options ?? {},
 	)
@@ -205,7 +208,7 @@ export async function syncFiles(
 	const startTime = performance.now()
 
 	const resolvedOptions = deepmerge(defaultSyncOptions, options ?? {})
-	const { namespace } = resolvedOptions
+	const { namespace, obsidianVault } = resolvedOptions
 
 	const allLocalMarkdown: string[] = []
 	const allLocalNotes: YankiNote[] = []
@@ -216,7 +219,7 @@ export async function syncFiles(
 	for (const [index, filePath] of allLocalFilePaths.entries()) {
 		const markdown = await fs.readFile(filePath, 'utf8')
 		allLocalMarkdown.push(markdown)
-		const note = await getNoteFromMarkdown(markdown, namespace)
+		const note = await getNoteFromMarkdown(markdown, { namespace, obsidianVault })
 		if (note.deckName === '') {
 			note.deckName = deckNamesFromFilePaths[index]
 		}

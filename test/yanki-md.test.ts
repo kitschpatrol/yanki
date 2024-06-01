@@ -162,14 +162,14 @@ describeWithFileFixture(
 )
 
 describeWithFileFixture(
-	'syntax highlighting',
+	'fancy markdown',
 	{
-		assetPath: './test/assets/syntax-highlighting/',
+		assetPath: './test/assets/fancy-markdown/',
 		cleanUpAnki: false,
 		namespace: 'Yanki Complex Tree Test',
 	},
 	(context) => {
-		it('highlight typescript code blocks', async () => {
+		it('handles fancy markdown', async () => {
 			const results = await syncFiles(context.files, { namespace: context.namespace })
 
 			expect(stableResults(results)).toMatchSnapshot()

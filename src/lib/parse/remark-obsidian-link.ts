@@ -34,9 +34,6 @@ type WikiLinkNode = {
 	value: string
 } & Parent
 
-/**
- * A remark plugin that expands HTML comments in Markdown files.
- */
 const remarkObsidianLink: Plugin<[Options?], Root> = function (options?: Options) {
 	const toLink = options?.toLink ?? (({ alias, value }) => alias ?? value)
 

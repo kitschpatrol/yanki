@@ -5,6 +5,7 @@
 import { type YankiNote } from '../model/yanki-note'
 import { mdastToHtml } from './rehype-utilities'
 import {
+	type AstFromMarkdownOptions,
 	deleteFirstNodeOfType,
 	getAstFromMarkdown,
 	getFrontmatterFromTree,
@@ -14,8 +15,19 @@ import {
 	splitTreeAtThematicBreak,
 } from './remark-utilities'
 
-export async function getNoteFromMarkdown(markdown: string, namespace: string): Promise<YankiNote> {
-	let ast = await getAstFromMarkdown(markdown)
+export type NoteFromMarkdownOptions = {
+	namespace: string
+} & AstFromMarkdownOptions
+
+export async function getNoteFromMarkdown(
+	markdown: string,
+	options: NoteFromMarkdownOptions,
+): Promise<YankiNote> {
+	const { namespace, obsidianVault } = options
+
+	let ast = await getAstFromMarkdown(markdown, {
+		obsidianVault,
+	})
 	const modelName = getYankiModelNameFromTree(ast)
 	const frontmatter = getFrontmatterFromTree(ast)
 

@@ -8,7 +8,9 @@ import remarkObsidianLink from './remark-obsidian-link'
 import type { Node, Parent, Root, Text } from 'mdast'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
+import remarkGithubBetaBlockquoteAdmonitions from 'remark-github-beta-blockquote-admonitions'
 import remarkHtml from 'remark-html'
+import remarkMath from 'remark-math'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
@@ -16,21 +18,52 @@ import { CONTINUE, EXIT, visit } from 'unist-util-visit'
 import { parse as yamlParse } from 'yaml'
 
 // Processor shared across operations
-const processor = unified()
-	.use(remarkParse)
-	.use(remarkGfm)
-	.use(remarkFrontmatter, ['yaml'])
-	.use(remarkObsidianLink, {
-		toLink(wikiLink) {
-			return {
-				title: wikiLink.alias ?? wikiLink.value,
-				uri: wikiLink.value,
-				value: wikiLink.alias ?? wikiLink.value,
-			}
-		},
-	})
 
-export async function getAstFromMarkdown(markdown: string): Promise<Root> {
+export type AstFromMarkdownOptions = {
+	obsidianVault?: string
+}
+
+export async function getAstFromMarkdown(
+	markdown: string,
+	options?: AstFromMarkdownOptions,
+): Promise<Root> {
+	const { obsidianVault } = options ?? {}
+
+	const processor = unified()
+		.use(remarkParse)
+		.use(remarkMath)
+		.use(remarkGfm)
+		.use(remarkGithubBetaBlockquoteAdmonitions, {
+			titleTextMap(title) {
+				const bareTitle = title.slice(2, -1)
+				const titleMap = {
+					caution: '⚠️ Caution:',
+					important: '❗ Important:',
+					info: 'ℹ️ Info":',
+					note: '✏️ Note:',
+					tip: '💡 Tip:',
+					warning: '⚠️ Warning:',
+				}
+
+				return {
+					checkedTitle: bareTitle,
+					displayTitle: titleMap[bareTitle.toLowerCase() as keyof typeof titleMap] ?? bareTitle,
+				}
+			},
+		})
+		.use(remarkFrontmatter, ['yaml'])
+		.use(remarkObsidianLink, {
+			toLink(wikiLink) {
+				return {
+					title: wikiLink.alias ?? wikiLink.value,
+					uri: obsidianVault
+						? `obsidian://open?vault=Vault&file=${encodeURIComponent(wikiLink.value)}.md`
+						: wikiLink.value,
+					value: wikiLink.alias ?? wikiLink.value,
+				}
+			},
+		})
+
 	return processor.run(processor.parse(markdown))
 }
 

@@ -4,7 +4,8 @@
 
 import rehypeShiki from '@shikijs/rehype'
 import type { Root } from 'mdast'
-import rehypeSanitize from 'rehype-sanitize'
+import rehypeMathjax from 'rehype-mathjax'
+// Import rehypeSanitize from 'rehype-sanitize'
 import rehypeStringify from 'rehype-stringify'
 import remarkRehype from 'remark-rehype'
 import { unified } from 'unified'
@@ -12,7 +13,8 @@ import { unified } from 'unified'
 export async function mdastToHtml(mdast: Root): Promise<string> {
 	const processor = unified()
 		.use(remarkRehype, { allowDangerousHtml: true })
-		.use(rehypeSanitize)
+		.use(rehypeMathjax)
+		// .use(rehypeSanitize) // Messes up obsidian links
 		.use(rehypeShiki, {
 			// See https://shiki.style/packages/rehype
 			themes: {
@@ -22,7 +24,7 @@ export async function mdastToHtml(mdast: Root): Promise<string> {
 		})
 		.use(rehypeStringify, { allowDangerousHtml: true })
 
-	const file = await processor.run(mdast)
-	const result = processor.stringify(file)
+	const hast = await processor.run(mdast)
+	const result = processor.stringify(hast)
 	return result
 }
