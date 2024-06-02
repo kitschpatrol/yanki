@@ -16,7 +16,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
-import { YankiConnect, type YankiConnectOptions } from 'yanki-connect'
+import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
 
 export type SyncedNote = {
 	action: 'created' | 'deleted' | 'recreated' | 'unchanged' | 'updated'
@@ -33,10 +33,8 @@ export type SyncOptions = {
 	obsidianVault: string | undefined
 }
 
-const defaultSyncOptions: SyncOptions = {
-	ankiConnectOptions: {
-		autoLaunch: true,
-	},
+export const defaultSyncOptions: SyncOptions = {
+	ankiConnectOptions: defaultYankiConnectOptions,
 	defaultDeckName: 'Yanki',
 	dryRun: false,
 	namespace: yankiDefaultNamespace,

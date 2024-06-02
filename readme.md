@@ -142,7 +142,7 @@ Jazz isn't dead
 _It just smells funny_
 ```
 
-***
+---
 
 ### Cloze
 
@@ -362,6 +362,7 @@ Behind the scenes, Yanki MD creates new note type models to match the four defau
 - Oleksandr Shlinchak's [mdanki](https://github.com/ashlinchak/mdanki).
 - Ben Weinstein-Raun's [ankidown](https://github.com/ankicommunity/ankidown/)
 - Alex Biosa's [Markdown2Anki](https://github.com/Mochitto/Markdown2Anki)
+- Pradhyo Bijja's [anki-markdown-notes](https://github.com/Pradhyo/anki-markdown-notes)
 
 ## The future
 

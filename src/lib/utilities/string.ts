@@ -21,3 +21,7 @@ export function urlToHostAndPort(url: string): { host: string; port: number } {
 		port: Number.parseInt(urlObject.port, 10),
 	}
 }
+
+export function hostAndPortToUrl(host: string, port: number): string {
+	return `${host}:${port}`
+}

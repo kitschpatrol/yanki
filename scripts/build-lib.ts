@@ -5,7 +5,7 @@ await esbuild.build({
 	entryPoints: ['src/lib/index.ts'],
 	format: 'esm',
 	minify: false,
-	outfile: 'dist/lib/index.js',
+	outfile: 'dist/index.js',
 	platform: 'node',
 	target: 'node18',
 })
