@@ -128,11 +128,11 @@ Sometimes the answer is the question
 Sometimes the question is the answer
 ```
 
+<em>Mnemonic: The syntax resembles a `_blank to be filled in_`.</em>
+
 ### Basic (type in the answer)
 
 If the last statement in the Markdown file is `_emphasized like this_`, it becomes the type-in-the-answer text in Anki.
-
-_Mnemonic: The `_`syntax resembles a`_blank to be filled in_`.\_
 
 ```md
 Jazz isn't dead
