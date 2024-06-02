@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { cleanNotes, formatCleanReport } from '../lib/sync/clean'
 import { formatListReport, listNotes } from '../lib/sync/list'
 import { formatSyncReport, syncFiles } from '../lib/sync/sync'

@@ -5,8 +5,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Document</title>
 		<script type="module">
-			console.log('----------------------------------')
-
 			import {
 				getDeckNamesFromFilePaths,
 				getNoteFromMarkdown,
@@ -14,12 +12,8 @@
 				syncNotes,
 			} from './dist/lib/index'
 
-			console.log('Hi')
+			console.log('----------------- List Notes -----------------')
 			const notes = await listNotes({ namespace: '*' })
-
-			// // Console.log('----------------------------------')
-			// // console.log('----------------------------------')
-			// // console.log('----------------------------------')
 			console.log(notes)
 
 			const paths = [
@@ -48,21 +42,19 @@
 				'../assets/minimal-notes/cloze.md',
 			]
 
+			console.log('----------------- List Decks -----------------')
 			const deckNames = getDeckNamesFromFilePaths(paths)
-
 			console.log(deckNames)
 
-			// //
-			// const note1 = await getNoteFromMarkdown('**The Cauchy-Schwarz Inequality**\n---\nThe back!', {
-			// 	namespace: 'Vite Test',
-			// })
+			console.log('----------------- Parse Note -----------------')
+			const note1 = await getNoteFromMarkdown('**The Cauchy-Schwarz Inequality**\n---\nThe back!', {
+				namespace: 'Vite Test',
+			})
+			console.log(note1)
 
-			// console.log(note1)
-
-			// const report = await syncNotes([note1], { namespace: 'Vite Test' })
-
-			// // Console.log('----------------------------------')
-			// console.log(report)
+			console.log('----------------- Sync Note -----------------')
+			const report = await syncNotes([note1], { namespace: 'Vite Test' })
+			console.log(report)
 		</script>
 	</head>
 	<body></body>

@@ -1,4 +1,5 @@
-import { cleanNotes, syncFiles } from './src/lib'
+import { syncFiles } from './dist/lib'
+
 // Import { mdastToHtml } from './src/lib/parse/rehype-utilities'
 // import { getAstFromMarkdown } from './src/lib/parse/remark-utilities'
 // import fs from 'node:fs/promises'
@@ -29,19 +30,19 @@ const paths = [
 	'test/assets/minimal-notes/cloze.md',
 ]
 
-const cleanResults = await cleanNotes({
-	dryRun: false,
-	namespace: '*',
-})
+// Const cleanResults = await cleanNotes({
+// 	dryRun: false,
+// 	namespace: '*',
+// })
 
-console.log('Cleaned ----------------------------------')
-console.log(cleanResults.deleted.length)
+// console.log('Cleaned ----------------------------------')
+// console.log(cleanResults.deleted.length)
 
 const results = await syncFiles(paths, {
 	namespace: 'YankiTestFile',
 })
 
-console.log('----------------------------------')
+// Console.log('----------------------------------')
 console.log('----------------------------------')
 console.log(JSON.stringify(results, undefined, 2))
 
