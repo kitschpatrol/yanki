@@ -12,31 +12,12 @@
 		"source.fixAll": "explicit"
 	},
 	"eslint.enable": true,
-	"eslint.validate": [
-		"astro",
-		"html",
-		"javascript",
-		"javascriptreact",
-		"markdown",
-		"mdx",
-		"svelte",
-		"typescript",
-		"typescriptreact"
-	],
+	"eslint.validate": ["html", "javascript", "markdown", "typescript"],
 	"typescript.tsdk": "node_modules/typescript/lib",
-	"[astro]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
 	"[gitignore]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
-	"[ruby]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
 	"[shellscript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[svelte]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -45,12 +26,9 @@
 		"**/.eslintignore",
 		"**/.node-version",
 		"**/.npmrc",
-		"**/.prettierignore",
-		"**/*.astro",
-		"**/*.rb",
-		"**/*.svelte"
+		"**/.prettierignore"
 	],
 	"prettier.enable": true,
 	"stylelint.enable": true,
-	"stylelint.validate": ["css", "html", "svelte", "astro"]
+	"stylelint.validate": ["css", "html"]
 }

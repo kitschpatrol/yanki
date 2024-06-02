@@ -23,9 +23,9 @@
 
 Yanki MD simply syncs a folder of Markdown notes to Anki.
 
-The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools.
+The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
 
-This library leverages my [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers my [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) plugin.
+This library leverages the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) plugin.
 
 ## Quick start
 
@@ -142,7 +142,7 @@ Jazz isn't dead
 _It just smells funny_
 ```
 
----
+***
 
 ### Cloze
 

@@ -94,6 +94,7 @@
 		"string-strip-html": "^13.4.8",
 		"tsx": "^4.11.0",
 		"type-fest": "^4.18.3",
+		"typescript": "^5.4.5",
 		"unified": "^11.0.4",
 		"unist-builder": "^4.0.0",
 		"unist-util-visit": "^5.0.0",
