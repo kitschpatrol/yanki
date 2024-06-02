@@ -6,6 +6,7 @@ import type { Frontmatter } from '../model/frontmatter'
 import type { YankiModelName } from '../model/yanki-note'
 import remarkObsidianLink from './remark-obsidian-link'
 import type { Node, Parent, Root, Text } from 'mdast'
+import remarkFlexibleMarkers from 'remark-flexible-markers'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
 import remarkGithubBetaBlockquoteAdmonitions from 'remark-github-beta-blockquote-admonitions'
@@ -64,6 +65,7 @@ export async function getAstFromMarkdown(
 				}
 			},
 		})
+		.use(remarkFlexibleMarkers)
 
 	return processor.run(processor.parse(markdown))
 }
