@@ -100,7 +100,7 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 	let clozeIndex = 1
 
 	visit(ast, 'delete', (node, index, parent) => {
-		if (parent === undefined || index === undefined) {
+		if (parent === undefined || index === undefined || !('children' in node)) {
 			return CONTINUE
 		}
 
@@ -133,14 +133,17 @@ export function splitTreeAtEmphasis(tree: Root): [Root, string] {
 
 	// Find the index of the last thematicBreak node
 	visit(tree, 'emphasis', (node, index, parent) => {
-		if (index === undefined || parent === undefined) {
+		if (index === undefined || parent === undefined || !('children' in parent)) {
 			return CONTINUE
 		}
 
 		// Get index of parent
-		const parentIndex = parent.children.indexOf(node)
+		// TODO type issue
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+		const parentIndex = parent.children.indexOf(node as unknown as any)
 
-		typeInText = extractTextFromNode(node)
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+		typeInText = extractTextFromNode(node as unknown as any)
 		splitIndex = parentIndex
 	})
 
@@ -284,6 +287,10 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 export function getFrontmatterFromTree(ast: Root): Frontmatter {
 	let rawYaml: string | undefined
 	visit(ast, 'yaml', (node) => {
+		if (!('value' in node)) {
+			return CONTINUE
+		}
+
 		rawYaml = node.value
 		return EXIT
 	})

@@ -24,20 +24,19 @@
 		"pnpm": ">=8.0.0"
 	},
 	"bin": {
-		"yanki-md": "bin/cli.js",
-		"yanki": "bin/cli.js"
+		"yanki-md": "dist/cli/cli.js",
+		"yanki": "dist/cli/cli.js"
 	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.js",
+	"main": "./dist/lib/index.js",
+	"module": "./dist/lib/index.js",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
+			"import": "./dist/lib/index.js",
+			"types": "./dist/lib/index.d.ts"
 		}
 	},
-	"types": "./dist/index.d.ts",
+	"types": "./dist/lib/index.d.ts",
 	"files": [
-		"bin/*",
 		"dist/*"
 	],
 	"keywords": [
@@ -67,6 +66,8 @@
 		"@types/node": "^20.13.0",
 		"@types/unist": "^3.0.2",
 		"@types/yargs": "^17.0.32",
+		"chalk": "^5.3.0",
+		"globby": "^14.0.1",
 		"rehype-mathjax": "^6.0.0",
 		"yargs": "^17.7.2"
 	},
@@ -77,13 +78,12 @@
 		"@rollup/plugin-typescript": "^11.1.6",
 		"@shikijs/rehype": "^1.6.2",
 		"bumpp": "^9.4.1",
-		"chalk": "^5.3.0",
 		"deepmerge-ts": "^7.0.1",
 		"esbuild": "^0.21.4",
 		"esbuild-plugin-polyfill-node": "^0.3.0",
 		"esbuild-plugins-node-modules-polyfill": "^1.6.4",
-		"globby": "^14.0.1",
 		"path-browserify-esm": "^1.0.4",
+		"pkgroll": "^2.1.1",
 		"plur": "^5.1.0",
 		"pretty-ms": "^9.0.0",
 		"rehype-remove-comments": "^6.0.0",
