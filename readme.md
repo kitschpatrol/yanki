@@ -25,6 +25,8 @@ Yanki MD simply syncs a folder of Markdown notes to Anki.
 
 The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools.
 
+This library leverages my [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers my [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) plugin.
+
 ## Quick start
 
 Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on installed:
