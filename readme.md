@@ -329,11 +329,11 @@ This package also exposes an API for integrating syncing capability programmatic
 The following functions are exported:
 
 ```ts
-syncFiles(allLocalFilePaths: string[], options?: Partial<SyncOptions>): Promise<SyncReport>
+syncFiles(allLocalFilePaths: string[], options?: PartialDeep<SyncOptions>): Promise<SyncReport>
 
 getNoteFromMarkdown(markdown: string, namespace: string): Promise<YankiNote>
 
-syncNotes(allLocalNotes: YankiNote[], options?: Partial<SyncOptions>): Promise<SyncReport>
+syncNotes(allLocalNotes: YankiNote[], options?: PartialDeep<SyncOptions>): Promise<SyncReport>
 
 listNotes(options?: ListOptions): Promise<ListReport>
 

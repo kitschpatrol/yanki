@@ -1,17 +1,25 @@
 import { type YankiNote, yankiDefaultNamespace } from '../model/yanki-note'
 import { stripHtmlTags, truncateWithEllipsis } from '../utilities/string'
 import { deleteNotes, deleteOrphanedDecks, getRemoteNotes } from './anki-connect'
+import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
-import { YankiConnect, type YankiConnectOptions } from 'yanki-connect'
+import type { PartialDeep } from 'type-fest'
+import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
 
-type CleanOptions = {
-	ankiConnectOptions?: YankiConnectOptions
-	dryRun?: boolean
-	namespace?: string
+export const defaultCleanOptions: CleanOptions = {
+	ankiConnectOptions: defaultYankiConnectOptions,
+	dryRun: false,
+	namespace: yankiDefaultNamespace,
 }
 
-type CleanReport = {
+export type CleanOptions = {
+	ankiConnectOptions: YankiConnectOptions
+	dryRun: boolean
+	namespace: string
+}
+
+export type CleanReport = {
 	decks: string[]
 	deleted: YankiNote[]
 	dryRun: boolean
@@ -28,11 +36,11 @@ type CleanReport = {
  * @param options
  * @throws
  */
-export async function cleanNotes(options: CleanOptions): Promise<CleanReport> {
+export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanReport> {
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, dryRun = false, namespace = yankiDefaultNamespace } = options ?? {}
+	const { ankiConnectOptions, dryRun, namespace } = deepmerge(defaultCleanOptions, options ?? {})
 
 	const client = new YankiConnect(ankiConnectOptions)
 

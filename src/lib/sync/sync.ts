@@ -16,6 +16,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
+import type { PartialDeep } from 'type-fest'
 import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
 
 export type SyncedNote = {
@@ -58,7 +59,7 @@ export type SyncReport = {
  */
 export async function syncNotes(
 	allLocalNotes: YankiNote[],
-	options?: Partial<SyncOptions>,
+	options?: PartialDeep<SyncOptions>,
 ): Promise<SyncReport> {
 	const startTime = performance.now()
 
@@ -201,7 +202,7 @@ export async function syncNotes(
  */
 export async function syncFiles(
 	allLocalFilePaths: string[],
-	options?: Partial<SyncOptions>,
+	options?: PartialDeep<SyncOptions>,
 ): Promise<SyncReport> {
 	const startTime = performance.now()
 

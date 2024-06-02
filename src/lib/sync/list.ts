@@ -1,11 +1,18 @@
 import { type YankiNote, yankiDefaultNamespace } from '../model/yanki-note'
 import { stripHtmlTags, truncateWithEllipsis } from '../utilities/string'
 import { getRemoteNotes } from './anki-connect'
-import { YankiConnect, type YankiConnectOptions } from 'yanki-connect'
+import { deepmerge } from 'deepmerge-ts'
+import type { PartialDeep } from 'type-fest'
+import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
 
 export type ListOptions = {
-	ankiConnectOptions?: YankiConnectOptions
-	namespace?: string
+	ankiConnectOptions: YankiConnectOptions
+	namespace: string
+}
+
+export const defaultListOptions: ListOptions = {
+	ankiConnectOptions: defaultYankiConnectOptions,
+	namespace: yankiDefaultNamespace,
 }
 
 export type ListReport = {
@@ -19,10 +26,10 @@ export type ListReport = {
  * @param options
  * @returns
  */
-export async function listNotes(options?: ListOptions): Promise<ListReport> {
+export async function listNotes(options?: PartialDeep<ListOptions>): Promise<ListReport> {
 	const startTime = performance.now()
 
-	const { ankiConnectOptions, namespace = yankiDefaultNamespace } = options ?? {}
+	const { ankiConnectOptions, namespace } = deepmerge(defaultListOptions, options ?? {})
 	const client = new YankiConnect(ankiConnectOptions)
 	const notes = await getRemoteNotes(client, namespace)
 
