@@ -1,4 +1,9 @@
-// MyFixture.ts
+/**
+ * Provides a test fixture that copies a directory of markdown files to a
+ * temporary directory for mutation tests, and manages Yanki Connect clean up, start up, and
+ * teardown.
+ */
+
 import { cleanNotes } from '../../src/lib'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
@@ -10,7 +15,6 @@ import { YankiConnect } from 'yanki-connect'
 type FixtureOptions = {
 	assetPath: string
 	cleanUpAnki: boolean
-	namespace: string
 }
 
 type TestContext = {
@@ -22,14 +26,14 @@ type TestContext = {
 
 export function describeWithFileFixture(
 	description: string,
-	{ assetPath, cleanUpAnki, namespace }: FixtureOptions,
+	{ assetPath, cleanUpAnki }: FixtureOptions,
 	tests: (context: TestContext) => void,
 ) {
 	describe(description, () => {
 		const context: TestContext = {
 			assetPath: '',
 			files: [],
-			namespace: 'YankiTestUndefined - ',
+			namespace: `Yanki Test - ${description}`,
 			yankiConnect: new YankiConnect({ autoLaunch: true }),
 		}
 		let tempAssetPath: string
@@ -43,12 +47,13 @@ export function describeWithFileFixture(
 			context.files = await globby(`${tempAssetPath}/**/*.md`)
 			expect(context.files.length).toBeGreaterThan(0)
 
-			// Expose the namespace to the tests
-			context.namespace = namespace
-
 			// Clean up anki first
 			if (cleanUpAnki) {
-				await cleanNotes({ ankiConnectOptions: { autoLaunch: true }, dryRun: false, namespace })
+				await cleanNotes({
+					ankiConnectOptions: { autoLaunch: true },
+					dryRun: false,
+					namespace: context.namespace,
+				})
 				const allNotes = await context.yankiConnect.note.findNotes({
 					query: '*',
 				})
@@ -59,7 +64,7 @@ export function describeWithFileFixture(
 			// console.log(`Setup before all tests: ${JSON.stringify(context, undefined, 2)}`)
 		})
 
-		// Call the tests function and pass the context to it
+		// Call the tests functions, pass the context
 		tests(context)
 
 		afterAll(async () => {
@@ -68,7 +73,11 @@ export function describeWithFileFixture(
 
 			// Clean up anki
 			if (cleanUpAnki) {
-				await cleanNotes({ ankiConnectOptions: { autoLaunch: true }, dryRun: false, namespace })
+				await cleanNotes({
+					ankiConnectOptions: { autoLaunch: true },
+					dryRun: false,
+					namespace: context.namespace,
+				})
 				const allNotes = await context.yankiConnect.note.findNotes({ query: '*' })
 				const finalCardCount = allNotes.length
 

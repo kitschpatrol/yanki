@@ -33,9 +33,6 @@ importers:
       '@types/yargs':
         specifier: ^17.0.32
         version: 17.0.32
-      add:
-        specifier: ^2.0.6
-        version: 2.0.6
       bumpp:
         specifier: ^9.4.1
         version: 9.4.1
@@ -51,9 +48,6 @@ importers:
       globby:
         specifier: ^14.0.1
         version: 14.0.1
-      mdast-util-to-hast:
-        specifier: ^13.1.0
-        version: 13.1.0
       plur:
         specifier: ^5.1.0
         version: 5.1.0
@@ -63,15 +57,15 @@ importers:
       rehype-remove-comments:
         specifier: ^6.0.0
         version: 6.0.0
-      rehype-sanitize:
-        specifier: ^6.0.0
-        version: 6.0.0
       rehype-stringify:
         specifier: ^10.0.0
         version: 10.0.0
       remark:
         specifier: ^15.0.1
         version: 15.0.1
+      remark-flexible-markers:
+        specifier: ^1.2.1
+        version: 1.2.1
       remark-frontmatter:
         specifier: ^5.0.0
         version: 5.0.0
@@ -81,9 +75,6 @@ importers:
       remark-github-beta-blockquote-admonitions:
         specifier: ^3.1.1
         version: 3.1.1
-      remark-html:
-        specifier: ^16.0.1
-        version: 16.0.1
       remark-math:
         specifier: ^6.0.0
         version: 6.0.0
@@ -132,9 +123,6 @@ importers:
       yanki-connect:
         specifier: link:../yanki-connect
         version: link:../yanki-connect
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
 
 packages:
 
@@ -1166,9 +1154,6 @@ packages:
     resolution: {integrity: sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
-
-  add@2.0.6:
-    resolution: {integrity: sha512-j5QzrmsokwWWp6kUcJQySpbG+xfOBqqKnup3OIk1pz+kB/80SLorZ9V8zHFLO92Lcd+hbvq8bT+zOGoPkmBV0Q==}
 
   agent-base@7.1.1:
     resolution: {integrity: sha512-H0TSyFNDMomMNJQBn8wFV5YC/2eJ+VXECwOadZJT554xP6cODZHPX3H9QMQECxvrgiSOP1pHjy1sMWQVYJOUOA==}
@@ -2380,9 +2365,6 @@ packages:
 
   hast-util-raw@9.0.3:
     resolution: {integrity: sha512-ICWvVOF2fq4+7CMmtCPD5CM4QKjPbHpPotE6+8tDooV0ZuyJVUzHsrNX+O5NaRbieTf0F7FfeBOMAwi6Td0+yQ==}
-
-  hast-util-sanitize@5.0.1:
-    resolution: {integrity: sha512-IGrgWLuip4O2nq5CugXy4GI2V8kx4sFVy5Hd4vF7AR2gxS0N9s7nEAVUyeMtZKZvzrxVsHt73XdTsno1tClIkQ==}
 
   hast-util-to-html@9.0.1:
     resolution: {integrity: sha512-hZOofyZANbyWo+9RP75xIDV/gq+OUKx+T46IlwERnKmfpwp81XBFbT9mi26ws+SJchA4RVUQwIBJpqEOBhMzEQ==}
@@ -3790,9 +3772,6 @@ packages:
   rehype-remove-comments@6.0.0:
     resolution: {integrity: sha512-RrJPQcVkJPZqX0Go0IAxiplgiTAkOdRbkjtPymVIDJwcgA37iZiWFCimVXP33CdMDSouAPQbTkuV32NgI8x67g==}
 
-  rehype-sanitize@6.0.0:
-    resolution: {integrity: sha512-CsnhKNsyI8Tub6L4sm5ZFsme4puGfc6pYylvXo1AeqaGbjOYyzNv3qZPwvs0oMJ39eryyeOdmxwUIo94IpEhqg==}
-
   rehype-stringify@10.0.0:
     resolution: {integrity: sha512-1TX1i048LooI9QoecrXy7nGFFbFSufxVRAfc6Y9YMRAi56l+oB0zP51mLSV312uRuvVLPV1opSlJmslozR1XHQ==}
 
@@ -3803,6 +3782,9 @@ packages:
   remark-directive@3.0.0:
     resolution: {integrity: sha512-l1UyWJ6Eg1VPU7Hm/9tt0zKtReJQNOA4+iDMAxTyZNWnJnFlbS/7zhiel/rogTLQ2vMYwDzSJa4BiVNqGlqIMA==}
 
+  remark-flexible-markers@1.2.1:
+    resolution: {integrity: sha512-yAqJ2bRDWfBC7G0A6lHsifMQpzeID10RQc5Pgm29jyAzdJQ7pJozDROeMEk7GW1KznSxIjO5be+fn7Dh+Fbo4A==}
+
   remark-frontmatter@5.0.0:
     resolution: {integrity: sha512-XTFYvNASMe5iPN0719nPrdItC9aU0ssC4v14mH1BCi1u0n1gAocqcujWUrByftZTbLhRtiKRyjYTSIOcr69UVQ==}
 
@@ -3811,9 +3793,6 @@ packages:
 
   remark-github-beta-blockquote-admonitions@3.1.1:
     resolution: {integrity: sha512-36ofXpQnz9wrZthe0WB1qtNCgflHFsz7VoUG/j+WJU/GxMpo7Tp+qN86s/Tvx6MiusQIDg0BZhWXnfklEXRiVw==}
-
-  remark-html@16.0.1:
-    resolution: {integrity: sha512-B9JqA5i0qZe0Nsf49q3OXyGvyXuZFDzAP2iOFLEumymuYJITVpiH1IgsTEwTpdptDmZlMDMWeDmSawdaJIGCXQ==}
 
   remark-lint-checkbox-character-style@5.0.0:
     resolution: {integrity: sha512-K0G/Nok59fb2q5KUxcemBVt+ymnhTkDVLJAatZ4PAh9At8y0DGctHdU27jWsuvO0Fs7Zy62Usk7IJE2VO89p1w==}
@@ -4525,6 +4504,15 @@ packages:
 
   unist-util-find-after@5.0.0:
     resolution: {integrity: sha512-amQa0Ep2m6hE2g72AugUItjbuM8X8cGQnFoHk0pGfrFeT9GZhzN5SW8nRsiGKK7Aif4CrACPENkA6P/Lw6fHGQ==}
+
+  unist-util-find-all-after@5.0.0:
+    resolution: {integrity: sha512-nGmOYvTSdGcI4RvrUNfe0mOsqqbbJOtqCQsppsY9KZjmv3nwM3YRgNBwFPdZ8Y+iv9Z/2PDjR9u6u+uK62XTTg==}
+
+  unist-util-find-all-before@5.0.0:
+    resolution: {integrity: sha512-zir6a7GsXfdn4YAWR4F3hLNKZjTjLBJurdyquysvmX38xbftS1+qwvEhutxxHLq0Pp1tW5V1TDiuj+qluuOnKw==}
+
+  unist-util-find-between-all@1.0.5:
+    resolution: {integrity: sha512-zqpIPPzhbG6fI5lqYZhS1UPsMvxV9IY6dwbizLHLPAGNb3pQT3mTvmzXpP1K2lmUh4bhUwAN4gkQcxhR/OLS4g==}
 
   unist-util-inspect@8.0.0:
     resolution: {integrity: sha512-/3Wn/wU6/H6UEo4FoYUeo8KUePN8ERiZpQYFWYoihOsr1DoDuv80PeB0hobVZyYSvALa2e556bG1A1/AbwU4yg==}
@@ -5919,8 +5907,6 @@ snapshots:
   acorn-walk@8.3.2: {}
 
   acorn@8.11.3: {}
-
-  add@2.0.6: {}
 
   agent-base@7.1.1:
     dependencies:
@@ -7515,12 +7501,6 @@ snapshots:
       vfile: 6.0.1
       web-namespaces: 2.0.1
       zwitch: 2.0.4
-
-  hast-util-sanitize@5.0.1:
-    dependencies:
-      '@types/hast': 3.0.4
-      '@ungap/structured-clone': 1.2.0
-      unist-util-position: 5.0.0
 
   hast-util-to-html@9.0.1:
     dependencies:
@@ -9275,11 +9255,6 @@ snapshots:
       hast-util-is-conditional-comment: 3.0.0
       unist-util-visit: 5.0.0
 
-  rehype-sanitize@6.0.0:
-    dependencies:
-      '@types/hast': 3.0.4
-      hast-util-sanitize: 5.0.1
-
   rehype-stringify@10.0.0:
     dependencies:
       '@types/hast': 3.0.4
@@ -9304,6 +9279,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  remark-flexible-markers@1.2.1:
+    dependencies:
+      '@types/mdast': 4.0.4
+      unist-builder: 4.0.0
+      unist-util-find-after: 5.0.0
+      unist-util-find-all-after: 5.0.0
+      unist-util-find-all-before: 5.0.0
+      unist-util-find-between-all: 1.0.5
+      unist-util-visit: 5.0.0
+
   remark-frontmatter@5.0.0:
     dependencies:
       '@types/mdast': 4.0.4
@@ -9327,14 +9312,6 @@ snapshots:
   remark-github-beta-blockquote-admonitions@3.1.1:
     dependencies:
       unist-util-visit: 5.0.0
-
-  remark-html@16.0.1:
-    dependencies:
-      '@types/mdast': 4.0.4
-      hast-util-sanitize: 5.0.1
-      hast-util-to-html: 9.0.1
-      mdast-util-to-hast: 13.1.0
-      unified: 11.0.4
 
   remark-lint-checkbox-character-style@5.0.0:
     dependencies:
@@ -10492,6 +10469,21 @@ snapshots:
       '@types/unist': 3.0.2
 
   unist-util-find-after@5.0.0:
+    dependencies:
+      '@types/unist': 3.0.2
+      unist-util-is: 6.0.0
+
+  unist-util-find-all-after@5.0.0:
+    dependencies:
+      '@types/unist': 3.0.2
+      unist-util-is: 6.0.0
+
+  unist-util-find-all-before@5.0.0:
+    dependencies:
+      '@types/unist': 3.0.2
+      unist-util-is: 6.0.0
+
+  unist-util-find-between-all@1.0.5:
     dependencies:
       '@types/unist': 3.0.2
       unist-util-is: 6.0.0

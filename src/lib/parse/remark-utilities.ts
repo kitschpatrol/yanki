@@ -290,7 +290,7 @@ export function getFrontmatterFromTree(ast: Root): Frontmatter {
 
 	if (!rawYaml) {
 		// Unremarkable
-		console.warn('No frontmatter found')
+		// console.warn('No frontmatter found')
 		return {}
 	}
 

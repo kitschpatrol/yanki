@@ -25,7 +25,6 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/minimal-notes/',
 		cleanUpAnki: false,
-		namespace: 'Yanki Model Type Test',
 	},
 	(context) => {
 		it('correctly infers Anki model types from markdown', async () => {
@@ -73,8 +72,7 @@ describeWithFileFixture(
 	'basic synchronization',
 	{
 		assetPath: './test/assets/minimal-notes/',
-		cleanUpAnki: false,
-		namespace: 'Yanki Basic Sync Test',
+		cleanUpAnki: true,
 	},
 	(context) => {
 		it('synchronizes notes to anki and has he correct deck name', async () => {
@@ -116,7 +114,6 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/surplus-frontmatter/',
 		cleanUpAnki: true,
-		namespace: 'Yanki Surplus Frontmatter Test',
 	},
 	(context) => {
 		it('preserves and merges unrelated surplus frontmatter', async () => {
@@ -148,7 +145,6 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/complex-tree/',
 		cleanUpAnki: true,
-		namespace: 'Yanki Complex Tree Test',
 	},
 	(context) => {
 		it('makes the right decisions about deck naming', async () => {
@@ -187,14 +183,56 @@ describeWithFileFixture(
 	'fancy markdown',
 	{
 		assetPath: './test/assets/fancy-markdown/',
-		cleanUpAnki: false,
-		namespace: 'Yanki Complex Tree Test',
+		cleanUpAnki: true,
 	},
 	(context) => {
 		it('handles fancy markdown', async () => {
-			const results = await syncFiles(context.files, { namespace: context.namespace })
+			const results = await syncFiles(context.files, {
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+			})
 
 			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
+)
+
+describeWithFileFixture(
+	'idempotent syncing',
+	{
+		assetPath: './test/assets/minimal-notes/',
+		cleanUpAnki: true,
+	},
+	(context) => {
+		it('idempotent syncing', async () => {
+			// First sync should be all "created"
+			const results = await syncFiles(context.files, {
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+			})
+
+			const syncActions = [...new Set(results.synced.map((syncInfo) => syncInfo.action))]
+
+			expect(syncActions).toMatchInlineSnapshot(`
+				[
+				  "created",
+				]
+			`)
+
+			const secondSyncResults = await syncFiles(context.files, {
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+			})
+
+			const secondSyncActions = [
+				...new Set(secondSyncResults.synced.map((syncInfo) => syncInfo.action)),
+			]
+
+			expect(secondSyncActions).toMatchInlineSnapshot(`
+				[
+				  "unchanged",
+				]
+			`)
 		})
 	},
 )

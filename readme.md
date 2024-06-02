@@ -81,7 +81,14 @@ But when you do want to delete something, it's as simple as deleting the local M
 
 ### Fancy markdown
 
-Write your notes with [GitHub Flavored Markdown](https://github.github.com/gfm/), syntax-highlighted code blocks via [Shiki](https://shiki.style), [GitHub style Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts), [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md), and [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via [MathJax](https://www.mathjax.org).
+An extended palette of markdown syntax is available out of the box:
+
+- [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-throughs~~`, `- [x] task lists`, and autolinks.
+- Syntax highlighting via [Shiki](https://shiki.style).
+- GitHub-style [Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
+- [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md)
+- [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via [MathJax](https://www.mathjax.org)
+- Support for the [`==highlights==`](https://github.com/ipikuka/remark-flexible-markers) syntax.
 
 ## Markdown note types
 
@@ -91,7 +98,7 @@ The rules were designed with the semantic and visual nature of Markdown in mind.
 
 The most minimal examples to "trigger" different note types are shown below, but the implementation can handle additional weirdness and will generally do the right thing if it encounters elements that might indicate conflicting note types.
 
-You're free to use additional Markdown in your note files to style and structure the front and back of your flashcards, but note that embedding images is currently not supported.
+You're free to use additional Markdown in your note files to style and structure the front and back of your flashcards. Image markup will work, but currently assets must be hosted externally and are not copied into Anki's media storage system.
 
 ### Basic
 
@@ -356,7 +363,7 @@ Behind the scenes, Yanki MD creates new note type models to match the four defau
 
 ## The future
 
-Image support would be nice.
+Either embedding media assets or implementing integration with Anki's media library could be helpful for offline study. (Though externally hosted image links seem generally fine for now.)
 
 ## Maintainers
 

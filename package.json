@@ -42,6 +42,7 @@
 	],
 	"keywords": [
 		"anki",
+		"flashcards",
 		"spaced-repetition",
 		"anki-connect",
 		"markdown",
@@ -53,6 +54,7 @@
 		"build": "pnpm run build:lib && pnpm run build:cli",
 		"build:cli": "tsx ./scripts/build-cli.ts",
 		"build:lib": "tsx ./scripts/build-lib.ts && tsc -p tsconfig.lib.json",
+		"clean": "git clean -fdX && rm ./pnpm-lock.yaml",
 		"fix": "shared-config --fix",
 		"lint": "shared-config --lint",
 		"release": "pnpm build && pnpm bumpp --commit 'Release: %s' && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
@@ -69,18 +71,17 @@
 		"@types/node": "^20.13.0",
 		"@types/unist": "^3.0.2",
 		"@types/yargs": "^17.0.32",
-		"add": "^2.0.6",
 		"bumpp": "^9.4.1",
 		"chalk": "^5.3.0",
 		"deepmerge-ts": "^7.0.1",
 		"esbuild": "^0.21.4",
 		"globby": "^14.0.1",
-		"mdast-util-to-hast": "^13.1.0",
 		"plur": "^5.1.0",
 		"pretty-ms": "^9.0.0",
 		"rehype-remove-comments": "^6.0.0",
 		"rehype-stringify": "^10.0.0",
 		"remark": "^15.0.1",
+		"remark-flexible-markers": "^1.2.1",
 		"remark-frontmatter": "^5.0.0",
 		"remark-gfm": "^4.0.0",
 		"remark-github-beta-blockquote-admonitions": "^3.1.1",
@@ -99,8 +100,7 @@
 		"untildify": "^5.0.0",
 		"vitest": "^1.6.0",
 		"yaml": "^2.4.2",
-		"yanki-connect": "link:../yanki-connect",
-		"zod": "^3.23.8"
+		"yanki-connect": "link:../yanki-connect"
 	},
 	"publishConfig": {
 		"access": "public"
