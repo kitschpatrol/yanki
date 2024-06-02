@@ -61,16 +61,16 @@
 		"test": "vitest"
 	},
 	"dependencies": {
+		"@types/mdast": "^4.0.4",
+		"@types/node": "^20.13.0",
+		"@types/unist": "^3.0.2",
+		"@types/yargs": "^17.0.32",
 		"rehype-mathjax": "^6.0.0",
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^4.6.6",
 		"@shikijs/rehype": "^1.6.1",
-		"@types/mdast": "^4.0.4",
-		"@types/node": "^20.13.0",
-		"@types/unist": "^3.0.2",
-		"@types/yargs": "^17.0.32",
 		"bumpp": "^9.4.1",
 		"chalk": "^5.3.0",
 		"deepmerge-ts": "^7.0.1",
