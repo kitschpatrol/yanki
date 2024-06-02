@@ -2,5 +2,12 @@ export { type YankiNote } from './model/yanki-note'
 export { getNoteFromMarkdown } from './parse/parse'
 export { type CleanOptions, cleanNotes, defaultCleanOptions } from './sync/clean'
 export { type ListOptions, defaultListOptions, listNotes } from './sync/list'
-export { type SyncOptions, defaultSyncOptions, syncFiles, syncNotes } from './sync/sync'
+export {
+	type SyncOptions,
+	defaultSyncOptions,
+	formatSyncReport,
+	getDeckNamesFromFilePaths,
+	syncFiles,
+	syncNotes,
+} from './sync/sync'
 export { hostAndPortToUrl, urlToHostAndPort } from './utilities/string'

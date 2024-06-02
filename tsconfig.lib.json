@@ -6,5 +6,6 @@
 		"outDir": "./dist",
 		"emitDeclarationOnly": true
 	},
-	"include": ["src/lib/index.ts"]
+	"include": ["src/lib/index.ts"],
+	"exclude": ["test/**/*", "src/cli/**/*"]
 }

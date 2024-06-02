@@ -1,6 +1,7 @@
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
 import { type YankiNote, yankiDefaultNamespace } from '../model/yanki-note'
 import { getNoteFromMarkdown } from '../parse/parse'
+import { environment } from '../utilities/platform'
 import { capitalize } from '../utilities/string'
 import {
 	addNote,
@@ -12,8 +13,7 @@ import {
 	updateNote,
 } from './anki-connect'
 import { deepmerge } from 'deepmerge-ts'
-import fs from 'node:fs/promises'
-import path from 'node:path'
+import path from 'path-browserify-esm'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
 import type { PartialDeep } from 'type-fest'
@@ -203,8 +203,26 @@ export async function syncNotes(
 export async function syncFiles(
 	allLocalFilePaths: string[],
 	options?: PartialDeep<SyncOptions>,
+): Promise<SyncReport>
+export async function syncFiles(
+	allLocalFilePaths: string[],
+	options?: PartialDeep<SyncOptions>,
+	readFile?: (filePath: string) => Promise<string>,
+	writeFile?: (filePath: string, data: string) => Promise<void>,
 ): Promise<SyncReport> {
 	const startTime = performance.now()
+
+	if (readFile === undefined || writeFile === undefined) {
+		if (environment === 'node') {
+			const fs = await import('node:fs/promises')
+			readFile = async (filePath) => fs.readFile(filePath, 'utf8')
+			writeFile = async (filePath, data) => fs.writeFile(filePath, data, 'utf8')
+		} else {
+			throw new Error(
+				'Both readFile and writeFile implementations must be provided to the syncFiles function in the browser',
+			)
+		}
+	}
 
 	const resolvedOptions = deepmerge(defaultSyncOptions, options ?? {})
 	const { namespace, obsidianVault } = resolvedOptions
@@ -216,7 +234,7 @@ export async function syncFiles(
 	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths)
 
 	for (const [index, filePath] of allLocalFilePaths.entries()) {
-		const markdown = await fs.readFile(filePath, 'utf8')
+		const markdown = await readFile(filePath)
 		allLocalMarkdown.push(markdown)
 		const note = await getNoteFromMarkdown(markdown, { namespace, obsidianVault })
 		if (note.deckName === '') {
@@ -244,7 +262,7 @@ export async function syncFiles(
 			}
 
 			const updatedMarkdown = await setNoteIdInFrontmatter(allLocalMarkdown[index], note.noteId)
-			await fs.writeFile(allLocalFilePaths[index], updatedMarkdown)
+			await writeFile(allLocalFilePaths[index], updatedMarkdown)
 		}
 	}
 
@@ -293,15 +311,19 @@ export async function syncFiles(
  * /base/bla/note.md -> bla
  * /base/bla/blo/note.md -> bla::blo
  *
- * @param filePaths Paths to all markdown Anki note files
+ * @param absoluteFilePaths Absolute paths to all markdown Anki note files. (Ensures proper resolution if path module is polyfilled.)
  * @param prune If true, deck names are not allowed to "jump" over empty directories, even if there are other note files somewhere up the hierarchy
  * @returns array of ::-delimited deck paths
  */
-function getDeckNamesFromFilePaths(
-	filePaths: string[],
+export function getDeckNamesFromFilePaths(
+	absoluteFilePaths: string[],
 	mode: 'common' | 'jump' | 'stop' = 'common',
 ) {
-	const filePathSegments = filePaths.map((filePath) =>
+	if (environment === 'node') {
+		path.setCWD(process.cwd())
+	}
+
+	const filePathSegments = absoluteFilePaths.map((filePath) =>
 		path.dirname(path.resolve(filePath)).split(path.sep),
 	)
 
