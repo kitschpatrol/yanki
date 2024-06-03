@@ -22,6 +22,7 @@ export default defineConfig({
 		open: true,
 	},
 	test: {
+		root: path.resolve(import.meta.dirname),
 		// Enable serial mode
 		sequence: {
 			concurrent: false,

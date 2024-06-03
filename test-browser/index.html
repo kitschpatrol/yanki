@@ -12,7 +12,7 @@
 				syncNotes,
 			} from '../dist/lib/index'
 
-			console.log('----------------- List Notes -----------------')
+			console.log('----------------- List All Notes -----------------')
 			const notes = await listNotes({ namespace: '*' })
 			console.log(notes)
 
@@ -42,7 +42,7 @@
 				'../assets/minimal-notes/cloze.md',
 			]
 
-			console.log('----------------- List Decks -----------------')
+			console.log('----------------- List Deck Name For Each File Path -----------------')
 			const deckNames = getDeckNamesFromFilePaths(paths)
 			console.log(deckNames)
 
