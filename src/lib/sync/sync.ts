@@ -203,10 +203,6 @@ export async function syncNotes(
 export async function syncFiles(
 	allLocalFilePaths: string[],
 	options?: PartialDeep<SyncOptions>,
-): Promise<SyncReport>
-export async function syncFiles(
-	allLocalFilePaths: string[],
-	options?: PartialDeep<SyncOptions>,
 	readFile?: (filePath: string) => Promise<string>,
 	writeFile?: (filePath: string, data: string) => Promise<void>,
 ): Promise<SyncReport> {
