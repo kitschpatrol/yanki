@@ -1,7 +1,6 @@
-export { type YankiNote } from './model/yanki-note'
-export { getNoteFromMarkdown } from './parse/parse'
-export { type CleanOptions, cleanNotes, defaultCleanOptions } from './sync/clean'
-export { type ListOptions, defaultListOptions, listNotes } from './sync/list'
+export { type CleanOptions, cleanNotes, defaultCleanOptions } from './actions/clean'
+export { type ListOptions, defaultListOptions, listNotes } from './actions/list'
+export { type StyleOptions, type StyleReport, defaultStyleOptions, setStyle } from './actions/style'
 export {
 	type SyncOptions,
 	defaultSyncOptions,
@@ -9,5 +8,7 @@ export {
 	getDeckNamesFromFilePaths,
 	syncFiles,
 	syncNotes,
-} from './sync/sync'
+} from './actions/sync'
+export { type YankiNote } from './model/note'
+export { getNoteFromMarkdown } from './parse/parse'
 export { hostAndPortToUrl, urlToHostAndPort } from './utilities/string'

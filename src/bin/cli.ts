@@ -1,6 +1,6 @@
-import { cleanNotes, formatCleanReport } from '../lib/sync/clean'
-import { formatListReport, listNotes } from '../lib/sync/list'
-import { formatSyncReport, syncFiles } from '../lib/sync/sync'
+import { cleanNotes, formatCleanReport } from '../lib/actions/clean'
+import { formatListReport, listNotes } from '../lib/actions/list'
+import { formatSyncReport, syncFiles } from '../lib/actions/sync'
 import log from '../lib/utilities/log'
 import { urlToHostAndPort } from '../lib/utilities/string'
 import {

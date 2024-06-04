@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { type Simplify } from 'type-fest'
+
 import { type YankiParamsForAction } from 'yanki-connect'
+
+export type YankiModel = YankiParamsForAction<'createModel'>
 
 export const yankiModels = [
 	{
@@ -55,16 +57,8 @@ export const yankiModels = [
 		inOrderFields: ['Front', 'Back', 'YankiNamespace'],
 		modelName: 'Yanki - Basic (type in the answer)',
 	},
-] as const satisfies Array<YankiParamsForAction<'createModel'>>
+] as const satisfies YankiModel[]
 
 export type YankiModelName = (typeof yankiModels)[number]['modelName']
-export const yankiModelNames: YankiModelName[] = yankiModels.map((model) => model.modelName)
 
-export type YankiNote = Simplify<
-	{
-		cards?: number[]
-		fields: { Back: string; Front: string; YankiNamespace: string }
-		modelName: YankiModelName
-		noteId: number | undefined
-	} & Omit<YankiParamsForAction<'addNote'>['note'], 'fields' | 'modelName' | 'options'>
->
+export const yankiModelNames: YankiModelName[] = yankiModels.map((model) => model.modelName)

@@ -3,7 +3,7 @@
  */
 
 import type { Frontmatter } from '../model/frontmatter'
-import type { YankiModelName } from '../model/yanki-note'
+import type { YankiModelName } from '../model/model'
 import remarkObsidianLink from './remark-obsidian-link'
 import type { Emphasis, Node, Parent, Root, Text } from 'mdast'
 import remarkFlexibleMarkers from 'remark-flexible-markers'
@@ -322,11 +322,6 @@ function isLastVisibleNodeEmphasisWithOthers(ast: Root): boolean {
 			return SKIP
 		}
 	})
-
-	// Check if the last visible node is an emphasis and there are other visible nodes
-
-	console.log('----------------- last visible node -----------------')
-	console.log(lastVisibleNode?.type)
 
 	return lastVisibleNode !== undefined && lastVisibleNode.type === 'emphasis' && visibleCount > 1
 }

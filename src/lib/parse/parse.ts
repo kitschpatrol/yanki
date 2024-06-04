@@ -3,7 +3,7 @@
  */
 
 import { yankiDefaultCssClassName } from '../model/constants'
-import { type YankiNote } from '../model/yanki-note'
+import { type YankiNote } from '../model/note'
 import { mdastToHtml } from './rehype-utilities'
 import {
 	type AstFromMarkdownOptions,
@@ -52,8 +52,16 @@ export async function getNoteFromMarkdown(
 
 			// Basic and reverse always needs both sides to have content.
 			// Basic can technically have no back , but it's confusing so we throw in the placeholder.
-			front = await mdastToHtml(firstPart, [yankiDefaultCssClassName, 'front', modelName], true)
-			back = await mdastToHtml(secondPart, [yankiDefaultCssClassName, 'back', modelName], true)
+			front = await mdastToHtml(
+				firstPart,
+				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
+				true,
+			)
+			back = await mdastToHtml(
+				secondPart,
+				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
+				true,
+			)
 
 			break
 		}
@@ -63,8 +71,16 @@ export async function getNoteFromMarkdown(
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
 
 			// Cloze can't have empty front? But what does that even mean?
-			front = await mdastToHtml(firstPart, [yankiDefaultCssClassName, 'front', modelName], true)
-			back = await mdastToHtml(secondPart, [yankiDefaultCssClassName, 'back', modelName], false)
+			front = await mdastToHtml(
+				firstPart,
+				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
+				true,
+			)
+			back = await mdastToHtml(
+				secondPart,
+				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
+				false,
+			)
 
 			break
 		}
@@ -83,16 +99,18 @@ export async function getNoteFromMarkdown(
 			// const secondPartHast = u('root', [u('paragraph', [u('text', secondPart)])])
 			const secondPartHast = u('root', u('paragraph', secondPart.children))
 
-			console.log('----------------- parts -----------------')
-			console.log('----------------- front -----------------')
-			console.log(`firstPart: ${JSON.stringify(firstPart, undefined, 2)}`)
-			console.log('----------------- back -----------------')
-			console.log(`secondPart: ${JSON.stringify(secondPart, undefined, 2)}`)
-
-			front = await mdastToHtml(firstPart, [yankiDefaultCssClassName, 'front', modelName], true)
+			front = await mdastToHtml(
+				firstPart,
+				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
+				true,
+			)
 
 			// TODO html on the back?
-			back = await mdastToHtml(secondPartHast, [yankiDefaultCssClassName, 'back', modelName], false)
+			back = await mdastToHtml(
+				secondPartHast,
+				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
+				false,
+			)
 			break
 		}
 	}

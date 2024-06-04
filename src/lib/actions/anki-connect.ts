@@ -1,11 +1,6 @@
 import { yankiDefaultNamespace } from '../model/constants'
-import {
-	type YankiModelName,
-	type YankiNote,
-	yankiModelNames,
-	yankiModels,
-} from '../model/yanki-note'
-import githubMarkdownCss from '../style/github-markdown-css'
+import { type YankiModelName, yankiModelNames, yankiModels } from '../model/model'
+import { type YankiNote } from '../model/note'
 import { type YankiConnect } from 'yanki-connect'
 
 // Console.log('----------------------------------')
@@ -62,9 +57,6 @@ export async function addNote(
 		return 0
 	}
 
-	console.log('----------------- Adding Note -----------------')
-	console.log(note)
-
 	const newNote = await client.note
 		.addNote({
 			note: {
@@ -83,10 +75,8 @@ export async function addNote(
 						throw new Error(`Model not found: ${note.modelName}`)
 					}
 
-					await client.model.createModel({
-						...model,
-						css: githubMarkdownCss,
-					})
+					await client.model.createModel(model)
+
 					return addNote(client, note, dryRun)
 				}
 
@@ -412,4 +402,99 @@ export async function deleteOrphanedDecks(
 	}
 
 	return decksToDelete
+}
+
+/**
+ * Global! Does not respect namespace. You can write namespace checks into your css if you want.
+ * @param client
+ * @param modelName
+ * @param css
+ * @returns
+ */
+export async function updateModelStyle(
+	client: YankiConnect,
+	modelName: string,
+	css: string,
+	dryRun: boolean,
+): Promise<boolean> {
+	// Get original css
+
+	// Create model on demand if necessary
+	let currentCss: string | undefined
+	try {
+		const { css } = await client.model.modelStyling({ modelName })
+		currentCss = css
+	} catch (error) {
+		if (error instanceof Error) {
+			if (error.message === `model was not found: ${modelName}`) {
+				// Create the model and try again
+				const model = yankiModels.find((model) => model.modelName === modelName)
+				if (model === undefined) {
+					throw new Error(`Model not found: ${modelName}`)
+				}
+
+				if (dryRun) {
+					return false
+				}
+
+				await client.model.createModel(model)
+
+				return updateModelStyle(client, model.modelName, css, dryRun)
+			}
+
+			throw error
+		} else {
+			throw new TypeError('Unknown error')
+		}
+	}
+
+	if (currentCss !== undefined && currentCss === css) {
+		return false
+	}
+
+	if (!dryRun) {
+		await client.model.updateModelStyling({
+			model: {
+				css,
+				name: modelName,
+			},
+		})
+	}
+
+	return true
+}
+
+// For testing
+
+/**
+ * For testing purposes only
+ * @param client
+ * @returns
+ */
+export async function createModels(client: YankiConnect) {
+	for (const model of yankiModels) {
+		try {
+			await client.model.createModel(model)
+		} catch (error) {
+			if (error instanceof Error) {
+				if (error.message === `Model name already exists`) {
+					continue
+				}
+
+				throw error
+			} else {
+				throw new TypeError('Unknown error')
+			}
+		}
+	}
+}
+
+/**
+ * For testing purposes only
+ * @param client
+ * @returns css
+ */
+export async function getStyle(client: YankiConnect): Promise<string> {
+	const { css } = await client.model.modelStyling({ modelName: yankiModelNames[0] })
+	return css
 }

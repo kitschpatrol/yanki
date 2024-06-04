@@ -368,6 +368,8 @@ Behind the scenes, Yanki MD creates new note type models to match the four defau
 
 Either embedding media assets or implementing integration with Anki's media library could be helpful for offline study. (Though externally hosted image links seem generally fine for now.)
 
+Support for custom CSS would be nice as well.
+
 ## Maintainers
 
 [@kitschpatrol](https://github.com/kitschpatrol)

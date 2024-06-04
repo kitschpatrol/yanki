@@ -7,24 +7,11 @@ import path from 'node:path'
 import sortKeys from 'sort-keys'
 import { expect, it } from 'vitest'
 
-// Scratch
-// describe('anki connect actions', () => {
-// 	it('finds cards with YankiNamespace fields', async () => {
-// 		const client = new YankiConnect({ autoLaunch: true })
-
-// 		const allYankiNotes = await client.note.findNotes({ query: '"YankiNamespace:*"' })
-// 		const specificYankiNotes = await client.note.findNotes({
-// 			query: '"YankiNamespace:Yanki Basic Sync Test"',
-// 		})
-
-// 	})
-// })
-
 describeWithFileFixture(
 	'model types',
 	{
-		assetPath: './test/assets/minimal-notes/',
-		cleanUpAnki: false,
+		assetPath: './test/assets/test-minimal-notes/',
+		cleanUpAnki: true,
 	},
 	(context) => {
 		it('correctly infers Anki model types from markdown', async () => {
@@ -44,19 +31,21 @@ describeWithFileFixture(
 				  "basic-and-reversed-card.md": "Yanki - Basic (and reversed card)",
 				  "basic-type-in-the-answer-with-empty-frontmatter.md": "Yanki - Basic (type in the answer)",
 				  "basic-type-in-the-answer-with-frontmatter.md": "Yanki - Basic (type in the answer)",
+				  "basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md": "Yanki - Basic (type in the answer)",
 				  "basic-type-in-the-answer-with-multiple-emphasis.md": "Yanki - Basic (type in the answer)",
 				  "basic-type-in-the-answer.md": "Yanki - Basic (type in the answer)",
-				  "basic-with-cloze-like-back.md": "Yanki - Basic",
+				  "basic-with-back-and-no-front-with-empty-frontmatter.md": "Yanki - Basic",
+				  "basic-with-back-and-no-front.md": "Yanki - Basic",
+				  "basic-with-cloze-like-back-and-no-front.md": "Yanki - Basic",
 				  "basic-with-empty-everything.md": "Yanki - Basic",
 				  "basic-with-empty-frontmatter.md": "Yanki - Basic",
-				  "basic-with-no-back.md": "Yanki - Basic",
-				  "basic-with-no-front-empty-frontmatter.md": "Yanki - Basic",
-				  "basic-with-no-front.md": "Yanki - Basic",
-				  "basic-with-type-in-like-answer-and-no-back.md": "Yanki - Basic",
-				  "basic-with-type-in-like-answer-and-no-front.md": "Yanki - Basic",
-				  "basic-with-type-in-like-single-line-with-empty-frontmatter.md": "Yanki - Basic",
-				  "basic-with-type-in-like-single-line-with-frontmatter.md": "Yanki - Basic",
-				  "basic-with-type-in-like-single-line.md": "Yanki - Basic",
+				  "basic-with-front-and-cloze-like-back.md": "Yanki - Basic",
+				  "basic-with-front-and-no-back.md": "Yanki - Basic",
+				  "basic-with-type-in-the-answer-like-back-and-no-front.md": "Yanki - Basic",
+				  "basic-with-type-in-the-answer-like-front-and-no-back.md": "Yanki - Basic",
+				  "basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md": "Yanki - Basic",
+				  "basic-with-type-in-the-answer-like-single-line-with-frontmatter.md": "Yanki - Basic",
+				  "basic-with-type-in-the-answer-like-single-line.md": "Yanki - Basic",
 				  "basic.md": "Yanki - Basic",
 				  "cloze-with-extra-empty.md": "Yanki - Cloze",
 				  "cloze-with-extra.md": "Yanki - Cloze",
@@ -71,7 +60,7 @@ describeWithFileFixture(
 describeWithFileFixture(
 	'basic synchronization',
 	{
-		assetPath: './test/assets/minimal-notes/',
+		assetPath: './test/assets/test-minimal-notes/',
 		cleanUpAnki: true,
 	},
 	(context) => {
@@ -100,6 +89,7 @@ describeWithFileFixture(
 		it('writes anki note IDs to the markdown files frontmatter', async () => {
 			for (const filePath of context.files) {
 				const markdown = await fs.readFile(filePath, 'utf8')
+
 				const note = await getNoteFromMarkdown(markdown, { namespace: context.namespace })
 
 				expect(note.noteId).toBeDefined()
@@ -112,7 +102,7 @@ describeWithFileFixture(
 describeWithFileFixture(
 	'surplus frontmatter',
 	{
-		assetPath: './test/assets/surplus-frontmatter/',
+		assetPath: './test/assets/test-surplus-frontmatter/',
 		cleanUpAnki: true,
 	},
 	(context) => {
@@ -143,7 +133,7 @@ describeWithFileFixture(
 describeWithFileFixture(
 	'complex trees',
 	{
-		assetPath: './test/assets/complex-tree/',
+		assetPath: './test/assets/test-complex-tree/',
 		cleanUpAnki: true,
 	},
 	(context) => {
@@ -162,15 +152,15 @@ describeWithFileFixture(
 
 			expect(pathToDeckMap).toMatchInlineSnapshot(`
 				{
-				  "/complex-tree/deep-contiguous/basic.md": "complex-tree::deep-contiguous",
-				  "/complex-tree/deep-contiguous/within/basic.md": "complex-tree::deep-contiguous::within",
-				  "/complex-tree/deep-contiguous/within/within/basic.md": "complex-tree::deep-contiguous::within::within",
-				  "/complex-tree/deep-contiguous/within/within/within/basic.md": "complex-tree::deep-contiguous::within::within::within",
-				  "/complex-tree/deep-island/within/within/within/basic.md": "complex-tree::deep-island::within::within::within",
-				  "/complex-tree/deep-non-contiguous/within/within/basic.md": "complex-tree::deep-non-contiguous::within::within",
-				  "/complex-tree/sibling-folders/brother/basic.md": "complex-tree::sibling-folders::brother",
-				  "/complex-tree/sibling-folders/sister/basic.md": "complex-tree::sibling-folders::sister",
-				  "/complex-tree/solo-note/basic.md": "complex-tree::solo-note",
+				  "/test-complex-tree/deep-contiguous/basic.md": "test-complex-tree::deep-contiguous",
+				  "/test-complex-tree/deep-contiguous/within/basic.md": "test-complex-tree::deep-contiguous::within",
+				  "/test-complex-tree/deep-contiguous/within/within/basic.md": "test-complex-tree::deep-contiguous::within::within",
+				  "/test-complex-tree/deep-contiguous/within/within/within/basic.md": "test-complex-tree::deep-contiguous::within::within::within",
+				  "/test-complex-tree/deep-island/within/within/within/basic.md": "test-complex-tree::deep-island::within::within::within",
+				  "/test-complex-tree/deep-non-contiguous/within/within/basic.md": "test-complex-tree::deep-non-contiguous::within::within",
+				  "/test-complex-tree/sibling-folders/brother/basic.md": "test-complex-tree::sibling-folders::brother",
+				  "/test-complex-tree/sibling-folders/sister/basic.md": "test-complex-tree::sibling-folders::sister",
+				  "/test-complex-tree/solo-note/basic.md": "test-complex-tree::solo-note",
 				}
 			`)
 
@@ -182,7 +172,7 @@ describeWithFileFixture(
 describeWithFileFixture(
 	'fancy markdown',
 	{
-		assetPath: './test/assets/fancy-markdown/',
+		assetPath: './test/assets/test-fancy-markdown/',
 		cleanUpAnki: true,
 	},
 	(context) => {
@@ -200,7 +190,7 @@ describeWithFileFixture(
 describeWithFileFixture(
 	'idempotent syncing',
 	{
-		assetPath: './test/assets/minimal-notes/',
+		assetPath: './test/assets/test-minimal-notes/',
 		cleanUpAnki: true,
 	},
 	(context) => {

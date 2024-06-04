@@ -23,9 +23,9 @@ export default defineConfig({
 	},
 	test: {
 		root: path.resolve(import.meta.dirname),
-		// Enable serial mode
-		sequence: {
-			concurrent: false,
-		},
+		// // Enable serial mode
+		// sequence: {
+		// 	concurrent: false,
+		// },
 	},
 })

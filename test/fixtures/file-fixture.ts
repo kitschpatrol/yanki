@@ -5,6 +5,9 @@
  */
 
 import { cleanNotes } from '../../src/lib'
+import { createModels, getStyle, updateModelStyle } from '../../src/lib/actions/anki-connect'
+import { defaultCss } from '../../src/lib/model/constants'
+import { yankiModelNames } from '../../src/lib/model/model'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
@@ -38,6 +41,7 @@ export function describeWithFileFixture(
 		}
 		let tempAssetPath: string
 		let initialCardCount: number
+		let originalCss: string
 
 		beforeAll(async () => {
 			// Setup logic before all tests
@@ -46,6 +50,15 @@ export function describeWithFileFixture(
 			await fs.cp(assetPath, tempAssetPath, { force: true, recursive: true })
 			context.files = await globby(`${tempAssetPath}/**/*.md`)
 			expect(context.files.length).toBeGreaterThan(0)
+
+			// Save CSS, so that we're always using the same stuff
+			await createModels(context.yankiConnect)
+			originalCss = await getStyle(context.yankiConnect)
+
+			// Set default CSS
+			for (const name of yankiModelNames) {
+				await updateModelStyle(context.yankiConnect, name, defaultCss, false)
+			}
 
 			// Clean up anki first
 			if (cleanUpAnki) {
@@ -70,6 +83,16 @@ export function describeWithFileFixture(
 		afterAll(async () => {
 			// Teardown logic after all tests
 			// console.log(`Teardown after all tests: ${JSON.stringify(context, undefined, 2)}`)
+
+			// Sleep for 2 seconds, some issues with file writing latency
+			await new Promise((resolve) => {
+				setTimeout(resolve, 1000)
+			})
+
+			// Set default CSS
+			for (const name of yankiModelNames) {
+				await updateModelStyle(context.yankiConnect, name, originalCss, false)
+			}
 
 			// Clean up anki
 			if (cleanUpAnki) {
