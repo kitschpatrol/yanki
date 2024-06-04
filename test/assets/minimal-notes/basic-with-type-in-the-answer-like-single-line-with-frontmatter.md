@@ -1,5 +1,4 @@
 ---
-noteId: 0
 tags:
   - orange
 ---

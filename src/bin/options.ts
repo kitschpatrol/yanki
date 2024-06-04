@@ -1,4 +1,4 @@
-import { yankiDefaultNamespace } from '../lib/model/yanki-note'
+import { yankiDefaultNamespace } from '../lib/model/constants'
 import { type Options } from 'yargs'
 
 export const ankiAutoLaunchOption = {

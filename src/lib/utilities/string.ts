@@ -25,3 +25,10 @@ export function urlToHostAndPort(url: string): { host: string; port: number } {
 export function hostAndPortToUrl(host: string, port: number): string {
 	return `${host}:${port}`
 }
+
+export function cleanClassName(className: string): string {
+	return className
+		.toLowerCase()
+		.replaceAll(/[^\da-z]/gi, '-')
+		.replaceAll(/-+/g, '-')
+}

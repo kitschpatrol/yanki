@@ -1,4 +1,5 @@
-import { type YankiNote, yankiDefaultNamespace } from '../model/yanki-note'
+import { yankiDefaultNamespace } from '../model/constants'
+import { type YankiNote } from '../model/yanki-note'
 import { stripHtmlTags, truncateWithEllipsis } from '../utilities/string'
 import { deleteNotes, deleteOrphanedDecks, getRemoteNotes } from './anki-connect'
 import { deepmerge } from 'deepmerge-ts'

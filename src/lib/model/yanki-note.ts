@@ -2,8 +2,6 @@
 import { type Simplify } from 'type-fest'
 import { type YankiParamsForAction } from 'yanki-connect'
 
-export const yankiDefaultNamespace = 'Yanki CLI'
-
 export const yankiModels = [
 	{
 		cardTemplates: [

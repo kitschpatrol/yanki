@@ -2,6 +2,7 @@
  * Turns a markdown string into a YankiNote object.
  */
 
+import { yankiDefaultCssClassName } from '../model/constants'
 import { type YankiNote } from '../model/yanki-note'
 import { mdastToHtml } from './rehype-utilities'
 import {
@@ -10,10 +11,11 @@ import {
 	getAstFromMarkdown,
 	getFrontmatterFromTree,
 	getYankiModelNameFromTree,
+	removeLastEmphasis,
 	replaceDeleteNodesWithClozeMarkup,
-	splitTreeAtEmphasis,
 	splitTreeAtThematicBreak,
 } from './remark-utilities'
+import { u } from 'unist-builder'
 
 export type NoteFromMarkdownOptions = {
 	namespace: string
@@ -25,11 +27,9 @@ export async function getNoteFromMarkdown(
 ): Promise<YankiNote> {
 	const { namespace, obsidianVault } = options
 
-	// Anki won't create notes if the front field is blank, but we want
+	// Anki won't create notes at all if the front field is blank, but we want
 	// parity between markdown files and notes at all costs, so we'll put
 	// in a placeholder if the front is empty.
-	const emptyNotePlaceholder = '<p><em>(Empty)</em></p>'
-
 	let ast = await getAstFromMarkdown(markdown, {
 		obsidianVault,
 	})
@@ -43,36 +43,56 @@ export async function getNoteFromMarkdown(
 	let back = ''
 
 	switch (modelName) {
-		case `Yanki - Basic`:
-		case `Yanki - Basic (and reversed card)`: {
+		case 'Yanki - Basic':
+		case 'Yanki - Basic (and reversed card)': {
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
 
 			// Anki won't create notes if the front field is blank, but we want parity between markdown files and notes at all costs,
-			// so we'll put in a placeholder if the front is empty.
-			const frontHtml = await mdastToHtml(firstPart)
-			front = frontHtml.length === 0 ? emptyNotePlaceholder : frontHtml
-			back = await mdastToHtml(secondPart)
+			// so we'll put in a placeholder if the front is empty. It's hard to know if the output is really empty without rendering, due to invisible elements.
+
+			// Basic and reverse always needs both sides to have content.
+			// Basic can technically have no back , but it's confusing so we throw in the placeholder.
+			front = await mdastToHtml(firstPart, [yankiDefaultCssClassName, 'front', modelName], true)
+			back = await mdastToHtml(secondPart, [yankiDefaultCssClassName, 'back', modelName], true)
+
 			break
 		}
 
-		case `Yanki - Cloze`: {
+		case 'Yanki - Cloze': {
 			ast = replaceDeleteNodesWithClozeMarkup(ast)
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
 
-			const frontHtml = await mdastToHtml(firstPart)
-			front = frontHtml.length === 0 ? emptyNotePlaceholder : frontHtml
+			// Cloze can't have empty front? But what does that even mean?
+			front = await mdastToHtml(firstPart, [yankiDefaultCssClassName, 'front', modelName], true)
+			back = await mdastToHtml(secondPart, [yankiDefaultCssClassName, 'back', modelName], false)
 
-			back = await mdastToHtml(secondPart)
 			break
 		}
 
-		case `Yanki - Basic (type in the answer)`: {
-			const [firstPart, secondPart] = splitTreeAtEmphasis(ast)
+		case 'Yanki - Basic (type in the answer)': {
+			// Mutates AST
+			const secondPart = removeLastEmphasis(ast)
 
-			const frontHtml = await mdastToHtml(firstPart)
-			front = frontHtml.length === 0 ? emptyNotePlaceholder : frontHtml
+			if (secondPart === undefined) {
+				throw new Error('Could not find emphasis in Basic (type in the answer) note AST.')
+			}
 
-			back = secondPart
+			const firstPart = ast
+
+			// Const [firstPart, secondPart] = splitTreeAtEmphasis(ast)
+			// const secondPartHast = u('root', [u('paragraph', [u('text', secondPart)])])
+			const secondPartHast = u('root', u('paragraph', secondPart.children))
+
+			console.log('----------------- parts -----------------')
+			console.log('----------------- front -----------------')
+			console.log(`firstPart: ${JSON.stringify(firstPart, undefined, 2)}`)
+			console.log('----------------- back -----------------')
+			console.log(`secondPart: ${JSON.stringify(secondPart, undefined, 2)}`)
+
+			front = await mdastToHtml(firstPart, [yankiDefaultCssClassName, 'front', modelName], true)
+
+			// TODO html on the back?
+			back = await mdastToHtml(secondPartHast, [yankiDefaultCssClassName, 'back', modelName], false)
 			break
 		}
 	}

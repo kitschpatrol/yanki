@@ -1,11 +1,15 @@
+import { yankiDefaultNamespace } from '../model/constants'
 import {
 	type YankiModelName,
 	type YankiNote,
-	yankiDefaultNamespace,
 	yankiModelNames,
 	yankiModels,
 } from '../model/yanki-note'
+import githubMarkdownCss from '../style/github-markdown-css'
 import { type YankiConnect } from 'yanki-connect'
+
+// Console.log('----------------------------------')
+// console.log(githubMarkdownCss)
 
 export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryRun = false) {
 	if (dryRun) {
@@ -58,6 +62,9 @@ export async function addNote(
 		return 0
 	}
 
+	console.log('----------------- Adding Note -----------------')
+	console.log(note)
+
 	const newNote = await client.note
 		.addNote({
 			note: {
@@ -76,7 +83,10 @@ export async function addNote(
 						throw new Error(`Model not found: ${note.modelName}`)
 					}
 
-					await client.model.createModel(model)
+					await client.model.createModel({
+						...model,
+						css: githubMarkdownCss,
+					})
 					return addNote(client, note, dryRun)
 				}
 

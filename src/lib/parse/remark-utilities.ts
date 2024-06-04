@@ -5,7 +5,7 @@
 import type { Frontmatter } from '../model/frontmatter'
 import type { YankiModelName } from '../model/yanki-note'
 import remarkObsidianLink from './remark-obsidian-link'
-import type { Node, Parent, Root, Text } from 'mdast'
+import type { Emphasis, Node, Parent, Root, Text } from 'mdast'
 import remarkFlexibleMarkers from 'remark-flexible-markers'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
@@ -34,26 +34,29 @@ export async function getAstFromMarkdown(
 	const processor = unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, [{ anywhere: false, marker: '-', type: 'yaml' }])
-		.use(remarkGfm)
+		.use(remarkGfm, { singleTilde: false })
 		.use(remarkMath)
-		.use(remarkGithubBetaBlockquoteAdmonitions, {
-			titleTextMap(title) {
-				const bareTitle = title.slice(2, -1)
-				const titleMap = {
-					caution: '⚠️ Caution:',
-					important: '❗ Important:',
-					info: 'ℹ️ Info":',
-					note: '✏️ Note:',
-					tip: '💡 Tip:',
-					warning: '⚠️ Warning:',
-				}
+		.use(
+			remarkGithubBetaBlockquoteAdmonitions,
+			// {
+			// titleTextMap(title) {
+			// 	const bareTitle = title.slice(2, -1)
+			// 	const titleMap = {
+			// 		caution: '⚠️ Caution:',
+			// 		important: '❗ Important:',
+			// 		info: 'ℹ️ Info":',
+			// 		note: '✏️ Note:',
+			// 		tip: '💡 Tip:',
+			// 		warning: '⚠️ Warning:',
+			// 	}
 
-				return {
-					checkedTitle: bareTitle,
-					displayTitle: titleMap[bareTitle.toLowerCase() as keyof typeof titleMap] ?? bareTitle,
-				}
-			},
-		})
+			// 	return {
+			// 		checkedTitle: bareTitle,
+			// 		displayTitle: titleMap[bareTitle.toLowerCase() as keyof typeof titleMap] ?? bareTitle,
+			// 	}
+			// },
+			// }
+		)
 		.use(remarkObsidianLink, {
 			toLink(wikiLink) {
 				return {
@@ -130,6 +133,16 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 export function splitTreeAtEmphasis(tree: Root): [Root, string] {
 	let splitIndex: number | undefined
 	let typeInText: string | undefined
+
+	console.log('----------------- tree -----------------')
+	/**
+	 * Description
+	 * @param {${JSON.stringify(tree} `tree
+	 * @param {any} undefined
+	 * @param {any} 2
+	 * @returns {any}
+	 */
+	console.log(`tree: ${JSON.stringify(tree, undefined, 2)}`)
 
 	// Find the index of the last thematicBreak node
 	visit(tree, 'emphasis', (node, index, parent) => {
@@ -229,37 +242,7 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 	// Type in the answer must not have a thematic break at all, and the emphasis
 	// must be the last node, but it also must have more than one line
 
-	// Walk for stats
-	let thematicBreakCount = 0
-	let emphasisCount = 0
-	let contentElementCount = 0
-	visit(ast, (node, index, parent) => {
-		if (parent === null || index === null) {
-			return CONTINUE
-		}
-
-		if (node.type === 'thematicBreak') {
-			thematicBreakCount++
-			return EXIT
-		}
-
-		if (node.type === 'emphasis') {
-			emphasisCount++
-			return SKIP
-		}
-
-		if (node.type === 'yaml') {
-			return SKIP
-		}
-
-		if (isEmptyOrWhitespace(node)) {
-			return CONTINUE
-		}
-
-		contentElementCount++
-	})
-
-	if (thematicBreakCount === 0 && emphasisCount >= 1 && contentElementCount >= 3) {
+	if (!hasThematicBreak(ast) && isLastVisibleNodeEmphasisWithOthers(ast)) {
 		return `Yanki - Basic (type in the answer)`
 	}
 
@@ -310,15 +293,105 @@ export function getFrontmatterFromTree(ast: Root): Frontmatter {
 	return parsedYaml
 }
 
-// Utility function to check if a node is empty, whitespace, or a break
-function isEmptyOrWhitespace(node: Node): boolean {
-	if (node.type === 'break') {
-		return true
+function hasThematicBreak(ast: Root): boolean {
+	let hasThematicBreak = false
+
+	visit(ast, 'thematicBreak', () => {
+		hasThematicBreak = true
+		return EXIT
+	})
+
+	return hasThematicBreak
+}
+
+function isLastVisibleNodeEmphasisWithOthers(ast: Root): boolean {
+	let lastVisibleNode: (Emphasis | Text) | undefined
+	let visibleCount = 0
+
+	// Visit all nodes, tracking the last node with visible content and counting visible nodes
+	visit(ast, (node) => {
+		if (node.type === 'text' && node.value.trim() !== '') {
+			lastVisibleNode = node
+			visibleCount++ // Increment count for every visible node
+		} else if (
+			node.type === 'emphasis' &&
+			node.children.some((child) => child.type === 'text' && child.value.trim() !== '')
+		) {
+			lastVisibleNode = node
+			visibleCount++ // Increment count for every visible node
+			return SKIP
+		}
+	})
+
+	// Check if the last visible node is an emphasis and there are other visible nodes
+
+	console.log('----------------- last visible node -----------------')
+	console.log(lastVisibleNode?.type)
+
+	return lastVisibleNode !== undefined && lastVisibleNode.type === 'emphasis' && visibleCount > 1
+}
+
+// Export function removeLastEmphasis(ast: Root): Emphasis | undefined {
+// 	let lastEmphasisNode: Emphasis | undefined
+// 	let lastEmphasisParent: Parent | undefined
+// 	let lastEmphasisIndex: number | undefined
+// 	let visibleCount = 0
+
+// 	// Visit all nodes to track the last emphasis with visibility and count visible nodes
+// 	visit(ast, (node, index, parent) => {
+// 		if (parent === undefined || index === undefined) {
+// 			return CONTINUE
+// 		}
+
+// 		if (node.type === 'text' && node.value.trim() !== '') {
+// 			visibleCount++ // Increment for every visible text node
+// 			lastEmphasisNode = undefined // Reset last emphasis if a visible text follows
+// 		} else if (
+// 			node.type === 'emphasis' &&
+// 			node.children.some((child) => child.type === 'text' && child.value.trim() !== '')
+// 		) {
+// 			lastEmphasisNode = node
+// 			lastEmphasisParent = parent
+// 			lastEmphasisIndex = index
+// 			visibleCount++ // Consider emphasis with visible text as visible
+// 		}
+// 	})
+
+// 	// Remove the last emphasis node if it exists and there are other visible nodes
+// 	if (
+// 		lastEmphasisParent &&
+// 		lastEmphasisNode &&
+// 		typeof lastEmphasisIndex === 'number' &&
+// 		visibleCount > 1
+// 	) {
+// 		lastEmphasisParent.children.splice(lastEmphasisIndex, 1)
+// 		return lastEmphasisNode // Return the removed node
+// 	}
+
+// 	return undefined
+// }
+
+export function removeLastEmphasis(ast: Root): Emphasis | undefined {
+	let lastEmphasisNode: Emphasis | undefined
+	let lastEmphasisParent: Parent | undefined
+	let lastEmphasisIndex: number | undefined
+
+	// Visit all emphasis nodes and track the last one
+	visit(ast, 'emphasis', (node, index, parent) => {
+		if (parent === undefined || index === undefined || node.type !== 'emphasis') {
+			return CONTINUE
+		}
+
+		lastEmphasisNode = node
+		lastEmphasisParent = parent
+		lastEmphasisIndex = index
+	})
+
+	// Remove the last emphasis node if it exists
+	if (lastEmphasisParent && lastEmphasisNode && typeof lastEmphasisIndex === 'number') {
+		lastEmphasisParent.children.splice(lastEmphasisIndex, 1)
+		return lastEmphasisNode // Return the removed node
 	}
 
-	if (node.type === 'text' && 'value' in node && typeof node.value === 'string') {
-		return node.value.trim().length > 0
-	}
-
-	return false
+	return undefined
 }

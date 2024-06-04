@@ -1,7 +1,4 @@
 ---
----
-
----
 
 I'm the back of the card
 

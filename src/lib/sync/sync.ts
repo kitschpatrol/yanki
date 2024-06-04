@@ -1,5 +1,6 @@
+import { yankiDefaultNamespace } from '../model/constants'
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
-import { type YankiNote, yankiDefaultNamespace } from '../model/yanki-note'
+import { type YankiNote } from '../model/yanki-note'
 import { getNoteFromMarkdown } from '../parse/parse'
 import { environment } from '../utilities/platform'
 import { capitalize } from '../utilities/string'
@@ -27,6 +28,8 @@ export type SyncedNote = {
 
 export type SyncOptions = {
 	ankiConnectOptions: YankiConnectOptions
+	// Not yet
+	// css: 'github' | string | undefined
 	defaultDeckName: string
 	dryRun: boolean
 	namespace: string
@@ -36,6 +39,8 @@ export type SyncOptions = {
 
 export const defaultSyncOptions: SyncOptions = {
 	ankiConnectOptions: defaultYankiConnectOptions,
+	// Not yet
+	// css: 'github',
 	defaultDeckName: 'Yanki',
 	dryRun: false,
 	namespace: yankiDefaultNamespace,
