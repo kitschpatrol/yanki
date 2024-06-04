@@ -8,9 +8,20 @@ export const defaultCss = `.card {
   background-color: white;
 }`
 
+/**
+ * Whether to require changes to notes, models, or decks before invoking an
+ * AnkiWeb sync. Seems like a good idea, but this is tricky... because if you
+ * change the AnkiWeb flag after doing a sync, and haven't changed any files,
+ * you won't end up pushing changes to AnkiWeb, which seems to contradict
+ * expectations even though it would be more performant in the typical case.
+ *
+ * Still requires the AnkiWeb flag to be true.
+ * */
+export const yankiSyncToAnkiWebEvenIfUnchanged = true
+
 export const yankiDefaultCssClassName = 'yanki'
 
-export const yankiDefaultNamespace = 'Yanki CLI'
+export const yankiDefaultNamespace = 'Yanki MD'
 
 export const yankiDefaultEmptyNotePlaceholderHast = u('root', [
 	u(

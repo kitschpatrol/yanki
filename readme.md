@@ -21,11 +21,11 @@
 
 ## Overview
 
-Yanki MD simply syncs a folder of Markdown notes to Anki.
-
-The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
+Yanki simply syncs a folder of Markdown notes to Anki.
 
 This library leverages the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) plugin.
+
+The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
 
 ## Quick start
 
@@ -43,11 +43,13 @@ This will turn the folder's Markdown files into Anki notes and send them up to t
 
 Avoid the complexity of mixing and matching multi-note and single-note syntaxes. One local Markdown file always yields one Anki note.
 
-### Folder hierarchy = Anki deck hierarchy
+### Local folder hierarchy = Anki deck hierarchy
 
-Yanki MD uses the source Markdown file's parent directory name as the deck name. Complex folder hierarchies are also supported — Anki decks will be created and nested as needed to match the structure of the local file system.
+Yanki uses the source Markdown file's parent directory name as the deck name. Complex folder hierarchies are also supported — Anki decks will be created and nested as needed to match the structure of the local file system.
 
-### Leverage the default Anki note types
+### Embrace Anki's default note types
+
+More note types, more problems.
 
 Yanki _only_ supports turning Markdown into the "Basic", "Basic (and reversed card)" , "Basic (type in the answer)", and "Cloze" note types that ship as defaults in the Anki App.
 
@@ -75,11 +77,13 @@ Optionally, you can add a `tags` array to your Markdown file's frontmatter and h
 
 ### Intelligent synchronization
 
-Your local Markdown files are the single point of truth for what will and up in Anki, but Yanki MD knows to leave your other Anki notes alone.
+Your local Markdown files are the single point of truth for what will and up in Anki, but Yanki knows to leave your other Anki notes alone.
 
-When you edit a local markdown note, Yanki MD makes every effort to update rather than delete it in the Anki database so that progress is preserved.
+When you edit a local markdown note, Yanki makes every effort to update rather than delete it in the Anki database so that progress is preserved.
 
-But when you do want to delete something, it's as simple as deleting the local Markdown note from the file system and running `yanki sync` to remove it from the Anki database. Protections are in place to prevent deleting Anki notes that weren't initially created by Yanki MD.
+But when you do want to delete something, it's as simple as deleting the local Markdown note from the file system and running `yanki sync` to remove it from the Anki database. Protections are in place to prevent deleting Anki notes that weren't initially created by Yanki.
+
+If you use [AnkiWeb](https://ankiweb.net/) to sync your notes to the cloud, Yanki will also trigger this next step in the sync, automating the flow from Markdown → Anki → AnkiWeb in one shot.
 
 ### Fancy markdown
 
@@ -92,9 +96,13 @@ An extended palette of markdown syntax is available out of the box:
 - [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via [MathJax](https://www.mathjax.org)
 - Support for the [`==highlights==`](https://github.com/ipikuka/remark-flexible-markers) syntax.
 
+### Custom styles
+
+Yanki uses Anki's built-in CSS stylesheet to style cards by default, but it makes it simple to set a custom stylesheet for all of your Yanki-managed notes without having to go on a click-quest in the Anki user interface.
+
 ## Markdown note types
 
-Yanki MD automatically infers the _type_ of Note you'd like to create in Anki based on the presence or absence of certain element in your Markdown files.
+Yanki automatically infers the _type_ of Note you'd like to create in Anki based on the presence or absence of certain element in your Markdown files.
 
 The rules were designed with the semantic and visual nature of Markdown in mind.
 
@@ -104,7 +112,7 @@ You're free to use additional Markdown in your note files to style and structure
 
 ### Basic
 
-A basic card is created from any file with a `---`:
+A **basic** card is created from any file with a `---`:
 
 ```md
 This is the front of the card
@@ -116,7 +124,7 @@ This is the back of the card
 
 ### Basic (and reversed card)
 
-Doubling up the `---` identifies the note as being reversible (and will result in the generation of two cards in Anki).
+Doubling up the `---` identifies the note as being **reversible** (and will result in the generation of two cards in Anki).
 
 _Mnemonic: Twice the `---` for twice the cards._
 
@@ -146,7 +154,7 @@ _It just smells funny_
 
 ### Cloze
 
-Text that is `~~struck through~~` with the [somewhat esoteric double-tilde syntax](https://github.github.com/gfm/#strikethrough-extension-) will be hidden in the resulting cloze Note:
+Text that is `~~struck through~~` with the [somewhat esoteric double-tilde syntax](https://github.github.com/gfm/#strikethrough-extension-) will be hidden in the resulting _cloze_ card:
 
 _Mnemonic: The `~~strike through~~` implies redaction._
 
@@ -169,11 +177,11 @@ Clozing a block element is not currently supported.
 ## Getting started
 
 > \[!WARNING]
-> Yanki MD is still in develop. Please back up your Anki library if you intend to use it, and please expect changes to commands and the exported APIs until the 1.0.0 release.
+> Yanki is still in development. Please back up your Anki library if you intend to use it, and please expect changes to commands and the exported APIs until the 1.0.0 release.
 
 ### Dependencies
 
-The `yanki` CLI tool requires Node 18+. The exported TypeScript / JavaScript APIs are ESM-only and share the Node 18+ requirement. Yanki MD is implemented in TypeScript and bundles a complete set of type definitions.
+The `yanki` CLI tool requires Node 18+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
 
 The [Anki](https://apps.ankiweb.net) desktop app with the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on installed and configured is also required to do anything useful with the library.
 
@@ -268,16 +276,17 @@ yanki sync <directory> [options]
 | ------------------- | ------------------------------------------------------------------------ | -------- |
 | `directory`         | The path to the local directory of Markdown files to sync. _(Required.)_ | `string` |
 
-| Option               | Alias | Description                                                                                                                     | Type      | Default                   |
-| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
-| `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                 | `boolean` | `false`                   |
-| `--namespace`        | `-n`  | Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.      | `string`  | "Yanki CLI"               |
-| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information. | `string`  | `"http://127.0.0.1:8765"` |
-| `--anki-auto-launch` |       | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                   | `boolean` | `false`                   |
-| `--json`             |       | Output the sync report as JSON.                                                                                                 | `boolean` | `false`                   |
-| `--verbose`          |       | Enable verbose logging.                                                                                                         | `boolean` | `false`                   |
-| `--help`             | `-h`  | Show help                                                                                                                       | `boolean` |                           |
-| `--version`          | `-v`  | Show version number                                                                                                             | `boolean` |                           |
+| Option               | Alias | Description                                                                                                                                                                                                                                        | Type      | Default                   |
+| -------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
+| `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                    | `boolean` | `false`                   |
+| `--namespace`        | `-n`  | Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.                                                                                                                         | `string`  | "Yanki MD"                |
+| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                    | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-auto-launch` | `-l`  | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                                                                                                                                      | `boolean` | `false`                   |
+| `--anki-web`         | `-w`  | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app. | `boolean` | `true`                    |
+| `--json`             |       | Output the sync report as JSON.                                                                                                                                                                                                                    | `boolean` | `false`                   |
+| `--verbose`          |       | Enable verbose logging.                                                                                                                                                                                                                            | `boolean` | `false`                   |
+| `--help`             | `-h`  | Show help                                                                                                                                                                                                                                          | `boolean` |                           |
+| `--version`          | `-v`  | Show version number                                                                                                                                                                                                                                | `boolean` |                           |
 
 #### Subcommand: `yanki list`
 
@@ -291,9 +300,9 @@ yanki list
 
 | Option               | Alias | Description                                                                                                                                                                                                | Type      | Default                   |
 | -------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
-| `--namespace`        | `-n`  | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to list all Yanki-created notes in the Anki database. | `string`  | "Yanki CLI"               |
+| `--namespace`        | `-n`  | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to list all Yanki-created notes in the Anki database. | `string`  | "Yanki MD"                |
 | `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                            | `string`  | `"http://127.0.0.1:8765"` |
-| `--anki-auto-launch` |       | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                                                                                              | `boolean` | `false`                   |
+| `--anki-auto-launch` | `-l`  | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                                                                                              | `boolean` | `false`                   |
 | `--json`             |       | Output the list of notes as JSON to stdout.                                                                                                                                                                | `boolean` | `false`                   |
 | `--help`             | `-h`  | Show help                                                                                                                                                                                                  | `boolean` |                           |
 | `--version`          | `-v`  | Show version number                                                                                                                                                                                        | `boolean` |                           |
@@ -308,16 +317,17 @@ Usage:
 yanki delete
 ```
 
-| Option               | Alias | Description                                                                                                                                                                                                  | Type      | Default                   |
-| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ------------------------- |
-| `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                              | `boolean` | `false`                   |
-| `--namespace`        | `-n`  | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to delete all Yanki-created notes in the Anki database. | `string`  | "Yanki CLI"               |
-| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                              | `string`  | `"http://127.0.0.1:8765"` |
-| `--anki-auto-launch` |       | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                                                                                                | `boolean` | `false`                   |
-| `--json`             |       | Output the list of deleted notes as JSON to stdout.                                                                                                                                                          | `boolean` | `false`                   |
-| `--verbose`          |       | Enable verbose logging.                                                                                                                                                                                      | `boolean` | `false`                   |
-| `--help`             | `-h`  | Show help                                                                                                                                                                                                    | `boolean` |                           |
-| `--version`          | `-v`  | Show version number                                                                                                                                                                                          | `boolean` |                           |
+| Option               | Alias | Description                                                                                                                                                                                                                                        | Type      | Default                   |
+| -------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
+| `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                    | `boolean` | `false`                   |
+| `--namespace`        | `-n`  | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to delete all Yanki-created notes in the Anki database.                                       | `string`  | "Yanki MD"                |
+| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                    | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-auto-launch` | `-l`  | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                                                                                                                                      | `boolean` | `false`                   |
+| `--anki-web`         | `-w`  | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app. | `boolean` | `true`                    |
+| `--json`             |       | Output the list of deleted notes as JSON to stdout.                                                                                                                                                                                                | `boolean` | `false`                   |
+| `--verbose`          |       | Enable verbose logging.                                                                                                                                                                                                                            | `boolean` | `false`                   |
+| `--help`             | `-h`  | Show help                                                                                                                                                                                                                                          | `boolean` |                           |
+| `--version`          | `-v`  | Show version number                                                                                                                                                                                                                                | `boolean` |                           |
 
 #### Subcommand: `yanki style`
 
@@ -329,16 +339,17 @@ Usage:
 yanki style
 ```
 
-| Option               | Alias | Description                                                                                                                     | Type      | Default                   |
-| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
-| `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                 | `boolean` | `false`                   |
-| `--css`              | `-c`  | Path to the CSS stylesheet to set for all Yanki-created notes. If not provided, the default Anki stylesheet is used.            | `string`  |                           |
-| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information. | `string`  | `"http://127.0.0.1:8765"` |
-| `--anki-auto-launch` |       | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                   | `boolean` | `false`                   |
-| `--json`             |       | Output the list of updated note types / models as JSON to stdout.                                                               | `boolean` | `false`                   |
-| `--verbose`          |       | Enable verbose logging.                                                                                                         | `boolean` | `false`                   |
-| `--help`             | `-h`  | Show help                                                                                                                       | `boolean` |                           |
-| `--version`          | `-v`  | Show version number                                                                                                             | `boolean` |                           |
+| Option               | Alias | Description                                                                                                                                                                                                                                        | Type      | Default                   |
+| -------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
+| `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                    | `boolean` | `false`                   |
+| `--css`              | `-c`  | Path to the CSS stylesheet to set for all Yanki-created notes. If not provided, the default Anki stylesheet is used.                                                                                                                               | `string`  |                           |
+| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                    | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-auto-launch` | `-l`  | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                                                                                                                                      | `boolean` | `false`                   |
+| `--anki-web`         | `-w`  | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app. | `boolean` | `true`                    |
+| `--json`             |       | Output the list of updated note types / models as JSON to stdout.                                                                                                                                                                                  | `boolean` | `false`                   |
+| `--verbose`          |       | Enable verbose logging.                                                                                                                                                                                                                            | `boolean` | `false`                   |
+| `--help`             | `-h`  | Show help                                                                                                                                                                                                                                          | `boolean` |                           |
+| `--version`          | `-v`  | Show version number                                                                                                                                                                                                                                | `boolean` |                           |
 
 <!-- /cli-help -->
 
@@ -364,19 +375,31 @@ cleanNotes(options: CleanOptions): Promise<CleanReport>
 
 See the source code for additional inline documentation.
 
-## Background
+## Advanced Features
 
-### Motivation
+### Namespaces
+
+TODO
+
+### Styles
+
+TODO
+
+### Browser environments
+
+TODO
+
+## Background
 
 ### Implementation notes
 
-The excellent [unified](https://unifiedjs.com) / [remark](https://remark.js.org) / mdast libraries are used extensively to traverse and render the underlying Markdown ASTs.
+The excellent [unified](https://unifiedjs.com) / [remark](https://remark.js.org) / [rehype](https://github.com/rehypejs/rehype) libraries are used extensively to traverse and render the underlying Markdown ASTs.
 
 [Anki-Connect](https://foosoft.net/projects/anki-connect/) provides access to Anki's database.
 
 For type safety, access to Anki-Connect is managed through my wrapper library, [yanki-connect](https://github.com/kitschpatrol/yanki-connect).
 
-Behind the scenes, Yanki MD creates new note type models to match the four default Anki types. It keeps track of the notes it has ownership of via a hidden `YankiNamespace` field in each note.
+Behind the scenes, Yanki creates new note type models to match the four default Anki types. It keeps track of the notes it has ownership of via a hidden `YankiNamespace` field in each note.
 
 ### Other projects
 
@@ -388,9 +411,13 @@ Behind the scenes, Yanki MD creates new note type models to match the four defau
 
 ## The future
 
-Either embedding media assets or implementing integration with Anki's media library could be helpful for offline study. (Though externally hosted image links seem generally fine for now.)
+Possible features on the horizon include:
 
-Support for custom CSS would be nice as well.
+1. Including some built-in CSS stylesheet options might be nice, since Anki's defaults can't always anticipate the kinds of HTML you're likely to generate from Markdown.
+
+2. Either embedding media assets or implementing integration with Anki's media library could be helpful for offline study. (Though externally hosted image links seem generally fine for now.)
+
+3. It would be nice to find a way to talk to the Anki database that doesn't require the Anki app to be running, but my research hasn't yet turned up anything as robust and reliable as Anki-Connect for this purpose.
 
 ## Maintainers
 
@@ -399,6 +426,8 @@ Support for custom CSS would be nice as well.
 ## Acknowledgements
 
 Thanks to Alex Yatskov for creating [Anki-Connect](https://foosoft.net/projects/anki-connect/).
+
+Thanks to the [unified team](https://github.com/orgs/unifiedjs/people) for their superb ecosystem of AST tools.
 
 <!-- contributing -->
 

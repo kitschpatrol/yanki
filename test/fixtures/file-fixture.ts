@@ -64,6 +64,7 @@ export function describeWithFileFixture(
 			if (cleanUpAnki) {
 				await cleanNotes({
 					ankiConnectOptions: { autoLaunch: true },
+					ankiWeb: false,
 					dryRun: false,
 					namespace: context.namespace,
 				})
@@ -98,6 +99,7 @@ export function describeWithFileFixture(
 			if (cleanUpAnki) {
 				await cleanNotes({
 					ankiConnectOptions: { autoLaunch: true },
+					ankiWeb: false,
 					dryRun: false,
 					namespace: context.namespace,
 				})

@@ -1,4 +1,4 @@
-import { defaultCss } from '../model/constants'
+import { defaultCss, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
 import { yankiModelNames } from '../model/model'
 import { updateModelStyle } from './anki-connect'
 import { deepmerge } from 'deepmerge-ts'
@@ -9,17 +9,26 @@ import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } fr
 
 export type StyleOptions = {
 	ankiConnectOptions: YankiConnectOptions
+	/**
+	 * Automatically sync any changes to AnkiWeb after Yanki has finished syncing
+	 * locally. If false, only local Anki data is updated and you must manually
+	 * invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync"
+	 * button in the Anki app.
+	 */
+	ankiWeb: boolean
 	css: string
 	dryRun: boolean
 }
 
 export const defaultStyleOptions: StyleOptions = {
 	ankiConnectOptions: defaultYankiConnectOptions,
+	ankiWeb: false,
 	css: defaultCss,
 	dryRun: false,
 }
 
 export type StyleReport = {
+	ankiWeb: boolean
 	dryRun: boolean
 	duration: number
 	models: Array<{
@@ -32,7 +41,7 @@ export async function setStyle(options: PartialDeep<StyleOptions>): Promise<Styl
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, css, dryRun } = deepmerge(defaultStyleOptions, options ?? {})
+	const { ankiConnectOptions, ankiWeb, css, dryRun } = deepmerge(defaultStyleOptions, options ?? {})
 
 	const client = new YankiConnect(ankiConnectOptions)
 
@@ -47,7 +56,14 @@ export async function setStyle(options: PartialDeep<StyleOptions>): Promise<Styl
 		})
 	}
 
+	// AnkiWeb sync
+	const isChanged = modelsReport.some((model) => model.action !== 'unchanged')
+	if (!dryRun && ankiWeb && (isChanged || yankiSyncToAnkiWebEvenIfUnchanged)) {
+		await client.miscellaneous.sync()
+	}
+
 	return {
+		ankiWeb,
 		dryRun,
 		duration: performance.now() - startTime,
 		models: modelsReport,

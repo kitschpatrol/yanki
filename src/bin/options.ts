@@ -3,9 +3,20 @@ import { type Options } from 'yargs'
 
 export const ankiAutoLaunchOption = {
 	'anki-auto-launch': {
+		alias: 'l',
 		default: false,
 		describe:
 			"Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)",
+		type: 'boolean',
+	},
+} as const satisfies Record<string, Options>
+
+export const ankiWebOption = {
+	'anki-web': {
+		alias: 'w',
+		default: true, // Overrides library default!
+		describe:
+			'Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app.',
 		type: 'boolean',
 	},
 } as const satisfies Record<string, Options>

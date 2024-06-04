@@ -1,4 +1,4 @@
-import { yankiDefaultNamespace } from '../model/constants'
+import { yankiDefaultNamespace, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
 import { type YankiNote } from '../model/note'
 import { getNoteFromMarkdown } from '../parse/parse'
@@ -28,6 +28,13 @@ export type SyncedNote = {
 
 export type SyncOptions = {
 	ankiConnectOptions: YankiConnectOptions
+	/**
+	 * Automatically sync any changes to AnkiWeb after Yanki has finished syncing
+	 * locally. If false, only local Anki data is updated and you must manually
+	 * invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync"
+	 * button in the Anki app.
+	 */
+	ankiWeb: boolean
 	defaultDeckName: string
 	dryRun: boolean
 	namespace: string
@@ -37,6 +44,7 @@ export type SyncOptions = {
 
 export const defaultSyncOptions: SyncOptions = {
 	ankiConnectOptions: defaultYankiConnectOptions,
+	ankiWeb: false,
 	defaultDeckName: 'Yanki',
 	dryRun: false,
 	namespace: yankiDefaultNamespace,
@@ -44,6 +52,7 @@ export const defaultSyncOptions: SyncOptions = {
 }
 
 export type SyncReport = {
+	ankiWeb: boolean
 	deletedDecks: string[]
 	dryRun: boolean
 	duration: number
@@ -58,6 +67,7 @@ export type SyncReport = {
  * @returns The synced notes (with new IDs where applicable), plus some stats
  * about the sync @throws
  */
+// eslint-disable-next-line complexity
 export async function syncNotes(
 	allLocalNotes: YankiNote[],
 	options?: PartialDeep<SyncOptions>,
@@ -65,7 +75,7 @@ export async function syncNotes(
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, defaultDeckName, dryRun, namespace } = deepmerge(
+	const { ankiConnectOptions, ankiWeb, defaultDeckName, dryRun, namespace } = deepmerge(
 		defaultSyncOptions,
 		options ?? {},
 	)
@@ -180,7 +190,14 @@ export async function syncNotes(
 
 	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, deletedNotes, dryRun)
 
+	// AnkiWeb sync
+	const isChanged = deletedDecks.length > 0 || synced.some((note) => note.action !== 'unchanged')
+	if (!dryRun && ankiWeb && (isChanged || yankiSyncToAnkiWebEvenIfUnchanged)) {
+		await client.miscellaneous.sync()
+	}
+
 	return {
+		ankiWeb,
 		deletedDecks,
 		dryRun,
 		duration: performance.now() - startTime,
@@ -241,7 +258,7 @@ export async function syncFiles(
 		allLocalNotes.push(note)
 	}
 
-	const { deletedDecks, dryRun, synced } = await syncNotes(allLocalNotes, resolvedOptions)
+	const { ankiWeb, deletedDecks, dryRun, synced } = await syncNotes(allLocalNotes, resolvedOptions)
 
 	// Write IDs to the local files as necessary
 	// Can't just get markdown from the note because there might be extra
@@ -278,6 +295,7 @@ export async function syncFiles(
 		}))
 
 	return {
+		ankiWeb,
 		deletedDecks,
 		dryRun,
 		duration: performance.now() - startTime,

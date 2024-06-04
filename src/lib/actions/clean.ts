@@ -1,4 +1,4 @@
-import { yankiDefaultNamespace } from '../model/constants'
+import { yankiDefaultNamespace, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
 import { type YankiNote } from '../model/note'
 import { stripHtmlTags, truncateWithEllipsis } from '../utilities/string'
 import { deleteNotes, deleteOrphanedDecks, getRemoteNotes } from './anki-connect'
@@ -10,17 +10,26 @@ import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } fr
 
 export const defaultCleanOptions: CleanOptions = {
 	ankiConnectOptions: defaultYankiConnectOptions,
+	ankiWeb: false,
 	dryRun: false,
 	namespace: yankiDefaultNamespace,
 }
 
 export type CleanOptions = {
 	ankiConnectOptions: YankiConnectOptions
+	/**
+	 * Automatically sync any changes to AnkiWeb after Yanki has finished syncing
+	 * locally. If false, only local Anki data is updated and you must manually
+	 * invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync"
+	 * button in the Anki app.
+	 */
+	ankiWeb: boolean
 	dryRun: boolean
 	namespace: string
 }
 
 export type CleanReport = {
+	ankiWeb: boolean
 	decks: string[]
 	deleted: YankiNote[]
 	dryRun: boolean
@@ -41,7 +50,10 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, dryRun, namespace } = deepmerge(defaultCleanOptions, options ?? {})
+	const { ankiConnectOptions, ankiWeb, dryRun, namespace } = deepmerge(
+		defaultCleanOptions,
+		options ?? {},
+	)
 
 	const client = new YankiConnect(ankiConnectOptions)
 
@@ -51,7 +63,14 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	await deleteNotes(client, remoteNotes, dryRun)
 	const deletedDecks = await deleteOrphanedDecks(client, [], remoteNotes, dryRun)
 
+	// AnkiWeb sync
+	const isChanged = remoteNotes.length > 0 || deletedDecks.length > 0
+	if (!dryRun && ankiWeb && (isChanged || yankiSyncToAnkiWebEvenIfUnchanged)) {
+		await client.miscellaneous.sync()
+	}
+
 	return {
+		ankiWeb,
 		decks: deletedDecks,
 		deleted: remoteNotes,
 		dryRun,

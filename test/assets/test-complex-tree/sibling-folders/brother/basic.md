@@ -4,4 +4,4 @@ tags:
   - yes
 ---
 
-I should be in the deck 'another'
+I should be in the deck 'brother'

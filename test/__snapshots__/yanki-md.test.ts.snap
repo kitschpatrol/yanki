@@ -2,6 +2,7 @@
 
 exports[`basic synchronization > synchronizes notes to anki and has he correct deck name 1`] = `
 {
+  "ankiWeb": false,
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,
@@ -403,6 +404,7 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
 
 exports[`complex trees > makes the right decisions about deck naming 2`] = `
 {
+  "ankiWeb": false,
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,
@@ -415,7 +417,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
         "deckName": "test-complex-tree::deep-contiguous",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I'm just a note, you know?</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'deep-contiguous'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
@@ -430,7 +432,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
         "deckName": "test-complex-tree::solo-note",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I'm just a note, you know?</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
@@ -463,7 +465,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
         "deckName": "test-complex-tree::sibling-folders::brother",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'brother'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
@@ -481,7 +483,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
         "deckName": "test-complex-tree::sibling-folders::sister",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'sister'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
@@ -517,7 +519,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
         "deckName": "test-complex-tree::deep-non-contiguous::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I'm just a note, you know?</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
@@ -532,7 +534,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
         "deckName": "test-complex-tree::deep-contiguous::within::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
@@ -550,7 +552,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
         "deckName": "test-complex-tree::deep-island::within::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I'm just a note, you know?</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
@@ -564,6 +566,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
 
 exports[`fancy markdown > handles fancy markdown 1`] = `
 {
+  "ankiWeb": false,
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,
@@ -875,6 +878,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
 
 exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatter 1`] = `
 {
+  "ankiWeb": false,
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,

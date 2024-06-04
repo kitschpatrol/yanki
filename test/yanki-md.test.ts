@@ -65,7 +65,11 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('synchronizes notes to anki and has he correct deck name', async () => {
-			const results = await syncFiles(context.files, { namespace: context.namespace })
+			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+			})
 
 			// Check the stuff that's elided from the stable results snapshot
 			expect(results.duration).toBeDefined()
@@ -107,7 +111,11 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('preserves and merges unrelated surplus frontmatter', async () => {
-			const results = await syncFiles(context.files, { namespace: context.namespace })
+			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+			})
 			expect(stableResults(results)).toMatchSnapshot()
 
 			for (const filePath of context.files) {
@@ -138,7 +146,11 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('makes the right decisions about deck naming', async () => {
-			const results = await syncFiles(context.files, { namespace: context.namespace })
+			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+			})
 
 			// Log inline for legibility
 			const pathToDeckMap: Record<string, string | undefined> = {}
@@ -150,7 +162,7 @@ describeWithFileFixture(
 				pathToDeckMap[cleanPath] = synced.note.deckName
 			}
 
-			expect(pathToDeckMap).toMatchInlineSnapshot(`
+			expect(sortKeys(pathToDeckMap, { deep: true })).toMatchInlineSnapshot(`
 				{
 				  "/test-complex-tree/deep-contiguous/basic.md": "test-complex-tree::deep-contiguous",
 				  "/test-complex-tree/deep-contiguous/within/basic.md": "test-complex-tree::deep-contiguous::within",
@@ -178,6 +190,8 @@ describeWithFileFixture(
 	(context) => {
 		it('handles fancy markdown', async () => {
 			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
 			})
@@ -197,6 +211,8 @@ describeWithFileFixture(
 		it('idempotent syncing', async () => {
 			// First sync should be all "created"
 			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
 			})
@@ -210,6 +226,8 @@ describeWithFileFixture(
 			`)
 
 			const secondSyncResults = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
 			})

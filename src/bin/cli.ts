@@ -7,6 +7,7 @@ import { urlToHostAndPort } from '../lib/utilities/string'
 import {
 	ankiAutoLaunchOption,
 	ankiConnectOption,
+	ankiWebOption,
 	dryRun,
 	jsonOption,
 	namespaceOption,
@@ -49,11 +50,13 @@ await yargsInstance
 				)
 				.option(ankiConnectOption)
 				.option(ankiAutoLaunchOption)
+				.option(ankiWebOption)
 				.option(jsonOption('Output the sync report as JSON.'))
 				.option(verboseOption),
 		async ({
 			ankiAutoLaunch,
 			ankiConnect,
+			ankiWeb,
 			directory,
 			dryRun,
 			json,
@@ -81,6 +84,7 @@ await yargsInstance
 					host,
 					port,
 				},
+				ankiWeb,
 				dryRun,
 				namespace,
 			})
@@ -143,9 +147,10 @@ await yargsInstance
 				)
 				.options(ankiConnectOption)
 				.options(ankiAutoLaunchOption)
+				.option(ankiWebOption)
 				.option(jsonOption('Output the list of deleted notes as JSON to stdout.'))
 				.option(verboseOption),
-		async ({ ankiAutoLaunch, ankiConnect, dryRun, json, namespace, verbose }) => {
+		async ({ ankiAutoLaunch, ankiConnect, ankiWeb, dryRun, json, namespace, verbose }) => {
 			const { host, port } = urlToHostAndPort(ankiConnect)
 
 			const report = await cleanNotes({
@@ -154,6 +159,7 @@ await yargsInstance
 					host,
 					port,
 				},
+				ankiWeb,
 				dryRun,
 				namespace,
 			})
@@ -183,9 +189,10 @@ await yargsInstance
 				})
 				.options(ankiConnectOption)
 				.options(ankiAutoLaunchOption)
+				.option(ankiWebOption)
 				.option(jsonOption('Output the list of updated note types / models as JSON to stdout.'))
 				.option(verboseOption),
-		async ({ ankiAutoLaunch, ankiConnect, css, dryRun, json, verbose }) => {
+		async ({ ankiAutoLaunch, ankiConnect, ankiWeb, css, dryRun, json, verbose }) => {
 			const { host, port } = urlToHostAndPort(ankiConnect)
 
 			let loadedCss: string | undefined
@@ -216,6 +223,7 @@ await yargsInstance
 					host,
 					port,
 				},
+				ankiWeb,
 				css: loadedCss ?? undefined,
 				dryRun,
 			})
