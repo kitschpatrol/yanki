@@ -250,6 +250,7 @@ yanki [command]
 | `sync`   | `<directory>` `[options]` | Perform a one-way synchronization from a local directory of Markdown files to the Anki database. Any Markdown files in subdirectories are included as well. _(Default command.)_                                                         |
 | `list`   |                           | Utility command to list Yanki-created notes in the Anki database.                                                                                                                                                                        |
 | `delete` |                           | Utility command to manually delete Yanki-created notes in the Anki database. This is for advanced use cases, usually the `sync` command takes care of deleting files from Anki Database once they're removed from the local file system. |
+| `style`  |                           | Utility command to set the CSS stylesheet for all present and future Yanki-created notes.                                                                                                                                                |
 
 _See the sections below for more information on each subcommand._
 
@@ -317,6 +318,27 @@ yanki delete
 | `--verbose`          |       | Enable verbose logging.                                                                                                                                                                                      | `boolean` | `false`                   |
 | `--help`             | `-h`  | Show help                                                                                                                                                                                                    | `boolean` |                           |
 | `--version`          | `-v`  | Show version number                                                                                                                                                                                          | `boolean` |                           |
+
+#### Subcommand: `yanki style`
+
+Utility command to set the CSS stylesheet for all present and future Yanki-created notes.
+
+Usage:
+
+```txt
+yanki style
+```
+
+| Option               | Alias | Description                                                                                                                     | Type      | Default                   |
+| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
+| `--dry-run`          | `-d`  | Run without making any changes to the Anki database. See a report of what would have been done.                                 | `boolean` | `false`                   |
+| `--css`              | `-c`  | Path to the CSS stylesheet to set for all Yanki-created notes. If not provided, the default Anki stylesheet is used.            | `string`  |                           |
+| `--anki-connect`     |       | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information. | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-auto-launch` |       | Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)                                   | `boolean` | `false`                   |
+| `--json`             |       | Output the list of updated note types / models as JSON to stdout.                                                               | `boolean` | `false`                   |
+| `--verbose`          |       | Enable verbose logging.                                                                                                         | `boolean` | `false`                   |
+| `--help`             | `-h`  | Show help                                                                                                                       | `boolean` |                           |
+| `--version`          | `-v`  | Show version number                                                                                                             | `boolean` |                           |
 
 <!-- /cli-help -->
 

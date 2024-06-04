@@ -391,7 +391,7 @@ export function formatSyncReport(report: SyncReport, verbose = false): string {
 	const totalSynced = synced.filter((note) => note.action !== 'deleted').length
 
 	lines.push(
-		`${report.dryRun ? 'Would have' : 'Successfully'} synced ${totalSynced} ${plur('note', totalSynced)} to Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}`,
+		`${report.dryRun ? 'Will' : 'Successfully'} synced ${totalSynced} ${plur('note', totalSynced)} to Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}`,
 	)
 
 	if (verbose) {

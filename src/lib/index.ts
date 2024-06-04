@@ -1,6 +1,17 @@
-export { type CleanOptions, cleanNotes, defaultCleanOptions } from './actions/clean'
-export { type ListOptions, defaultListOptions, listNotes } from './actions/list'
-export { type StyleOptions, type StyleReport, defaultStyleOptions, setStyle } from './actions/style'
+export {
+	type CleanOptions,
+	cleanNotes,
+	defaultCleanOptions,
+	formatCleanReport,
+} from './actions/clean'
+export { type ListOptions, defaultListOptions, formatListReport, listNotes } from './actions/list'
+export {
+	type StyleOptions,
+	type StyleReport,
+	defaultStyleOptions,
+	formatStyleReport,
+	setStyle,
+} from './actions/style'
 export {
 	type SyncOptions,
 	defaultSyncOptions,

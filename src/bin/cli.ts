@@ -1,5 +1,6 @@
 import { cleanNotes, formatCleanReport } from '../lib/actions/clean'
 import { formatListReport, listNotes } from '../lib/actions/list'
+import { formatStyleReport, setStyle } from '../lib/actions/style'
 import { formatSyncReport, syncFiles } from '../lib/actions/sync'
 import log from '../lib/utilities/log'
 import { urlToHostAndPort } from '../lib/utilities/string'
@@ -12,6 +13,8 @@ import {
 	verboseOption,
 } from './options'
 import { globby } from 'globby'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import untildify from 'untildify'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -160,6 +163,68 @@ await yargsInstance
 				process.stdout.write('\n')
 			} else {
 				process.stderr.write(formatCleanReport(report, verbose))
+				process.stderr.write('\n')
+			}
+		},
+	)
+	// `yanki style`
+	.command(
+		'style',
+		'Utility command to set the CSS stylesheet for all present and future Yanki-created notes.',
+		(yargs) =>
+			yargs
+				.option(dryRun)
+				.option('css', {
+					alias: 'c',
+					default: undefined,
+					describe:
+						'Path to the CSS stylesheet to set for all Yanki-created notes. If not provided, the default Anki stylesheet is used.',
+					type: 'string',
+				})
+				.options(ankiConnectOption)
+				.options(ankiAutoLaunchOption)
+				.option(jsonOption('Output the list of updated note types / models as JSON to stdout.'))
+				.option(verboseOption),
+		async ({ ankiAutoLaunch, ankiConnect, css, dryRun, json, verbose }) => {
+			const { host, port } = urlToHostAndPort(ankiConnect)
+
+			let loadedCss: string | undefined
+			if (css !== undefined) {
+				if (path.extname(css) !== '.css') {
+					log.error('The provided CSS file must have a .css extension.')
+					process.exitCode = 1
+					return
+				}
+
+				try {
+					loadedCss = await fs.readFile(css, 'utf8')
+				} catch (error) {
+					if (error instanceof Error) {
+						log.error(`Error loading CSS file: ${error.message}`)
+					} else {
+						log.error(`Unknown error loading CSS file: ${String(error)}`)
+					}
+
+					process.exitCode = 1
+					return
+				}
+			}
+
+			const report = await setStyle({
+				ankiConnectOptions: {
+					autoLaunch: ankiAutoLaunch,
+					host,
+					port,
+				},
+				css: loadedCss ?? undefined,
+				dryRun,
+			})
+
+			if (json) {
+				process.stdout.write(JSON.stringify(report, undefined, 2))
+				process.stdout.write('\n')
+			} else {
+				process.stderr.write(formatStyleReport(report, verbose))
 				process.stderr.write('\n')
 			}
 		},
