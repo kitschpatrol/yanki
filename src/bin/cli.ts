@@ -20,6 +20,25 @@ import untildify from 'untildify'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+// Helper for nice errors in the most common case where Anki is not running
+// Must be constant function expression to help TS infer that it exits
+const ankiNotRunningErrorHandler = (error: unknown) => {
+	const { code } = (error as { cause: { code: string } } & Error).cause
+
+	if (code === 'ECONNREFUSED') {
+		log.error('Failed to connect to Anki. Make sure Anki is running and AnkiConnect is installed.')
+		process.exitCode = 1
+		// eslint-disable-next-line unicorn/no-process-exit
+		process.exit()
+	}
+
+	if (error instanceof Error) {
+		throw error
+	}
+
+	throw new Error('Unknown error')
+}
+
 const yargsInstance = yargs(hideBin(process.argv))
 
 await yargsInstance
@@ -87,7 +106,7 @@ await yargsInstance
 				ankiWeb,
 				dryRun,
 				namespace,
-			})
+			}).catch(ankiNotRunningErrorHandler)
 
 			if (json) {
 				process.stdout.write(JSON.stringify(report, undefined, 2))
@@ -122,7 +141,7 @@ await yargsInstance
 					port,
 				},
 				namespace,
-			})
+			}).catch(ankiNotRunningErrorHandler)
 
 			if (json) {
 				process.stdout.write(JSON.stringify(result, undefined, 2))
@@ -162,7 +181,7 @@ await yargsInstance
 				ankiWeb,
 				dryRun,
 				namespace,
-			})
+			}).catch(ankiNotRunningErrorHandler)
 
 			if (json) {
 				process.stdout.write(JSON.stringify(report, undefined, 2))
@@ -226,7 +245,7 @@ await yargsInstance
 				ankiWeb,
 				css: loadedCss ?? undefined,
 				dryRun,
-			})
+			}).catch(ankiNotRunningErrorHandler)
 
 			if (json) {
 				process.stdout.write(JSON.stringify(report, undefined, 2))
