@@ -1,5 +1,6 @@
 export {
 	type CleanOptions,
+	type CleanReport,
 	cleanNotes,
 	defaultCleanOptions,
 	formatCleanReport,
@@ -14,6 +15,7 @@ export {
 } from './actions/style'
 export {
 	type SyncOptions,
+	type SyncReport,
 	defaultSyncOptions,
 	formatSyncReport,
 	getDeckNamesFromFilePaths,
