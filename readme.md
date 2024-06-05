@@ -50,13 +50,13 @@ Avoid the complexity of mixing and matching multi-note and single-note syntaxes.
 
 Yanki uses the source Markdown file's parent directory name as the deck name. Complex folder hierarchies are also supported — Anki decks will be created and nested as needed to match the structure of the local file system.
 
-### Embrace Anki's default note types
+### Embrace of Anki's default note types
 
 More note types, more problems.
 
-Yanki _only_ supports turning Markdown into the "Basic", "Basic (and reversed card)" , "Basic (type in the answer)", and "Cloze" note types that ship as defaults in the Anki App.
+Yanki _only_ supports turning Markdown into the _Basic_, _Basic (and reversed card)_, _Basic (type in the answer)_, and _Cloze_ note types that ship as defaults in the Anki App.
 
-### Anki note type is inferred from Markdown structure
+### Infer Anki note type from Markdown structure
 
 Since the number of supported note types is small, the type of Anki note to create from a given document can be inferred from a few simple rules about the structure of the Markdown.
 
@@ -172,7 +172,7 @@ All will be ~~revealed~~.
 Multiple clozes are supported, which will create additional cards. You can add a `---` to include back-of-card information as well. Hints are also supported, and are indicated by giving the hint text `_emphasis_` at the end of the cloze strike-through:
 
 ```md
-~~All~~ will be ~~revealed _here's a hint: "shown"_~~.
+~~All~~ will be ~~revealed _here's a hint_~~.
 
 ---
 
@@ -211,7 +211,7 @@ npm install --save-dev yanki-md
 
 ## Usage
 
-### Basic
+### Basics
 
 #### Setup
 
