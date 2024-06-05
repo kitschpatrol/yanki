@@ -6,7 +6,7 @@ export const ankiAutoLaunchOption = {
 		alias: 'l',
 		default: false,
 		describe:
-			"Attempt to open the desktop Anki.app if it's not already running. (Experimental, macOS only.)",
+			"Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)",
 		type: 'boolean',
 	},
 } as const satisfies Record<string, Options>

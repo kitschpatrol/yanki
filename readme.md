@@ -19,9 +19,12 @@
 
 <!-- /short-description -->
 
+> \[!IMPORTANT]
+> Yanki MD is feature-complete but will remain zero-versioned until it's been thoroughly tested. Please exercise caution and make backups of your Anki notes until the 1.0.0 release.
+
 ## Overview
 
-Yanki simply syncs a folder of Markdown notes to Anki.
+Yanki simply syncs a folder of Markdown notes to Anki. The primary novelty of its approach is in how it translates Markdown into Anki notes. The structure of a Markdown note determines the type of Anki note it becomes, so no extra syntax or Anki-specific markup is required — just pure Markdown.
 
 This library leverages the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) plugin.
 
@@ -84,6 +87,10 @@ When you edit a local markdown note, Yanki makes every effort to update rather t
 But when you do want to delete something, it's as simple as deleting the local Markdown note from the file system and running `yanki sync` to remove it from the Anki database. Protections are in place to prevent deleting Anki notes that weren't initially created by Yanki.
 
 If you use [AnkiWeb](https://ankiweb.net/) to sync your notes to the cloud, Yanki will also trigger this next step in the sync, automating the flow from Markdown → Anki → AnkiWeb in one shot.
+
+### Existing notes are untouched
+
+Yanki tags the notes it's in charge of with a hidden field, so it will never touch your existing Anki notes. (_But please exercise caution until the 1.0 release..._)
 
 ### Fancy markdown
 
@@ -176,9 +183,6 @@ Clozing a block element is not currently supported.
 
 ## Getting started
 
-> \[!WARNING]
-> Yanki is still in development. Please back up your Anki library if you intend to use it, and please expect changes to commands and the exported APIs until the 1.0.0 release.
-
 ### Dependencies
 
 The `yanki` CLI tool requires Node 18+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
@@ -256,9 +260,9 @@ yanki [command]
 | Command  | Argument                  | Description                                                                                                                                                                                                                              |
 | -------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sync`   | `<directory>` `[options]` | Perform a one-way synchronization from a local directory of Markdown files to the Anki database. Any Markdown files in subdirectories are included as well. _(Default command.)_                                                         |
-| `list`   |                           | Utility command to list Yanki-created notes in the Anki database.                                                                                                                                                                        |
-| `delete` |                           | Utility command to manually delete Yanki-created notes in the Anki database. This is for advanced use cases, usually the `sync` command takes care of deleting files from Anki Database once they're removed from the local file system. |
-| `style`  |                           | Utility command to set the CSS stylesheet for all present and future Yanki-created notes.                                                                                                                                                |
+| `list`   | `[options]`               | Utility command to list Yanki-created notes in the Anki database.                                                                                                                                                                        |
+| `delete` | `[options]`               | Utility command to manually delete Yanki-created notes in the Anki database. This is for advanced use cases, usually the `sync` command takes care of deleting files from Anki Database once they're removed from the local file system. |
+| `style`  | `[options]`               | Utility command to set the CSS stylesheet for all present and future Yanki-created notes.                                                                                                                                                |
 
 _See the sections below for more information on each subcommand._
 
@@ -295,7 +299,7 @@ Utility command to list Yanki-created notes in the Anki database.
 Usage:
 
 ```txt
-yanki list
+yanki list [options]
 ```
 
 | Option               | Alias | Description                                                                                                                                                                                                | Type      | Default                   |
@@ -314,7 +318,7 @@ Utility command to manually delete Yanki-created notes in the Anki database. Thi
 Usage:
 
 ```txt
-yanki delete
+yanki delete [options]
 ```
 
 | Option               | Alias | Description                                                                                                                                                                                                                                        | Type      | Default                   |
@@ -336,7 +340,7 @@ Utility command to set the CSS stylesheet for all present and future Yanki-creat
 Usage:
 
 ```txt
-yanki style
+yanki style [options]
 ```
 
 | Option               | Alias | Description                                                                                                                                                                                                                                        | Type      | Default                   |
@@ -359,35 +363,114 @@ yanki style
 
 This package also exposes an API for integrating syncing capability programmatically in other context. (For example, in [yanki-obsidian](https://github.com/kitschpatrol/yanki-obsidian).)
 
-The following functions are exported:
+The primary functions of interest are:
 
 ```ts
-syncFiles(allLocalFilePaths: string[], options?: PartialDeep<SyncOptions>): Promise<SyncReport>
+function getNoteFromMarkdown(markdown: string, options: NoteFromMarkdownOptions): Promise<YankiNote>
 
-getNoteFromMarkdown(markdown: string, namespace: string): Promise<YankiNote>
+function syncFiles(
+  allLocalFilePaths: string[],
+  options?: PartialDeep<SyncOptions>,
+  readFile?: (filePath: string) => Promise<string>,
+  writeFile?: (filePath: string, data: string) => Promise<void>,
+): Promise<SyncReport>
 
-syncNotes(allLocalNotes: YankiNote[], options?: PartialDeep<SyncOptions>): Promise<SyncReport>
+function syncNotes(
+  allLocalNotes: YankiNote[],
+  options?: PartialDeep<SyncOptions>,
+): Promise<SyncReport>
 
-listNotes(options?: ListOptions): Promise<ListReport>
+function listNotes(options?: PartialDeep<ListOptions>): Promise<ListReport>
 
-cleanNotes(options: CleanOptions): Promise<CleanReport>
+function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanReport>
+
+function setStyle(options: PartialDeep<StyleOptions>): Promise<StyleReport>
 ```
 
-See the source code for additional inline documentation.
+See the [source code](https://github.com/kitschpatrol/yanki-md/blob/main/src/lib/index.ts) for additional exports and inline documentation.
 
 ## Advanced Features
 
 ### Namespaces
 
-TODO
+For simplicity's sake, Yanki anticipates syncing one folder of notes on one machine as its primary use case. Every note uploaded to Anki has a "namespace" string in a hidden field. Yanki uses this field to identify the notes it's in charge of, and to identify notes for deletion if they are present in the Anki database but missing in the collection of local markdown notes.
+
+For example, if you run:
+
+```sh
+yanki sync ./important-cards
+```
+
+Followed by:
+
+```sh
+yanki sync ./more-important-cards
+```
+
+Any notes synced from the `important-cards` folder _will be deleted_ from Anki by the second command to sync `more-important-cards`, because they share the same default namespace, and because you local notes are a single source of truth for the sync system.
+
+If you don't want this behavior, then you can pass the `--namespace` flag to explicitly state that you want the commands to exist in separate namespaces:
+
+```sh
+yanki sync ./important-cards --namespace "Foo"
+yanki sync ./more-important-cards --namespace "Bar"
+```
+
+This will let both directories sync and co-exist.
+
+But in general, a better solution would be to give them a common parent directory and, just sync that:
+
+```sh
+# Move to a common parent
+mv ./important-cards ~/cards/imporant-cards
+mv ./more-important-cards ~/cards/more-important-cards
+
+# Sync the parent
+yanki sync ~/cards
+```
+
+This makes `~/cards` the single source of truth, and spares the cognitive overhead of namespaces.
+
+Yanki will put the cards in eponymous decks, so you'll still have a clean separation of the two groups of cards in Anki.
 
 ### Styles
 
-TODO
+The [`yanki style`](#subcommand-yanki-style) command lets you assign a CSS stylesheet to all Yanki-managed notes.
+
+Because of how styles work in Anki and how Yanki manages card models, assigned style is a _global_ operation to _all_ Yanki-managed cards. (Though your other Anki cards, as always, will be untouched.)
+
+Your custom stylesheets can take advantage of several CSS classes added to the top-level `<div>` of each card by Yanki.
+
+The classes include:
+
+- `yanki`: Shared by all cards generated by Yanki
+- `namespace-$name`: The namespace associated with the card
+- `front` | `back`: The "side" of the card"
+- `model-$name`: The name of the card type / model, one of the following. They're wordy, but consistent with Anki's default model naming scheme:
+  - `model-yanki-basic`
+  - `model-yanki-basic-and-reversed-card`
+  - `model-yanki-basic-type-in-the-answer`
+  - `model-yanki-cloze`
+
+For example, the front of a basic card would look like:
+
+```html
+<div class="yanki namespace-yanki-md front model-yanki-basic">
+  <!-- The rest of the card's markup is here -->
+</div>
+```
 
 ### Browser environments
 
-TODO
+The Yanki TypeScript / JavaScript library is idempotent, so you can run it in a browser you'd like.
+
+There's one exception, the `syncFiles(...)` function, which by default relies on file system access to work.
+
+To retain `syncFiles(...)`'s utility in a browser environment, has the optional arguments `readFile` and `writeFile`, which are implemented by `node:fs/promises` by default in Node environments.
+
+Running Yanki in a browser environment required implementing and passing `readFile` and `writeFile` implementations to `syncFiles(...)` that are suited to your particular use case. (A warning will be provided if you neglect to do so.)
+
+The rest of the library should work fine in both contexts without special measures.
 
 ## Background
 

@@ -1,6 +1,6 @@
 {
 	"name": "yanki-md",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"type": "module",
 	"description": "An ultra-simple CLI tool and TypeScript library for syncing Markdown to Anki flashcards. No customization. No configuration. No fuss.",
 	"repository": {
@@ -70,7 +70,7 @@
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^4.6.6",
+		"@kitschpatrol/shared-config": "^4.6.7",
 		"@shikijs/rehype": "^1.6.2",
 		"@types/hast": "^3.0.4",
 		"bumpp": "^9.4.1",
@@ -94,7 +94,7 @@
 		"sort-keys": "^5.0.0",
 		"string-strip-html": "^13.4.8",
 		"tsx": "^4.11.2",
-		"type-fest": "^4.18.3",
+		"type-fest": "^4.19.0",
 		"typescript": "^5.4.5",
 		"unified": "^11.0.4",
 		"unist-builder": "^4.0.0",

@@ -1,3 +1,4 @@
+import { version } from '../../package.json'
 import { cleanNotes, formatCleanReport } from '../lib/actions/clean'
 import { formatListReport, listNotes } from '../lib/actions/list'
 import { formatStyleReport, setStyle } from '../lib/actions/style'
@@ -119,7 +120,7 @@ await yargsInstance
 	)
 	// `yanki list`
 	.command(
-		'list',
+		'list [options]',
 		'Utility command to list Yanki-created notes in the Anki database.',
 		(yargs) =>
 			yargs
@@ -154,14 +155,14 @@ await yargsInstance
 	)
 	// `yanki delete`
 	.command(
-		'delete',
+		'delete [options]',
 		"Utility command to manually delete Yanki-created notes in the Anki database. This is for advanced use cases, usually the `sync` command takes care of deleting files from Anki Database once they're removed from the local file system.",
 		(yargs) =>
 			yargs
 				.option(dryRun)
 				.option(
 					namespaceOption(
-						"Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to delete all Yanki-created notes in the Anki database.",
+						"Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. If you've synced notes to multiple namespaces, Pass `'*'` to delete all Yanki-created notes in the Anki database.",
 					),
 				)
 				.options(ankiConnectOption)
@@ -194,7 +195,7 @@ await yargsInstance
 	)
 	// `yanki style`
 	.command(
-		'style',
+		'style [options]',
 		'Utility command to set the CSS stylesheet for all present and future Yanki-created notes.',
 		(yargs) =>
 			yargs
@@ -258,7 +259,7 @@ await yargsInstance
 	)
 	.demandCommand(1)
 	.alias('h', 'help')
-	.version()
+	.version(version)
 	.alias('v', 'version')
 	.help()
 	.wrap(process.stdout.isTTY ? Math.min(120, yargsInstance.terminalWidth()) : 0)
