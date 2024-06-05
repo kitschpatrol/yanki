@@ -328,17 +328,17 @@ export async function getRemoteNotesById(
 export async function deleteOrphanedDecks(
 	client: YankiConnect,
 	activeNotes: YankiNote[],
-	recentlyDeletedNotes: YankiNote[],
+	originalNotes: YankiNote[],
 	dryRun: boolean,
 ): Promise<string[]> {
 	const activeNoteDeckNames = [...new Set(activeNotes.map((note) => note.deckName))].filter(Boolean)
 
-	const recentlyDeletedNoteDeckNames = [
-		...new Set(recentlyDeletedNotes.map((note) => note.deckName)),
-	].filter(Boolean)
+	const originalNoteDeckNames = [...new Set(originalNotes.map((note) => note.deckName))].filter(
+		Boolean,
+	)
 
 	// Set that's excluded from set of notes deck names and recently deleted notes deck names
-	const orphanedDeckNames = recentlyDeletedNoteDeckNames.filter(
+	const orphanedDeckNames = originalNoteDeckNames.filter(
 		(deckName) => !activeNoteDeckNames.includes(deckName),
 	)
 
@@ -373,7 +373,7 @@ export async function deleteOrphanedDecks(
 			// The notes will still be there, so the deckStat's won't reflect
 			// emptiness See if the number of cards in the deck is equal to the number
 			// of cards in the recently deleted notes with that same deck
-			const cardCount = recentlyDeletedNotes.reduce<number>((acc, note) => {
+			const cardCount = originalNotes.reduce<number>((acc, note) => {
 				if (note.deckName !== '') {
 					const lastPart = note.deckName.split('::').at(-1)
 

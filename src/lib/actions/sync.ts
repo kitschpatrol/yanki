@@ -188,7 +188,7 @@ export async function syncNotes(
 		}
 	}
 
-	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, deletedNotes, dryRun)
+	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, existingRemoteNotes, dryRun)
 
 	// AnkiWeb sync
 	const isChanged = deletedDecks.length > 0 || synced.some((note) => note.action !== 'unchanged')
