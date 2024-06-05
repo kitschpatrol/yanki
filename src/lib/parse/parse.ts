@@ -116,7 +116,9 @@ export async function getNoteFromMarkdown(
 	}
 
 	const note: YankiNote = {
-		deckName: frontmatter.deckName ?? '', // Set later based on file path if undefined
+		// Disable the frontmatter deck name feature, just seems messy
+		// deckName: frontmatter.deckName ?? '',
+		deckName: '', // Set later based on file path if undefined
 		fields: {
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			Back: back,
