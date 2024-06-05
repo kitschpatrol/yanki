@@ -134,16 +134,6 @@ export function splitTreeAtEmphasis(tree: Root): [Root, string] {
 	let splitIndex: number | undefined
 	let typeInText: string | undefined
 
-	console.log('----------------- tree -----------------')
-	/**
-	 * Description
-	 * @param {${JSON.stringify(tree} `tree
-	 * @param {any} undefined
-	 * @param {any} 2
-	 * @returns {any}
-	 */
-	console.log(`tree: ${JSON.stringify(tree, undefined, 2)}`)
-
 	// Find the index of the last thematicBreak node
 	visit(tree, 'emphasis', (node, index, parent) => {
 		if (index === undefined || parent === undefined || !('children' in parent)) {
