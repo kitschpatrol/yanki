@@ -141,11 +141,11 @@ describeWithFileFixture(
 describeWithFileFixture(
 	'complex trees',
 	{
-		assetPath: './test/assets/test-complex-tree/',
+		assetPath: './test/assets/test-complex-tree-root-note/',
 		cleanUpAnki: true,
 	},
 	(context) => {
-		it('makes the right decisions about deck naming', async () => {
+		it('makes the right decisions about deck naming with a file in the root', async () => {
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
@@ -164,15 +164,59 @@ describeWithFileFixture(
 
 			expect(sortKeys(pathToDeckMap, { deep: true })).toMatchInlineSnapshot(`
 				{
-				  "/test-complex-tree/deep-contiguous/basic.md": "test-complex-tree::deep-contiguous",
-				  "/test-complex-tree/deep-contiguous/within/basic.md": "test-complex-tree::deep-contiguous::within",
-				  "/test-complex-tree/deep-contiguous/within/within/basic.md": "test-complex-tree::deep-contiguous::within::within",
-				  "/test-complex-tree/deep-contiguous/within/within/within/basic.md": "test-complex-tree::deep-contiguous::within::within::within",
-				  "/test-complex-tree/deep-island/within/within/within/basic.md": "test-complex-tree::deep-island::within::within::within",
-				  "/test-complex-tree/deep-non-contiguous/within/within/basic.md": "test-complex-tree::deep-non-contiguous::within::within",
-				  "/test-complex-tree/sibling-folders/brother/basic.md": "test-complex-tree::sibling-folders::brother",
-				  "/test-complex-tree/sibling-folders/sister/basic.md": "test-complex-tree::sibling-folders::sister",
-				  "/test-complex-tree/solo-note/basic.md": "test-complex-tree::solo-note",
+				  "/test-complex-tree-root-note/basic.md": "test-complex-tree-root-note",
+				  "/test-complex-tree-root-note/deep-contiguous/basic.md": "test-complex-tree-root-note::deep-contiguous",
+				  "/test-complex-tree-root-note/deep-contiguous/within/basic.md": "test-complex-tree-root-note::deep-contiguous::within",
+				  "/test-complex-tree-root-note/deep-contiguous/within/within/basic.md": "test-complex-tree-root-note::deep-contiguous::within::within",
+				  "/test-complex-tree-root-note/deep-contiguous/within/within/within/basic.md": "test-complex-tree-root-note::deep-contiguous::within::within::within",
+				  "/test-complex-tree-root-note/deep-island/within/within/within/basic.md": "test-complex-tree-root-note::deep-island::within::within::within",
+				  "/test-complex-tree-root-note/deep-non-contiguous/within/within/basic.md": "test-complex-tree-root-note::deep-non-contiguous::within::within",
+				  "/test-complex-tree-root-note/sibling-folders/brother/basic.md": "test-complex-tree-root-note::sibling-folders::brother",
+				  "/test-complex-tree-root-note/sibling-folders/sister/basic.md": "test-complex-tree-root-note::sibling-folders::sister",
+				  "/test-complex-tree-root-note/solo-note/basic.md": "test-complex-tree-root-note::solo-note",
+				}
+			`)
+
+			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
+)
+
+describeWithFileFixture(
+	'complex trees',
+	{
+		assetPath: './test/assets/test-complex-tree-root-bare/',
+		cleanUpAnki: true,
+	},
+	(context) => {
+		it('makes the right decisions about deck naming without a file in the root', async () => {
+			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+			})
+
+			// Log inline for legibility
+			const pathToDeckMap: Record<string, string | undefined> = {}
+			for (const synced of results.synced) {
+				const cleanPath =
+					synced.filePath === undefined
+						? `(Note is in Anki, no file path.)`
+						: `/${path.basename(context.assetPath)}${synced.filePath.split(path.basename(context.assetPath), 2).pop() ?? ''}`
+				pathToDeckMap[cleanPath] = synced.note.deckName
+			}
+
+			expect(sortKeys(pathToDeckMap, { deep: true })).toMatchInlineSnapshot(`
+				{
+				  "/test-complex-tree-root-bare/deep-contiguous/basic.md": "deep-contiguous",
+				  "/test-complex-tree-root-bare/deep-contiguous/within/basic.md": "deep-contiguous::within",
+				  "/test-complex-tree-root-bare/deep-contiguous/within/within/basic.md": "deep-contiguous::within::within",
+				  "/test-complex-tree-root-bare/deep-contiguous/within/within/within/basic.md": "deep-contiguous::within::within::within",
+				  "/test-complex-tree-root-bare/deep-island/within/within/within/basic.md": "deep-island::within::within::within",
+				  "/test-complex-tree-root-bare/deep-non-contiguous/within/within/basic.md": "deep-non-contiguous::within::within",
+				  "/test-complex-tree-root-bare/sibling-folders/brother/basic.md": "sibling-folders::brother",
+				  "/test-complex-tree-root-bare/sibling-folders/sister/basic.md": "sibling-folders::sister",
+				  "/test-complex-tree-root-bare/solo-note/basic.md": "solo-note",
 				}
 			`)
 

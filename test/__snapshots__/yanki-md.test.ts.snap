@@ -14,8 +14,8 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-and-reversed-card-"><p><em>(Empty)</em></p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-and-reversed-card-"><p>I'm a <strong>question</strong> to which there is no answer.</p></div>",
+          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-and-reversed-card"><p><em>(Empty)</em></p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-and-reversed-card"><p>I'm a <strong>question</strong> to which there is no answer.</p></div>",
           "YankiNamespace": "Yanki Test - basic synchronization",
         },
         "modelName": "Yanki - Basic (and reversed card)",
@@ -29,8 +29,8 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-and-reversed-card-"><p>I'm an <strong>answer</strong> to which there is no question.</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-and-reversed-card-"><p><em>(Empty)</em></p></div>",
+          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-and-reversed-card"><p>I'm an <strong>answer</strong> to which there is no question.</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-and-reversed-card"><p><em>(Empty)</em></p></div>",
           "YankiNamespace": "Yanki Test - basic synchronization",
         },
         "modelName": "Yanki - Basic (and reversed card)",
@@ -44,8 +44,8 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-and-reversed-card-"><p>I'm an <strong>answer</strong> which is sometimes the question</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-and-reversed-card-"><p>I'm <em>question</em> which is sometimes the answer</p></div>",
+          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-and-reversed-card"><p>I'm an <strong>answer</strong> which is sometimes the question</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-and-reversed-card"><p>I'm <em>question</em> which is sometimes the answer</p></div>",
           "YankiNamespace": "Yanki Test - basic synchronization",
         },
         "modelName": "Yanki - Basic (and reversed card)",
@@ -59,8 +59,8 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer-">I'm the thing you need to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer-"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p></p></div>",
           "YankiNamespace": "Yanki Test - basic synchronization",
         },
@@ -75,8 +75,8 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer-">I'm the thing you need to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer-"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p></p></div>",
           "YankiNamespace": "Yanki Test - basic synchronization",
         },
@@ -93,8 +93,8 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer-">I'm the thing you <strong>need</strong> to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer-"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you <strong>need</strong> to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p><em>I'm actually also part of the prompt!</em>
 </p></div>",
           "YankiNamespace": "Yanki Test - basic synchronization",
@@ -110,8 +110,8 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer-">I'm the thing you need to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer-"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p><em>I'm actually also part of the prompt!</em>
 </p></div>",
           "YankiNamespace": "Yanki Test - basic synchronization",
@@ -127,8 +127,8 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer-">I'm the thing you need to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer-"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p></p></div>",
           "YankiNamespace": "Yanki Test - basic synchronization",
         },
@@ -402,7 +402,7 @@ exports[`basic synchronization > synchronizes notes to anki and has he correct d
 }
 `;
 
-exports[`complex trees > makes the right decisions about deck naming 2`] = `
+exports[`complex trees > makes the right decisions about deck naming with a file in the root 2`] = `
 {
   "ankiWeb": false,
   "deletedDecks": [],
@@ -414,22 +414,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "test-complex-tree::deep-contiguous",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'deep-contiguous'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "basic.md",
-      "note": {
-        "deckName": "test-complex-tree::solo-note",
+        "deckName": "test-complex-tree-root-note",
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
@@ -444,7 +429,37 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "test-complex-tree::deep-contiguous::within",
+        "deckName": "test-complex-tree-root-note::deep-contiguous",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'deep-contiguous'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "test-complex-tree-root-note::solo-note",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "test-complex-tree-root-note::deep-contiguous::within",
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
@@ -462,7 +477,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "test-complex-tree::sibling-folders::brother",
+        "deckName": "test-complex-tree-root-note::sibling-folders::brother",
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'brother'</p></div>",
@@ -480,7 +495,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "test-complex-tree::sibling-folders::sister",
+        "deckName": "test-complex-tree-root-note::sibling-folders::sister",
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'sister'</p></div>",
@@ -498,7 +513,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "test-complex-tree::deep-contiguous::within::within",
+        "deckName": "test-complex-tree-root-note::deep-contiguous::within::within",
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
@@ -516,7 +531,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "test-complex-tree::deep-non-contiguous::within::within",
+        "deckName": "test-complex-tree-root-note::deep-non-contiguous::within::within",
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
@@ -531,7 +546,7 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "test-complex-tree::deep-contiguous::within::within::within",
+        "deckName": "test-complex-tree-root-note::deep-contiguous::within::within::within",
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
@@ -549,7 +564,169 @@ exports[`complex trees > makes the right decisions about deck naming 2`] = `
       "action": "created",
       "filePath": "basic.md",
       "note": {
-        "deckName": "test-complex-tree::deep-island::within::within::within",
+        "deckName": "test-complex-tree-root-note::deep-island::within::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+  ],
+}
+`;
+
+exports[`complex trees > makes the right decisions about deck naming without a file in the root 2`] = `
+{
+  "ankiWeb": false,
+  "deletedDecks": [],
+  "dryRun": false,
+  "duration": 0,
+  "namespace": "Yanki Test - complex trees",
+  "synced": [
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "deep-contiguous",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'deep-contiguous'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "solo-note",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "deep-contiguous::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "sibling-folders::brother",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'brother'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "sibling-folders::sister",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'sister'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "deep-contiguous::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "deep-non-contiguous::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "deep-contiguous::within::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "deep-island::within::within::within",
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
@@ -593,7 +770,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-fancy-markdown back model-yanki-basic-and-reversed-card-"><h2>2</h2>
+          "Back": "<div class="yanki namespace-yanki-test-fancy-markdown back model-yanki-basic-and-reversed-card"><h2>2</h2>
 <table>
 <thead>
 <tr>
@@ -636,7 +813,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
 </table>
 <hr>
 <p>And I'm the back</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic-and-reversed-card-"><h1>GFM Tables</h1>
+          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic-and-reversed-card"><h1>GFM Tables</h1>
 <h2>1</h2>
 <table>
 <thead>
@@ -713,8 +890,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-fancy-markdown back model-yanki-basic-and-reversed-card-"><p><img src="https://images.unsplash.com/photo-1574235664854-92e1da7d229a?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8Y2F0fHx8fHx8MTcxNzI5MjE0NQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="cat"></p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic-and-reversed-card-"><p><img src="https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8a2l0dGVufHx8fHx8MTcxNzI5MTk1OQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="kitten"></p></div>",
+          "Back": "<div class="yanki namespace-yanki-test-fancy-markdown back model-yanki-basic-and-reversed-card"><p><img src="https://images.unsplash.com/photo-1574235664854-92e1da7d229a?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8Y2F0fHx8fHx8MTcxNzI5MjE0NQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="cat"></p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic-and-reversed-card"><p><img src="https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8a2l0dGVufHx8fHx8MTcxNzI5MTk1OQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="kitten"></p></div>",
           "YankiNamespace": "Yanki Test - fancy markdown",
         },
         "modelName": "Yanki - Basic (and reversed card)",

@@ -311,20 +311,21 @@ export async function syncFiles(
  *
  * Depends on the context of _all_ file paths passed to `syncNoteFiles`.
  *
- * Examples of paths -> deck names with `prune` set to `false`:
+ * Example of paths -> deck names with `common-root`:
  * /base/foo/note.md -> foo
  * /base/foo/baz/note.md -> foo::baz
- * /base/foo/baz/rud/pap/note.md -> foo::baz::rud::pap
- * /base/bla/note.md -> bla
- * /base/bla/note.md -> bla
- * /base/bla/blo/note.md -> bla::blo
  *
- * Examples of paths -> deck names with `prune` set to `true`:
+ * Example of paths -> deck names with `common-root`:
  * /base/foo/note.md -> foo
- * /base/foo/baz/note.md -> foo::baz
- * /base/foo/baz/rud/pap/note.md -> pap
- * /base/bla/note.md -> bla
- * /base/bla/blo/note.md -> bla::blo
+ * /base/foo/note.md -> foo
+ *
+ * Example of paths -> deck names with `common-parent`:
+ * /base/foo/note.md -> base::foo
+ * /base/foo/baz/note.md -> base::foo::baz
+ *
+ * Example of paths -> deck names with `common-parent`:
+ * /base/foo/note.md -> foo
+ * /base/foo/note.md -> foo
  *
  * @param absoluteFilePaths Absolute paths to all markdown Anki note files. (Ensures proper resolution if path module is polyfilled.)
  * @param prune If true, deck names are not allowed to "jump" over empty directories, even if there are other note files somewhere up the hierarchy
@@ -332,7 +333,7 @@ export async function syncFiles(
  */
 export function getDeckNamesFromFilePaths(
 	absoluteFilePaths: string[],
-	mode: 'common' | 'jump' | 'stop' = 'common',
+	mode: 'common-parent' | 'common-root' = 'common-root',
 ) {
 	if (environment === 'node') {
 		path.setCWD(process.cwd())
@@ -343,57 +344,25 @@ export function getDeckNamesFromFilePaths(
 	)
 
 	// Trim to the shortest common path
-	if (mode === 'common') {
-		const commonPathSegments = filePathSegments.reduce((acc, pathSegments) => {
-			const commonPath = acc.filter((segment, index) => segment === pathSegments[index])
-			return commonPath
-		})
-
-		const deckNamesWithShortestCommonPath = filePathSegments.map((pathSegments) => {
-			const deckName = pathSegments.slice(commonPathSegments.length - 1).join('::')
-			return deckName
-		})
-
-		return deckNamesWithShortestCommonPath
-	}
-
-	// TODO These are kind of broken...
-
-	const deckNames = filePathSegments.map((pathSegments) => {
-		// TODO broken if other paths have same file name
-		if (mode === 'stop') {
-			// Walk right to left, only go as far as you find another file
-			// This means "islands" become their own root if there aren't and
-			// markdown files in the parent directory
-			for (let index = pathSegments.length - 2; index >= 0; index--) {
-				// See if the segment is the "last path" in another file
-				if (
-					!filePathSegments.some(
-						(otherPathSegments) => otherPathSegments.at(-1) === pathSegments[index],
-					)
-				) {
-					return pathSegments.slice(index + 1).join('::')
-				}
-			}
-		} else if (mode === 'jump') {
-			// Walk from left to right, stop when you find the first segment with a file
-			for (let index = 0; index < pathSegments.length; index++) {
-				if (
-					filePathSegments.some(
-						(otherPathSegments) => otherPathSegments.at(-1) === pathSegments[index],
-					)
-				) {
-					return pathSegments.slice(index).join('::')
-				}
-			}
-		}
-
-		// If we didn't find another file, return the whole path
-		// This should not happen...
-		return pathSegments.join('::')
+	const commonPathSegments = filePathSegments.reduce((acc, pathSegments) => {
+		const commonPath = acc.filter((segment, index) => segment === pathSegments[index])
+		return commonPath
 	})
 
-	return deckNames
+	// Does the root segment have a file in it?
+	const lastSegmentHasFile = filePathSegments.some(
+		(pathSegments) => pathSegments.at(-1) === commonPathSegments.at(-1),
+	)
+
+	// Kinda tricky
+	const offset =
+		mode === 'common-parent' ? (lastSegmentHasFile ? 1 : 1) : lastSegmentHasFile ? 1 : 0
+
+	const deckNamesWithShortestCommonPath = filePathSegments.map((pathSegments) =>
+		pathSegments.slice(commonPathSegments.length - offset).join('::'),
+	)
+
+	return deckNamesWithShortestCommonPath
 }
 
 export function formatSyncReport(report: SyncReport, verbose = false): string {
