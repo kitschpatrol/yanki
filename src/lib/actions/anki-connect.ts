@@ -367,31 +367,23 @@ export async function deleteOrphanedDecks(
 
 	// Ensure all decks are actually empty
 	const deckStats = await client.deck.getDeckStats({ decks: deckDeletionCandidates })
-	const decksToDelete = Object.values(deckStats).reduce<string[]>((acc, deckStat) => {
+	const decksToDelete = Object.values(deckStats).reduce<string[]>((acc, deckStat, index) => {
+		const deckPath = deckDeletionCandidates[index]
+
 		if (dryRun) {
-			// Dry run is a special occasion...
-			// The notes will still be there, so the deckStat's won't reflect
-			// emptiness See if the number of cards in the deck is equal to the number
-			// of cards in the recently deleted notes with that same deck
-			const cardCount = originalNotes.reduce<number>((acc, note) => {
-				if (note.deckName !== '') {
-					const lastPart = note.deckName.split('::').at(-1)
-
-					const cards = note.cards ?? []
-
-					if (lastPart === deckStat.name) {
-						return acc + cards.length
-					}
-				}
-
-				return acc
-			}, 0)
-
-			if (cardCount === deckStat.total_in_deck) {
-				acc.push(deckStat.name)
+			// Get number of original cards in the deck, vs the number of cards in the deck now...
+			// TODO test this
+			const originalCount = originalNotes.filter((note) => note.deckName === deckPath).length
+			const activeCount = activeNotes.filter((note) => note.deckName === deckPath).length
+			if (
+				deckStat.total_in_deck === originalCount &&
+				activeCount === 0 &&
+				!acc.includes(deckPath)
+			) {
+				acc.push(deckPath)
 			}
-		} else if (deckStat.total_in_deck === 0 && !acc.includes(deckStat.name)) {
-			acc.push(deckStat.name)
+		} else if (deckStat.total_in_deck === 0 && !acc.includes(deckPath)) {
+			acc.push(deckPath)
 		}
 
 		return acc
