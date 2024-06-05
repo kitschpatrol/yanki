@@ -43,7 +43,7 @@ export async function listNotes(options?: PartialDeep<ListOptions>): Promise<Lis
 
 export function formatListReport(report: ListReport): string {
 	if (report.notes.length === 0) {
-		return 'No notes found'
+		return 'No notes found.'
 	}
 
 	const lines: string[] = []

@@ -90,7 +90,7 @@ export function formatCleanReport(report: CleanReport, verbose = false): string 
 	const lines: string[] = []
 
 	lines.push(
-		`${report.dryRun ? 'Will' : 'Successfully'} deleted ${report.deleted.length} ${plur('note', noteCount)} and ${report.decks.length} ${plur('deck', deckCount)} from Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}`,
+		`${report.dryRun ? 'Will' : 'Successfully'} deleted ${report.deleted.length} ${plur('note', noteCount)} and ${report.decks.length} ${plur('deck', deckCount)} from Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}.`,
 	)
 
 	if (verbose) {

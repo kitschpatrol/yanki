@@ -77,7 +77,7 @@ export function formatStyleReport(report: StyleReport, verbose = false): string 
 	const updatedModels = report.models.filter((model) => model.action === 'updated')
 
 	lines.push(
-		`${report.dryRun ? 'Will' : 'Successfully'} update ${updatedModels.length} ${plur('model', updatedModels.length)} and left ${unchangedModels.length} ${plur('model', unchangedModels.length)} unchanged${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}`,
+		`${report.dryRun ? 'Will' : 'Successfully'} update ${updatedModels.length} ${plur('model', updatedModels.length)} and left ${unchangedModels.length} ${plur('model', unchangedModels.length)} unchanged${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}.`,
 	)
 
 	if (verbose) {
