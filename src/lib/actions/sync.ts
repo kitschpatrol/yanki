@@ -122,6 +122,9 @@ export async function syncNotes(
 	const localNoteIds = allLocalNotes.map((note) => note.noteId).map((id) => id ?? -1)
 	const remoteNotes = await getRemoteNotesById(client, localNoteIds)
 
+	// TODO Check for duplicate local note ids...
+	//
+
 	// Creation and update pass
 	for (const [index, remoteNote] of remoteNotes.entries()) {
 		const localNote = allLocalNotes[index]
@@ -233,7 +236,7 @@ export async function syncFiles(
 			writeFile = async (filePath, data) => fs.writeFile(filePath, data, 'utf8')
 		} else {
 			throw new Error(
-				'Both readFile and writeFile implementations must be provided to the syncFiles function in the browser',
+				'Both readFile and writeFile implementations must be provided to the syncFiles function when running in the browser',
 			)
 		}
 	}

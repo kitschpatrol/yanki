@@ -105,7 +105,7 @@ export async function getNoteFromMarkdown(
 				true,
 			)
 
-			// TODO html on the back?
+			// HTML in the "blank" seems to parse correctly in Anki, but appears as plain text
 			back = await mdastToHtml(
 				secondPartHast,
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],

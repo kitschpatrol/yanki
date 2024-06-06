@@ -2,6 +2,7 @@ import { getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter } from '../src/lib/model/frontmatter'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stableResults } from './utilities/stable-sync-results'
+import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import sortKeys from 'sort-keys'
@@ -285,6 +286,53 @@ describeWithFileFixture(
 				  "unchanged",
 				]
 			`)
+		})
+	},
+)
+
+describeWithFileFixture(
+	'duplicate node ids',
+	{
+		assetPath: './test/assets/test-duplicate-node-ids/',
+		cleanUpAnki: true,
+	},
+	(context) => {
+		it('handles duplicate node ids for notes with different content gracefully', async () => {
+			// First, sync the file so it comes back with an id
+			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+
+			// Create a duplicate note with the same ID but different content
+			const filePathWithId = context.files[0]
+			const originalFileContent = await fs.readFile(filePathWithId, 'utf8')
+			const duplicateModifiedFileContent = originalFileContent.replace(
+				'Replace me',
+				'I am the duplicate',
+			)
+			await fs.writeFile(
+				filePathWithId.replace('.md', '-duplicate.md'),
+				duplicateModifiedFileContent,
+			)
+
+			// Sync again
+
+			const newFileList = await globby(`${path.dirname(filePathWithId)}/*.md`)
+
+			const resultsWithDuplicates = await syncFiles(newFileList, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+			})
+
+			// TODO revisit these results
+			console.log(resultsWithDuplicates)
 		})
 	},
 )

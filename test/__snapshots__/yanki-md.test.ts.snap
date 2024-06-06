@@ -741,6 +741,33 @@ exports[`complex trees > makes the right decisions about deck naming without a f
 }
 `;
 
+exports[`duplicate node ids > handles duplicate node ids for notes with different content gracefully 1`] = `
+{
+  "ankiWeb": false,
+  "deletedDecks": [],
+  "dryRun": false,
+  "duration": 0,
+  "namespace": "Yanki Test - duplicate node ids",
+  "synced": [
+    {
+      "action": "created",
+      "filePath": "basic.md",
+      "note": {
+        "deckName": "test-duplicate-node-ids",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-duplicate-node-ids front model-yanki-basic"><p>Replace me</p></div>",
+          "YankiNamespace": "Yanki Test - duplicate node ids",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+  ],
+}
+`;
+
 exports[`fancy markdown > handles fancy markdown 1`] = `
 {
   "ankiWeb": false,
