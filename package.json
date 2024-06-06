@@ -53,7 +53,7 @@
 		"clean": "git clean -fdX && rm ./pnpm-lock.yaml",
 		"fix": "shared-config --fix",
 		"lint": "shared-config --lint",
-		"release": "pnpm build && pnpm bumpp --commit 'Release: %s' && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
+		"release": "pnpm bumpp --commit 'Release: %s' && pnpm build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
 		"test": "vitest",
 		"test-browser": "vite"
 	},
