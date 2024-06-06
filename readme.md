@@ -19,14 +19,14 @@
 
 <!-- /short-description -->
 
-> \[!IMPORTANT]
+> [!IMPORTANT]
 > Yanki MD is feature-complete but will remain zero-versioned until it's been thoroughly tested. Please exercise caution and make backups of your Anki notes until the 1.0.0 release.
 
 ## Overview
 
 Yanki simply syncs a folder of Markdown notes to Anki. The primary novelty of its approach is in how Markdown is translated into Anki notes. The **structure** of a Markdown note determines the **type** of Anki note it becomes, so no extra syntax or Anki-specific markup is required — just pure Markdown.
 
-This library leverages the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) plugin.
+This library leverages the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers the soon-to-be-released `yanki-obsidian` plugin.
 
 The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
 
@@ -361,7 +361,7 @@ yanki style [options]
 
 #### API
 
-This package also exposes an API for integrating syncing capability programmatically in other context. (For example, in [yanki-obsidian](https://github.com/kitschpatrol/yanki-obsidian).)
+This package also exposes an API for integrating syncing capability programmatically in other contexts. (For example, in the soon-to-be-released `yanki-obsidian` plugin.
 
 The primary functions of interest are:
 
@@ -494,13 +494,19 @@ Behind the scenes, Yanki creates new note type models to match the four default 
 
 ## The future
 
-Possible features on the horizon include:
+Areas of improvement before a 1.0.0 release:
 
-1. Including some built-in CSS stylesheet options might be nice, since Anki's defaults can't always anticipate the kinds of HTML you're likely to generate from Markdown.
+- [ ] Refine handling of duplicate note ID edge cases.
 
-2. Either embedding media assets or implementing integration with Anki's media library could be helpful for offline study. (Though externally hosted image links seem generally fine for now.)
+Possible features on the horizon:
 
-3. It would be nice to find a way to talk to the Anki database that doesn't require the Anki app to be running, but my research hasn't yet turned up anything as robust and reliable as Anki-Connect for this purpose.
+- [ ] Including some built-in CSS stylesheet options might be nice, since Anki's defaults can't always anticipate the kinds of HTML you're likely to generate from Markdown.
+
+- [ ] Support for Mermaid diagrams.
+
+- [ ] Either embedding media assets or implementing integration with Anki's media library could be helpful for offline review. (Though externally hosted image links seem generally fine for now.)
+
+- [ ] It would be nice to find a way to talk to the Anki database that doesn't require the Anki app to be running, but my research hasn't yet turned up anything as robust and reliable as Anki-Connect for this purpose.
 
 ## Maintainers
 
