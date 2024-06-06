@@ -21,7 +21,7 @@ export const yankiSyncToAnkiWebEvenIfUnchanged = true
 
 export const yankiDefaultCssClassName = 'yanki'
 
-export const yankiDefaultNamespace = 'Yanki MD'
+export const yankiDefaultNamespace = 'Yanki'
 
 export const yankiDefaultEmptyNotePlaceholderHast = u('root', [
 	u(

@@ -210,7 +210,7 @@ export async function syncNotes(
 }
 
 /**
- * Sync a list of local yanki-md files to Anki.
+ * Sync a list of local yanki files to Anki.
  *
  * Wraps the syncNotes function to handle file I/O.
  *

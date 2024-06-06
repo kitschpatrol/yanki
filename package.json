@@ -1,15 +1,15 @@
 {
-	"name": "yanki-md",
+	"name": "yanki",
 	"version": "0.1.1",
 	"type": "module",
 	"description": "An ultra-simple CLI tool and TypeScript library for syncing Markdown to Anki flashcards. No customization. No configuration. No fuss.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/kitschpatrol/yanki-md.git"
+		"url": "git+https://github.com/kitschpatrol/yanki.git"
 	},
-	"homepage": "https://github.com/kitschpatrol/yanki-md",
+	"homepage": "https://github.com/kitschpatrol/yanki",
 	"bugs": {
-		"url": "https://github.com/kitschpatrol/yanki-md/issues",
+		"url": "https://github.com/kitschpatrol/yanki/issues",
 		"email": "eric@ericmika.com"
 	},
 	"author": {
@@ -24,7 +24,6 @@
 		"pnpm": ">=8.0.0"
 	},
 	"bin": {
-		"yanki-md": "dist/bin/cli.js",
 		"yanki": "dist/bin/cli.js"
 	},
 	"main": "./dist/lib/index.js",
