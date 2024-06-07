@@ -106,8 +106,8 @@ importers:
         specifier: ^13.4.8
         version: 13.4.8
       tsx:
-        specifier: ^4.12.0
-        version: 4.12.0
+        specifier: ^4.13.0
+        version: 4.13.0
       type-fest:
         specifier: ^4.19.0
         version: 4.19.0
@@ -136,8 +136,8 @@ importers:
         specifier: ^2.4.3
         version: 2.4.3
       yanki-connect:
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: ^1.0.3
+        version: 1.0.3
 
 packages:
 
@@ -4361,8 +4361,8 @@ packages:
   tslib@2.6.3:
     resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
 
-  tsx@4.12.0:
-    resolution: {integrity: sha512-642NAWAbDqPZINjmL32Lh/B+pd8vbVj6LHPsWm09IIHqQuWhCrNfcPTjRlHFWvv3FfM4vt9NLReBIjUNj5ZhDg==}
+  tsx@4.13.0:
+    resolution: {integrity: sha512-kNY70P2aLMdVBii1Err5ENxDhQ6Vz2PbQGX68DcvzY2/PWK5NLBO6vI7lPr1/2xG3IKSt2MN+KOAyWDQSRlbCA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -4765,8 +4765,8 @@ packages:
     engines: {node: '>= 14'}
     hasBin: true
 
-  yanki-connect@1.0.2:
-    resolution: {integrity: sha512-na92lAWMPn8dtWENKzQHG4mCTKPJdX1P3xyfZcEKT6k9ic3wJJmGibpVx+4MrZ46ZTE589e2eTPFhulQOBjXkw==}
+  yanki-connect@1.0.3:
+    resolution: {integrity: sha512-cNgtueCpEdNxbsIiXh+QzDpTY4PZsu2dGMUUZ7SKsmoAPpCfIjGEvZRNxgEIV0ucGBjPy6qw/fVz4QQJQMf+vg==}
     engines: {node: '>=18.0.0', pnpm: '>=8.0.0'}
 
   yargs-parser@21.1.1:
@@ -10198,7 +10198,7 @@ snapshots:
 
   tslib@2.6.3: {}
 
-  tsx@4.12.0:
+  tsx@4.13.0:
     dependencies:
       esbuild: 0.20.2
       get-tsconfig: 4.7.5
@@ -10690,7 +10690,7 @@ snapshots:
 
   yaml@2.4.3: {}
 
-  yanki-connect@1.0.2:
+  yanki-connect@1.0.3:
     dependencies:
       '@types/node': 20.14.2
       open: 10.1.0

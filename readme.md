@@ -26,7 +26,7 @@
 
 Yanki simply syncs a folder of Markdown notes to Anki. The primary novelty of its approach is in how Markdown is translated into Anki notes. The **structure** of a Markdown note determines the **type** of Anki note it becomes, so no extra syntax or Anki-specific markup is required — just pure Markdown.
 
-This library leverages the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers the soon-to-be-released `yanki-obsidian` plugin.
+This library leverages the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) plugin.
 
 The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
 
