@@ -1,7 +1,7 @@
 import { yankiDefaultNamespace, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
 import { type YankiNote } from '../model/note'
+import { deleteNotes, deleteOrphanedDecks, getRemoteNotes } from '../utilities/anki-connect'
 import { stripHtmlTags, truncateWithEllipsis } from '../utilities/string'
-import { deleteNotes, deleteOrphanedDecks, getRemoteNotes } from './anki-connect'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'

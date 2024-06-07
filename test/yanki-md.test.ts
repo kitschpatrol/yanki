@@ -316,7 +316,7 @@ describeWithFileFixture(
 				'I am the duplicate',
 			)
 			await fs.writeFile(
-				filePathWithId.replace('.md', '-duplicate.md'),
+				filePathWithId.replace('basic.md', 'a-duplicate.md'),
 				duplicateModifiedFileContent,
 			)
 

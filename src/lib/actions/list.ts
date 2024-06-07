@@ -1,7 +1,7 @@
 import { yankiDefaultNamespace } from '../model/constants'
 import { type YankiNote } from '../model/note'
+import { getRemoteNotes } from '../utilities/anki-connect'
 import { stripHtmlTags, truncateWithEllipsis } from '../utilities/string'
-import { getRemoteNotes } from './anki-connect'
 import { deepmerge } from 'deepmerge-ts'
 import type { PartialDeep } from 'type-fest'
 import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'

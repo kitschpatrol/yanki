@@ -1,6 +1,6 @@
 import { defaultCss, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
 import { yankiModelNames } from '../model/model'
-import { updateModelStyle } from './anki-connect'
+import { updateModelStyle } from '../utilities/anki-connect'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'

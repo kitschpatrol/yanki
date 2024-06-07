@@ -55,7 +55,7 @@ jobs:
       - name: Release
         if: env.IS_VALID_COMMIT == 'true'
         id: release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           token: ${{ env.ACCESS_TOKEN }}
           draft: false

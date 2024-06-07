@@ -2,8 +2,6 @@ import { yankiDefaultNamespace, yankiSyncToAnkiWebEvenIfUnchanged } from '../mod
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
 import { type YankiNote } from '../model/note'
 import { getNoteFromMarkdown } from '../parse/parse'
-import { environment } from '../utilities/platform'
-import { capitalize } from '../utilities/string'
 import {
 	addNote,
 	deleteNote,
@@ -12,7 +10,9 @@ import {
 	getRemoteNotes,
 	getRemoteNotesById,
 	updateNote,
-} from './anki-connect'
+} from '../utilities/anki-connect'
+import { environment } from '../utilities/platform'
+import { capitalize } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 import plur from 'plur'
@@ -118,12 +118,36 @@ export async function syncNotes(
 		}
 	}
 
+	// Check for and handle duplicate local note ids...
+	// If there are multiple local notes with the same ID, we see if any of them
+	// has content matching its remote note. If so, we keep that one and create
+	// new notes for the others by setting their noteIds to undefined. This is
+	// an edge case, but it can happen if users are manually duplicating notes
+	// that have already been synced as a shortcut to create new ones.
+	// Can't really think of a more sane thing to do without access to file metadata.
+	for (const localNote of allLocalNotes) {
+		if (localNote.noteId === undefined) continue
+
+		const duplicates = findNotesWithDuplicateIds(allLocalNotes, localNote.noteId)
+
+		if (duplicates.length <= 1) continue
+
+		const remoteNote = existingRemoteNotes.find((remote) => remote?.noteId === localNote.noteId)
+
+		// Defaults to the first note if no content match is found
+		const noteToKeep = selectNoteToKeep(duplicates, remoteNote)
+
+		// Reset noteId for all duplicates except the one to keep
+		for (const duplicate of duplicates) {
+			if (duplicate !== noteToKeep) {
+				duplicate.noteId = undefined
+			}
+		}
+	}
+
 	// Set undefined local note IDs to bogus ones to ensure we create them
 	const localNoteIds = allLocalNotes.map((note) => note.noteId).map((id) => id ?? -1)
 	const remoteNotes = await getRemoteNotesById(client, localNoteIds)
-
-	// TODO Check for duplicate local note ids...
-	//
 
 	// Creation and update pass
 	for (const [index, remoteNote] of remoteNotes.entries()) {
@@ -405,4 +429,20 @@ export function formatSyncReport(report: SyncReport, verbose = false): string {
 	}
 
 	return lines.join('\n')
+}
+
+// Helper function to find notes with the same noteId
+function findNotesWithDuplicateIds(notes: YankiNote[], noteId: number): YankiNote[] {
+	return notes.filter((note) => (note.noteId === undefined ? false : note.noteId === noteId))
+}
+
+// Function to select the note to keep based on content matching with the remote note
+function selectNoteToKeep(duplicates: YankiNote[], remoteNote: YankiNote | undefined): YankiNote {
+	return (
+		duplicates.find(
+			(duplicate) =>
+				duplicate.fields.Front === remoteNote?.fields.Front &&
+				duplicate.fields.Back === remoteNote?.fields.Back,
+		) ?? duplicates[0] // Default to the first note if no content match is found
+	)
 }

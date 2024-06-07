@@ -3,9 +3,6 @@ import { type YankiModelName, yankiModelNames, yankiModels } from '../model/mode
 import { type YankiNote } from '../model/note'
 import { type YankiConnect } from 'yanki-connect'
 
-// Console.log('----------------------------------')
-// console.log(githubMarkdownCss)
-
 export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryRun = false) {
 	if (dryRun) {
 		return

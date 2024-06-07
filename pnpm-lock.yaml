@@ -136,8 +136,8 @@ importers:
         specifier: ^2.4.3
         version: 2.4.3
       yanki-connect:
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2
 
 packages:
 
@@ -4765,8 +4765,8 @@ packages:
     engines: {node: '>= 14'}
     hasBin: true
 
-  yanki-connect@1.0.1:
-    resolution: {integrity: sha512-EDUw9Ao9ibxIoj1g2WfCOn//weq/U9QOhCiDtGLkD4AGPrA6BFGYFy9/g/Ev/xUY3PLAphuvzrCsQIS26fb+vw==}
+  yanki-connect@1.0.2:
+    resolution: {integrity: sha512-na92lAWMPn8dtWENKzQHG4mCTKPJdX1P3xyfZcEKT6k9ic3wJJmGibpVx+4MrZ46ZTE589e2eTPFhulQOBjXkw==}
     engines: {node: '>=18.0.0', pnpm: '>=8.0.0'}
 
   yargs-parser@21.1.1:
@@ -10690,7 +10690,7 @@ snapshots:
 
   yaml@2.4.3: {}
 
-  yanki-connect@1.0.1:
+  yanki-connect@1.0.2:
     dependencies:
       '@types/node': 20.14.2
       open: 10.1.0
