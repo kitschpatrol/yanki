@@ -496,9 +496,9 @@ The Yanki TypeScript / JavaScript library is idempotent, so you can run it in a 
 
 There's one exception, the `syncFiles(...)` function, which by default relies on file system access to work.
 
-To retain `syncFiles(...)`'s utility in a browser environment, has the optional arguments `readFile` and `writeFile`, which are implemented by `node:fs/promises` by default in Node environments.
+To retain `syncFiles(...)`'s utility in a browser environment, has the optional arguments `readFile`, `writeFile`, and `rename`, which are implemented by `node:fs/promises` by default in Node environments.
 
-Running Yanki in a browser environment required implementing and passing `readFile` and `writeFile` implementations to `syncFiles(...)` that are suited to your particular use case. (A warning will be provided if you neglect to do so.)
+Running Yanki in a browser environment requires implementing and passing `readFile`, `writeFile`, and `rename` implementations to `syncFiles(...)` that are suited to your particular use case. (A warning will be provided if you neglect to do so.)
 
 The rest of the library should work fine in both contexts without special measures.
 
