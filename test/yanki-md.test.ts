@@ -65,7 +65,7 @@ describeWithFileFixture(
 		cleanUpAnki: true,
 	},
 	(context) => {
-		it('synchronizes notes to anki and has he correct deck name', async () => {
+		it('synchronizes notes to anki and has the correct deck name', async () => {
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,

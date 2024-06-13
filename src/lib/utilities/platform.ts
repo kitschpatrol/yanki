@@ -3,9 +3,11 @@ export const environment =
 
 export const platform =
 	environment === 'browser'
-		? /windows/i.test(navigator.userAgent)
+		? // eslint-disable-next-line n/no-unsupported-features/node-builtins
+			/windows/i.test(navigator.userAgent)
 			? 'windows'
-			: /mac/i.test(navigator.userAgent)
+			: // eslint-disable-next-line n/no-unsupported-features/node-builtins
+				/mac/i.test(navigator.userAgent)
 				? 'mac'
 				: 'other'
 		: environment === 'node'

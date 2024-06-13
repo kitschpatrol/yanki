@@ -22,6 +22,26 @@
 > \[!IMPORTANT]
 > Yanki is feature-complete but will remain zero-versioned until it's been thoroughly tested. Please exercise caution and make backups of your Anki notes until the 1.0.0 release.
 
+<!-- table-of-contents { depth: 2 } -->
+
+## Table of contents
+
+- [Overview](#overview)
+- [Quick start](#quick-start)
+- [Features](#features)
+- [Markdown note types](#markdown-note-types)
+- [Getting started](#getting-started)
+- [Usage](#usage)
+- [Advanced features](#advanced-features)
+- [Background](#background)
+- [The future](#the-future)
+- [Maintainers](#maintainers)
+- [Acknowledgments](#acknowledgments)
+- [Contributing](#contributing)
+- [License](#license)
+
+<!-- /table-of-contents -->
+
 ## Overview
 
 Yanki simply syncs a folder of Markdown notes to Anki. The primary novelty of its approach is in how Markdown is translated into Anki notes. The **structure** of a Markdown note determines the **type** of Anki note it becomes, so no extra syntax or Anki-specific markup is required — just pure Markdown.
@@ -389,7 +409,7 @@ function setStyle(options: PartialDeep<StyleOptions>): Promise<StyleReport>
 
 See the [source code](https://github.com/kitschpatrol/yanki/blob/main/src/lib/index.ts) for additional exports and inline documentation.
 
-## Advanced Features
+## Advanced features
 
 ### Namespaces
 
@@ -496,7 +516,7 @@ Behind the scenes, Yanki creates new note type models to match the four default 
 
 Areas of improvement before a 1.0.0 release:
 
-- [ ] Refine handling of duplicate note ID edge cases.
+- [x] Refine handling of duplicate note ID edge cases.
 
 Possible features on the horizon:
 
@@ -512,7 +532,7 @@ Possible features on the horizon:
 
 [@kitschpatrol](https://github.com/kitschpatrol)
 
-## Acknowledgements
+## Acknowledgments
 
 Thanks to Alex Yatskov for creating [Anki-Connect](https://foosoft.net/projects/anki-connect/).
 
