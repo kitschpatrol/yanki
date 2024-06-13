@@ -22,10 +22,18 @@ export default defineConfig({
 		open: true,
 	},
 	test: {
+		// Disable concurrent test execution across files
+		// Yanki's tests count total file counts, irrespective of namespace, before
+		// and after each test to ensure the integrity of pre-existing Anki notes.
+		// Running tests concurrently across files can create race conditions in
+		// total note counts that will cause assertions to fail.
+		maxConcurrency: 1,
+		maxWorkers: 1,
+		minWorkers: 1,
 		root: path.resolve(import.meta.dirname),
-		// // Enable serial mode
-		// sequence: {
-		// 	concurrent: false,
-		// },
+		sequence: {
+			// Disable concurrent test execution within files
+			concurrent: false,
+		},
 	},
 })

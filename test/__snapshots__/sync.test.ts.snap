@@ -10,7 +10,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
   "synced": [
     {
       "action": "created",
-      "filePath": "basic-and-reversed-card-with-no-back.md",
+      "filePath": "/test-minimal-notes/basic-and-reversed-card-with-no-back.md",
+      "filePathOriginal": "/test-minimal-notes/basic-and-reversed-card-with-no-back.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -25,7 +26,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-and-reversed-card-with-no-front.md",
+      "filePath": "/test-minimal-notes/basic-and-reversed-card-with-no-front.md",
+      "filePathOriginal": "/test-minimal-notes/basic-and-reversed-card-with-no-front.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -40,7 +42,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-and-reversed-card.md",
+      "filePath": "/test-minimal-notes/basic-and-reversed-card.md",
+      "filePathOriginal": "/test-minimal-notes/basic-and-reversed-card.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -55,7 +58,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-type-in-the-answer-with-empty-frontmatter.md",
+      "filePath": "/test-minimal-notes/basic-type-in-the-answer-with-empty-frontmatter.md",
+      "filePathOriginal": "/test-minimal-notes/basic-type-in-the-answer-with-empty-frontmatter.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -71,7 +75,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-type-in-the-answer-with-frontmatter.md",
+      "filePath": "/test-minimal-notes/basic-type-in-the-answer-with-frontmatter.md",
+      "filePathOriginal": "/test-minimal-notes/basic-type-in-the-answer-with-frontmatter.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -89,7 +94,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md",
+      "filePath": "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md",
+      "filePathOriginal": "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -106,7 +112,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-type-in-the-answer-with-multiple-emphasis.md",
+      "filePath": "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis.md",
+      "filePathOriginal": "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -123,7 +130,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-type-in-the-answer.md",
+      "filePath": "/test-minimal-notes/basic-type-in-the-answer.md",
+      "filePathOriginal": "/test-minimal-notes/basic-type-in-the-answer.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -139,7 +147,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-back-and-no-front-with-empty-frontmatter.md",
+      "filePath": "/test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -155,7 +164,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-back-and-no-front.md",
+      "filePath": "/test-minimal-notes/basic-with-back-and-no-front.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-back-and-no-front.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -171,7 +181,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-cloze-like-back-and-no-front.md",
+      "filePath": "/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -186,7 +197,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-empty-everything.md",
+      "filePath": "/test-minimal-notes/basic-with-empty-everything.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-empty-everything.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -201,7 +213,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-empty-frontmatter.md",
+      "filePath": "/test-minimal-notes/basic-with-empty-frontmatter.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-empty-frontmatter.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -216,7 +229,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-front-and-cloze-like-back.md",
+      "filePath": "/test-minimal-notes/basic-with-front-and-cloze-like-back.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-front-and-cloze-like-back.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -231,7 +245,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-front-and-no-back.md",
+      "filePath": "/test-minimal-notes/basic-with-front-and-no-back.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-front-and-no-back.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -247,7 +262,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-type-in-the-answer-like-back-and-no-front.md",
+      "filePath": "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -262,7 +278,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-type-in-the-answer-like-front-and-no-back.md",
+      "filePath": "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -277,7 +294,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md",
+      "filePath": "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -292,7 +310,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-type-in-the-answer-like-single-line-with-frontmatter.md",
+      "filePath": "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -309,7 +328,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic-with-type-in-the-answer-like-single-line.md",
+      "filePath": "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -324,7 +344,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-minimal-notes/basic.md",
+      "filePathOriginal": "/test-minimal-notes/basic.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -339,7 +360,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "cloze-with-extra-empty.md",
+      "filePath": "/test-minimal-notes/cloze-with-extra-empty.md",
+      "filePathOriginal": "/test-minimal-notes/cloze-with-extra-empty.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -354,7 +376,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "cloze-with-extra.md",
+      "filePath": "/test-minimal-notes/cloze-with-extra.md",
+      "filePathOriginal": "/test-minimal-notes/cloze-with-extra.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -369,7 +392,40 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "cloze-with-style.md",
+      "filePath": "/test-minimal-notes/cloze-with-no-preamble.md",
+      "filePathOriginal": "/test-minimal-notes/cloze-with-no-preamble.md",
+      "note": {
+        "deckName": "test-minimal-notes",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-cloze"><p>{{c1::cloze}} is the {{c2::start of the card ::<em>here's a hint</em>}}.</p></div>",
+          "YankiNamespace": "Yanki Test - basic synchronization",
+        },
+        "modelName": "Yanki - Cloze",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-minimal-notes/cloze-with-nothing-else.md",
+      "filePathOriginal": "/test-minimal-notes/cloze-with-nothing-else.md",
+      "note": {
+        "deckName": "test-minimal-notes",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-cloze"><p>{{c1::a lonely cloze}}</p></div>",
+          "YankiNamespace": "Yanki Test - basic synchronization",
+        },
+        "modelName": "Yanki - Cloze",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-minimal-notes/cloze-with-style.md",
+      "filePathOriginal": "/test-minimal-notes/cloze-with-style.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -385,7 +441,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "cloze.md",
+      "filePath": "/test-minimal-notes/cloze.md",
+      "filePathOriginal": "/test-minimal-notes/cloze.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -412,7 +469,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
   "synced": [
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note",
         "fields": {
@@ -427,7 +485,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/deep-contiguous/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-contiguous/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note::deep-contiguous",
         "fields": {
@@ -442,7 +501,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/solo-note/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/solo-note/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note::solo-note",
         "fields": {
@@ -457,7 +517,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/deep-contiguous/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-contiguous/within/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note::deep-contiguous::within",
         "fields": {
@@ -475,7 +536,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/sibling-folders/brother/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/sibling-folders/brother/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note::sibling-folders::brother",
         "fields": {
@@ -493,7 +555,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/sibling-folders/sister/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/sibling-folders/sister/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note::sibling-folders::sister",
         "fields": {
@@ -511,7 +574,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/deep-contiguous/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-contiguous/within/within/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note::deep-contiguous::within::within",
         "fields": {
@@ -529,7 +593,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/deep-non-contiguous/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-non-contiguous/within/within/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note::deep-non-contiguous::within::within",
         "fields": {
@@ -544,7 +609,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/deep-contiguous/within/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-contiguous/within/within/within/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note::deep-contiguous::within::within::within",
         "fields": {
@@ -562,7 +628,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-note/deep-island/within/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-island/within/within/within/basic.md",
       "note": {
         "deckName": "test-complex-tree-root-note::deep-island::within::within::within",
         "fields": {
@@ -589,7 +656,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
   "synced": [
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-bare/deep-contiguous/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/basic.md",
       "note": {
         "deckName": "deep-contiguous",
         "fields": {
@@ -604,7 +672,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-bare/solo-note/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/solo-note/basic.md",
       "note": {
         "deckName": "solo-note",
         "fields": {
@@ -619,25 +688,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
     },
     {
       "action": "created",
-      "filePath": "basic.md",
-      "note": {
-        "deckName": "deep-contiguous::within",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-bare/sibling-folders/brother/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/sibling-folders/brother/basic.md",
       "note": {
         "deckName": "sibling-folders::brother",
         "fields": {
@@ -655,7 +707,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-bare/sibling-folders/sister/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/sibling-folders/sister/basic.md",
       "note": {
         "deckName": "sibling-folders::sister",
         "fields": {
@@ -673,7 +726,43 @@ exports[`complex trees > makes the right decisions about deck naming without a f
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-bare/deep-contiguous/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/within/basic.md",
+      "note": {
+        "deckName": "deep-contiguous::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-bare/deep-non-contiguous/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-non-contiguous/within/within/basic.md",
+      "note": {
+        "deckName": "deep-non-contiguous::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-bare/deep-contiguous/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/within/within/basic.md",
       "note": {
         "deckName": "deep-contiguous::within::within",
         "fields": {
@@ -691,9 +780,10 @@ exports[`complex trees > makes the right decisions about deck naming without a f
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-bare/deep-island/within/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-island/within/within/within/basic.md",
       "note": {
-        "deckName": "deep-non-contiguous::within::within",
+        "deckName": "deep-island::within::within::within",
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
@@ -706,7 +796,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
     },
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-complex-tree-root-bare/deep-contiguous/within/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/within/within/within/basic.md",
       "note": {
         "deckName": "deep-contiguous::within::within::within",
         "fields": {
@@ -720,21 +811,6 @@ exports[`complex trees > makes the right decisions about deck naming without a f
           "mdank",
           "yes",
         ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "basic.md",
-      "note": {
-        "deckName": "deep-island::within::within::within",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
       },
     },
   ],
@@ -751,7 +827,8 @@ exports[`duplicate node ids > handles duplicate node ids for notes with differen
   "synced": [
     {
       "action": "created",
-      "filePath": "basic.md",
+      "filePath": "/test-duplicate-node-ids/basic.md",
+      "filePathOriginal": "/test-duplicate-node-ids/basic.md",
       "note": {
         "deckName": "test-duplicate-node-ids",
         "fields": {
@@ -778,7 +855,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
   "synced": [
     {
       "action": "created",
-      "filePath": "autolinks.md",
+      "filePath": "/test-fancy-markdown/autolinks.md",
+      "filePathOriginal": "/test-fancy-markdown/autolinks.md",
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
@@ -793,7 +871,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
     },
     {
       "action": "created",
-      "filePath": "gfm-tables.md",
+      "filePath": "/test-fancy-markdown/gfm-tables.md",
+      "filePathOriginal": "/test-fancy-markdown/gfm-tables.md",
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
@@ -865,7 +944,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
     },
     {
       "action": "created",
-      "filePath": "gh-admonitions.md",
+      "filePath": "/test-fancy-markdown/gh-admonitions.md",
+      "filePathOriginal": "/test-fancy-markdown/gh-admonitions.md",
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
@@ -898,7 +978,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
     },
     {
       "action": "created",
-      "filePath": "highlights.md",
+      "filePath": "/test-fancy-markdown/highlights.md",
+      "filePathOriginal": "/test-fancy-markdown/highlights.md",
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
@@ -913,7 +994,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
     },
     {
       "action": "created",
-      "filePath": "images.md",
+      "filePath": "/test-fancy-markdown/images.md",
+      "filePathOriginal": "/test-fancy-markdown/images.md",
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
@@ -928,7 +1010,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
     },
     {
       "action": "created",
-      "filePath": "mathjax-fence.md",
+      "filePath": "/test-fancy-markdown/mathjax-fence.md",
+      "filePathOriginal": "/test-fancy-markdown/mathjax-fence.md",
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
@@ -1060,7 +1143,8 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
     },
     {
       "action": "created",
-      "filePath": "obsidian-wiki-links.md",
+      "filePath": "/test-fancy-markdown/obsidian-wiki-links.md",
+      "filePathOriginal": "/test-fancy-markdown/obsidian-wiki-links.md",
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
@@ -1090,7 +1174,8 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
   "synced": [
     {
       "action": "created",
-      "filePath": "basic-with-irrelevent-frontmatter.md",
+      "filePath": "/test-surplus-frontmatter/basic-with-irrelevent-frontmatter.md",
+      "filePathOriginal": "/test-surplus-frontmatter/basic-with-irrelevent-frontmatter.md",
       "note": {
         "deckName": "test-surplus-frontmatter",
         "fields": {
@@ -1105,7 +1190,8 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
     },
     {
       "action": "created",
-      "filePath": "basic-with-surplus-frontmatter.md",
+      "filePath": "/test-surplus-frontmatter/basic-with-surplus-frontmatter.md",
+      "filePathOriginal": "/test-surplus-frontmatter/basic-with-surplus-frontmatter.md",
       "note": {
         "deckName": "test-surplus-frontmatter",
         "fields": {

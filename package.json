@@ -74,6 +74,8 @@
 		"@shikijs/rehype": "^1.6.4",
 		"bumpp": "^9.4.1",
 		"deepmerge-ts": "^7.0.3",
+		"filenamify": "^6.0.0",
+		"nanoid": "^5.0.7",
 		"path-browserify-esm": "^1.0.4",
 		"pkgroll": "^2.1.1",
 		"plur": "^5.1.0",

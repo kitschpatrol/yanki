@@ -17,7 +17,8 @@ import { YankiConnect } from 'yanki-connect'
 
 type FixtureOptions = {
 	assetPath: string
-	cleanUpAnki: boolean
+	cleanUpAnki?: boolean
+	cleanUpTempFiles?: boolean
 }
 
 type TestContext = {
@@ -29,7 +30,7 @@ type TestContext = {
 
 export function describeWithFileFixture(
 	description: string,
-	{ assetPath, cleanUpAnki }: FixtureOptions,
+	{ assetPath, cleanUpAnki = true, cleanUpTempFiles = true }: FixtureOptions,
 	tests: (context: TestContext) => void,
 ) {
 	describe(description, () => {
@@ -69,6 +70,7 @@ export function describeWithFileFixture(
 					dryRun: false,
 					namespace: context.namespace,
 				})
+
 				const allNotes = await context.yankiConnect.note.findNotes({
 					query: '*',
 				})
@@ -111,7 +113,9 @@ export function describeWithFileFixture(
 			}
 
 			// Clean up temp dir
-			await fs.rm(tempAssetPath, { force: true, recursive: true })
+			if (cleanUpTempFiles) {
+				await fs.rm(tempAssetPath, { force: true, recursive: true })
+			}
 		})
 	})
 }

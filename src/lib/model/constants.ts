@@ -23,6 +23,8 @@ export const yankiDefaultCssClassName = 'yanki'
 
 export const yankiDefaultNamespace = 'Yanki'
 
+export const yankiDefaultEmptyNotePlaceholderText = '(Empty)'
+
 export const yankiDefaultEmptyNotePlaceholderHast = u('root', [
 	u(
 		'element',
@@ -37,7 +39,7 @@ export const yankiDefaultEmptyNotePlaceholderHast = u('root', [
 					properties: {},
 					tagName: 'em',
 				},
-				[u('text', '(Empty)')],
+				[u('text', yankiDefaultEmptyNotePlaceholderText)],
 			),
 		],
 	),

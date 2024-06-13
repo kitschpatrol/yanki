@@ -4,9 +4,25 @@ export function capitalize(text: string): string {
 	return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-export function truncateWithEllipsis(text: string, length: number): string {
-	if (text.length <= length) return text
-	return text.slice(0, Math.max(0, length - 3)) + '...'
+/**
+ * Truncates on word boundary and adds ellipsis. Does not give special treatment
+ * to file extensions.
+ * @param text Text to truncate
+ * @param maxLength Maximum length excluding ellipsis
+ * @returns Truncated string
+ */
+export function truncateWithEllipsis(text: string, maxLength: number): string {
+	if (text.length <= maxLength) {
+		return text
+	}
+
+	const words = text.split(' ')
+
+	while (words.length > 1 && words.join(' ').length > maxLength) {
+		words.pop()
+	}
+
+	return `${words.join(' ').slice(0, maxLength)}...`
 }
 
 export function stripHtmlTags(html: string): string {
@@ -32,4 +48,12 @@ export function cleanClassName(className: string): string {
 		.replaceAll(/[^\da-z]/gi, ' ')
 		.trim()
 		.replaceAll(/ +/g, '-')
+}
+
+export function emptyIsUndefined(text: string | undefined): string | undefined {
+	if (text === undefined) {
+		return undefined
+	}
+
+	return text.trim() === '' ? undefined : text
 }

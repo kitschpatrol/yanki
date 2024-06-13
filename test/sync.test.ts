@@ -13,6 +13,7 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/test-minimal-notes/',
 		cleanUpAnki: true,
+		cleanUpTempFiles: true,
 	},
 	(context) => {
 		it('correctly infers Anki model types from markdown', async () => {
@@ -50,6 +51,8 @@ describeWithFileFixture(
 				  "basic.md": "Yanki - Basic",
 				  "cloze-with-extra-empty.md": "Yanki - Cloze",
 				  "cloze-with-extra.md": "Yanki - Cloze",
+				  "cloze-with-no-preamble.md": "Yanki - Cloze",
+				  "cloze-with-nothing-else.md": "Yanki - Cloze",
 				  "cloze-with-style.md": "Yanki - Cloze",
 				  "cloze.md": "Yanki - Cloze",
 				}
@@ -63,6 +66,7 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/test-minimal-notes/',
 		cleanUpAnki: true,
+		cleanUpTempFiles: true,
 	},
 	(context) => {
 		it('synchronizes notes to anki and has the correct deck name', async () => {
@@ -109,6 +113,7 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/test-surplus-frontmatter/',
 		cleanUpAnki: true,
+		cleanUpTempFiles: true,
 	},
 	(context) => {
 		it('preserves and merges unrelated surplus frontmatter', async () => {
@@ -144,6 +149,7 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/test-complex-tree-root-note/',
 		cleanUpAnki: true,
+		cleanUpTempFiles: true,
 	},
 	(context) => {
 		it('makes the right decisions about deck naming with a file in the root', async () => {
@@ -188,6 +194,7 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/test-complex-tree-root-bare/',
 		cleanUpAnki: true,
+		cleanUpTempFiles: true,
 	},
 	(context) => {
 		it('makes the right decisions about deck naming without a file in the root', async () => {
@@ -231,6 +238,7 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/test-fancy-markdown/',
 		cleanUpAnki: true,
+		cleanUpTempFiles: true,
 	},
 	(context) => {
 		it('handles fancy markdown', async () => {
@@ -251,6 +259,7 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/test-minimal-notes/',
 		cleanUpAnki: true,
+		cleanUpTempFiles: true,
 	},
 	(context) => {
 		it('idempotent syncing', async () => {
@@ -295,6 +304,7 @@ describeWithFileFixture(
 	{
 		assetPath: './test/assets/test-duplicate-node-ids/',
 		cleanUpAnki: true,
+		cleanUpTempFiles: true,
 	},
 	(context) => {
 		it('handles duplicate node ids for notes with different content gracefully', async () => {

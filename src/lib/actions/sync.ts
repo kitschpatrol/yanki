@@ -11,6 +11,11 @@ import {
 	getRemoteNotesById,
 	updateNote,
 } from '../utilities/anki-connect'
+import {
+	getSafeTitleForNote,
+	getTemporarilyUniqueFilePath,
+	getUniqueFilePath,
+} from '../utilities/filenames'
 import { environment } from '../utilities/platform'
 import { capitalize } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
@@ -23,6 +28,7 @@ import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } fr
 export type SyncedNote = {
 	action: 'created' | 'deleted' | 'recreated' | 'unchanged' | 'updated'
 	filePath?: string // Not always applicable
+	filePathOriginal?: string // Not always applicable, used to detect name changes
 	note: YankiNote
 }
 
@@ -37,6 +43,10 @@ export type SyncOptions = {
 	ankiWeb: boolean
 	defaultDeckName: string
 	dryRun: boolean
+	/** Only applies to syncFiles */
+	manageFilenames: 'off' | 'prompt' | 'response'
+	/** Only applies if manageFilenames is not `'off'`. Will _not_ truncate user-specified file names in other cases. */
+	maxFilenameLength: number
 	namespace: string
 	/** Ensures that wiki-style links work correctly */
 	obsidianVault: string | undefined
@@ -47,6 +57,8 @@ export const defaultSyncOptions: SyncOptions = {
 	ankiWeb: false,
 	defaultDeckName: 'Yanki',
 	dryRun: false,
+	manageFilenames: 'off',
+	maxFilenameLength: 60,
 	namespace: yankiDefaultNamespace,
 	obsidianVault: undefined,
 }
@@ -245,28 +257,31 @@ export async function syncNotes(
  * @returns The synced files (with new IDs where applicable), plus some stats
  * about the sync @throws
  */
+// eslint-disable-next-line complexity
 export async function syncFiles(
 	allLocalFilePaths: string[],
 	options?: PartialDeep<SyncOptions>,
 	readFile?: (filePath: string) => Promise<string>,
 	writeFile?: (filePath: string, data: string) => Promise<void>,
+	rename?: (oldPath: string, newPath: string) => Promise<void>,
 ): Promise<SyncReport> {
 	const startTime = performance.now()
 
-	if (readFile === undefined || writeFile === undefined) {
+	if (readFile === undefined || writeFile === undefined || rename === undefined) {
 		if (environment === 'node') {
 			const fs = await import('node:fs/promises')
 			readFile = async (filePath) => fs.readFile(filePath, 'utf8')
 			writeFile = async (filePath, data) => fs.writeFile(filePath, data, 'utf8')
+			rename = async (oldPath, newPath) => fs.rename(oldPath, newPath)
 		} else {
 			throw new Error(
-				'Both readFile and writeFile implementations must be provided to the syncFiles function when running in the browser',
+				'The "readFile", "writeFile", and "rename" file function implementations must be provided to the syncFiles function when running in the browser',
 			)
 		}
 	}
 
 	const resolvedOptions = deepmerge(defaultSyncOptions, options ?? {})
-	const { namespace, obsidianVault } = resolvedOptions
+	const { manageFilenames, maxFilenameLength, namespace, obsidianVault } = resolvedOptions
 
 	const allLocalMarkdown: string[] = []
 	const allLocalNotes: YankiNote[] = []
@@ -310,10 +325,71 @@ export async function syncFiles(
 	const liveFiles: SyncedNote[] = allLocalNotes.map((note, index) => ({
 		action: liveNotes[index].action,
 		filePath: allLocalFilePaths[index],
+		filePathOriginal: allLocalFilePaths[index],
 		note,
 	}))
 
-	// Add undefined file path to deleted notes, since they only ever existed in Anki
+	// Manage filenames
+	if (manageFilenames !== 'off') {
+		// Update the file paths in the live files...
+
+		const newFilePaths: string[] = []
+
+		for (const liveFile of liveFiles) {
+			const { filePathOriginal, note } = liveFile
+
+			if (filePathOriginal === undefined) {
+				throw new Error('File path is undefined')
+			}
+
+			const newFilename = getSafeTitleForNote(note, manageFilenames, maxFilenameLength)
+			const newFilePath = path.join(
+				path.dirname(filePathOriginal),
+				`${newFilename}${path.extname(filePathOriginal)}`,
+			)
+
+			const newUniqueFilePath = getUniqueFilePath(newFilePath, newFilePaths)
+
+			liveFile.filePath = newUniqueFilePath
+			newFilePaths.push(newUniqueFilePath)
+		}
+
+		// Execute rename plan from liveFiles filePath fields, checking for possible collisions with the existing "old" paths.
+		// This is circuitous, but it means we don't need to implement additional file functions.
+		const intermediateRenamePlan = new Map<string, string>()
+
+		for (const liveFile of liveFiles) {
+			const { filePath, filePathOriginal } = liveFile
+			if (filePathOriginal === undefined) {
+				throw new Error('Original file path is undefined.')
+			}
+
+			if (filePath === undefined) {
+				throw new Error('File path is undefined.')
+			}
+
+			if (filePath === filePathOriginal) {
+				// No change
+				continue
+			}
+
+			// Check for old path collisions
+			let safeNewFilePath = filePath
+			if (liveFiles.some((file) => file.filePathOriginal === filePath)) {
+				safeNewFilePath = getTemporarilyUniqueFilePath(filePath)
+				intermediateRenamePlan.set(safeNewFilePath, filePath)
+			}
+
+			await rename(filePathOriginal, safeNewFilePath)
+		}
+
+		// One more pass to fix the intermediates
+		for (const [temporarilyUniquePath, newPath] of intermediateRenamePlan) {
+			await rename(temporarilyUniquePath, newPath)
+		}
+	}
+
+	// Add undefined file paths to deleted notes, since they only ever existed in Anki
 	const deletedNotes: SyncedNote[] = synced
 		.filter((note) => note.action === 'deleted')
 		.map((note) => ({
@@ -404,6 +480,8 @@ export function formatSyncReport(report: SyncReport, verbose = false): string {
 
 	const totalSynced = synced.filter((note) => note.action !== 'deleted').length
 
+	const totalRenamed = synced.filter((note) => note.filePath !== note.filePathOriginal).length
+
 	lines.push(
 		`${report.dryRun ? 'Will' : 'Successfully'} synced ${totalSynced} ${plur('note', totalSynced)} to Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}.`,
 	)
@@ -412,6 +490,10 @@ export function formatSyncReport(report: SyncReport, verbose = false): string {
 		lines.push('', report.dryRun ? 'Sync Plan Summary:' : 'Sync Summary:')
 		for (const [action, count] of Object.entries(actionCounts)) {
 			lines.push(`  ${capitalize(action)}: ${count}`)
+		}
+
+		if (totalRenamed > 0) {
+			lines.push('', `Local notes renamed: ${totalRenamed}`)
 		}
 
 		if (report.deletedDecks.length > 0) {

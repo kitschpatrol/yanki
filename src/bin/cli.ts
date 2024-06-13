@@ -2,7 +2,7 @@ import { version } from '../../package.json'
 import { cleanNotes, formatCleanReport } from '../lib/actions/clean'
 import { formatListReport, listNotes } from '../lib/actions/list'
 import { formatStyleReport, setStyle } from '../lib/actions/style'
-import { formatSyncReport, syncFiles } from '../lib/actions/sync'
+import { type SyncOptions, formatSyncReport, syncFiles } from '../lib/actions/sync'
 import log from '../lib/utilities/log'
 import { urlToHostAndPort } from '../lib/utilities/string'
 import {
@@ -71,6 +71,21 @@ await yargsInstance
 				.option(ankiConnectOption)
 				.option(ankiAutoLaunchOption)
 				.option(ankiWebOption)
+				.option('manage-filenames', {
+					alias: 'm',
+					choices: ['off', 'prompt', 'response'] as const,
+					default: 'off',
+					describe:
+						'Rename local note files to match their content. Useful if you want to feel have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of.',
+					type: 'string',
+				})
+				.option('max-filename-length', {
+					default: undefined,
+					defaultDescription: '60',
+					describe:
+						'If `manage-filenames` is enabled, this option specifies the maximum length of the filename in characters.',
+					type: 'number',
+				})
 				.option(jsonOption('Output the sync report as JSON.'))
 				.option(verboseOption),
 		async ({
@@ -80,6 +95,8 @@ await yargsInstance
 			directory,
 			dryRun,
 			json,
+			manageFilenames,
+			maxFilenameLength,
 			namespace,
 			// Not exposing this option for now
 			recursive = true,
@@ -96,6 +113,10 @@ await yargsInstance
 				return
 			}
 
+			if (manageFilenames === 'off' && maxFilenameLength !== undefined) {
+				log.warn('Ignoring `max-filename-length` option because `manage-filenames` is not enabled.')
+			}
+
 			const { host, port } = urlToHostAndPort(ankiConnect)
 
 			const report = await syncFiles(paths, {
@@ -106,6 +127,8 @@ await yargsInstance
 				},
 				ankiWeb,
 				dryRun,
+				manageFilenames: manageFilenames as SyncOptions['manageFilenames'],
+				maxFilenameLength,
 				namespace,
 			}).catch(ankiNotRunningErrorHandler)
 
