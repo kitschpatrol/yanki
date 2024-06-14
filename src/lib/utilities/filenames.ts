@@ -105,10 +105,11 @@ function getSafeFilename(text: string, maxLength?: number | undefined): string {
 	return truncateWithEllipsis(basicSafeFilename, safeMaxLength)
 }
 
+// Always prefixes with increment! Cleaned up in a subsequent pass.
 export function getUniqueFilePath(filePath: string, existingFilenames: string[]): string {
-	let newFilePath = filePath
-	let increment = 1
-	while (existingFilenames.includes(newFilePath)) {
+	let newFilePath = appendFilenameIncrement(filePath, 1)
+	let increment = 2
+	while (existingFilenames.includes(newFilePath.toLowerCase())) {
 		newFilePath = appendFilenameIncrement(filePath, increment)
 		increment++
 	}
@@ -116,12 +117,27 @@ export function getUniqueFilePath(filePath: string, existingFilenames: string[])
 	return newFilePath
 }
 
+// If there is no "second file", then strip the (1) suffix
+export function auditUniqueFilePath(filePath: string, existingFilenames: string[]) {
+	const testPath = appendFilenameIncrement(filePath, 2)
+
+	if (existingFilenames.includes(testPath.toLowerCase())) {
+		return filePath
+	}
+
+	return stripFilenameIncrement(filePath)
+}
+
 /**
  * @param filename File name without extension, but possible with an (1)
  * @returns filename without the increment
  */
 function stripFilenameIncrement(filename: string): string {
-	return filename.replace(/\s\(\d+\)$/, '')
+	const extension = path.extname(filename)
+	const strippedBaseNameWithoutExtension = path
+		.basename(filename, extension)
+		.replace(/\s\(\d+\)$/, '')
+	return path.join(path.dirname(filename), `${strippedBaseNameWithoutExtension}${extension}`)
 }
 
 function appendFilenameIncrement(filename: string, value: number): string {

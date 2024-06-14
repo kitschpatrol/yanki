@@ -501,22 +501,6 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "/test-complex-tree-root-note/solo-note/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-note/solo-note/basic.md",
-      "note": {
-        "deckName": "test-complex-tree-root-note::solo-note",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
       "filePath": "/test-complex-tree-root-note/deep-contiguous/within/basic.md",
       "filePathOriginal": "/test-complex-tree-root-note/deep-contiguous/within/basic.md",
       "note": {
@@ -532,6 +516,76 @@ exports[`complex trees > makes the right decisions about deck naming with a file
           "mdank",
           "yes",
         ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-note/deep-contiguous/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-contiguous/within/within/basic.md",
+      "note": {
+        "deckName": "test-complex-tree-root-note::deep-contiguous::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-note/deep-contiguous/within/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-contiguous/within/within/within/basic.md",
+      "note": {
+        "deckName": "test-complex-tree-root-note::deep-contiguous::within::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-note/deep-island/within/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-island/within/within/within/basic.md",
+      "note": {
+        "deckName": "test-complex-tree-root-note::deep-island::within::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-note/deep-non-contiguous/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/deep-non-contiguous/within/within/basic.md",
+      "note": {
+        "deckName": "test-complex-tree-root-note::deep-non-contiguous::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
       },
     },
     {
@@ -574,67 +628,13 @@ exports[`complex trees > makes the right decisions about deck naming with a file
     },
     {
       "action": "created",
-      "filePath": "/test-complex-tree-root-note/deep-contiguous/within/within/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-note/deep-contiguous/within/within/basic.md",
+      "filePath": "/test-complex-tree-root-note/solo-note/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-note/solo-note/basic.md",
       "note": {
-        "deckName": "test-complex-tree-root-note::deep-contiguous::within::within",
+        "deckName": "test-complex-tree-root-note::solo-note",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-complex-tree-root-note/deep-non-contiguous/within/within/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-note/deep-non-contiguous/within/within/basic.md",
-      "note": {
-        "deckName": "test-complex-tree-root-note::deep-non-contiguous::within::within",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-complex-tree-root-note/deep-contiguous/within/within/within/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-note/deep-contiguous/within/within/within/basic.md",
-      "note": {
-        "deckName": "test-complex-tree-root-note::deep-contiguous::within::within::within",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-complex-tree-root-note/deep-island/within/within/within/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-note/deep-island/within/within/within/basic.md",
-      "note": {
-        "deckName": "test-complex-tree-root-note::deep-island::within::within::within",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
@@ -672,13 +672,86 @@ exports[`complex trees > makes the right decisions about deck naming without a f
     },
     {
       "action": "created",
-      "filePath": "/test-complex-tree-root-bare/solo-note/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-bare/solo-note/basic.md",
+      "filePath": "/test-complex-tree-root-bare/deep-contiguous/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/within/basic.md",
       "note": {
-        "deckName": "solo-note",
+        "deckName": "deep-contiguous::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-bare/deep-contiguous/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/within/within/basic.md",
+      "note": {
+        "deckName": "deep-contiguous::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-bare/deep-contiguous/within/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/within/within/within/basic.md",
+      "note": {
+        "deckName": "deep-contiguous::within::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [
+          "mdank",
+          "yes",
+        ],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-bare/deep-island/within/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-island/within/within/within/basic.md",
+      "note": {
+        "deckName": "deep-island::within::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - complex trees",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-complex-tree-root-bare/deep-non-contiguous/within/within/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/deep-non-contiguous/within/within/basic.md",
+      "note": {
+        "deckName": "deep-non-contiguous::within::within",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
@@ -726,91 +799,18 @@ exports[`complex trees > makes the right decisions about deck naming without a f
     },
     {
       "action": "created",
-      "filePath": "/test-complex-tree-root-bare/deep-contiguous/within/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/within/basic.md",
+      "filePath": "/test-complex-tree-root-bare/solo-note/basic.md",
+      "filePathOriginal": "/test-complex-tree-root-bare/solo-note/basic.md",
       "note": {
-        "deckName": "deep-contiguous::within",
+        "deckName": "solo-note",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-complex-tree-root-bare/deep-non-contiguous/within/within/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-bare/deep-non-contiguous/within/within/basic.md",
-      "note": {
-        "deckName": "deep-non-contiguous::within::within",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
           "YankiNamespace": "Yanki Test - complex trees",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
         "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-complex-tree-root-bare/deep-contiguous/within/within/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/within/within/basic.md",
-      "note": {
-        "deckName": "deep-contiguous::within::within",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-complex-tree-root-bare/deep-island/within/within/within/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-bare/deep-island/within/within/within/basic.md",
-      "note": {
-        "deckName": "deep-island::within::within::within",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-complex-tree-root-bare/deep-contiguous/within/within/within/basic.md",
-      "filePathOriginal": "/test-complex-tree-root-bare/deep-contiguous/within/within/within/basic.md",
-      "note": {
-        "deckName": "deep-contiguous::within::within::within",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [
-          "mdank",
-          "yes",
-        ],
       },
     },
   ],

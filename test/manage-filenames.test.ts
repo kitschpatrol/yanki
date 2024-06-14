@@ -1,6 +1,8 @@
 import { syncFiles } from '../src/lib'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { cleanUpTempPath } from './utilities/stable-sync-results'
+import { globby } from 'globby'
+import path from 'node:path'
 import { expect, it } from 'vitest'
 
 describeWithFileFixture(
@@ -28,17 +30,46 @@ describeWithFileFixture(
 
 			expect(changeMap).toMatchInlineSnapshot(`
 				Map {
+				  "/test-filename-management/case-sensitivity/a.md" => "/test-filename-management/case-sensitivity/A (1).md",
+				  "/test-filename-management/case-sensitivity/b.md" => "/test-filename-management/case-sensitivity/A (2).md",
+				  "/test-filename-management/case-sensitivity/something-else.md" => "/test-filename-management/case-sensitivity/A (3).md",
+				  "/test-filename-management/case-sensitivity/something-lowercase.md" => "/test-filename-management/case-sensitivity/a (4).md",
+				  "/test-filename-management/case-sensitivity/something.md" => "/test-filename-management/case-sensitivity/A (5).md",
 				  "/test-filename-management/illegal-characters.md" => "/test-filename-management/I might have some deviant filename characters.md",
-				  "/test-filename-management/some-question-too.md" => "/test-filename-management/some-question.md",
-				  "/test-filename-management/some-question.md" => "/test-filename-management/some-question (1).md",
-				  "/test-filename-management/something.md" => "/test-filename-management/some-question (2).md",
+				  "/test-filename-management/some-question-too.md" => "/test-filename-management/some-question (1).md",
+				  "/test-filename-management/some-question.md" => "/test-filename-management/some-question (2).md",
+				  "/test-filename-management/something.md" => "/test-filename-management/some-question (3).md",
+				  "/test-filename-management/subfolder/some-question-too.md" => "/test-filename-management/subfolder/some-question (1).md",
+				  "/test-filename-management/subfolder/some-question.md" => "/test-filename-management/subfolder/some-question (2).md",
+				  "/test-filename-management/subfolder/something.md" => "/test-filename-management/subfolder/some-question (3).md",
 				  "/test-filename-management/very-long-title-one-word.md" => "/test-filename-management/this note has a very long title indeed what can be done....md",
 				  "/test-filename-management/very-long-title.md" => "/test-filename-management/thisnotehasaverylongonewordtitlecanwestillsplititusingthetru....md",
-				  "/test-filename-management/subfolder/some-question-too.md" => "/test-filename-management/subfolder/some-question.md",
-				  "/test-filename-management/subfolder/some-question.md" => "/test-filename-management/subfolder/some-question (1).md",
-				  "/test-filename-management/subfolder/something.md" => "/test-filename-management/subfolder/some-question (2).md",
 				}
 			`)
+
+			// Do it again to check for stability
+			const tempPath = path.dirname(context.files[0])
+			const newFileList = await globby(`${tempPath}/**/*.md`, {
+				absolute: true,
+			})
+
+			const resultsRound2 = await syncFiles(newFileList, {
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'prompt',
+				namespace: context.namespace,
+			})
+
+			const renamedFilesMap = new Map<string, string>()
+			for (const syncedFile of resultsRound2.synced) {
+				const original = cleanUpTempPath(syncedFile.filePathOriginal)
+				const current = cleanUpTempPath(syncedFile.filePath)
+				if (original !== current) {
+					renamedFilesMap.set(original!, current!)
+				}
+			}
+
+			expect(renamedFilesMap).toMatchInlineSnapshot(`Map {}`)
 		})
 	},
 )
@@ -68,17 +99,46 @@ describeWithFileFixture(
 
 			expect(changeMap).toMatchInlineSnapshot(`
 				Map {
+				  "/test-filename-management/case-sensitivity/a.md" => "/test-filename-management/case-sensitivity/B (1).md",
+				  "/test-filename-management/case-sensitivity/b.md" => "/test-filename-management/case-sensitivity/B (2).md",
+				  "/test-filename-management/case-sensitivity/something-else.md" => "/test-filename-management/case-sensitivity/B (3).md",
+				  "/test-filename-management/case-sensitivity/something-lowercase.md" => "/test-filename-management/case-sensitivity/b (4).md",
+				  "/test-filename-management/case-sensitivity/something.md" => "/test-filename-management/case-sensitivity/B (5).md",
 				  "/test-filename-management/illegal-characters.md" => "/test-filename-management/I might have some deviant filename characters.md",
-				  "/test-filename-management/some-question-too.md" => "/test-filename-management/some-answer.md",
-				  "/test-filename-management/some-question.md" => "/test-filename-management/some-answer (1).md",
-				  "/test-filename-management/something.md" => "/test-filename-management/some-answer (2).md",
+				  "/test-filename-management/some-question-too.md" => "/test-filename-management/some-answer (1).md",
+				  "/test-filename-management/some-question.md" => "/test-filename-management/some-answer (2).md",
+				  "/test-filename-management/something.md" => "/test-filename-management/some-answer (3).md",
+				  "/test-filename-management/subfolder/some-question-too.md" => "/test-filename-management/subfolder/some-answer (1).md",
+				  "/test-filename-management/subfolder/some-question.md" => "/test-filename-management/subfolder/some-answer (2).md",
+				  "/test-filename-management/subfolder/something.md" => "/test-filename-management/subfolder/some-answer (3).md",
 				  "/test-filename-management/very-long-title-one-word.md" => "/test-filename-management/this note has a very long title indeed what can be done....md",
 				  "/test-filename-management/very-long-title.md" => "/test-filename-management/thisnotehasaverylongonewordtitlecanwestillsplititusingthetru....md",
-				  "/test-filename-management/subfolder/some-question-too.md" => "/test-filename-management/subfolder/some-answer.md",
-				  "/test-filename-management/subfolder/some-question.md" => "/test-filename-management/subfolder/some-answer (1).md",
-				  "/test-filename-management/subfolder/something.md" => "/test-filename-management/subfolder/some-answer (2).md",
 				}
 			`)
+
+			// Do it again to check for stability
+			const tempPath = path.dirname(context.files[0])
+			const newFileList = await globby(`${tempPath}/**/*.md`, {
+				absolute: true,
+			})
+
+			const resultsRound2 = await syncFiles(newFileList, {
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'response',
+				namespace: context.namespace,
+			})
+
+			const renamedFilesMap = new Map<string, string>()
+			for (const syncedFile of resultsRound2.synced) {
+				const original = cleanUpTempPath(syncedFile.filePathOriginal)
+				const current = cleanUpTempPath(syncedFile.filePath)
+				if (original !== current) {
+					renamedFilesMap.set(original!, current!)
+				}
+			}
+
+			expect(renamedFilesMap).toMatchInlineSnapshot(`Map {}`)
 		})
 	},
 )
@@ -108,15 +168,20 @@ describeWithFileFixture(
 
 			expect(changeMap).toMatchInlineSnapshot(`
 				Map {
+				  "/test-filename-management/case-sensitivity/a.md" => "/test-filename-management/case-sensitivity/a.md",
+				  "/test-filename-management/case-sensitivity/b.md" => "/test-filename-management/case-sensitivity/b.md",
+				  "/test-filename-management/case-sensitivity/something-else.md" => "/test-filename-management/case-sensitivity/something-else.md",
+				  "/test-filename-management/case-sensitivity/something-lowercase.md" => "/test-filename-management/case-sensitivity/something-lowercase.md",
+				  "/test-filename-management/case-sensitivity/something.md" => "/test-filename-management/case-sensitivity/something.md",
 				  "/test-filename-management/illegal-characters.md" => "/test-filename-management/illegal-characters.md",
 				  "/test-filename-management/some-question-too.md" => "/test-filename-management/some-question-too.md",
 				  "/test-filename-management/some-question.md" => "/test-filename-management/some-question.md",
 				  "/test-filename-management/something.md" => "/test-filename-management/something.md",
-				  "/test-filename-management/very-long-title-one-word.md" => "/test-filename-management/very-long-title-one-word.md",
-				  "/test-filename-management/very-long-title.md" => "/test-filename-management/very-long-title.md",
 				  "/test-filename-management/subfolder/some-question-too.md" => "/test-filename-management/subfolder/some-question-too.md",
 				  "/test-filename-management/subfolder/some-question.md" => "/test-filename-management/subfolder/some-question.md",
 				  "/test-filename-management/subfolder/something.md" => "/test-filename-management/subfolder/something.md",
+				  "/test-filename-management/very-long-title-one-word.md" => "/test-filename-management/very-long-title-one-word.md",
+				  "/test-filename-management/very-long-title.md" => "/test-filename-management/very-long-title.md",
 				}
 			`)
 		})
@@ -151,32 +216,56 @@ describeWithFileFixture(
 				  "/test-minimal-notes/basic-and-reversed-card-with-no-back.md" => "/test-minimal-notes/I'm a question to which there is no answer.md",
 				  "/test-minimal-notes/basic-and-reversed-card-with-no-front.md" => "/test-minimal-notes/I'm an answer to which there is no question.md",
 				  "/test-minimal-notes/basic-and-reversed-card.md" => "/test-minimal-notes/I'm question which is sometimes the answer.md",
-				  "/test-minimal-notes/basic-type-in-the-answer-with-empty-frontmatter.md" => "/test-minimal-notes/I'm the prompt.md",
-				  "/test-minimal-notes/basic-type-in-the-answer-with-frontmatter.md" => "/test-minimal-notes/I'm the prompt (1).md",
-				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md" => "/test-minimal-notes/I'm the prompt I'm actually also part of the prompt!.md",
-				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis.md" => "/test-minimal-notes/I'm the prompt I'm actually also part of the prompt! (1).md",
-				  "/test-minimal-notes/basic-type-in-the-answer.md" => "/test-minimal-notes/I'm the prompt (2).md",
-				  "/test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md" => "/test-minimal-notes/I'm the back of the card I have no front.md",
-				  "/test-minimal-notes/basic-with-back-and-no-front.md" => "/test-minimal-notes/I'm the back of the card I have no front (1).md",
+				  "/test-minimal-notes/basic-type-in-the-answer-with-empty-frontmatter.md" => "/test-minimal-notes/I'm the prompt (1).md",
+				  "/test-minimal-notes/basic-type-in-the-answer-with-frontmatter.md" => "/test-minimal-notes/I'm the prompt (2).md",
+				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md" => "/test-minimal-notes/I'm the prompt I'm actually also part of the prompt! (1).md",
+				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis.md" => "/test-minimal-notes/I'm the prompt I'm actually also part of the prompt! (2).md",
+				  "/test-minimal-notes/basic-type-in-the-answer.md" => "/test-minimal-notes/I'm the prompt (3).md",
+				  "/test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md" => "/test-minimal-notes/I'm the back of the card I have no front (1).md",
+				  "/test-minimal-notes/basic-with-back-and-no-front.md" => "/test-minimal-notes/I'm the back of the card I have no front (2).md",
 				  "/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md" => "/test-minimal-notes/This looks a lot like a cloze but it's a basic answer.md",
-				  "/test-minimal-notes/basic-with-empty-everything.md" => "/test-minimal-notes/Untitled.md",
+				  "/test-minimal-notes/basic-with-empty-everything.md" => "/test-minimal-notes/Untitled (1).md",
 				  "/test-minimal-notes/basic-with-empty-frontmatter.md" => "/test-minimal-notes/My frontmatter is empty.md",
 				  "/test-minimal-notes/basic-with-front-and-cloze-like-back.md" => "/test-minimal-notes/I'm the question.md",
 				  "/test-minimal-notes/basic-with-front-and-no-back.md" => "/test-minimal-notes/I'm the front of the card I have no back.md",
 				  "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (1).md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (2).md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (3).md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (4).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
 				  "/test-minimal-notes/basic.md" => "/test-minimal-notes/I'm the front of the card.md",
-				  "/test-minimal-notes/cloze-with-extra-empty.md" => "/test-minimal-notes/This card has a.md",
-				  "/test-minimal-notes/cloze-with-extra.md" => "/test-minimal-notes/This card has a (1).md",
+				  "/test-minimal-notes/cloze-with-extra-empty.md" => "/test-minimal-notes/This card has a (1).md",
+				  "/test-minimal-notes/cloze-with-extra.md" => "/test-minimal-notes/This card has a (2).md",
 				  "/test-minimal-notes/cloze-with-no-preamble.md" => "/test-minimal-notes/is the.md",
-				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/Untitled (1).md",
-				  "/test-minimal-notes/cloze-with-style.md" => "/test-minimal-notes/This card has a (2).md",
-				  "/test-minimal-notes/cloze.md" => "/test-minimal-notes/This card has a (3).md",
+				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/Untitled (2).md",
+				  "/test-minimal-notes/cloze-with-style.md" => "/test-minimal-notes/This card has a (3).md",
+				  "/test-minimal-notes/cloze.md" => "/test-minimal-notes/This card has a (4).md",
 				}
 			`)
+
+			// Do it again to check for stability
+			const tempPath = path.dirname(context.files[0])
+			const newFileList = await globby(`${tempPath}/**/*.md`, {
+				absolute: true,
+			})
+
+			const resultsRound2 = await syncFiles(newFileList, {
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'prompt',
+				namespace: context.namespace,
+			})
+
+			const renamedFilesMap = new Map<string, string>()
+			for (const syncedFile of resultsRound2.synced) {
+				const original = cleanUpTempPath(syncedFile.filePathOriginal)
+				const current = cleanUpTempPath(syncedFile.filePath)
+				if (original !== current) {
+					renamedFilesMap.set(original!, current!)
+				}
+			}
+
+			expect(renamedFilesMap).toMatchInlineSnapshot(`Map {}`)
 		})
 	},
 )
@@ -209,32 +298,56 @@ describeWithFileFixture(
 				  "/test-minimal-notes/basic-and-reversed-card-with-no-back.md" => "/test-minimal-notes/I'm a question to which there is no answer.md",
 				  "/test-minimal-notes/basic-and-reversed-card-with-no-front.md" => "/test-minimal-notes/I'm an answer to which there is no question.md",
 				  "/test-minimal-notes/basic-and-reversed-card.md" => "/test-minimal-notes/I'm an answer which is sometimes the question.md",
-				  "/test-minimal-notes/basic-type-in-the-answer-with-empty-frontmatter.md" => "/test-minimal-notes/I'm the thing you need to type on the card.md",
-				  "/test-minimal-notes/basic-type-in-the-answer-with-frontmatter.md" => "/test-minimal-notes/I'm the thing you need to type on the card (1).md",
-				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md" => "/test-minimal-notes/I'm the thing you need to type on the card (2).md",
-				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis.md" => "/test-minimal-notes/I'm the thing you need to type on the card (3).md",
-				  "/test-minimal-notes/basic-type-in-the-answer.md" => "/test-minimal-notes/I'm the thing you need to type on the card (4).md",
-				  "/test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md" => "/test-minimal-notes/I'm the back of the card I have no front.md",
-				  "/test-minimal-notes/basic-with-back-and-no-front.md" => "/test-minimal-notes/I'm the back of the card I have no front (1).md",
+				  "/test-minimal-notes/basic-type-in-the-answer-with-empty-frontmatter.md" => "/test-minimal-notes/I'm the thing you need to type on the card (1).md",
+				  "/test-minimal-notes/basic-type-in-the-answer-with-frontmatter.md" => "/test-minimal-notes/I'm the thing you need to type on the card (2).md",
+				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md" => "/test-minimal-notes/I'm the thing you need to type on the card (3).md",
+				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis.md" => "/test-minimal-notes/I'm the thing you need to type on the card (4).md",
+				  "/test-minimal-notes/basic-type-in-the-answer.md" => "/test-minimal-notes/I'm the thing you need to type on the card (5).md",
+				  "/test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md" => "/test-minimal-notes/I'm the back of the card I have no front (1).md",
+				  "/test-minimal-notes/basic-with-back-and-no-front.md" => "/test-minimal-notes/I'm the back of the card I have no front (2).md",
 				  "/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md" => "/test-minimal-notes/This looks a lot like a cloze but it's a basic answer.md",
-				  "/test-minimal-notes/basic-with-empty-everything.md" => "/test-minimal-notes/Untitled.md",
+				  "/test-minimal-notes/basic-with-empty-everything.md" => "/test-minimal-notes/Untitled (1).md",
 				  "/test-minimal-notes/basic-with-empty-frontmatter.md" => "/test-minimal-notes/My frontmatter is empty.md",
 				  "/test-minimal-notes/basic-with-front-and-cloze-like-back.md" => "/test-minimal-notes/This looks a lot like a cloze or two here's a hint.md",
 				  "/test-minimal-notes/basic-with-front-and-no-back.md" => "/test-minimal-notes/I'm the front of the card I have no back.md",
 				  "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (1).md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (2).md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (3).md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (4).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
 				  "/test-minimal-notes/basic.md" => "/test-minimal-notes/I'm the back of the card.md",
-				  "/test-minimal-notes/cloze-with-extra-empty.md" => "/test-minimal-notes/This card has a.md",
-				  "/test-minimal-notes/cloze-with-extra.md" => "/test-minimal-notes/This card has a (1).md",
+				  "/test-minimal-notes/cloze-with-extra-empty.md" => "/test-minimal-notes/This card has a (1).md",
+				  "/test-minimal-notes/cloze-with-extra.md" => "/test-minimal-notes/This card has a (2).md",
 				  "/test-minimal-notes/cloze-with-no-preamble.md" => "/test-minimal-notes/is the.md",
-				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/Untitled (1).md",
-				  "/test-minimal-notes/cloze-with-style.md" => "/test-minimal-notes/This card has a (2).md",
-				  "/test-minimal-notes/cloze.md" => "/test-minimal-notes/This card has a (3).md",
+				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/Untitled (2).md",
+				  "/test-minimal-notes/cloze-with-style.md" => "/test-minimal-notes/This card has a (3).md",
+				  "/test-minimal-notes/cloze.md" => "/test-minimal-notes/This card has a (4).md",
 				}
 			`)
+
+			// Do it again to check for stability
+			const tempPath = path.dirname(context.files[0])
+			const newFileList = await globby(`${tempPath}/**/*.md`, {
+				absolute: true,
+			})
+
+			const resultsRound2 = await syncFiles(newFileList, {
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'response',
+				namespace: context.namespace,
+			})
+
+			const renamedFilesMap = new Map<string, string>()
+			for (const syncedFile of resultsRound2.synced) {
+				const original = cleanUpTempPath(syncedFile.filePathOriginal)
+				const current = cleanUpTempPath(syncedFile.filePath)
+				if (original !== current) {
+					renamedFilesMap.set(original!, current!)
+				}
+			}
+
+			expect(renamedFilesMap).toMatchInlineSnapshot(`Map {}`)
 		})
 	},
 )

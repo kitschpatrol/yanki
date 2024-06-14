@@ -12,6 +12,7 @@ import {
 	updateNote,
 } from '../utilities/anki-connect'
 import {
+	auditUniqueFilePath,
 	getSafeTitleForNote,
 	getTemporarilyUniqueFilePath,
 	getUniqueFilePath,
@@ -322,12 +323,14 @@ export async function syncFiles(
 		}
 	}
 
-	const liveFiles: SyncedNote[] = allLocalNotes.map((note, index) => ({
-		action: liveNotes[index].action,
-		filePath: allLocalFilePaths[index],
-		filePathOriginal: allLocalFilePaths[index],
-		note,
-	}))
+	const liveFiles: SyncedNote[] = allLocalNotes
+		.map((note, index) => ({
+			action: liveNotes[index].action,
+			filePath: allLocalFilePaths[index],
+			filePathOriginal: allLocalFilePaths[index],
+			note,
+		}))
+		.sort((a, b) => a.filePath.localeCompare(b.filePath))
 
 	// Manage filenames
 	if (manageFilenames !== 'off') {
@@ -351,7 +354,17 @@ export async function syncFiles(
 			const newUniqueFilePath = getUniqueFilePath(newFilePath, newFilePaths)
 
 			liveFile.filePath = newUniqueFilePath
-			newFilePaths.push(newUniqueFilePath)
+			newFilePaths.push(newUniqueFilePath.toLowerCase())
+		}
+
+		// Clean up singular incremented paths
+		for (const liveFile of liveFiles) {
+			const { filePath } = liveFile
+			if (filePath === undefined) {
+				throw new Error('File path is undefined')
+			}
+
+			liveFile.filePath = auditUniqueFilePath(filePath, newFilePaths)
 		}
 
 		// Execute rename plan from liveFiles filePath fields, checking for possible collisions with the existing "old" paths.
@@ -375,7 +388,12 @@ export async function syncFiles(
 
 			// Check for old path collisions
 			let safeNewFilePath = filePath
-			if (liveFiles.some((file) => file.filePathOriginal === filePath)) {
+			if (
+				liveFiles.some(
+					(file) =>
+						file !== liveFile && file.filePathOriginal?.toLowerCase() === filePath.toLowerCase(),
+				)
+			) {
 				safeNewFilePath = getTemporarilyUniqueFilePath(filePath)
 				intermediateRenamePlan.set(safeNewFilePath, filePath)
 			}
