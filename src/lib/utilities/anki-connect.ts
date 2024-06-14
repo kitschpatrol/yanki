@@ -487,3 +487,35 @@ export async function getStyle(client: YankiConnect): Promise<string> {
 	const { css } = await client.model.modelStyling({ modelName: yankiModelNames[0] })
 	return css
 }
+
+/**
+ * For testing purposes only
+ * @param client
+ * @returns 'ankiUnreachable' if Anki is not open, or 'granted' if everything is copacetic
+ * @throws if access is denied
+ */
+export async function requestPermission(
+	client: YankiConnect,
+): Promise<'ankiUnreachable' | 'granted'> {
+	try {
+		const { permission } = await client.miscellaneous.requestPermission()
+
+		if (permission === 'denied') {
+			throw new Error(
+				'Permission denied, please add this source to the "webCorsOriginList" in the Anki-Connect add-on configuration options.',
+			)
+		} else {
+			return 'granted'
+		}
+	} catch (error) {
+		if (
+			error instanceof Error &&
+			// Accommodate error message from requestUrl in Obsidian as well
+			(error.message === 'fetch failed' || error.message === 'net::ERR_CONNECTION_REFUSED')
+		) {
+			return 'ankiUnreachable'
+		}
+
+		throw error
+	}
+}

@@ -131,7 +131,7 @@ Yanki uses Anki's built-in CSS stylesheet to style cards by default, but it make
 
 The "one Markdown file = one Anki note" can make for a lot of individual files, and thinking up and renaming files as content is revised can be tedious. So, if you want, Yanki can manage the names of your note files based on their content.
 
-Yanki looks inside each note, and extracts either the text of the prompt (e.g. the front of the card in most cases), or the "response" (e.g. the back of the card in most cases) to use as the filename. Truncation, deduplication, and sanitization are all taken care of.
+Yanki looks inside each note, and extracts either the text of the "prompt" (e.g. the front of the card in most cases), or the "response" (e.g. the back of the card in most cases) to use as the filename. Truncation, deduplication, and sanitization are all taken care of.
 
 Edge cases are carefully managed to ensure that there's always _some kind_ of best-effort semantically valuable file name assigned.
 
@@ -215,7 +215,18 @@ Clozing a block element is not currently supported.
 
 The `yanki` CLI tool requires Node 18+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
 
-The [Anki](https://apps.ankiweb.net) desktop app with the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on installed and configured is also required to do anything useful with the library.
+#### Prerequisites:
+
+- The [Anki desktop app](https://apps.ankiweb.net)
+- The [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on
+
+  If you need to install it, select _Tools → Add-ons_ from the menu, click _Get Add-ons..._, and then enter the code `2055492159` in the field to get Anki-Connect.
+
+  Anki-Connect may ask for your permission in the Anki application to connect to Obsidian on the first sync.
+
+  If the automatic permission request fails, you might need to configure Anki-Connect to accept connections from your origin.
+
+  In Anki, select _Tools → Add-ons_ from the menu, then select _AnkiConnect_ from the list, and click the _Config_ button in the lower right. In the ensuing modal, add the host and port from which you're attempting to connect to to the `webCorsOriginList` array.
 
 ### Installation
 

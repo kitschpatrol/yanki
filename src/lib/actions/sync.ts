@@ -9,6 +9,7 @@ import {
 	deleteOrphanedDecks,
 	getRemoteNotes,
 	getRemoteNotesById,
+	requestPermission,
 	updateNote,
 } from '../utilities/anki-connect'
 import {
@@ -27,7 +28,7 @@ import type { PartialDeep } from 'type-fest'
 import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
 
 export type SyncedNote = {
-	action: 'created' | 'deleted' | 'recreated' | 'unchanged' | 'updated'
+	action: 'ankiUnreachable' | 'created' | 'deleted' | 'recreated' | 'unchanged' | 'updated'
 	filePath?: string // Not always applicable
 	filePathOriginal?: string // Not always applicable, used to detect name changes
 	note: YankiNote
@@ -107,6 +108,24 @@ export async function syncNotes(
 	const synced: SyncedNote[] = []
 
 	const client = new YankiConnect(ankiConnectOptions)
+
+	const permissionStatus = await requestPermission(client)
+
+	if (permissionStatus === 'ankiUnreachable') {
+		return {
+			ankiWeb,
+			deletedDecks: [],
+			dryRun,
+			duration: performance.now() - startTime,
+			namespace,
+			synced: allLocalNotes.map((note) => ({
+				action: 'ankiUnreachable',
+				filePath: undefined,
+				filePathOriginal: undefined,
+				note,
+			})),
+		}
+	}
 
 	// Deletion pass, we need the full info to do deck cleanup later on
 	const existingRemoteNotes = await getRemoteNotes(client, namespace)
@@ -310,16 +329,19 @@ export async function syncFiles(
 	const liveNotes = synced.filter((note) => note.action !== 'deleted')
 
 	for (const [index, note] of allLocalNotes.entries()) {
-		const liveNoteId = liveNotes[index].note.noteId
+		const liveNote = liveNotes[index]
+		const liveNoteId = liveNote.note.noteId
 		if (note.noteId === undefined || note.noteId !== liveNoteId) {
 			note.noteId = liveNoteId
 
-			if (note.noteId === undefined) {
-				throw new Error('Note ID is still undefined')
-			}
+			if (liveNote.action !== 'ankiUnreachable') {
+				if (note.noteId === undefined) {
+					throw new Error('Note ID is still undefined')
+				}
 
-			const updatedMarkdown = await setNoteIdInFrontmatter(allLocalMarkdown[index], note.noteId)
-			await writeFile(allLocalFilePaths[index], updatedMarkdown)
+				const updatedMarkdown = await setNoteIdInFrontmatter(allLocalMarkdown[index], note.noteId)
+				await writeFile(allLocalFilePaths[index], updatedMarkdown)
+			}
 		}
 	}
 
@@ -497,11 +519,11 @@ export function formatSyncReport(report: SyncReport, verbose = false): string {
 	}, {})
 
 	const totalSynced = synced.filter((note) => note.action !== 'deleted').length
-
 	const totalRenamed = synced.filter((note) => note.filePath !== note.filePathOriginal).length
+	const ankiUnreachable = actionCounts.ankiUnreachable > 0
 
 	lines.push(
-		`${report.dryRun ? 'Will' : 'Successfully'} synced ${totalSynced} ${plur('note', totalSynced)} to Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}.`,
+		`${report.dryRun ? 'Will sync' : ankiUnreachable ? 'Failed to sync' : 'Successfully synced'} synced ${totalSynced} ${plur('note', totalSynced)} to Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}.`,
 	)
 
 	if (verbose) {

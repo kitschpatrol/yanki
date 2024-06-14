@@ -1,7 +1,12 @@
 import { yankiDefaultNamespace, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
-import { deleteNotes, deleteOrphanedDecks, getRemoteNotes } from '../utilities/anki-connect'
+import {
+	deleteNotes,
+	deleteOrphanedDecks,
+	getRemoteNotes,
+	requestPermission,
+} from '../utilities/anki-connect'
 import { truncateWithEllipsis } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
@@ -57,6 +62,12 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	)
 
 	const client = new YankiConnect(ankiConnectOptions)
+
+	const permissionStatus = await requestPermission(client)
+
+	if (permissionStatus === 'ankiUnreachable') {
+		throw new Error('Anki is unreachable. Is Anki running?')
+	}
 
 	const remoteNotes = await getRemoteNotes(client, namespace)
 

@@ -1,7 +1,7 @@
 import { yankiDefaultNamespace } from '../model/constants'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
-import { getRemoteNotes } from '../utilities/anki-connect'
+import { getRemoteNotes, requestPermission } from '../utilities/anki-connect'
 import { truncateWithEllipsis } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
 import type { PartialDeep } from 'type-fest'
@@ -33,6 +33,12 @@ export async function listNotes(options?: PartialDeep<ListOptions>): Promise<Lis
 
 	const { ankiConnectOptions, namespace } = deepmerge(defaultListOptions, options ?? {})
 	const client = new YankiConnect(ankiConnectOptions)
+
+	const permissionStatus = await requestPermission(client)
+	if (permissionStatus === 'ankiUnreachable') {
+		throw new Error('Anki is unreachable. Is Anki running?')
+	}
+
 	const notes = await getRemoteNotes(client, namespace)
 
 	return {
