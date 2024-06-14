@@ -1,7 +1,8 @@
 import { yankiDefaultNamespace, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
 import { type YankiNote } from '../model/note'
+import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
 import { deleteNotes, deleteOrphanedDecks, getRemoteNotes } from '../utilities/anki-connect'
-import { stripHtmlTags, truncateWithEllipsis } from '../utilities/string'
+import { truncateWithEllipsis } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
@@ -97,8 +98,10 @@ export function formatCleanReport(report: CleanReport, verbose = false): string 
 		if (noteCount > 0) {
 			lines.push('', report.dryRun ? 'Notes to delete:' : 'Deleted notes:')
 			for (const note of report.deleted) {
-				const firstLineOfFront = note.fields.Front.split('\n')[0]
-				const noteFrontText = truncateWithEllipsis(stripHtmlTags(firstLineOfFront), 50)
+				const noteFrontText = truncateWithEllipsis(
+					getFirstLineOfHtmlAsPlainText(note.fields.Front),
+					50,
+				)
 				lines.push(`  Note ID ${note.noteId} ${noteFrontText}`)
 			}
 		}

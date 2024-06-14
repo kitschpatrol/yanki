@@ -1,5 +1,3 @@
-import { stripHtml } from 'string-strip-html'
-
 export function capitalize(text: string): string {
 	return text.charAt(0).toUpperCase() + text.slice(1)
 }
@@ -23,10 +21,6 @@ export function truncateWithEllipsis(text: string, maxLength: number): string {
 	}
 
 	return `${words.join(' ').slice(0, maxLength)}...`
-}
-
-export function stripHtmlTags(html: string): string {
-	return stripHtml(html).result
 }
 
 export function urlToHostAndPort(url: string): { host: string; port: number } {

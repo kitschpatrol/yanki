@@ -1,6 +1,7 @@
 import { yankiDefaultEmptyNotePlaceholderText } from '../model/constants'
 import { type YankiNote } from '../model/note'
-import { emptyIsUndefined, stripHtmlTags, truncateWithEllipsis } from './string'
+import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
+import { emptyIsUndefined, truncateWithEllipsis } from './string'
 import filenamify from 'filenamify'
 import { nanoid } from 'nanoid'
 import path from 'path-browserify-esm'
@@ -85,7 +86,7 @@ export function getSafeTitleForNote(
  * @returns
  */
 function getSafeFilename(text: string, maxLength?: number | undefined): string {
-	let basicSafeFilename = filenamify(stripHtmlTags(text).trim(), {
+	let basicSafeFilename = filenamify(getFirstLineOfHtmlAsPlainText(text).trim(), {
 		maxLength: Number.MAX_SAFE_INTEGER,
 		replacement: ' ',
 	})

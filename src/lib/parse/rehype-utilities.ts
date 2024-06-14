@@ -6,8 +6,10 @@ import { yankiDefaultEmptyNotePlaceholderHast } from '../model/constants'
 import { cleanClassName } from '../utilities/string'
 import rehypeShiki from '@shikijs/rehype'
 import { type Element, type Root as HastRoot } from 'hast'
+import { toText } from 'hast-util-to-text'
 import type { Root as MdastRoot } from 'mdast'
 import rehypeMathjax from 'rehype-mathjax'
+import rehypeParse from 'rehype-parse'
 import rehypeRemoveComments from 'rehype-remove-comments'
 import rehypeStringify from 'rehype-stringify'
 import remarkRehype from 'remark-rehype'
@@ -75,4 +77,21 @@ export async function mdastToHtml(
 	const htmlWithClass = processor.stringify(hastWithClass)
 
 	return htmlWithClass.trim()
+}
+
+const htmlProcessor = unified().use(rehypeParse, { fragment: true })
+
+function htmlToPlainText(html: string): string {
+	const hast = htmlProcessor.parse(html)
+	return toText(hast)
+}
+
+export function getFirstLineOfHtmlAsPlainText(html: string): string {
+	const text = htmlToPlainText(html)
+	return (
+		text
+			.split('\n')
+			.map((line) => line.trim())
+			.find((line) => line.length > 0) ?? ''
+	)
 }

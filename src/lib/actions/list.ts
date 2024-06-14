@@ -1,7 +1,8 @@
 import { yankiDefaultNamespace } from '../model/constants'
 import { type YankiNote } from '../model/note'
+import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
 import { getRemoteNotes } from '../utilities/anki-connect'
-import { stripHtmlTags, truncateWithEllipsis } from '../utilities/string'
+import { truncateWithEllipsis } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
 import type { PartialDeep } from 'type-fest'
 import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
@@ -49,9 +50,7 @@ export function formatListReport(report: ListReport): string {
 	const lines: string[] = []
 
 	for (const note of report.notes) {
-		const firstLineOfFront = note.fields.Front.split('\n')[0]
-
-		const noteFrontText = truncateWithEllipsis(stripHtmlTags(firstLineOfFront), 50)
+		const noteFrontText = truncateWithEllipsis(getFirstLineOfHtmlAsPlainText(note.fields.Front), 50)
 		lines.push(`Note ID ${note.noteId} ${noteFrontText}`)
 	}
 
