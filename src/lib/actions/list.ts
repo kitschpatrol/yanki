@@ -24,7 +24,7 @@ export type ListReport = {
 }
 
 /**
- * Description List notes...
+ * Description List notes currently in Anki...
  * @param options
  * @returns
  */
