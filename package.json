@@ -18,7 +18,7 @@
 		"url": "https://ericmika.com"
 	},
 	"license": "MIT",
-	"packageManager": "pnpm@9.3.0",
+	"packageManager": "pnpm@9.4.0",
 	"engines": {
 		"node": ">=18.0.0",
 		"pnpm": ">=8.0.0"
@@ -61,7 +61,7 @@
 		"@types/hast": "^3.0.4",
 		"@types/lodash-es": "^4.17.12",
 		"@types/mdast": "^4.0.4",
-		"@types/node": "^20.14.2",
+		"@types/node": "^20.14.4",
 		"@types/unist": "^3.0.2",
 		"@types/yargs": "^17.0.32",
 		"chalk": "^5.3.0",
@@ -72,7 +72,7 @@
 	},
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^4.7.2",
-		"@shikijs/rehype": "^1.6.4",
+		"@shikijs/rehype": "^1.7.0",
 		"bumpp": "^9.4.1",
 		"deepmerge-ts": "^7.0.3",
 		"filenamify": "^6.0.0",
@@ -95,8 +95,8 @@
 		"remark-remove-comments": "^1.0.1",
 		"remark-wiki-link": "^2.0.1",
 		"sort-keys": "^5.0.0",
-		"tsx": "^4.15.4",
-		"type-fest": "^4.20.0",
+		"tsx": "^4.15.6",
+		"type-fest": "^4.20.1",
 		"typescript": "^5.4.5",
 		"unified": "^11.0.4",
 		"unist-builder": "^4.0.0",
