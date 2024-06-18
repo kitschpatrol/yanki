@@ -1408,6 +1408,28 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
     },
     {
       "action": "created",
+      "filePath": "/test-fancy-markdown/mermaid.md",
+      "filePathOriginal": "/test-fancy-markdown/mermaid.md",
+      "note": {
+        "deckName": "test-fancy-markdown",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p>This note has a Mermaid flowchart, which is NOT supported.</p>
+<pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">graph TD;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  A-->B;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  A-->C;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  B-->D;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  C-->D;</span></span>
+<span class="line"></span></code></pre></div>",
+          "YankiNamespace": "Yanki Test - fancy markdown",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
       "filePath": "/test-fancy-markdown/obsidian-wiki-links.md",
       "filePathOriginal": "/test-fancy-markdown/obsidian-wiki-links.md",
       "note": {

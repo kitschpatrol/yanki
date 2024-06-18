@@ -1,6 +1,8 @@
 {
 	"$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
-	"ignorePaths": ["bin/"],
+	"ignorePaths": [
+		"bin/"
+	],
 	"import": "@kitschpatrol/cspell-config",
 	"ignoreRegExpList": [
 		// TODO get this from SharedConfig
@@ -21,6 +23,7 @@
 		"Mathjax",
 		"mdank",
 		"mdanki",
+		"mermaidjs",
 		"obrigado",
 		"Oleksandr",
 		"Pradhyo",

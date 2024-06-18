@@ -543,7 +543,7 @@ Possible features on the horizon:
 
 - [ ] Including some built-in CSS stylesheet options might be nice, since Anki's defaults can't always anticipate the kinds of HTML you're likely to generate from Markdown.
 
-- [ ] Support for Mermaid diagrams.
+- [ ] Support for Mermaid diagrams. (Unlikely since rendering to an SVG seems to require a browser. See [rehype-mermaid](https://github.com/remcohaszing/rehype-mermaid) and [remark-mermaidjs](https://github.com/remcohaszing/remark-mermaidjs).)
 
 - [ ] Either embedding media assets or implementing integration with Anki's media library could be helpful for offline review. (Though externally hosted image links seem generally fine for now.)
 
