@@ -62,6 +62,42 @@ describeWithFileFixture(
 )
 
 describeWithFileFixture(
+	'unexpected formatting',
+	{
+		assetPath: './test/assets/test-unexpected-formatting/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('correctly infers Anki model types from markdown with unexpected formatting', async () => {
+			const results: Record<string, string> = {}
+			for (const filePath of context.files) {
+				const markdown = await fs.readFile(filePath, 'utf8')
+				const { modelName } = await getNoteFromMarkdown(markdown, {
+					namespace: context.namespace,
+				})
+				results[path.basename(filePath)] = modelName
+			}
+
+			expect(sortKeys(results, { deep: true })).toMatchInlineSnapshot(`
+				{
+				  "basic-and-reversed-card-with-alternate-thematic-breaks.md": "Yanki - Basic (and reversed card)",
+				  "basic-and-reversed-card-with-confusing-setext-headline.md": "Yanki - Basic (and reversed card)",
+				  "basic-and-reversed-card-with-empty-front-and-frontmatter.md": "Yanki - Basic (and reversed card)",
+				  "basic-and-reversed-card-with-extra-thematic-break-dashes.md": "Yanki - Basic (and reversed card)",
+				  "basic-and-reversed-card-with-tight-spacing-and-frontmatter.md": "Yanki - Basic (and reversed card)",
+				  "basic-and-reversed-card-with-tight-spacing.md": "Yanki - Basic (and reversed card)",
+				  "basic-with-confusing-setext-headline.md": "Yanki - Basic",
+				  "basic-with-empty-front-and-frontmatter.md": "Yanki - Basic",
+				  "basic-with-tight-spacing-and-frontmatter.md": "Yanki - Basic",
+				  "basic-with-tight-spacing.md": "Yanki - Basic",
+				}
+			`)
+		})
+	},
+)
+
+describeWithFileFixture(
 	'basic synchronization',
 	{
 		assetPath: './test/assets/test-minimal-notes/',
