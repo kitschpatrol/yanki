@@ -1,8 +1,9 @@
 import { version } from '../../package.json'
 import { cleanNotes, formatCleanReport } from '../lib/actions/clean'
 import { formatListReport, listNotes } from '../lib/actions/list'
+import { type FilenameMode } from '../lib/actions/rename'
 import { formatStyleReport, setStyle } from '../lib/actions/style'
-import { type SyncOptions, formatSyncReport, syncFiles } from '../lib/actions/sync'
+import { formatSyncReport, syncFiles } from '../lib/actions/sync'
 import log from '../lib/utilities/log'
 import { urlToHostAndPort } from '../lib/utilities/string'
 import {
@@ -127,7 +128,8 @@ await yargsInstance
 				},
 				ankiWeb,
 				dryRun,
-				manageFilenames: manageFilenames as SyncOptions['manageFilenames'],
+				filenameMode: manageFilenames === 'off' ? undefined : (manageFilenames as FilenameMode),
+				manageFilenames: manageFilenames !== 'off',
 				maxFilenameLength,
 				namespace,
 			}).catch(ankiNotRunningErrorHandler)

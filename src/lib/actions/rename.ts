@@ -21,9 +21,12 @@ export type RenameFilesReport = {
 		note: YankiNote
 	}>
 }
+
+export type FilenameMode = 'prompt' | 'response'
 export type RenameFilesOptions = {
 	dryRun: boolean
-	manageFilenames: 'off' | 'prompt' | 'response'
+	filenameMode: FilenameMode
+	manageFilenames: boolean
 	maxFilenameLength: number
 	namespace: string
 	obsidianVault: string | undefined
@@ -31,7 +34,8 @@ export type RenameFilesOptions = {
 
 export const defaultRenameFilesOptions: RenameFilesOptions = {
 	dryRun: false,
-	manageFilenames: 'off',
+	filenameMode: 'prompt',
+	manageFilenames: false,
 	maxFilenameLength: 60,
 	namespace: yankiDefaultNamespace,
 	obsidianVault: undefined,
@@ -59,7 +63,8 @@ export async function renameFiles(
 	)
 
 	const resolvedOptions = deepmerge(defaultRenameFilesOptions, options ?? {})
-	const { dryRun, manageFilenames, maxFilenameLength, namespace, obsidianVault } = resolvedOptions
+	const { dryRun, filenameMode, manageFilenames, maxFilenameLength, namespace, obsidianVault } =
+		resolvedOptions
 
 	allLocalFilePaths.sort((a, b) => a.localeCompare(b))
 
@@ -84,7 +89,7 @@ export async function renameFiles(
 	}
 
 	// Manage filenames
-	if (manageFilenames !== 'off') {
+	if (manageFilenames) {
 		// Update the file paths in the live files...
 
 		const newFilePaths: string[] = []
@@ -96,7 +101,7 @@ export async function renameFiles(
 				throw new Error('File path is undefined')
 			}
 
-			const newFilename = getSafeTitleForNote(note, manageFilenames, maxFilenameLength)
+			const newFilename = getSafeTitleForNote(note, filenameMode, maxFilenameLength)
 			const newFilePath = path.join(
 				path.dirname(filePathOriginal),
 				`${newFilename}${path.extname(filePathOriginal)}`,

@@ -13,7 +13,7 @@ import {
 } from '../utilities/anki-connect'
 import { validateFileFunctions } from '../utilities/file'
 import { capitalize } from '../utilities/string'
-import { renameFiles } from './rename'
+import { type FilenameMode, renameFiles } from './rename'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
@@ -38,9 +38,10 @@ export type SyncOptions = {
 	ankiWeb: boolean
 	defaultDeckName: string
 	dryRun: boolean
+	filenameMode: FilenameMode
 	/** Only applies to syncFiles */
-	manageFilenames: 'off' | 'prompt' | 'response'
-	/** Only applies if manageFilenames is not `'off'`. Will _not_ truncate user-specified file names in other cases. */
+	manageFilenames: boolean
+	/** Only applies if manageFilenames is not `false`. Will _not_ truncate user-specified file names in other cases. */
 	maxFilenameLength: number
 	namespace: string
 	/** Ensures that wiki-style links work correctly */
@@ -52,7 +53,8 @@ export const defaultSyncOptions: SyncOptions = {
 	ankiWeb: false,
 	defaultDeckName: 'Yanki',
 	dryRun: false,
-	manageFilenames: 'off',
+	filenameMode: 'prompt',
+	manageFilenames: false,
 	maxFilenameLength: 60,
 	namespace: yankiDefaultNamespace,
 	obsidianVault: undefined,

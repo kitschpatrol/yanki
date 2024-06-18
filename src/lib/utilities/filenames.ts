@@ -1,3 +1,4 @@
+import { type FilenameMode } from '../actions/rename'
 import { yankiDefaultEmptyNotePlaceholderText } from '../model/constants'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
@@ -10,7 +11,7 @@ export const defaultEmptyFilenamePlaceholderText = 'Untitled'
 
 export function getSafeTitleForNote(
 	note: YankiNote,
-	mode: 'prompt' | 'response',
+	mode: FilenameMode,
 	maxLength: number,
 ): string {
 	switch (note.modelName) {

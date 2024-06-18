@@ -17,7 +17,8 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: 'prompt',
+				filenameMode: 'prompt',
+				manageFilenames: true,
 				namespace: context.namespace,
 			})
 
@@ -57,7 +58,8 @@ describeWithFileFixture(
 			const resultsRound2 = await syncFiles(newFileList, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: 'prompt',
+				filenameMode: 'prompt',
+				manageFilenames: true,
 				namespace: context.namespace,
 			})
 
@@ -87,7 +89,8 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: 'response',
+				filenameMode: 'response',
+				manageFilenames: true,
 				namespace: context.namespace,
 			})
 
@@ -127,7 +130,8 @@ describeWithFileFixture(
 			const resultsRound2 = await syncFiles(newFileList, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: 'response',
+				filenameMode: 'response',
+				manageFilenames: true,
 				namespace: context.namespace,
 			})
 
@@ -157,7 +161,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: 'off',
+				manageFilenames: false,
 				namespace: context.namespace,
 			})
 
@@ -203,7 +207,8 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: 'prompt',
+				filenameMode: 'prompt',
+				manageFilenames: true,
 				namespace: context.namespace,
 			})
 
@@ -255,7 +260,8 @@ describeWithFileFixture(
 			const resultsRound2 = await syncFiles(newFileList, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: 'prompt',
+				filenameMode: 'prompt',
+				manageFilenames: true,
 				namespace: context.namespace,
 			})
 
@@ -285,7 +291,8 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: 'response',
+				filenameMode: 'response',
+				manageFilenames: true,
 				namespace: context.namespace,
 			})
 
@@ -337,7 +344,8 @@ describeWithFileFixture(
 			const resultsRound2 = await syncFiles(newFileList, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: 'response',
+				filenameMode: 'response',
+				manageFilenames: true,
 				namespace: context.namespace,
 			})
 

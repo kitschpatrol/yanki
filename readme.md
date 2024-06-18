@@ -414,6 +414,7 @@ function syncFiles(
   options?: PartialDeep<SyncOptions>,
   readFile?: (filePath: string) => Promise<string>,
   writeFile?: (filePath: string, data: string) => Promise<void>,
+  rename?: (oldPath: string, newPath: string) => Promise<void>,
 ): Promise<SyncReport>
 
 function syncNotes(
