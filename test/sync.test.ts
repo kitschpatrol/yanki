@@ -1,6 +1,7 @@
 import { getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter } from '../src/lib/model/frontmatter'
 import { describeWithFileFixture } from './fixtures/file-fixture'
+import { countLinesOfFrontmatter } from './utilities/frontmatter-counter'
 import { stableResults } from './utilities/stable-sync-results'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
@@ -333,6 +334,34 @@ describeWithFileFixture(
 			})
 
 			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
+)
+
+describeWithFileFixture(
+	'long frontmatter',
+	{
+		assetPath: './test/assets/test-long-frontmatter/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('handles long frontmatter non-destructively', async () => {
+			// Saw some issues with frontmatter getting split into multiple lines after sync...
+			const initialLinesOfFrontmatter = await countLinesOfFrontmatter(context.files[0])
+
+			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+			})
+
+			expect(results.synced[0].filePath).toBeDefined()
+			const postSyncLinesOfFrontmatter = await countLinesOfFrontmatter(results.synced[0].filePath!)
+
+			// Make sure the number of frontmatter lines in the output matches the input
+			expect(initialLinesOfFrontmatter).toEqual(postSyncLinesOfFrontmatter)
 		})
 	},
 )

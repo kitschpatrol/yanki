@@ -50,7 +50,9 @@ export async function setNoteIdInFrontmatter(
 		parsedFrontmatter.noteId = noteId
 	}
 
-	const newFrontmatter = yamlStringify(parsedFrontmatter).trim()
+	const newFrontmatter = yamlStringify(parsedFrontmatter, {
+		lineWidth: 0,
+	}).trim()
 
 	return [
 		...lines.slice(0, frontmatterStart + 1),
