@@ -15,6 +15,7 @@ import rehypeStringify from 'rehype-stringify'
 import remarkRehype from 'remark-rehype'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
+import { CONTINUE, EXIT, visit } from 'unist-util-visit'
 
 // Significant performance improvement by reusing this
 const processor = unified()
@@ -73,6 +74,33 @@ export async function mdastToHtml(
 			nonEmptyHast.children as Element[], // TODO: Fix this type error
 		),
 	])
+
+	// Edge case... if a note ONLY has MathJax in the front field, Anki will think it's empty
+	// (Anki-connect error message: "cannot create note because it is empty")
+	// So we have to add a hidden content field to convince Anki otherwise...
+	visit(hastWithClass, 'element', (node, _, parent) => {
+		if (parent === undefined) return CONTINUE
+
+		if (node.tagName === 'mjx-container') {
+			const index = parent.children.indexOf(node)
+			parent.children.splice(
+				index + 1,
+				0,
+				u(
+					'element',
+					{
+						properties: {
+							style: 'display: none;',
+						},
+						tagName: 'span',
+					},
+					[u('text', 'Not empty')],
+				),
+			)
+			// One is enough
+			return EXIT
+		}
+	})
 
 	const htmlWithClass = processor.stringify(hastWithClass)
 
