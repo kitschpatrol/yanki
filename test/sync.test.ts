@@ -270,6 +270,53 @@ describeWithFileFixture(
 )
 
 describeWithFileFixture(
+	'update model',
+	{
+		assetPath: './test/assets/test-update-model/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('updates the model if it changes without destroying the note', async () => {
+			// First sync
+			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+			})
+
+			// Now change the synced note in a way that would require a model update
+
+			const note = results.synced[0]
+
+			expect(note.filePath).toBeDefined()
+			const markdown = await fs.readFile(note.filePath!, 'utf8')
+			const updatedMarkdown = markdown.replace(
+				"I'm the front of the card\n\n---",
+				"I'm the front of the card\n\n---\n---",
+			)
+
+			await fs.writeFile(note.filePath!, updatedMarkdown)
+
+			// Second sync
+			const newModelResults = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+			})
+
+			const newNote = newModelResults.synced[0]
+
+			expect(newNote.note.noteId).toEqual(note.note.noteId)
+			expect(newNote.action).toEqual('updated')
+			expect(newNote.note.modelName).toEqual('Yanki - Basic (and reversed card)')
+		})
+	},
+)
+
+describeWithFileFixture(
 	'fancy markdown',
 	{
 		assetPath: './test/assets/test-fancy-markdown/',

@@ -15,6 +15,20 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 	await client.note.deleteNotes({ notes: noteIds })
 }
 
+export async function updateNoteModel(client: YankiConnect, note: YankiNote, dryRun = false) {
+	if (note.noteId === undefined) {
+		throw new Error('Note ID is undefined')
+	}
+
+	if (dryRun) {
+		return
+	}
+
+	await client.note.updateNoteModel({
+		note: { ...note, id: note.noteId, tags: note.tags ?? [] },
+	})
+}
+
 export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun = false) {
 	if (note.noteId === undefined) {
 		throw new Error('Note ID is undefined')
@@ -116,9 +130,6 @@ export async function addNote(
 
 /**
  * Updates a note in Anki.
- *
- * In certain circumstances (like a model change), the note will be recreated.
- * This destroys any scheduling information for that note.
  *
  * @param client An instance of YankiConnect
  * @param localNote A note read from a markdown file @param remoteNote A note

@@ -3,13 +3,13 @@ import { setNoteIdInFrontmatter } from '../model/frontmatter'
 import { type YankiNote } from '../model/note'
 import {
 	addNote,
-	deleteNote,
 	deleteNotes,
 	deleteOrphanedDecks,
 	getRemoteNotes,
 	getRemoteNotesById,
 	requestPermission,
 	updateNote,
+	updateNoteModel,
 } from '../utilities/anki-connect'
 import { validateFileFunctions } from '../utilities/file'
 import { capitalize } from '../utilities/string'
@@ -207,26 +207,18 @@ export async function syncNotes(
 				note: localNote,
 			})
 		} else {
-			// Model change, need to recreate TODO is there a way to "update" a note
-			// model?
-
+			// Model change, need to update
+			// In previous versions, this was handled by deleting the note and recreating it,
+			// but updateNoteModel seems to work and preserves activity data
 			if (remoteNote.noteId === undefined) {
 				throw new Error('Remote note ID is undefined')
 			}
 
-			synced.push({
-				action: 'deleted',
-				note: remoteNote,
-			})
-			await deleteNote(client, remoteNote, dryRun)
-			const newNoteId = await addNote(client, { ...localNote, noteId: undefined }, dryRun)
+			await updateNoteModel(client, localNote, dryRun)
 
 			synced.push({
-				action: 'recreated',
-				note: {
-					...localNote,
-					noteId: newNoteId,
-				},
+				action: 'updated',
+				note: localNote,
 			})
 		}
 	}
