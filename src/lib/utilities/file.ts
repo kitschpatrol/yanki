@@ -1,4 +1,6 @@
 import { environment } from './platform'
+import { getHash, getNamespaceHash } from './string'
+import slugify from '@sindresorhus/slugify'
 import path from 'path-browserify-esm'
 
 export async function validateFileFunctions(
@@ -27,12 +29,29 @@ export async function validateFileFunctions(
 	return { readFile, rename, writeFile }
 }
 
-export function getSafeAnkiMediaFilename(filePath: string): string {
-	// TODO more than this?
+export function getSafeAnkiMediaFilename(absoluteFilePath: string, namespace: string): string {
+	// Anki truncates long file names... so we crush the complete path down to a hash
+	// Taking the actual hash of the asset would make isomorphism more of a pain, and Anki might do some hash comparison of its own?
+	const fileExtension = path.extname(absoluteFilePath)
+	const namespaceHash = getNamespaceHash(namespace)
+	const fileNameHash = getHash(
+		`${path.dirname(absoluteFilePath)}${path.basename(absoluteFilePath)}`,
+		8,
+	)
+	const fileNameLegible =
+		`${slugify(path.basename(absoluteFilePath, fileExtension).trim()).slice(0, 60)}`.replace(
+			/-+$/,
+			'',
+		)
+	const safeFilename = `${namespaceHash}-${fileNameHash}-${fileNameLegible}${fileExtension}`
 
-	const parts = filePath.split(path.sep).filter((part) => part.trim().length > 0)
+	// Should never happen
+	// Observed max length in Anki seems to be 115... we leave some breathing room
+	if (safeFilename.length > 100) {
+		throw new Error(`Filename too long: ${safeFilename}`)
+	}
 
-	return encodeURI(parts.join('--'))
+	return safeFilename
 }
 
 export function isUrl(filePath: string): boolean {

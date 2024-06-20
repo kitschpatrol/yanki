@@ -73,6 +73,8 @@
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^4.7.2",
 		"@shikijs/rehype": "^1.7.0",
+		"@sindresorhus/fnv1a": "^3.1.0",
+		"@sindresorhus/slugify": "^2.2.1",
 		"bumpp": "^9.4.1",
 		"deepmerge-ts": "^7.0.3",
 		"filenamify": "^6.0.0",

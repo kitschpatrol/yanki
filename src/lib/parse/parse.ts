@@ -60,12 +60,14 @@ export async function getNoteFromMarkdown(
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
 				true,
 				cwd,
+				namespace,
 			)
 			back = await mdastToHtml(
 				secondPart,
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
 				true,
 				cwd,
+				namespace,
 			)
 
 			break
@@ -81,12 +83,14 @@ export async function getNoteFromMarkdown(
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
 				true,
 				cwd,
+				namespace,
 			)
 			back = await mdastToHtml(
 				secondPart,
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
 				false,
 				cwd,
+				namespace,
 			)
 
 			break
@@ -111,6 +115,7 @@ export async function getNoteFromMarkdown(
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
 				true,
 				cwd,
+				namespace,
 			)
 
 			// HTML in the "blank" seems to parse correctly in Anki, but appears as plain text
@@ -119,6 +124,7 @@ export async function getNoteFromMarkdown(
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
 				false,
 				cwd,
+				namespace,
 			)
 			break
 		}

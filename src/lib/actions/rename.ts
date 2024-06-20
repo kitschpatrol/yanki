@@ -75,7 +75,11 @@ export async function renameFiles(
 
 	for (const [index, filePath] of allLocalFilePaths.entries()) {
 		const markdown = await readFileValidated(filePath)
-		const note = await getNoteFromMarkdown(markdown, { namespace, obsidianVault })
+		const note = await getNoteFromMarkdown(markdown, {
+			cwd: path.dirname(filePath),
+			namespace,
+			obsidianVault,
+		})
 		if (note.deckName === '') {
 			note.deckName = deckNamesFromFilePaths[index]
 		}

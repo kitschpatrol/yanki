@@ -90,7 +90,13 @@ export async function syncNotes(
 	)
 
 	// Namespace validation
+	// Can't be too long because of Anki's limitations around media asset filename length
+	// TODO just use a hash internally? Safety vs. legibility in Anki...
 	const validNamespace = namespace.trim()
+
+	if (validNamespace.length > 32) {
+		throw new Error('Namespace must be 32 characters or fewer')
+	}
 
 	if (validNamespace === '') {
 		throw new Error('Namespace must not be empty')

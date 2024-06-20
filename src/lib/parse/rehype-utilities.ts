@@ -44,7 +44,10 @@ export async function mdastToHtml(
 	mdast: MdastRoot | undefined,
 	cssClassNames: string[] | undefined,
 	useEmptyPlaceholder: boolean,
-	cwd: string, // Path containing the note
+	/** Path containing the note, used to resolve relative paths in media src paths */
+	cwd: string,
+	/** Namespace to prepend to the media filenames for easy clean-up later */
+	namespace: string,
 ): Promise<string> {
 	if (mdast === undefined) {
 		return ''
@@ -110,7 +113,7 @@ export async function mdastToHtml(
 		}
 
 		const absoluteSrc = path.resolve(node.properties.src)
-		const safeFilename = getSafeAnkiMediaFilename(absoluteSrc)
+		const safeFilename = getSafeAnkiMediaFilename(absoluteSrc, namespace)
 		const extension = path.extname(absoluteSrc).slice(1)
 
 		if ((yankiSupportedImageFormats as unknown as string[]).includes(extension)) {

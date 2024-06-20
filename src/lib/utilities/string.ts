@@ -1,3 +1,18 @@
+import fnv1a from '@sindresorhus/fnv1a'
+
+// Don't touch
+export function getNamespaceHash(namespace: string): string {
+	return `yanki-${getHash(namespace, 16)}`
+}
+
+// Don't touch this either
+export function getHash(text: string, length: 8 | 16): string {
+	// Clunky for types
+	return fnv1a(text, { size: length === 8 ? 32 : 64 })
+		.toString(16)
+		.padStart(length, '0')
+}
+
 export function capitalize(text: string): string {
 	return text.charAt(0).toUpperCase() + text.slice(1)
 }
