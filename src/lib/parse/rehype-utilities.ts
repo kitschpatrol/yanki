@@ -3,11 +3,14 @@
 // https://github.com/rehypejs/rehype-highlight
 
 import { yankiDefaultEmptyNotePlaceholderHast } from '../model/constants'
+import { yankiSupportedAudioVideoFormats, yankiSupportedImageFormats } from '../model/model'
+import { getSafeAnkiMediaFilename, isUrl } from '../utilities/file'
 import { cleanClassName } from '../utilities/string'
 import rehypeShiki from '@shikijs/rehype'
 import { type Element, type Root as HastRoot } from 'hast'
 import { toText } from 'hast-util-to-text'
 import type { Root as MdastRoot } from 'mdast'
+import path from 'path-browserify-esm'
 import rehypeMathjax from 'rehype-mathjax'
 import rehypeParse from 'rehype-parse'
 import rehypeRemoveComments from 'rehype-remove-comments'
@@ -39,8 +42,9 @@ const processor = unified()
 
 export async function mdastToHtml(
 	mdast: MdastRoot | undefined,
-	cssClassNames: string[] | undefined = undefined,
-	useEmptyPlaceholder = false,
+	cssClassNames: string[] | undefined,
+	useEmptyPlaceholder: boolean,
+	cwd: string, // Path containing the note
 ): Promise<string> {
 	if (mdast === undefined) {
 		return ''
@@ -74,6 +78,72 @@ export async function mdastToHtml(
 			nonEmptyHast.children as Element[], // TODO: Fix this type error
 		),
 	])
+
+	// Handle Media
+	// 1. Find image tags... which are also where we'll find audio/video sources via Obsidian
+	// 2. Convert any relative URLs to absolute URLs
+	// 3. Devise a "safe" filename for Anki to use, based on the original path
+	// 4. Detect if image or audio/video
+	// 5. If image, replace the src with a safe filename and embed the original
+	//    path in a data attribute, which is later processed by the functions in
+	//    anki-connect.ts.
+	// 6. If audio/video, replace the img element with a span with a data
+	//    attribute with the original path and Anki's markup for embedding
+	//    audio/video.
+
+	const originalCwd = path.process_cwd
+	path.setCWD(cwd)
+
+	visit(hastWithClass, 'element', (node, index, parent) => {
+		if (parent === undefined || index === undefined || node.tagName !== 'img') return CONTINUE
+
+		// Ensure src is a string
+		if (typeof node.properties.src !== 'string' || node.properties?.src?.trim().length === 0) {
+			console.warn('Image has no src')
+			return CONTINUE
+		}
+
+		// Check if src is a remote url
+		if (isUrl(node.properties.src)) {
+			console.warn('Image is remote, action TBD')
+			return CONTINUE
+		}
+
+		const absoluteSrc = path.resolve(node.properties.src)
+		const safeFilename = getSafeAnkiMediaFilename(absoluteSrc)
+		const extension = path.extname(absoluteSrc).slice(1)
+
+		if ((yankiSupportedImageFormats as unknown as string[]).includes(extension)) {
+			node.properties.src = safeFilename
+			node.properties.className = ['yanki-media', 'yanki-media-image']
+			node.properties['data-src-original'] = absoluteSrc
+		} else if ((yankiSupportedAudioVideoFormats as unknown as string[]).includes(extension)) {
+			// Replace the current node with a span
+			// containing the Anki media embedding syntax
+			// Using <audio> and <video> tags would be nicer, and <audio> kind of works on desktop,
+			// but this breaks on mobile, so we have to use the [sound:] syntax
+			parent.children.splice(
+				index,
+				1,
+				u(
+					'element',
+					{
+						properties: {
+							className: ['yanki-media', 'yanki-media-audio-video'],
+							'data-filename': safeFilename,
+							'data-src-original': absoluteSrc,
+						},
+						tagName: 'span',
+					},
+					[u('text', `[sound:${safeFilename}]`)],
+				),
+			)
+		} else {
+			console.warn(`Unsupported media format: ${extension}`)
+		}
+	})
+
+	path.setCWD(originalCwd)
 
 	// Edge case... if a note ONLY has MathJax in the front field, Anki will think it's empty
 	// (Anki-connect error message: "cannot create note because it is empty")
@@ -122,4 +192,38 @@ export function getFirstLineOfHtmlAsPlainText(html: string): string {
 			.map((line) => line.trim())
 			.find((line) => line.length > 0) ?? ''
 	)
+}
+
+export type Media = {
+	filename: string
+	originalSrc: string
+}
+
+export function extractMediaFromHtml(html: string): Media[] {
+	const hast = htmlProcessor.parse(html)
+	const media: Media[] = []
+
+	// Assumes media-related manipulations performed by
+	// mdastToHtml have already been done
+	visit(hast, 'element', (node) => {
+		if (node.tagName === 'img' || node.tagName === 'span') {
+			const filename = node.properties?.src ?? node.properties?.dataFilename
+			const originalSrc = node.properties?.dataSrcOriginal
+			if (
+				filename !== undefined &&
+				originalSrc !== undefined &&
+				typeof filename === 'string' &&
+				typeof originalSrc === 'string'
+			) {
+				media.push({
+					filename,
+					originalSrc,
+				})
+			} else if (node.tagName === 'img') {
+				console.warn('Image has no src or original src data')
+			}
+		}
+	})
+
+	return media
 }

@@ -62,3 +62,42 @@ export const yankiModels = [
 export type YankiModelName = (typeof yankiModels)[number]['modelName']
 
 export const yankiModelNames: YankiModelName[] = yankiModels.map((model) => model.modelName)
+
+// Via https://github.com/ankitects/anki/blob/e41c4573d789afe8b020fab5d9d1eede50c3fa3d/qt/aqt/editor.py#L62
+export const yankiSupportedImageFormats = [
+	'avif',
+	'gif',
+	'ico',
+	'jpeg',
+	'jpg',
+	'png',
+	'svg',
+	'tif',
+	'tiff',
+	'webp',
+] as const
+
+// Via https://github.com/ankitects/anki/blob/e41c4573d789afe8b020fab5d9d1eede50c3fa3d/qt/aqt/editor.py#L63-L85
+export const yankiSupportedAudioVideoFormats = [
+	'3gp',
+	'aac',
+	'avi',
+	'flac',
+	'flv',
+	'm4a',
+	'mkv',
+	'mov',
+	'mp3',
+	'mp4',
+	'mpeg',
+	'mpg',
+	'oga',
+	'ogg',
+	'ogv',
+	'ogx',
+	'opus',
+	'spx',
+	'swf',
+	'wav',
+	'webm',
+] as const

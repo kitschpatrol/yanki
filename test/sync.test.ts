@@ -99,6 +99,26 @@ describeWithFileFixture(
 )
 
 describeWithFileFixture(
+	'media',
+	{
+		assetPath: './test/assets/test-media/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('adds media to anki when appropriate', async () => {
+			const results = await syncFiles(context.files, {
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
+)
+
+describeWithFileFixture(
 	'basic synchronization',
 	{
 		assetPath: './test/assets/test-minimal-notes/',

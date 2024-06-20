@@ -1,6 +1,8 @@
 import { yankiDefaultNamespace } from '../model/constants'
 import { type YankiModelName, yankiModelNames, yankiModels } from '../model/model'
 import { type YankiNote } from '../model/note'
+import { extractMediaFromHtml } from '../parse/rehype-utilities'
+import { isUrl } from './file'
 import { type YankiConnect } from 'yanki-connect'
 
 export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryRun = false) {
@@ -8,9 +10,14 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 		return
 	}
 
-	const noteIds = notes
-		.map((note) => note.noteId)
-		.filter((noteId) => noteId !== undefined) as number[]
+	// TODO TypeScript regression
+	// const noteIds = notes.map((note) => note.noteId).filter((noteId) => noteId !== undefined)
+	const noteIds: number[] = []
+	for (const note of notes) {
+		if (note.noteId !== undefined) {
+			noteIds.push(note.noteId)
+		}
+	}
 
 	await client.note.deleteNotes({ notes: noteIds })
 }
@@ -66,6 +73,29 @@ export async function addNote(
 
 	if (dryRun) {
 		return 0
+	}
+
+	// Upload media
+	const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
+
+	for (const { filename, originalSrc } of mediaPaths) {
+		const ankiMediaFilename = await client.media.storeMediaFile(
+			isUrl(originalSrc)
+				? {
+						deleteExisting: true,
+						filename,
+						url: originalSrc,
+					}
+				: {
+						deleteExisting: true,
+						filename,
+						path: originalSrc,
+					},
+		)
+
+		if (filename !== ankiMediaFilename) {
+			console.warn(`Anki media filename mismatch: ${filename} -> ${ankiMediaFilename}`)
+		}
 	}
 
 	const newNote = await client.note

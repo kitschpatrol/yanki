@@ -15,9 +15,12 @@ import {
 	replaceDeleteNodesWithClozeMarkup,
 	splitTreeAtThematicBreak,
 } from './remark-utilities'
+import path from 'path-browserify-esm'
 import { u } from 'unist-builder'
 
 export type NoteFromMarkdownOptions = {
+	/** Path containing the markdown, used to resolve relative links in the markdown */
+	cwd?: string
 	namespace: string
 } & AstFromMarkdownOptions
 
@@ -25,7 +28,7 @@ export async function getNoteFromMarkdown(
 	markdown: string,
 	options: NoteFromMarkdownOptions,
 ): Promise<YankiNote> {
-	const { namespace, obsidianVault } = options
+	const { cwd = path.process_cwd, namespace, obsidianVault } = options
 
 	// Anki won't create notes at all if the front field is blank, but we want
 	// parity between markdown files and notes at all costs, so we'll put
@@ -56,11 +59,13 @@ export async function getNoteFromMarkdown(
 				firstPart,
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
 				true,
+				cwd,
 			)
 			back = await mdastToHtml(
 				secondPart,
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
 				true,
+				cwd,
 			)
 
 			break
@@ -75,11 +80,13 @@ export async function getNoteFromMarkdown(
 				firstPart,
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
 				true,
+				cwd,
 			)
 			back = await mdastToHtml(
 				secondPart,
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
 				false,
+				cwd,
 			)
 
 			break
@@ -103,6 +110,7 @@ export async function getNoteFromMarkdown(
 				firstPart,
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
 				true,
+				cwd,
 			)
 
 			// HTML in the "blank" seems to parse correctly in Anki, but appears as plain text
@@ -110,6 +118,7 @@ export async function getNoteFromMarkdown(
 				secondPartHast,
 				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
 				false,
+				cwd,
 			)
 			break
 		}

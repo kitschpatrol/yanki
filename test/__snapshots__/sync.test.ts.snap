@@ -1686,6 +1686,39 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
 }
 `;
 
+exports[`media > adds media to anki when appropriate 1`] = `
+{
+  "ankiWeb": false,
+  "deletedDecks": [],
+  "dryRun": false,
+  "duration": 0,
+  "namespace": "Yanki Test - media",
+  "synced": [
+    {
+      "action": "created",
+      "filePath": "/test-media/basic-compound.md",
+      "filePathOriginal": "/test-media/basic-compound.md",
+      "note": {
+        "deckName": "test-media",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-media front model-yanki-basic"><p>Audio</p>
+<p><span class="yanki-media yanki-media-audio-video" data-filename="var--folders--7w--vbgxhpks5pz_9z06ms_4s9f80000gn--T--1718914981651--test-media--audio--yanki.wav" data-src-original="/var/folders/7w/vbgxhpks5pz_9z06ms_4s9f80000gn/T/1718914981651/test-media/audio/yanki.wav">[sound:var--folders--7w--vbgxhpks5pz_9z06ms_4s9f80000gn--T--1718914981651--test-media--audio--yanki.wav]</span></p>
+<p>Image</p>
+<p><img src="var--folders--7w--vbgxhpks5pz_9z06ms_4s9f80000gn--T--1718914981651--test-media--image--yanki.png" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/var/folders/7w/vbgxhpks5pz_9z06ms_4s9f80000gn/T/1718914981651/test-media/image/yanki.png"></p>
+<p>Video</p>
+<p><span class="yanki-media yanki-media-audio-video" data-filename="var--folders--7w--vbgxhpks5pz_9z06ms_4s9f80000gn--T--1718914981651--test-media--video--yanki.mp4" data-src-original="/var/folders/7w/vbgxhpks5pz_9z06ms_4s9f80000gn/T/1718914981651/test-media/video/yanki.mp4">[sound:var--folders--7w--vbgxhpks5pz_9z06ms_4s9f80000gn--T--1718914981651--test-media--video--yanki.mp4]</span></p></div>",
+          "YankiNamespace": "Yanki Test - media",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+  ],
+}
+`;
+
 exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatter 1`] = `
 {
   "ankiWeb": false,

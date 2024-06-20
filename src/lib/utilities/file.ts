@@ -1,4 +1,5 @@
 import { environment } from './platform'
+import path from 'path-browserify-esm'
 
 export async function validateFileFunctions(
 	readFile?: (filePath: string) => Promise<string>,
@@ -24,4 +25,16 @@ export async function validateFileFunctions(
 	}
 
 	return { readFile, rename, writeFile }
+}
+
+export function getSafeAnkiMediaFilename(filePath: string): string {
+	// TODO more than this?
+
+	const parts = filePath.split(path.sep).filter((part) => part.trim().length > 0)
+
+	return encodeURI(parts.join('--'))
+}
+
+export function isUrl(filePath: string): boolean {
+	return filePath.startsWith('http://') || filePath.startsWith('https://')
 }
