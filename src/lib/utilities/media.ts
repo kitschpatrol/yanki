@@ -61,7 +61,8 @@ export function getSafeAnkiMediaFilename(absolutePathOrUrl: string, namespace: s
 	const fileExtension = getAnkiMediaFilenameExtension(absolutePathOrUrl)
 	const legibleFilename = getLegibleFilename(absolutePathOrUrl, 60)
 
-	const safeFilename = `${namespaceHash}-${assetPathHash}-${legibleFilename}.${fileExtension}`
+	const safeFilename =
+		`${namespaceHash}-${assetPathHash}-${legibleFilename}.${fileExtension}`.replaceAll('?', '')
 
 	// Should never happen
 	// Anki truncates long file names... so we crush the complete path down to a hash

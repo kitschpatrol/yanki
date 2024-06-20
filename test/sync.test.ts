@@ -102,7 +102,7 @@ describeWithFileFixture(
 	'media',
 	{
 		assetPath: './test/assets/test-media/',
-		cleanUpAnki: true,
+		cleanUpAnki: false,
 		cleanUpTempFiles: true,
 	},
 	(context) => {
