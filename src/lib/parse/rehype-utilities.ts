@@ -4,8 +4,9 @@
 
 import { yankiDefaultEmptyNotePlaceholderHast } from '../model/constants'
 import { yankiSupportedAudioVideoFormats, yankiSupportedImageFormats } from '../model/model'
-import { getSafeAnkiMediaFilename, isUrl } from '../utilities/file'
+import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
 import { cleanClassName } from '../utilities/string'
+import { isUrl } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
 import { type Element, type Root as HastRoot } from 'hast'
 import { toText } from 'hast-util-to-text'
@@ -106,20 +107,23 @@ export async function mdastToHtml(
 			return CONTINUE
 		}
 
-		// Check if src is a remote url
-		if (isUrl(node.properties.src)) {
-			console.warn('Image is remote, action TBD')
+		const srcIsUrl = isUrl(node.properties.src)
+
+		const absoluteSrcOrUrl = srcIsUrl ? node.properties.src : path.resolve(node.properties.src)
+
+		// These handle url vs. file path internally..
+		const safeFilename = getSafeAnkiMediaFilename(absoluteSrcOrUrl, namespace)
+		const extension = getAnkiMediaFilenameExtension(absoluteSrcOrUrl)
+
+		if (extension === undefined) {
+			console.warn(`Could not determine extension for ${node.properties.src}`)
 			return CONTINUE
 		}
-
-		const absoluteSrc = path.resolve(node.properties.src)
-		const safeFilename = getSafeAnkiMediaFilename(absoluteSrc, namespace)
-		const extension = path.extname(absoluteSrc).slice(1)
 
 		if ((yankiSupportedImageFormats as unknown as string[]).includes(extension)) {
 			node.properties.src = safeFilename
 			node.properties.className = ['yanki-media', 'yanki-media-image']
-			node.properties['data-src-original'] = absoluteSrc
+			node.properties['data-src-original'] = absoluteSrcOrUrl
 		} else if ((yankiSupportedAudioVideoFormats as unknown as string[]).includes(extension)) {
 			// Replace the current node with a span
 			// containing the Anki media embedding syntax
@@ -134,7 +138,7 @@ export async function mdastToHtml(
 						properties: {
 							className: ['yanki-media', 'yanki-media-audio-video'],
 							'data-filename': safeFilename,
-							'data-src-original': absoluteSrc,
+							'data-src-original': absoluteSrcOrUrl,
 						},
 						tagName: 'span',
 					},

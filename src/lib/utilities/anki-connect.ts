@@ -2,7 +2,7 @@ import { yankiDefaultNamespace } from '../model/constants'
 import { type YankiModelName, yankiModelNames, yankiModels } from '../model/model'
 import { type YankiNote } from '../model/note'
 import { extractMediaFromHtml } from '../parse/rehype-utilities'
-import { isUrl } from './file'
+import { isUrl } from './url'
 import { type YankiConnect } from 'yanki-connect'
 
 export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryRun = false) {
@@ -94,7 +94,9 @@ export async function addNote(
 		)
 
 		if (filename !== ankiMediaFilename) {
-			console.warn(`Anki media filename mismatch: ${filename} -> ${ankiMediaFilename}`)
+			console.warn(
+				`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
+			)
 		}
 	}
 
