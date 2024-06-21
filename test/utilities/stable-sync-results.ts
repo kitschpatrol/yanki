@@ -9,7 +9,11 @@ export function cleanUpTempPath(filePath: string | undefined): string | undefine
 		return undefined
 	}
 
-	return filePath.replace(os.tmpdir(), '/').replace(/\/\d{13}\//, '')
+	return filePath.replaceAll(os.tmpdir(), '/').replaceAll(/\/\d{13}\//g, '')
+}
+
+function cleanUpHashes(text: string): string {
+	return text.replaceAll(/-[\da-f]{8}-/g, '-HASH-')
 }
 
 type SyncResults = UnwrapPromise<ReturnType<typeof syncFiles>>
@@ -19,6 +23,8 @@ export function stableResults(results: SyncResults): SyncResults {
 		note.filePath = cleanUpTempPath(note.filePath)
 		note.filePathOriginal = cleanUpTempPath(note.filePathOriginal)
 		note.note.noteId = 0
+		note.note.fields.Front = cleanUpHashes(cleanUpTempPath(note.note.fields.Front) ?? '')
+		note.note.fields.Back = cleanUpHashes(cleanUpTempPath(note.note.fields.Back) ?? '')
 		return note
 	})
 

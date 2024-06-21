@@ -16,10 +16,6 @@
 
 ![Yanki test video](./video/yanki.gif)
 
-## m4v (Broken on Mac desktop and iOS mobile)
-
-![Yanki test video](./video/yanki.m4v)
-
 ## mkv (Broken on iOS mobile)
 
 ![Yanki test video](./video/yanki.mkv)

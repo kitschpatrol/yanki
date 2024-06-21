@@ -16,10 +16,6 @@
 
 ![Yanki test video](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.gif?raw=true)
 
-## m4v (Broken on Mac desktop and iOS mobile)
-
-![Yanki test video](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.m4v?raw=true)
-
 ## mkv (Broken on iOS mobile)
 
 ![Yanki test video](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mkv?raw=true)
