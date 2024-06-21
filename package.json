@@ -79,6 +79,7 @@
 		"deepmerge-ts": "^7.0.3",
 		"filenamify": "^6.0.0",
 		"hast-util-to-text": "^4.0.2",
+		"mdast-util-find-and-replace": "^3.0.1",
 		"nanoid": "^5.0.7",
 		"path-browserify-esm": "^1.0.4",
 		"pkgroll": "^2.1.1",

@@ -66,6 +66,9 @@ importers:
       hast-util-to-text:
         specifier: ^4.0.2
         version: 4.0.2
+      mdast-util-find-and-replace:
+        specifier: ^3.0.1
+        version: 3.0.1
       nanoid:
         specifier: ^5.0.7
         version: 5.0.7

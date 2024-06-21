@@ -260,9 +260,7 @@ export function extractMediaFromHtml(html: string): Media[] {
 					originalSrc,
 				})
 			} else if (node.tagName === 'img' && node.properties?.src !== undefined) {
-				// Console.log('----------------------------------')
-				// console.log(html)
-				// console.warn(`Ignoring image without decipherable source: ${String(node.properties.src)}`)
+				// Console.warn(`Ignoring image without decipherable source: ${String(node.properties.src)}`)
 			}
 		}
 	})

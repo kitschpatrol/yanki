@@ -5,7 +5,7 @@
 import type { Frontmatter } from '../model/frontmatter'
 import type { YankiModelName } from '../model/model'
 import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
-import remarkObsidianLink from './remark-obsidian-link'
+import remarkObsidianWikilink from './remark-obsidian-wikilink'
 import { deepmerge } from 'deepmerge-ts'
 import type { Emphasis, Node, Parent, PhrasingContent, Root, Text } from 'mdast'
 import remarkFlexibleMarkers from 'remark-flexible-markers'
@@ -38,6 +38,7 @@ export async function getAstFromMarkdown(
 	const processor = unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, [{ anywhere: false, marker: '-', type: 'yaml' }])
+		.use(remarkObsidianWikilink, { automaticAlias: true, obsidianVault })
 		.use(remarkGfm, { singleTilde: false })
 		.use(remarkMath)
 		.use(
@@ -53,7 +54,6 @@ export async function getAstFromMarkdown(
 			// 		tip: '💡 Tip:',
 			// 		warning: '⚠️ Warning:',
 			// 	}
-
 			// 	return {
 			// 		checkedTitle: bareTitle,
 			// 		displayTitle: titleMap[bareTitle.toLowerCase() as keyof typeof titleMap] ?? bareTitle,
@@ -61,17 +61,6 @@ export async function getAstFromMarkdown(
 			// },
 			// }
 		)
-		.use(remarkObsidianLink, {
-			toLink(wikiLink) {
-				return {
-					title: wikiLink.alias ?? wikiLink.value,
-					uri: obsidianVault
-						? `obsidian://open?vault=Vault&file=${encodeURIComponent(wikiLink.value)}.md`
-						: wikiLink.value,
-					value: wikiLink.alias ?? wikiLink.value,
-				}
-			},
-		})
 		.use(remarkFlexibleMarkers)
 
 	return processor.run(processor.parse(markdown))
