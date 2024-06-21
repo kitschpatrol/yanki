@@ -135,11 +135,13 @@ Yanki looks inside each note, and extracts either the text of the "prompt" (e.g.
 
 Edge cases are carefully managed to ensure that there's always _some kind_ of best-effort semantically valuable file name assigned.
 
-### Full media asset sync
+### Media asset synchronization
 
 Yanki can sync images, videos, and audio files embedded in your notes with Anki's media asset management system. At your option, it can sync local assets, or assets linked via URL, or both, or none.
 
-Yanki automatically manages clean-up of synced media assets when you delete your notes, or when specific assets are removed from your notes .
+Yanki automatically manages clean-up of synced media assets when you delete your notes, or when specific assets are removed from your notes.
+
+Both wiki-style `![[something.png]]` and `![markdown](style.png)` asset embedding syntaxes are supported.
 
 ## Markdown note types
 
