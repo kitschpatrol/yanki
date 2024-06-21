@@ -1,7 +1,8 @@
-import { yankiDefaultNamespace } from '../model/constants'
 import { type YankiModelName, yankiModelNames, yankiModels } from '../model/model'
 import { type YankiNote } from '../model/note'
 import { extractMediaFromHtml } from '../parse/rehype-utilities'
+import { defaultGlobalOptions } from '../shared/options'
+import { getNamespaceHash } from './string'
 import { isUrl } from './url'
 import { type YankiConnect } from 'yanki-connect'
 
@@ -20,6 +21,44 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 	}
 
 	await client.note.deleteNotes({ notes: noteIds })
+}
+
+export async function deleteUnusedMedia(
+	client: YankiConnect,
+	liveNotes: YankiNote[],
+	namespace: string,
+	dryRun: boolean,
+): Promise<string[]> {
+	if (dryRun) {
+		return []
+	}
+
+	// TODO revisit this after global hashing is implemented
+	const hashedNamespace = getNamespaceHash(namespace)
+
+	const activeMediaFilenames: string[] = []
+	for (const note of liveNotes) {
+		// Room for optimization to avoid re-parsing the HTML...
+		const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
+		for (const { filename } of mediaPaths) {
+			activeMediaFilenames.push(filename)
+		}
+	}
+
+	const allMediaInNamespace = await client.media.getMediaFilesNames({
+		pattern: `${hashedNamespace}-*`,
+	})
+
+	const deletedMediaFilenames: string[] = []
+
+	for (const remoteMediaFilename of allMediaInNamespace) {
+		if (!activeMediaFilenames.includes(remoteMediaFilename)) {
+			await client.media.deleteMediaFile({ filename: remoteMediaFilename })
+			deletedMediaFilenames.push(remoteMediaFilename)
+		}
+	}
+
+	return deletedMediaFilenames
 }
 
 export async function updateNoteModel(client: YankiConnect, note: YankiNote, dryRun = false) {
@@ -48,6 +87,44 @@ export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun =
 	await client.note.deleteNotes({ notes: [note.noteId] })
 }
 
+// TODO actually get the local hash?
+async function uploadMediaForNote(
+	client: YankiConnect,
+	note: YankiNote,
+	dryRun: boolean,
+): Promise<number> {
+	// Upload media
+	const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
+
+	if (dryRun) {
+		return mediaPaths.length
+	}
+
+	for (const { filename, originalSrc } of mediaPaths) {
+		const ankiMediaFilename = await client.media.storeMediaFile(
+			isUrl(originalSrc)
+				? {
+						deleteExisting: true,
+						filename,
+						url: originalSrc,
+					}
+				: {
+						deleteExisting: true,
+						filename,
+						path: originalSrc,
+					},
+		)
+
+		if (filename !== ankiMediaFilename) {
+			console.warn(
+				`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
+			)
+		}
+	}
+
+	return mediaPaths.length
+}
+
 /**
  * Add a note to Anki.
  *
@@ -73,31 +150,6 @@ export async function addNote(
 
 	if (dryRun) {
 		return 0
-	}
-
-	// Upload media
-	const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
-
-	for (const { filename, originalSrc } of mediaPaths) {
-		const ankiMediaFilename = await client.media.storeMediaFile(
-			isUrl(originalSrc)
-				? {
-						deleteExisting: true,
-						filename,
-						url: originalSrc,
-					}
-				: {
-						deleteExisting: true,
-						filename,
-						path: originalSrc,
-					},
-		)
-
-		if (filename !== ankiMediaFilename) {
-			console.warn(
-				`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
-			)
-		}
 	}
 
 	const newNote = await client.note
@@ -157,6 +209,8 @@ export async function addNote(
 		throw new Error('Note creation failed')
 	}
 
+	await uploadMediaForNote(client, note, dryRun)
+
 	return newNote
 }
 
@@ -194,6 +248,8 @@ export async function updateNote(
 				note: { ...localNote, id: localNote.noteId },
 			})
 		}
+
+		await uploadMediaForNote(client, localNote, dryRun)
 
 		updated = true
 	}
@@ -263,7 +319,7 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
  */
 export async function getRemoteNotes(
 	client: YankiConnect,
-	namespace = yankiDefaultNamespace,
+	namespace = defaultGlobalOptions.namespace,
 ): Promise<YankiNote[]> {
 	const noteIds = await client.note.findNotes({ query: `"YankiNamespace:${namespace}"` })
 

@@ -17,9 +17,9 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				filenameMode: 'prompt',
-				manageFilenames: true,
+				manageFilenames: 'prompt',
 				namespace: context.namespace,
+				syncMediaAssets: 'none',
 			})
 
 			const changeMap = new Map<string, string>()
@@ -58,9 +58,9 @@ describeWithFileFixture(
 			const resultsRound2 = await syncFiles(newFileList, {
 				ankiWeb: false,
 				dryRun: false,
-				filenameMode: 'prompt',
-				manageFilenames: true,
+				manageFilenames: 'prompt',
 				namespace: context.namespace,
+				syncMediaAssets: 'none',
 			})
 
 			const renamedFilesMap = new Map<string, string>()
@@ -89,9 +89,9 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				filenameMode: 'response',
-				manageFilenames: true,
+				manageFilenames: 'response',
 				namespace: context.namespace,
+				syncMediaAssets: 'none',
 			})
 
 			const changeMap = new Map<string, string>()
@@ -130,9 +130,9 @@ describeWithFileFixture(
 			const resultsRound2 = await syncFiles(newFileList, {
 				ankiWeb: false,
 				dryRun: false,
-				filenameMode: 'response',
-				manageFilenames: true,
+				manageFilenames: 'response',
 				namespace: context.namespace,
+				syncMediaAssets: 'none',
 			})
 
 			const renamedFilesMap = new Map<string, string>()
@@ -161,7 +161,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				manageFilenames: false,
+				manageFilenames: 'off',
 				namespace: context.namespace,
 			})
 
@@ -207,9 +207,9 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				filenameMode: 'prompt',
-				manageFilenames: true,
+				manageFilenames: 'prompt',
 				namespace: context.namespace,
+				syncMediaAssets: 'none',
 			})
 
 			const changeMap = new Map<string, string>()
@@ -260,9 +260,9 @@ describeWithFileFixture(
 			const resultsRound2 = await syncFiles(newFileList, {
 				ankiWeb: false,
 				dryRun: false,
-				filenameMode: 'prompt',
-				manageFilenames: true,
+				manageFilenames: 'prompt',
 				namespace: context.namespace,
+				syncMediaAssets: 'none',
 			})
 
 			const renamedFilesMap = new Map<string, string>()
@@ -291,9 +291,9 @@ describeWithFileFixture(
 			const results = await syncFiles(context.files, {
 				ankiWeb: false,
 				dryRun: false,
-				filenameMode: 'response',
-				manageFilenames: true,
+				manageFilenames: 'response',
 				namespace: context.namespace,
+				syncMediaAssets: 'none',
 			})
 
 			const changeMap = new Map<string, string>()
@@ -344,9 +344,9 @@ describeWithFileFixture(
 			const resultsRound2 = await syncFiles(newFileList, {
 				ankiWeb: false,
 				dryRun: false,
-				filenameMode: 'response',
-				manageFilenames: true,
+				manageFilenames: 'response',
 				namespace: context.namespace,
+				syncMediaAssets: 'none',
 			})
 
 			const renamedFilesMap = new Map<string, string>()

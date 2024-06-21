@@ -1,47 +1,43 @@
-import { defaultCss, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
+import { yankiDefaultCss } from '../model/constants'
 import { yankiModelNames } from '../model/model'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
 import { requestPermission, updateModelStyle } from '../utilities/anki-connect'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
-import type { PartialDeep } from 'type-fest'
-import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
+import type { PartialDeep, Simplify } from 'type-fest'
+import { YankiConnect } from 'yanki-connect'
 
 export type StyleOptions = {
-	ankiConnectOptions: YankiConnectOptions
-	/**
-	 * Automatically sync any changes to AnkiWeb after Yanki has finished syncing
-	 * locally. If false, only local Anki data is updated and you must manually
-	 * invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync"
-	 * button in the Anki app.
-	 */
-	ankiWeb: boolean
 	css: string
-	dryRun: boolean
-}
+} & Pick<
+	GlobalOptions,
+	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'syncToAnkiWebEvenIfUnchanged'
+>
 
 export const defaultStyleOptions: StyleOptions = {
-	ankiConnectOptions: defaultYankiConnectOptions,
-	ankiWeb: false,
-	css: defaultCss,
-	dryRun: false,
+	css: yankiDefaultCss,
+	...defaultGlobalOptions,
 }
 
-export type StyleReport = {
-	ankiWeb: boolean
-	dryRun: boolean
-	duration: number
-	models: Array<{
-		action: 'unchanged' | 'updated'
-		name: string
-	}>
-}
+export type StyleResult = Simplify<
+	{
+		duration: number
+		models: Array<{
+			action: 'unchanged' | 'updated'
+			name: string
+		}>
+	} & Pick<GlobalOptions, 'ankiWeb' | 'dryRun'>
+>
 
-export async function setStyle(options: PartialDeep<StyleOptions>): Promise<StyleReport> {
+export async function setStyle(options: PartialDeep<StyleOptions>): Promise<StyleResult> {
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, ankiWeb, css, dryRun } = deepmerge(defaultStyleOptions, options ?? {})
+	const { ankiConnectOptions, ankiWeb, css, dryRun, syncToAnkiWebEvenIfUnchanged } = deepmerge(
+		defaultStyleOptions,
+		options ?? {},
+	) as StyleOptions
 
 	const client = new YankiConnect(ankiConnectOptions)
 
@@ -50,7 +46,7 @@ export async function setStyle(options: PartialDeep<StyleOptions>): Promise<Styl
 		throw new Error('Anki is unreachable. Is Anki running?')
 	}
 
-	const modelsReport: StyleReport['models'] = []
+	const modelsReport: StyleResult['models'] = []
 
 	for (const modelName of yankiModelNames) {
 		const updated = await updateModelStyle(client, modelName, css, dryRun)
@@ -63,7 +59,7 @@ export async function setStyle(options: PartialDeep<StyleOptions>): Promise<Styl
 
 	// AnkiWeb sync
 	const isChanged = modelsReport.some((model) => model.action !== 'unchanged')
-	if (!dryRun && ankiWeb && (isChanged || yankiSyncToAnkiWebEvenIfUnchanged)) {
+	if (!dryRun && ankiWeb && (isChanged || syncToAnkiWebEvenIfUnchanged)) {
 		await client.miscellaneous.sync()
 	}
 
@@ -75,26 +71,26 @@ export async function setStyle(options: PartialDeep<StyleOptions>): Promise<Styl
 	}
 }
 
-export function formatStyleReport(report: StyleReport, verbose = false): string {
+export function formatStyleResult(result: StyleResult, verbose = false): string {
 	const lines: string[] = []
 
-	const unchangedModels = report.models.filter((model) => model.action === 'unchanged')
-	const updatedModels = report.models.filter((model) => model.action === 'updated')
+	const unchangedModels = result.models.filter((model) => model.action === 'unchanged')
+	const updatedModels = result.models.filter((model) => model.action === 'updated')
 
 	lines.push(
-		`${report.dryRun ? 'Will' : 'Successfully'} update ${updatedModels.length} ${plur('model', updatedModels.length)} and left ${unchangedModels.length} ${plur('model', unchangedModels.length)} unchanged${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}.`,
+		`${result.dryRun ? 'Will' : 'Successfully'} update ${updatedModels.length} ${plur('model', updatedModels.length)} and left ${unchangedModels.length} ${plur('model', unchangedModels.length)} unchanged${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,
 	)
 
 	if (verbose) {
 		if (updatedModels.length > 0) {
-			lines.push('', report.dryRun ? 'Models to update:' : 'Updated models:')
+			lines.push('', result.dryRun ? 'Models to update:' : 'Updated models:')
 			for (const model of updatedModels) {
 				lines.push(`  ${model.name}`)
 			}
 		}
 
 		if (unchangedModels.length > 0) {
-			lines.push('', report.dryRun ? 'Models unchanged:' : 'Unchanged models:')
+			lines.push('', result.dryRun ? 'Models unchanged:' : 'Unchanged models:')
 			for (const model of unchangedModels) {
 				lines.push(`  ${model.name}`)
 			}

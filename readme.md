@@ -135,6 +135,12 @@ Yanki looks inside each note, and extracts either the text of the "prompt" (e.g.
 
 Edge cases are carefully managed to ensure that there's always _some kind_ of best-effort semantically valuable file name assigned.
 
+### Full media asset sync
+
+Yanki can sync images, videos, and audio files embedded in your notes with Anki's media asset management system. At your option, it can sync local assets, or assets linked via URL, or both, or none.
+
+Yanki automatically manages clean-up of synced media assets when you delete your notes, or when specific assets are removed from your notes .
+
 ## Markdown note types
 
 Yanki automatically infers the _type_ of Note you'd like to create in Anki based on the presence or absence of certain element in your Markdown files.
@@ -143,7 +149,7 @@ The rules were designed with the semantic and visual nature of Markdown in mind.
 
 The most minimal examples to "trigger" different note types are shown below, but the implementation can handle additional weirdness and will generally do the right thing if it encounters elements that might indicate conflicting note types.
 
-You're free to use additional Markdown in your note files to style and structure the front and back of your flashcards. Image markup will work, but currently assets must be hosted externally and are not copied into Anki's media storage system.
+You're free to use additional Markdown in your note files to style and structure the front and back of your flashcards.
 
 ### Basic
 
@@ -319,19 +325,20 @@ yanki sync <directory> [options]
 | ------------------- | ------------------------------------------------------------------------ | -------- |
 | `directory`         | The path to the local directory of Markdown files to sync. _(Required.)_ | `string` |
 
-| Option                       | Description                                                                                                                                                                                                                                                                                                                                                                                                             | Type                            | Default                   |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------- |
-| `--dry-run`<br>`-d`          | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                                                                                                                                                                                         | `boolean`                       | `false`                   |
-| `--namespace`<br>`-n`        | Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.                                                                                                                                                                                                                                                                                              | `string`                        | `"Yanki"`                 |
-| `--anki-connect`             | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                                                                                                                                                                                         | `string`                        | `"http://127.0.0.1:8765"` |
-| `--anki-auto-launch`<br>`-l` | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                                                                                                                                                                                                                                           | `boolean`                       | `false`                   |
-| `--anki-web`<br>`-w`         | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app.                                                                                                                                                                      | `boolean`                       | `true`                    |
-| `--manage-filenames`<br>`-m` | Rename local note files to match their content. Useful if you want to feel have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of. | `"off"` `"prompt"` `"response"` | `"off"`                   |
-| `--max-filename-length`      | If `manage-filenames` is enabled, this option specifies the maximum length of the filename in characters.                                                                                                                                                                                                                                                                                                               | `number`                        | `60`                      |
-| `--json`                     | Output the sync report as JSON.                                                                                                                                                                                                                                                                                                                                                                                         | `boolean`                       | `false`                   |
-| `--verbose`                  | Enable verbose logging.                                                                                                                                                                                                                                                                                                                                                                                                 | `boolean`                       | `false`                   |
-| `--help`<br>`-h`             | Show help                                                                                                                                                                                                                                                                                                                                                                                                               | `boolean`                       |                           |
-| `--version`<br>`-v`          | Show version number                                                                                                                                                                                                                                                                                                                                                                                                     | `boolean`                       |                           |
+| Option                       | Description                                                                                                                                                                                                                                                                                                                                                                                                             | Type                                  | Default                   |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------- |
+| `--dry-run`<br>`-d`          | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                                                                                                                                                                                         | `boolean`                             | `false`                   |
+| `--namespace`<br>`-n`        | Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.                                                                                                                                                                                                                                                                                              | `string`                              | `"Yanki"`                 |
+| `--anki-connect`             | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                                                                                                                                                                                         | `string`                              | `"http://127.0.0.1:8765"` |
+| `--anki-auto-launch`<br>`-l` | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                                                                                                                                                                                                                                           | `boolean`                             | `false`                   |
+| `--anki-web`<br>`-w`         | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app.                                                                                                                                                                      | `boolean`                             | `true`                    |
+| `--manage-filenames`<br>`-m` | Rename local note files to match their content. Useful if you want to feel have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of. | `"off"` `"prompt"` `"response"`       | `"off"`                   |
+| `--max-filename-length`      | If `manage-filenames` is enabled, this option specifies the maximum length of the filename in characters.                                                                                                                                                                                                                                                                                                               | `number`                              | `60`                      |
+| `--sync-media`<br>`-s`       | Sync image, video, and audio assets to Anki's media storage system. Clean up is managed automatically. The `all` argument will save both local and remote assets to Anki, while `local` will only save local assets, `remote` will only save remote assets, and `none` will not save any assets.                                                                                                                        | `"none"` `"all"` `"local"` `"remote"` | `"local"`                 |
+| `--json`                     | Output the sync report as JSON.                                                                                                                                                                                                                                                                                                                                                                                         | `boolean`                             | `false`                   |
+| `--verbose`                  | Enable verbose logging.                                                                                                                                                                                                                                                                                                                                                                                                 | `boolean`                             | `false`                   |
+| `--help`<br>`-h`             | Show help                                                                                                                                                                                                                                                                                                                                                                                                               | `boolean`                             |                           |
+| `--version`<br>`-v`          | Show version number                                                                                                                                                                                                                                                                                                                                                                                                     | `boolean`                             |                           |
 
 #### Subcommand: `yanki list`
 
@@ -407,7 +414,10 @@ This package also exposes an API for integrating syncing capability programmatic
 The primary functions of interest are:
 
 ```ts
-function getNoteFromMarkdown(markdown: string, options: NoteFromMarkdownOptions): Promise<YankiNote>
+function getNoteFromMarkdown(
+  markdown: string,
+  options: GetNoteFromMarkdownOptions,
+): Promise<YankiNote>
 
 function syncFiles(
   allLocalFilePaths: string[],
@@ -424,9 +434,9 @@ function syncNotes(
 
 function listNotes(options?: PartialDeep<ListOptions>): Promise<ListReport>
 
-function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanReport>
+function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanResult>
 
-function setStyle(options: PartialDeep<StyleOptions>): Promise<StyleReport>
+function setStyle(options: PartialDeep<StyleOptions>): Promise<StyleResult>
 ```
 
 See the [source code](https://github.com/kitschpatrol/yanki/blob/main/src/lib/index.ts) for additional exports and inline documentation.
@@ -538,15 +548,11 @@ Behind the scenes, Yanki creates new note type models to match the four default 
 
 Areas of improvement before a 1.0.0 release:
 
-- [x] Refine handling of duplicate note ID edge cases.
-
 Possible features on the horizon:
 
 - [ ] Including some built-in CSS stylesheet options might be nice, since Anki's defaults can't always anticipate the kinds of HTML you're likely to generate from Markdown.
 
 - [ ] Support for Mermaid diagrams. (Unlikely since rendering to an SVG seems to require a browser. See [rehype-mermaid](https://github.com/remcohaszing/rehype-mermaid) and [remark-mermaidjs](https://github.com/remcohaszing/remark-mermaidjs).)
-
-- [ ] Either embedding media assets or implementing integration with Anki's media library could be helpful for offline review. (Though externally hosted image links seem generally fine for now.)
 
 - [ ] It would be nice to find a way to talk to the Anki database that doesn't require the Anki app to be running, but my research hasn't yet turned up anything as robust and reliable as Anki-Connect for this purpose.
 

@@ -5,7 +5,7 @@
  */
 
 import { cleanNotes } from '../../src/lib'
-import { defaultCss } from '../../src/lib/model/constants'
+import { yankiDefaultCss } from '../../src/lib/model/constants'
 import { yankiModelNames } from '../../src/lib/model/model'
 import { createModels, getStyle, updateModelStyle } from '../../src/lib/utilities/anki-connect'
 import { globby } from 'globby'
@@ -59,7 +59,7 @@ export function describeWithFileFixture(
 
 			// Set default CSS
 			for (const name of yankiModelNames) {
-				await updateModelStyle(context.yankiConnect, name, defaultCss, false)
+				await updateModelStyle(context.yankiConnect, name, yankiDefaultCss, false)
 			}
 
 			// Clean up anki first

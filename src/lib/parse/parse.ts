@@ -4,9 +4,10 @@
 
 import { yankiDefaultCssClassName } from '../model/constants'
 import { type YankiNote } from '../model/note'
+import { defaultGlobalOptions } from '../shared/options'
+import { type GlobalOptions } from '../shared/options'
 import { mdastToHtml } from './rehype-utilities'
 import {
-	type AstFromMarkdownOptions,
 	deleteFirstNodeOfType,
 	getAstFromMarkdown,
 	getFrontmatterFromTree,
@@ -15,20 +16,26 @@ import {
 	replaceDeleteNodesWithClozeMarkup,
 	splitTreeAtThematicBreak,
 } from './remark-utilities'
-import path from 'path-browserify-esm'
+import { deepmerge } from 'deepmerge-ts'
 import { u } from 'unist-builder'
 
-export type NoteFromMarkdownOptions = {
-	/** Path containing the markdown, used to resolve relative links in the markdown */
-	cwd?: string
-	namespace: string
-} & AstFromMarkdownOptions
+export type GetNoteFromMarkdownOptions = Pick<
+	GlobalOptions,
+	'cwd' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
+>
+
+export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
+	...defaultGlobalOptions,
+}
 
 export async function getNoteFromMarkdown(
 	markdown: string,
-	options: NoteFromMarkdownOptions,
+	options?: Partial<GetNoteFromMarkdownOptions>,
 ): Promise<YankiNote> {
-	const { cwd = path.process_cwd, namespace, obsidianVault } = options
+	const { cwd, namespace, obsidianVault, syncMediaAssets } = deepmerge(
+		defaultGetNoteFromMarkdownOptions,
+		options ?? {},
+	)
 
 	// Anki won't create notes at all if the front field is blank, but we want
 	// parity between markdown files and notes at all costs, so we'll put
@@ -55,20 +62,30 @@ export async function getNoteFromMarkdown(
 
 			// Basic and reverse always needs both sides to have content.
 			// Basic can technically have no back , but it's confusing so we throw in the placeholder.
-			front = await mdastToHtml(
-				firstPart,
-				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
-				true,
+			front = await mdastToHtml(firstPart, {
+				cssClassNames: [
+					yankiDefaultCssClassName,
+					`namespace-${namespace}`,
+					'front',
+					`model-${modelName}`,
+				],
 				cwd,
 				namespace,
-			)
-			back = await mdastToHtml(
-				secondPart,
-				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
-				true,
+				syncMediaAssets,
+				useEmptyPlaceholder: true,
+			})
+			back = await mdastToHtml(secondPart, {
+				cssClassNames: [
+					yankiDefaultCssClassName,
+					`namespace-${namespace}`,
+					'back',
+					`model-${modelName}`,
+				],
 				cwd,
 				namespace,
-			)
+				syncMediaAssets,
+				useEmptyPlaceholder: true,
+			})
 
 			break
 		}
@@ -78,20 +95,31 @@ export async function getNoteFromMarkdown(
 			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
 
 			// Cloze can't have empty front? But what does that even mean?
-			front = await mdastToHtml(
-				firstPart,
-				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
-				true,
+			front = await mdastToHtml(firstPart, {
+				cssClassNames: [
+					yankiDefaultCssClassName,
+					`namespace-${namespace}`,
+					'front',
+					`model-${modelName}`,
+				],
 				cwd,
 				namespace,
-			)
-			back = await mdastToHtml(
-				secondPart,
-				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
-				false,
+				syncMediaAssets,
+				useEmptyPlaceholder: true,
+			})
+			back = await mdastToHtml(secondPart, {
+				cssClassNames: [
+					yankiDefaultCssClassName,
+					`namespace-${namespace}`,
+					'back',
+					`model-${modelName}`,
+				],
 				cwd,
 				namespace,
-			)
+				syncMediaAssets,
+
+				useEmptyPlaceholder: false,
+			})
 
 			break
 		}
@@ -110,22 +138,34 @@ export async function getNoteFromMarkdown(
 			// const secondPartHast = u('root', [u('paragraph', [u('text', secondPart)])])
 			const secondPartHast = u('root', u('paragraph', secondPart.children))
 
-			front = await mdastToHtml(
-				firstPart,
-				[yankiDefaultCssClassName, `namespace-${namespace}`, 'front', `model-${modelName}`],
-				true,
+			front = await mdastToHtml(firstPart, {
+				cssClassNames: [
+					yankiDefaultCssClassName,
+					`namespace-${namespace}`,
+					'front',
+					`model-${modelName}`,
+				],
 				cwd,
 				namespace,
-			)
+				syncMediaAssets,
+
+				useEmptyPlaceholder: true,
+			})
 
 			// HTML in the "blank" seems to parse correctly in Anki, but appears as plain text
-			back = await mdastToHtml(
-				secondPartHast,
-				[yankiDefaultCssClassName, `namespace-${namespace}`, 'back', `model-${modelName}`],
-				false,
+			back = await mdastToHtml(secondPartHast, {
+				cssClassNames: [
+					yankiDefaultCssClassName,
+					`namespace-${namespace}`,
+					'back',
+					`model-${modelName}`,
+				],
 				cwd,
 				namespace,
-			)
+				syncMediaAssets,
+
+				useEmptyPlaceholder: false,
+			})
 			break
 		}
 	}

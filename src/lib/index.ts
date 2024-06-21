@@ -1,33 +1,36 @@
 export {
 	type CleanOptions,
-	type CleanReport,
+	type CleanResult,
 	cleanNotes,
 	defaultCleanOptions,
-	formatCleanReport,
+	formatCleanResult,
 } from './actions/clean'
-export { type ListOptions, defaultListOptions, formatListReport, listNotes } from './actions/list'
+export { type ListOptions, defaultListOptions, formatListResult, listNotes } from './actions/list'
 export {
 	type RenameFilesOptions,
-	type RenameFilesReport,
+	type RenameFilesResult,
 	defaultRenameFilesOptions,
 	renameFiles,
 } from './actions/rename'
 export {
 	type StyleOptions,
-	type StyleReport,
+	type StyleResult,
 	defaultStyleOptions,
-	formatStyleReport,
+	formatStyleResult,
 	setStyle,
 } from './actions/style'
 export {
-	type SyncOptions,
-	type SyncReport,
-	defaultSyncOptions,
-	formatSyncReport,
+	type SyncFilesOptions,
+	type SyncFilesResult,
+	defaultSyncFilesOptions,
+	formatSyncFilesResult,
 	syncFiles,
-	syncNotes,
-} from './actions/sync'
+} from './actions/sync-files'
 
 export { type YankiNote } from './model/note'
-export { getNoteFromMarkdown } from './parse/parse'
+export {
+	type GetNoteFromMarkdownOptions,
+	defaultGetNoteFromMarkdownOptions,
+	getNoteFromMarkdown,
+} from './parse/parse'
 export { hostAndPortToUrl, urlToHostAndPort } from './utilities/string'

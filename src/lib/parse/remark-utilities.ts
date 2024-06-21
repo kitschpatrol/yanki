@@ -4,8 +4,10 @@
 
 import type { Frontmatter } from '../model/frontmatter'
 import type { YankiModelName } from '../model/model'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
 import remarkObsidianLink from './remark-obsidian-link'
-import type { Emphasis, Node, Parent, Root, Text } from 'mdast'
+import { deepmerge } from 'deepmerge-ts'
+import type { Emphasis, Node, Parent, PhrasingContent, Root, Text } from 'mdast'
 import remarkFlexibleMarkers from 'remark-flexible-markers'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
@@ -19,15 +21,17 @@ import { parse as yamlParse } from 'yaml'
 
 // Processor shared across operations
 
-export type AstFromMarkdownOptions = {
-	obsidianVault?: string
+export type AstFromMarkdownOptions = Pick<GlobalOptions, 'obsidianVault'>
+
+export const defaultAstFromMarkdownOptions: AstFromMarkdownOptions = {
+	...defaultGlobalOptions,
 }
 
 export async function getAstFromMarkdown(
 	markdown: string,
-	options?: AstFromMarkdownOptions,
+	options?: Partial<AstFromMarkdownOptions>,
 ): Promise<Root> {
-	const { obsidianVault } = options ?? {}
+	const { obsidianVault } = deepmerge(defaultAstFromMarkdownOptions, options ?? {})
 
 	// Not seeing huge improvements from reusing this...
 	// And there's the issue of passing the options
@@ -305,7 +309,10 @@ function isLastVisibleNodeEmphasisWithOthers(ast: Root): boolean {
 			visibleCount++ // Increment count for every visible node
 		} else if (
 			node.type === 'emphasis' &&
-			node.children.some((child) => child.type === 'text' && child.value.trim() !== '')
+			// TODO type issue, PhrasingContent must be explicitly annotated for Rollup DTS plugin build...
+			node.children.some(
+				(child: PhrasingContent) => child.type === 'text' && child.value.trim() !== '',
+			)
 		) {
 			lastVisibleNode = node
 			visibleCount++ // Increment count for every visible node

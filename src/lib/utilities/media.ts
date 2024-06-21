@@ -1,3 +1,4 @@
+import { yankiSupportedAudioVideoFormats, yankiSupportedImageFormats } from '../model/model'
 import { getHash, getNamespaceHash } from './string'
 import slugify from '@sindresorhus/slugify'
 import path from 'path-browserify-esm'
@@ -6,33 +7,46 @@ import path from 'path-browserify-esm'
  * @param pathOrUrl
  * @returns Extension without the `.`, possibly an extra string if no extension is found
  */
-export function getAnkiMediaFilenameExtension(pathOrUrl: string): string | undefined {
+export function getAnkiMediaFilenameExtension(
+	pathOrUrl: string,
+	allowUnknownUrlExtension: boolean,
+): string | undefined {
+	let extensionCandidate: string | undefined
+	let isUrl = false
+
 	try {
 		const url = new URL(pathOrUrl)
+		isUrl = true
 		const pathnameParts = url.pathname.split('.')
 		if (pathnameParts.length > 1) {
-			return pathnameParts.at(-1)
+			extensionCandidate = pathnameParts.at(-1)
+		} else {
+			// Look in the query string if we must...
+			const searchParts = url.search.split('.')
+			extensionCandidate = searchParts.at(-1)
 		}
-
-		// Look in the query string if we must...
-		const searchParts = url.search.split('.')
-		if (searchParts.length > 1) {
-			return searchParts.at(-1)
-		}
-
-		// Nothing extension-like found
-		return undefined
 	} catch {
 		// Must be a file path
 		const filePath = pathOrUrl
-		const extension = path.extname(filePath).slice(1)
-		if (extension.length > 0) {
-			return extension
+		extensionCandidate = path.extname(filePath).slice(1)
+	}
+
+	// Make sure it's supported
+
+	if (
+		extensionCandidate === undefined ||
+		!([...yankiSupportedAudioVideoFormats, ...yankiSupportedImageFormats] as string[]).includes(
+			extensionCandidate,
+		)
+	) {
+		if (isUrl && allowUnknownUrlExtension) {
+			return 'unknown'
 		}
 
-		// No extension found
 		return undefined
 	}
+
+	return extensionCandidate
 }
 
 function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
@@ -55,11 +69,15 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 	return slugify(legibleFilename.trim()).slice(0, maxLength).replace(/-+$/, '')
 }
 
-export function getSafeAnkiMediaFilename(absolutePathOrUrl: string, namespace: string): string {
+export function getSafeAnkiMediaFilename(
+	absolutePathOrUrl: string,
+	namespace: string,
+	allowUnknownUrlExtension: boolean,
+): string {
 	const namespaceHash = getNamespaceHash(namespace)
 	const assetPathHash = getHash(absolutePathOrUrl, 8)
-	const fileExtension = getAnkiMediaFilenameExtension(absolutePathOrUrl)
-	const legibleFilename = getLegibleFilename(absolutePathOrUrl, 60)
+	const fileExtension = getAnkiMediaFilenameExtension(absolutePathOrUrl, allowUnknownUrlExtension)
+	const legibleFilename = getLegibleFilename(absolutePathOrUrl, 55)
 
 	const safeFilename =
 		`${namespaceHash}-${assetPathHash}-${legibleFilename}.${fileExtension}`.replaceAll('?', '')

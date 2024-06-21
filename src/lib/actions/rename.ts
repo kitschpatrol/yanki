@@ -1,111 +1,52 @@
-import { yankiDefaultNamespace } from '../model/constants'
-import { type YankiNote } from '../model/note'
-import { getNoteFromMarkdown } from '../parse/parse'
-import { validateFileFunctions } from '../utilities/file'
+import {
+	type GlobalOptions,
+	defaultGlobalOptions,
+	getDefaultFileFunctions,
+} from '../shared/options'
 import {
 	auditUniqueFilePath,
 	getSafeTitleForNote,
 	getTemporarilyUniqueFilePath,
 	getUniqueFilePath,
 } from '../utilities/filenames'
-import { environment } from '../utilities/platform'
+import { type LoadOptions, type LocalNote, loadLocalNotes } from './load-local-notes'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
+import { type Simplify } from 'type-fest'
 
-export type RenameFilesReport = {
-	dryRun: boolean
-	notes: Array<{
-		filePath: string
-		filePathOriginal: string
-		markdown: string // Useful later for updating the note ID in the frontmatter
-		note: YankiNote
-	}>
+export type RenameNotesOptions = Pick<
+	GlobalOptions,
+	'dryRun' | 'fileFunctions' | 'manageFilenames' | 'maxFilenameLength'
+>
+
+export const defaultRenameNotesOptions: RenameNotesOptions = {
+	...defaultGlobalOptions,
 }
 
-export type FilenameMode = 'prompt' | 'response'
-export type RenameFilesOptions = {
-	dryRun: boolean
-	filenameMode: FilenameMode
-	manageFilenames: boolean
-	maxFilenameLength: number
-	namespace: string
-	obsidianVault: string | undefined
-}
+export async function renameNotes(
+	notes: LocalNote[],
+	options: Partial<RenameNotesOptions>,
+): Promise<LocalNote[]> {
+	const {
+		dryRun,
+		fileFunctions = getDefaultFileFunctions(),
+		manageFilenames,
+		maxFilenameLength,
+	} = deepmerge(defaultRenameNotesOptions, options ?? {})
 
-export const defaultRenameFilesOptions: RenameFilesOptions = {
-	dryRun: false,
-	filenameMode: 'prompt',
-	manageFilenames: false,
-	maxFilenameLength: 60,
-	namespace: yankiDefaultNamespace,
-	obsidianVault: undefined,
-}
-
-/**
- * Also loads the notes from markdown and sets deck names...
- * @param allLocalFilePaths
- * @param options
- * @param readFile
- * @param writeFile
- * @param rename
- */
-export async function renameFiles(
-	allLocalFilePaths: string[],
-	options: Partial<RenameFilesOptions>,
-	readFile?: (filePath: string) => Promise<string>,
-	writeFile?: (filePath: string, data: string) => Promise<void>, // Not used, yet
-	rename?: (oldPath: string, newPath: string) => Promise<void>,
-): Promise<RenameFilesReport> {
-	const { readFile: readFileValidated, rename: renameValidated } = await validateFileFunctions(
-		readFile,
-		writeFile,
-		rename,
-	)
-
-	const resolvedOptions = deepmerge(defaultRenameFilesOptions, options ?? {})
-	const { dryRun, filenameMode, manageFilenames, maxFilenameLength, namespace, obsidianVault } =
-		resolvedOptions
-
-	allLocalFilePaths.sort((a, b) => a.localeCompare(b))
-
-	// Use file paths as deck names
-	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths)
-
-	const notes: Array<RenameFilesReport['notes'][number]> = []
-
-	for (const [index, filePath] of allLocalFilePaths.entries()) {
-		const markdown = await readFileValidated(filePath)
-		const note = await getNoteFromMarkdown(markdown, {
-			cwd: path.dirname(filePath),
-			namespace,
-			obsidianVault,
-		})
-		if (note.deckName === '') {
-			note.deckName = deckNamesFromFilePaths[index]
-		}
-
-		notes.push({
-			filePath,
-			filePathOriginal: filePath,
-			markdown,
-			note,
-		})
-	}
-
-	// Manage filenames
-	if (manageFilenames) {
+	if (manageFilenames !== 'off') {
 		// Update the file paths in the live files...
 
 		const newFilePaths: string[] = []
 
 		for (const noteToRename of notes) {
-			const { filePathOriginal, note } = noteToRename
+			const { filePath: filePathOriginal, note } = noteToRename
 
 			if (filePathOriginal === undefined) {
 				throw new Error('File path is undefined')
 			}
 
-			const newFilename = getSafeTitleForNote(note, filenameMode, maxFilenameLength)
+			const newFilename = getSafeTitleForNote(note, manageFilenames, maxFilenameLength)
 			const newFilePath = path.join(
 				path.dirname(filePathOriginal),
 				`${newFilename}${path.extname(filePathOriginal)}`,
@@ -156,87 +97,69 @@ export async function renameFiles(
 				)
 			) {
 				safeNewFilePath = getTemporarilyUniqueFilePath(filePath)
+
 				intermediateRenamePlan.set(safeNewFilePath, filePath)
 			}
 
 			if (!dryRun) {
-				await renameValidated(filePathOriginal, safeNewFilePath)
+				await fileFunctions.rename(filePathOriginal, safeNewFilePath)
 			}
 		}
 
 		// One more pass to fix the intermediates
 		for (const [temporarilyUniquePath, newPath] of intermediateRenamePlan) {
 			if (!dryRun) {
-				await renameValidated(temporarilyUniquePath, newPath)
+				await fileFunctions.rename(temporarilyUniquePath, newPath)
 			}
 		}
 	}
 
 	notes.sort((a, b) => a.filePath.localeCompare(b.filePath))
 
-	return {
-		dryRun,
-		notes,
-	}
+	return notes
 }
 
-/**
- * Helper function to infer deck names from file paths if `deckName` not defined in the note's frontmatter.
- *
- * `deckName` will always override the inferred deck name.
- *
- * Depends on the context of _all_ file paths passed to `syncNoteFiles`.
- *
- * Example of paths -> deck names with `common-root`:
- * /base/foo/note.md -> foo
- * /base/foo/baz/note.md -> foo::baz
- *
- * Example of paths -> deck names with `common-root`:
- * /base/foo/note.md -> foo
- * /base/foo/note.md -> foo
- *
- * Example of paths -> deck names with `common-parent`:
- * /base/foo/note.md -> base::foo
- * /base/foo/baz/note.md -> base::foo::baz
- *
- * Example of paths -> deck names with `common-parent`:
- * /base/foo/note.md -> foo
- * /base/foo/note.md -> foo
- *
- * @param absoluteFilePaths Absolute paths to all markdown Anki note files. (Ensures proper resolution if path module is polyfilled.)
- * @param prune If true, deck names are not allowed to "jump" over empty directories, even if there are other note files somewhere up the hierarchy
- * @returns array of ::-delimited deck paths
- */
-export function getDeckNamesFromFilePaths(
-	absoluteFilePaths: string[],
-	mode: 'common-parent' | 'common-root' = 'common-root',
-) {
-	if (environment === 'node') {
-		path.setCWD(process.cwd())
-	}
+export type RenameFilesResult = {
+	dryRun: boolean
+	notes: LocalNote[]
+}
 
-	const filePathSegments = absoluteFilePaths.map((filePath) =>
-		path.dirname(path.resolve(filePath)).split(path.sep),
-	)
+export type RenameFilesOptions = Simplify<LoadOptions & RenameNotesOptions>
 
-	// Trim to the shortest common path
-	const commonPathSegments = filePathSegments.reduce((acc, pathSegments) => {
-		const commonPath = acc.filter((segment, index) => segment === pathSegments[index])
-		return commonPath
+export const defaultRenameFilesOptions: RenameFilesOptions = {
+	...defaultGlobalOptions,
+}
+
+export async function renameFiles(
+	allLocalFilePaths: string[],
+	options: Partial<RenameFilesOptions>,
+): Promise<RenameFilesResult> {
+	const {
+		dryRun,
+		fileFunctions,
+		manageFilenames,
+		maxFilenameLength,
+		namespace,
+		obsidianVault,
+		syncMediaAssets,
+	} = deepmerge(defaultRenameFilesOptions, options ?? {})
+
+	const notes = await loadLocalNotes(allLocalFilePaths, {
+		fileFunctions,
+		namespace,
+		obsidianVault,
+		syncMediaAssets,
 	})
 
-	// Does the root segment have a file in it?
-	const lastSegmentHasFile = filePathSegments.some(
-		(pathSegments) => pathSegments.at(-1) === commonPathSegments.at(-1),
-	)
+	const renamedNotes = await renameNotes(notes, {
+		dryRun,
+		fileFunctions,
+		manageFilenames,
+		maxFilenameLength,
+	})
 
-	// Kinda tricky
-	const offset =
-		mode === 'common-parent' ? (lastSegmentHasFile ? 1 : 1) : lastSegmentHasFile ? 1 : 0
-
-	const deckNamesWithShortestCommonPath = filePathSegments.map((pathSegments) =>
-		pathSegments.slice(commonPathSegments.length - offset).join('::'),
-	)
-
-	return deckNamesWithShortestCommonPath
+	return {
+		dryRun,
+		notes: renamedNotes,
+	}
 }

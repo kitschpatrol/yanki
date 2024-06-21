@@ -1,73 +1,42 @@
-import { yankiDefaultNamespace, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
-import { setNoteIdInFrontmatter } from '../model/frontmatter'
+import { yankiDefaultDeckName } from '../model/constants'
 import { type YankiNote } from '../model/note'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
 import {
 	addNote,
 	deleteNotes,
 	deleteOrphanedDecks,
+	deleteUnusedMedia,
 	getRemoteNotes,
 	getRemoteNotesById,
 	requestPermission,
 	updateNote,
 	updateNoteModel,
 } from '../utilities/anki-connect'
-import { validateFileFunctions } from '../utilities/file'
-import { capitalize } from '../utilities/string'
-import { type FilenameMode, renameFiles } from './rename'
 import { deepmerge } from 'deepmerge-ts'
-import plur from 'plur'
-import prettyMilliseconds from 'pretty-ms'
-import type { PartialDeep } from 'type-fest'
-import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
+import type { PartialDeep, Simplify } from 'type-fest'
+import { YankiConnect } from 'yanki-connect'
 
 export type SyncedNote = {
 	action: 'ankiUnreachable' | 'created' | 'deleted' | 'recreated' | 'unchanged' | 'updated'
-	filePath?: string // Not always applicable
-	filePathOriginal?: string // Not always applicable, used to detect name changes
 	note: YankiNote
 }
 
-export type SyncOptions = {
-	ankiConnectOptions: YankiConnectOptions
-	/**
-	 * Automatically sync any changes to AnkiWeb after Yanki has finished syncing
-	 * locally. If false, only local Anki data is updated and you must manually
-	 * invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync"
-	 * button in the Anki app.
-	 */
-	ankiWeb: boolean
-	defaultDeckName: string
-	dryRun: boolean
-	filenameMode: FilenameMode
-	/** Only applies to syncFiles */
-	manageFilenames: boolean
-	/** Only applies if manageFilenames is not `false`. Will _not_ truncate user-specified file names in other cases. */
-	maxFilenameLength: number
-	namespace: string
-	/** Ensures that wiki-style links work correctly */
-	obsidianVault: string | undefined
-}
+export type SyncOptions = Pick<
+	GlobalOptions,
+	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace' | 'syncToAnkiWebEvenIfUnchanged'
+>
 
 export const defaultSyncOptions: SyncOptions = {
-	ankiConnectOptions: defaultYankiConnectOptions,
-	ankiWeb: false,
-	defaultDeckName: 'Yanki',
-	dryRun: false,
-	filenameMode: 'prompt',
-	manageFilenames: false,
-	maxFilenameLength: 60,
-	namespace: yankiDefaultNamespace,
-	obsidianVault: undefined,
+	...defaultGlobalOptions,
 }
 
-export type SyncReport = {
-	ankiWeb: boolean
-	deletedDecks: string[]
-	dryRun: boolean
-	duration: number
-	namespace: string
-	synced: SyncedNote[]
-}
+export type SyncResult = Simplify<
+	{
+		deletedDecks: string[]
+		duration: number
+		synced: SyncedNote[]
+	} & Pick<GlobalOptions, 'ankiWeb' | 'dryRun' | 'namespace'>
+>
 
 /**
  * Syncs local notes to Anki.
@@ -80,23 +49,17 @@ export type SyncReport = {
 export async function syncNotes(
 	allLocalNotes: YankiNote[],
 	options?: PartialDeep<SyncOptions>,
-): Promise<SyncReport> {
+): Promise<SyncResult> {
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, ankiWeb, defaultDeckName, dryRun, namespace } = deepmerge(
-		defaultSyncOptions,
-		options ?? {},
-	)
+	const { ankiConnectOptions, ankiWeb, dryRun, namespace, syncToAnkiWebEvenIfUnchanged } =
+		deepmerge(defaultSyncOptions, options ?? {}) as SyncOptions
 
 	// Namespace validation
 	// Can't be too long because of Anki's limitations around media asset filename length
 	// TODO just use a hash internally? Safety vs. legibility in Anki...
 	const validNamespace = namespace.trim()
-
-	if (validNamespace.length > 32) {
-		throw new Error('Namespace must be 32 characters or fewer')
-	}
 
 	if (validNamespace === '') {
 		throw new Error('Namespace must not be empty')
@@ -121,8 +84,6 @@ export async function syncNotes(
 			namespace,
 			synced: allLocalNotes.map((note) => ({
 				action: 'ankiUnreachable',
-				filePath: undefined,
-				filePathOriginal: undefined,
 				note,
 			})),
 		}
@@ -147,7 +108,7 @@ export async function syncNotes(
 	// Set undefined local note decks to the default
 	for (const note of allLocalNotes) {
 		if (note.deckName === '') {
-			note.deckName = defaultDeckName
+			note.deckName = yankiDefaultDeckName
 		}
 	}
 
@@ -242,9 +203,12 @@ export async function syncNotes(
 
 	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, existingRemoteNotes, dryRun)
 
+	// Clean up unused media files
+	await deleteUnusedMedia(client, liveNotes, namespace, dryRun)
+
 	// AnkiWeb sync
 	const isChanged = deletedDecks.length > 0 || synced.some((note) => note.action !== 'unchanged')
-	if (!dryRun && ankiWeb && (isChanged || yankiSyncToAnkiWebEvenIfUnchanged)) {
+	if (!dryRun && ankiWeb && (isChanged || syncToAnkiWebEvenIfUnchanged)) {
 		await client.miscellaneous.sync()
 	}
 
@@ -256,141 +220,6 @@ export async function syncNotes(
 		namespace,
 		synced,
 	}
-}
-
-/**
- * Sync a list of local yanki files to Anki.
- *
- * Wraps the syncNotes function to handle file I/O.
- *
- * Most importantly, it updates the note IDs in the frontmatter of the local
- * files.
- *
- * @param allLocalFilePaths Array of paths to the local markdown files
- * @returns The synced files (with new IDs where applicable), plus some stats
- * about the sync @throws
- */
-
-export async function syncFiles(
-	allLocalFilePaths: string[],
-	options?: PartialDeep<SyncOptions>,
-	readFile?: (filePath: string) => Promise<string>,
-	writeFile?: (filePath: string, data: string) => Promise<void>,
-	rename?: (oldPath: string, newPath: string) => Promise<void>,
-): Promise<SyncReport> {
-	const startTime = performance.now()
-
-	const {
-		readFile: readFileValidated,
-		rename: renameValidated,
-		writeFile: writeFileValidated,
-	} = await validateFileFunctions(readFile, writeFile, rename)
-
-	const resolvedOptions = deepmerge(defaultSyncOptions, options ?? {})
-	const { namespace } = resolvedOptions
-
-	const { notes: loadedAndRenamedNotes } = await renameFiles(
-		allLocalFilePaths,
-		resolvedOptions,
-		readFileValidated,
-		writeFileValidated,
-		renameValidated,
-	)
-
-	const allLocalNotes = loadedAndRenamedNotes.map((note) => note.note)
-
-	const { ankiWeb, deletedDecks, dryRun, synced } = await syncNotes(allLocalNotes, resolvedOptions)
-
-	// Write IDs to the local files as necessary
-	// Can't just get markdown from the note because there might be extra
-	// frontmatter from e.g. obsidian, which is not captured in the YankiNote type
-	const liveNotes = synced.filter((note) => note.action !== 'deleted')
-
-	for (const [index, loadedAndRenamedNote] of loadedAndRenamedNotes.entries()) {
-		const liveNote = liveNotes[index]
-
-		if (
-			(loadedAndRenamedNote.note.noteId === undefined ||
-				loadedAndRenamedNote.note.noteId !== liveNote.note.noteId) &&
-			liveNote.action !== 'ankiUnreachable'
-		) {
-			const updatedMarkdown = await setNoteIdInFrontmatter(
-				loadedAndRenamedNote.markdown,
-				liveNote.note.noteId,
-			)
-			await writeFileValidated(loadedAndRenamedNote.filePath, updatedMarkdown)
-		}
-
-		// Set file paths
-		liveNote.filePath = loadedAndRenamedNote.filePath
-		liveNote.filePathOriginal = loadedAndRenamedNote.filePathOriginal
-	}
-
-	// Add undefined file paths to deleted notes, since they only ever existed in Anki
-	const deletedNotes: SyncedNote[] = synced
-		.filter((note) => note.action === 'deleted')
-		.map((note) => ({
-			action: 'deleted',
-			note: note.note,
-		}))
-
-	const syncedAndSorted = [...deletedNotes, ...liveNotes].sort((a, b) =>
-		(a.filePath ?? '').localeCompare(b.filePath ?? ''),
-	)
-
-	return {
-		ankiWeb,
-		deletedDecks,
-		dryRun,
-		duration: performance.now() - startTime,
-		namespace,
-		synced: syncedAndSorted,
-	}
-}
-
-export function formatSyncReport(report: SyncReport, verbose = false): string {
-	const lines: string[] = []
-	const { synced } = report
-
-	// Aggregate the counts of each action:
-	const actionCounts = synced.reduce<Record<string, number>>((acc, note) => {
-		acc[note.action] = (acc[note.action] || 0) + 1
-		return acc
-	}, {})
-
-	const totalSynced = synced.filter((note) => note.action !== 'deleted').length
-	const totalRenamed = synced.filter((note) => note.filePath !== note.filePathOriginal).length
-	const ankiUnreachable = actionCounts.ankiUnreachable > 0
-
-	lines.push(
-		`${report.dryRun ? 'Will sync' : ankiUnreachable ? 'Failed to sync' : 'Successfully synced'} synced ${totalSynced} ${plur('note', totalSynced)} to Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}.`,
-	)
-
-	if (verbose) {
-		lines.push('', report.dryRun ? 'Sync Plan Summary:' : 'Sync Summary:')
-		for (const [action, count] of Object.entries(actionCounts)) {
-			lines.push(`  ${capitalize(action)}: ${count}`)
-		}
-
-		if (totalRenamed > 0) {
-			lines.push('', `Local notes renamed: ${totalRenamed}`)
-		}
-
-		if (report.deletedDecks.length > 0) {
-			lines.push('', `Decks pruned: ${report.deletedDecks.length}`)
-		}
-
-		lines.push('', report.dryRun ? 'Sync Plan Details:' : 'Sync Details:')
-		for (const { action, filePath, note } of synced) {
-			if (filePath === undefined) {
-				lines.push(`  Note ID ${note.noteId} ${capitalize(action)} (From Anki)`)
-			} else {
-				lines.push(`  Note ID ${note.noteId} ${capitalize(action)} ${filePath}`)
-			}
-		}
-	}
-
-	return lines.join('\n')
 }
 
 // Helper function to find notes with the same noteId

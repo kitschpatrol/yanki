@@ -1,7 +1,7 @@
-import { type FilenameMode } from '../actions/rename'
 import { yankiDefaultEmptyNotePlaceholderText } from '../model/constants'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
+import type { ManageFilenames } from '../shared/options'
 import { emptyIsUndefined, truncateWithEllipsis } from './string'
 import filenamify from 'filenamify'
 import { nanoid } from 'nanoid'
@@ -9,11 +9,16 @@ import path from 'path-browserify-esm'
 
 export const defaultEmptyFilenamePlaceholderText = 'Untitled'
 
+// eslint-disable-next-line complexity
 export function getSafeTitleForNote(
 	note: YankiNote,
-	mode: FilenameMode,
+	manageFilenames: ManageFilenames,
 	maxLength: number,
 ): string {
+	if (manageFilenames === 'off') {
+		throw new Error('manageFilenames must not be off')
+	}
+
 	switch (note.modelName) {
 		case 'Yanki - Basic':
 		case 'Yanki - Basic (and reversed card)':
@@ -30,7 +35,7 @@ export function getSafeTitleForNote(
 			)
 
 			// Always try to provide some semantic value
-			switch (mode) {
+			switch (manageFilenames) {
 				case 'prompt': {
 					return getSafeFilename(cleanFront ?? cleanBack ?? '', maxLength)
 				}
@@ -54,12 +59,12 @@ export function getSafeTitleForNote(
 				return getSafeFilename('', maxLength)
 			}
 
-			const textBeforeCloze = emptyIsUndefined(cleanFront.split('{{')[0])
+			const textBeforeCloze = emptyIsUndefined(cleanFront.split('{{').at(0) ?? '')
 			const firstClozeText = emptyIsUndefined(/{{\w\d*::([^:}]+)/.exec(cleanFront)?.at(0))
-			const textAfterCloze = emptyIsUndefined(cleanFront.split('}}')[1].split('{{')[0])
+			const textAfterCloze = emptyIsUndefined(cleanFront.split('}}').at(1)?.split('{{').at(0) ?? '')
 
 			// Always try to provide some semantic value
-			switch (mode) {
+			switch (manageFilenames) {
 				case 'prompt': {
 					return getSafeFilename(
 						textBeforeCloze ?? textAfterCloze ?? firstClozeText ?? '',

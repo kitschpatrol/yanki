@@ -1,9 +1,9 @@
 import { version } from '../../package.json'
-import { cleanNotes, formatCleanReport } from '../lib/actions/clean'
-import { formatListReport, listNotes } from '../lib/actions/list'
-import { type FilenameMode } from '../lib/actions/rename'
-import { formatStyleReport, setStyle } from '../lib/actions/style'
-import { formatSyncReport, syncFiles } from '../lib/actions/sync'
+import { cleanNotes, formatCleanResult } from '../lib/actions/clean'
+import { formatListResult, listNotes } from '../lib/actions/list'
+import { formatStyleResult, setStyle } from '../lib/actions/style'
+import { formatSyncFilesResult, syncFiles } from '../lib/actions/sync-files'
+import { defaultGlobalOptions } from '../lib/shared/options'
 import log from '../lib/utilities/log'
 import { urlToHostAndPort } from '../lib/utilities/string'
 import {
@@ -75,17 +75,26 @@ await yargsInstance
 				.option('manage-filenames', {
 					alias: 'm',
 					choices: ['off', 'prompt', 'response'] as const,
-					default: 'off',
+					default: defaultGlobalOptions.manageFilenames,
 					describe:
 						'Rename local note files to match their content. Useful if you want to feel have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of.',
 					type: 'string',
 				})
 				.option('max-filename-length', {
+					// Default to undefined for more informative validation if manage-filenames is not enabled
 					default: undefined,
-					defaultDescription: '60',
+					defaultDescription: String(defaultGlobalOptions.maxFilenameLength),
 					describe:
 						'If `manage-filenames` is enabled, this option specifies the maximum length of the filename in characters.',
 					type: 'number',
+				})
+				.option('sync-media', {
+					alias: 's',
+					choices: ['none', 'all', 'local', 'remote'] as const,
+					default: defaultGlobalOptions.syncMediaAssets,
+					describe:
+						"Sync image, video, and audio assets to Anki's media storage system. Clean up is managed automatically. The `all` argument will save both local and remote assets to Anki, while `local` will only save local assets, `remote` will only save remote assets, and `none` will not save any assets.",
+					type: 'string',
 				})
 				.option(jsonOption('Output the sync report as JSON.'))
 				.option(verboseOption),
@@ -101,6 +110,7 @@ await yargsInstance
 			namespace,
 			// Not exposing this option for now
 			recursive = true,
+			syncMedia,
 			verbose,
 		}) => {
 			log.verbose = verbose
@@ -120,7 +130,7 @@ await yargsInstance
 
 			const { host, port } = urlToHostAndPort(ankiConnect)
 
-			const report = await syncFiles(paths, {
+			const result = await syncFiles(paths, {
 				ankiConnectOptions: {
 					autoLaunch: ankiAutoLaunch,
 					host,
@@ -128,17 +138,17 @@ await yargsInstance
 				},
 				ankiWeb,
 				dryRun,
-				filenameMode: manageFilenames === 'off' ? undefined : (manageFilenames as FilenameMode),
-				manageFilenames: manageFilenames !== 'off',
+				manageFilenames,
 				maxFilenameLength,
 				namespace,
+				syncMediaAssets: syncMedia,
 			}).catch(ankiNotRunningErrorHandler)
 
 			if (json) {
-				process.stdout.write(JSON.stringify(report, undefined, 2))
+				process.stdout.write(JSON.stringify(result, undefined, 2))
 				process.stdout.write('\n')
 			} else {
-				process.stderr.write(formatSyncReport(report, verbose))
+				process.stderr.write(formatSyncFilesResult(result, verbose))
 				process.stderr.write('\n')
 			}
 		},
@@ -173,7 +183,7 @@ await yargsInstance
 				process.stdout.write(JSON.stringify(result, undefined, 2))
 				process.stdout.write('\n')
 			} else {
-				process.stdout.write(formatListReport(result))
+				process.stdout.write(formatListResult(result))
 				process.stdout.write('\n')
 			}
 		},
@@ -198,7 +208,7 @@ await yargsInstance
 		async ({ ankiAutoLaunch, ankiConnect, ankiWeb, dryRun, json, namespace, verbose }) => {
 			const { host, port } = urlToHostAndPort(ankiConnect)
 
-			const report = await cleanNotes({
+			const result = await cleanNotes({
 				ankiConnectOptions: {
 					autoLaunch: ankiAutoLaunch,
 					host,
@@ -210,10 +220,10 @@ await yargsInstance
 			}).catch(ankiNotRunningErrorHandler)
 
 			if (json) {
-				process.stdout.write(JSON.stringify(report, undefined, 2))
+				process.stdout.write(JSON.stringify(result, undefined, 2))
 				process.stdout.write('\n')
 			} else {
-				process.stderr.write(formatCleanReport(report, verbose))
+				process.stderr.write(formatCleanResult(result, verbose))
 				process.stderr.write('\n')
 			}
 		},
@@ -262,7 +272,7 @@ await yargsInstance
 				}
 			}
 
-			const report = await setStyle({
+			const result = await setStyle({
 				ankiConnectOptions: {
 					autoLaunch: ankiAutoLaunch,
 					host,
@@ -274,10 +284,10 @@ await yargsInstance
 			}).catch(ankiNotRunningErrorHandler)
 
 			if (json) {
-				process.stdout.write(JSON.stringify(report, undefined, 2))
+				process.stdout.write(JSON.stringify(result, undefined, 2))
 				process.stdout.write('\n')
 			} else {
-				process.stderr.write(formatStyleReport(report, verbose))
+				process.stderr.write(formatStyleResult(result, verbose))
 				process.stderr.write('\n')
 			}
 		},

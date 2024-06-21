@@ -4,10 +4,12 @@
 
 import { yankiDefaultEmptyNotePlaceholderHast } from '../model/constants'
 import { yankiSupportedAudioVideoFormats, yankiSupportedImageFormats } from '../model/model'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
 import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
 import { cleanClassName } from '../utilities/string'
 import { isUrl } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
+import { deepmerge } from 'deepmerge-ts'
 import { type Element, type Root as HastRoot } from 'hast'
 import { toText } from 'hast-util-to-text'
 import type { Root as MdastRoot } from 'mdast'
@@ -17,6 +19,7 @@ import rehypeParse from 'rehype-parse'
 import rehypeRemoveComments from 'rehype-remove-comments'
 import rehypeStringify from 'rehype-stringify'
 import remarkRehype from 'remark-rehype'
+import { type Simplify } from 'type-fest'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
 import { CONTINUE, EXIT, visit } from 'unist-util-visit'
@@ -41,18 +44,31 @@ const processor = unified()
 	.use(rehypeStringify)
 // .use(rehypeStringify, { allowDangerousCharacters: true, allowDangerousHtml: true })
 
+export type MdastToHtmlOptions = Simplify<
+	{
+		/** CSS class names to apply to the output HTML */
+		cssClassNames?: string[]
+		/** Whether to use an empty placeholder if the output is empty */
+		useEmptyPlaceholder?: boolean
+	} & Pick<GlobalOptions, 'cwd' | 'namespace' | 'syncMediaAssets'>
+>
+
+const defaultMdastToHtmlOptions: MdastToHtmlOptions = {
+	...defaultGlobalOptions,
+}
+
 export async function mdastToHtml(
 	mdast: MdastRoot | undefined,
-	cssClassNames: string[] | undefined,
-	useEmptyPlaceholder: boolean,
-	/** Path containing the note, used to resolve relative paths in media src paths */
-	cwd: string,
-	/** Namespace to prepend to the media filenames for easy clean-up later */
-	namespace: string,
+	options: Partial<MdastToHtmlOptions>,
 ): Promise<string> {
 	if (mdast === undefined) {
 		return ''
 	}
+
+	const { cssClassNames, cwd, namespace, syncMediaAssets, useEmptyPlaceholder } = deepmerge(
+		defaultMdastToHtmlOptions,
+		options ?? {},
+	)
 
 	const hast = await processor.run(mdast)
 
@@ -95,62 +111,79 @@ export async function mdastToHtml(
 	//    attribute with the original path and Anki's markup for embedding
 	//    audio/video.
 
-	const originalCwd = path.process_cwd
-	path.setCWD(cwd)
+	if (syncMediaAssets !== 'none') {
+		const originalCwd = path.process_cwd
+		path.setCWD(cwd)
 
-	visit(hastWithClass, 'element', (node, index, parent) => {
-		if (parent === undefined || index === undefined || node.tagName !== 'img') return CONTINUE
+		visit(hastWithClass, 'element', (node, index, parent) => {
+			if (parent === undefined || index === undefined || node.tagName !== 'img') return CONTINUE
 
-		// Ensure src is a string
-		if (typeof node.properties.src !== 'string' || node.properties?.src?.trim().length === 0) {
-			console.warn('Image has no src')
-			return CONTINUE
-		}
+			// Ensure src is a string
+			if (typeof node.properties.src !== 'string' || node.properties?.src?.trim().length === 0) {
+				console.warn('Image has no src')
+				return CONTINUE
+			}
 
-		const srcIsUrl = isUrl(node.properties.src)
+			const srcIsUrl = isUrl(node.properties.src)
 
-		const absoluteSrcOrUrl = srcIsUrl ? node.properties.src : path.resolve(node.properties.src)
+			if (syncMediaAssets === 'local' && srcIsUrl) {
+				return CONTINUE
+			}
 
-		// These handle url vs. file path internally..
-		const safeFilename = getSafeAnkiMediaFilename(absoluteSrcOrUrl, namespace)
-		const extension = getAnkiMediaFilenameExtension(absoluteSrcOrUrl)
+			if (syncMediaAssets === 'remote' && !srcIsUrl) {
+				return CONTINUE
+			}
 
-		if (extension === undefined) {
-			console.warn(`Could not determine extension for ${node.properties.src}`)
-			return CONTINUE
-		}
+			const allowUnknownUrlExtension = true
+			const absoluteSrcOrUrl = srcIsUrl ? node.properties.src : path.resolve(node.properties.src)
 
-		if ((yankiSupportedImageFormats as unknown as string[]).includes(extension)) {
-			node.properties.src = safeFilename
-			node.properties.className = ['yanki-media', 'yanki-media-image']
-			node.properties['data-src-original'] = absoluteSrcOrUrl
-		} else if ((yankiSupportedAudioVideoFormats as unknown as string[]).includes(extension)) {
-			// Replace the current node with a span
-			// containing the Anki media embedding syntax
-			// Using <audio> and <video> tags would be nicer, and <audio> kind of works on desktop,
-			// but this breaks on mobile, so we have to use the [sound:] syntax
-			parent.children.splice(
-				index,
-				1,
-				u(
-					'element',
-					{
-						properties: {
-							className: ['yanki-media', 'yanki-media-audio-video'],
-							'data-filename': safeFilename,
-							'data-src-original': absoluteSrcOrUrl,
-						},
-						tagName: 'span',
-					},
-					[u('text', `[sound:${safeFilename}]`)],
-				),
+			// These handle url vs. file path internally..
+			const safeFilename = getSafeAnkiMediaFilename(
+				absoluteSrcOrUrl,
+				namespace,
+				allowUnknownUrlExtension,
 			)
-		} else {
-			console.warn(`Unsupported media format: ${extension}`)
-		}
-	})
 
-	path.setCWD(originalCwd)
+			const extension = getAnkiMediaFilenameExtension(absoluteSrcOrUrl, allowUnknownUrlExtension)
+
+			if (extension === undefined) {
+				console.warn(`Could not determine extension for ${node.properties.src}`)
+				return CONTINUE
+			}
+
+			// Assume remote image assets without a valid extension  are images... they will have 'unknown' as their extension if allowUnknownUrlExtension is true
+			if ((['unknown', ...yankiSupportedImageFormats] as unknown as string[]).includes(extension)) {
+				node.properties.src = safeFilename
+				node.properties.className = ['yanki-media', 'yanki-media-image']
+				node.properties['data-src-original'] = absoluteSrcOrUrl
+			} else if ((yankiSupportedAudioVideoFormats as unknown as string[]).includes(extension)) {
+				// Replace the current node with a span
+				// containing the Anki media embedding syntax
+				// Using <audio> and <video> tags would be nicer, and <audio> kind of works on desktop,
+				// but this breaks on mobile, so we have to use the [sound:] syntax
+				parent.children.splice(
+					index,
+					1,
+					u(
+						'element',
+						{
+							properties: {
+								className: ['yanki-media', 'yanki-media-audio-video'],
+								'data-filename': safeFilename,
+								'data-src-original': absoluteSrcOrUrl,
+							},
+							tagName: 'span',
+						},
+						[u('text', `[sound:${safeFilename}]`)],
+					),
+				)
+			} else {
+				console.warn(`Unsupported media format: ${extension} for ${node.properties.src}`)
+			}
+		})
+
+		path.setCWD(originalCwd)
+	}
 
 	// Edge case... if a note ONLY has MathJax in the front field, Anki will think it's empty
 	// (Anki-connect error message: "cannot create note because it is empty")
@@ -226,8 +259,10 @@ export function extractMediaFromHtml(html: string): Media[] {
 					filename,
 					originalSrc,
 				})
-			} else if (node.tagName === 'img') {
-				console.warn('Image has no src or original src data')
+			} else if (node.tagName === 'img' && node.properties?.src !== undefined) {
+				// Console.log('----------------------------------')
+				// console.log(html)
+				// console.warn(`Ignoring image without decipherable source: ${String(node.properties.src)}`)
 			}
 		}
 	})

@@ -1,4 +1,4 @@
-import { yankiDefaultNamespace } from '../lib/model/constants'
+import { defaultGlobalOptions } from '../lib/shared/options'
 import { type Options } from 'yargs'
 
 export const ankiAutoLaunchOption = {
@@ -62,7 +62,7 @@ export function namespaceOption(describe: string) {
 	return {
 		namespace: {
 			alias: 'n',
-			default: yankiDefaultNamespace,
+			default: defaultGlobalOptions.namespace,
 			describe,
 			type: 'string',
 		},

@@ -1,9 +1,10 @@
-import { yankiDefaultNamespace, yankiSyncToAnkiWebEvenIfUnchanged } from '../model/constants'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
 import {
 	deleteNotes,
 	deleteOrphanedDecks,
+	deleteUnusedMedia,
 	getRemoteNotes,
 	requestPermission,
 } from '../utilities/anki-connect'
@@ -11,37 +12,25 @@ import { truncateWithEllipsis } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
-import type { PartialDeep } from 'type-fest'
-import { YankiConnect, type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
+import type { PartialDeep, Simplify } from 'type-fest'
+import { YankiConnect } from 'yanki-connect'
 
+export type CleanOptions = Pick<
+	GlobalOptions,
+	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace' | 'syncToAnkiWebEvenIfUnchanged'
+>
 export const defaultCleanOptions: CleanOptions = {
-	ankiConnectOptions: defaultYankiConnectOptions,
-	ankiWeb: false,
-	dryRun: false,
-	namespace: yankiDefaultNamespace,
+	...defaultGlobalOptions,
 }
 
-export type CleanOptions = {
-	ankiConnectOptions: YankiConnectOptions
-	/**
-	 * Automatically sync any changes to AnkiWeb after Yanki has finished syncing
-	 * locally. If false, only local Anki data is updated and you must manually
-	 * invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync"
-	 * button in the Anki app.
-	 */
-	ankiWeb: boolean
-	dryRun: boolean
-	namespace: string
-}
+export type CleanResult = Simplify<
+	{
+		decks: string[]
+		deleted: YankiNote[]
 
-export type CleanReport = {
-	ankiWeb: boolean
-	decks: string[]
-	deleted: YankiNote[]
-	dryRun: boolean
-	duration: number
-	namespace: string
-}
+		duration: number
+	} & Pick<GlobalOptions, 'ankiWeb' | 'dryRun' | 'namespace'>
+>
 
 /**
  * Deletes all remote notes in Anki associated with the given namespace.
@@ -52,14 +41,12 @@ export type CleanReport = {
  * @param options
  * @throws
  */
-export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanReport> {
+export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanResult> {
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, ankiWeb, dryRun, namespace } = deepmerge(
-		defaultCleanOptions,
-		options ?? {},
-	)
+	const { ankiConnectOptions, ankiWeb, dryRun, namespace, syncToAnkiWebEvenIfUnchanged } =
+		deepmerge(defaultCleanOptions, options ?? {}) as CleanOptions
 
 	const client = new YankiConnect(ankiConnectOptions)
 
@@ -75,9 +62,12 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	await deleteNotes(client, remoteNotes, dryRun)
 	const deletedDecks = await deleteOrphanedDecks(client, [], remoteNotes, dryRun)
 
+	// Media deletion pass
+	await deleteUnusedMedia(client, [], namespace, dryRun)
+
 	// AnkiWeb sync
 	const isChanged = remoteNotes.length > 0 || deletedDecks.length > 0
-	if (!dryRun && ankiWeb && (isChanged || yankiSyncToAnkiWebEvenIfUnchanged)) {
+	if (!dryRun && ankiWeb && (isChanged || syncToAnkiWebEvenIfUnchanged)) {
 		await client.miscellaneous.sync()
 	}
 
@@ -91,9 +81,9 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	}
 }
 
-export function formatCleanReport(report: CleanReport, verbose = false): string {
-	const deckCount = report.decks.length
-	const noteCount = report.deleted.length
+export function formatCleanResult(result: CleanResult, verbose = false): string {
+	const deckCount = result.decks.length
+	const noteCount = result.deleted.length
 
 	if (deckCount === 0 && noteCount === 0) {
 		return 'Nothing to delete'
@@ -102,13 +92,13 @@ export function formatCleanReport(report: CleanReport, verbose = false): string 
 	const lines: string[] = []
 
 	lines.push(
-		`${report.dryRun ? 'Will' : 'Successfully'} deleted ${report.deleted.length} ${plur('note', noteCount)} and ${report.decks.length} ${plur('deck', deckCount)} from Anki${report.dryRun ? '' : ` in ${prettyMilliseconds(report.duration)}`}.`,
+		`${result.dryRun ? 'Will' : 'Successfully'} deleted ${result.deleted.length} ${plur('note', noteCount)} and ${result.decks.length} ${plur('deck', deckCount)} from Anki${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,
 	)
 
 	if (verbose) {
 		if (noteCount > 0) {
-			lines.push('', report.dryRun ? 'Notes to delete:' : 'Deleted notes:')
-			for (const note of report.deleted) {
+			lines.push('', result.dryRun ? 'Notes to delete:' : 'Deleted notes:')
+			for (const note of result.deleted) {
 				const noteFrontText = truncateWithEllipsis(
 					getFirstLineOfHtmlAsPlainText(note.fields.Front),
 					50,
@@ -118,8 +108,8 @@ export function formatCleanReport(report: CleanReport, verbose = false): string 
 		}
 
 		if (deckCount > 0) {
-			lines.push('', report.dryRun ? 'Decks to delete:' : 'Deleted decks:')
-			for (const deck of report.decks) {
+			lines.push('', result.dryRun ? 'Decks to delete:' : 'Deleted decks:')
+			for (const deck of result.decks) {
 				lines.push(`  ${deck}`)
 			}
 		}
