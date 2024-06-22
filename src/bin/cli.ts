@@ -3,7 +3,7 @@ import { cleanNotes, formatCleanResult } from '../lib/actions/clean'
 import { formatListResult, listNotes } from '../lib/actions/list'
 import { formatStyleResult, setStyle } from '../lib/actions/style'
 import { formatSyncFilesResult, syncFiles } from '../lib/actions/sync-files'
-import { defaultGlobalOptions } from '../lib/shared/options'
+import { defaultGlobalOptions } from '../lib/shared/types'
 import log from '../lib/utilities/log'
 import { urlToHostAndPort } from '../lib/utilities/string'
 import {

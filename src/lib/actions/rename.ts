@@ -1,8 +1,4 @@
-import {
-	type GlobalOptions,
-	defaultGlobalOptions,
-	getDefaultFileFunctions,
-} from '../shared/options'
+import { type GlobalOptions, defaultGlobalOptions, getDefaultFileAdapters } from '../shared/types'
 import {
 	auditUniqueFilePath,
 	getSafeTitleForNote,
@@ -16,7 +12,7 @@ import { type Simplify } from 'type-fest'
 
 export type RenameNotesOptions = Pick<
 	GlobalOptions,
-	'dryRun' | 'fileFunctions' | 'manageFilenames' | 'maxFilenameLength'
+	'dryRun' | 'fileAdapters' | 'manageFilenames' | 'maxFilenameLength'
 >
 
 export const defaultRenameNotesOptions: RenameNotesOptions = {
@@ -29,7 +25,7 @@ export async function renameNotes(
 ): Promise<LocalNote[]> {
 	const {
 		dryRun,
-		fileFunctions = getDefaultFileFunctions(),
+		fileAdapters = getDefaultFileAdapters(),
 		manageFilenames,
 		maxFilenameLength,
 	} = deepmerge(defaultRenameNotesOptions, options ?? {})
@@ -102,14 +98,14 @@ export async function renameNotes(
 			}
 
 			if (!dryRun) {
-				await fileFunctions.rename(filePathOriginal, safeNewFilePath)
+				await fileAdapters.rename(filePathOriginal, safeNewFilePath)
 			}
 		}
 
 		// One more pass to fix the intermediates
 		for (const [temporarilyUniquePath, newPath] of intermediateRenamePlan) {
 			if (!dryRun) {
-				await fileFunctions.rename(temporarilyUniquePath, newPath)
+				await fileAdapters.rename(temporarilyUniquePath, newPath)
 			}
 		}
 	}
@@ -136,7 +132,7 @@ export async function renameFiles(
 ): Promise<RenameFilesResult> {
 	const {
 		dryRun,
-		fileFunctions,
+		fileAdapters,
 		manageFilenames,
 		maxFilenameLength,
 		namespace,
@@ -145,7 +141,7 @@ export async function renameFiles(
 	} = deepmerge(defaultRenameFilesOptions, options ?? {})
 
 	const notes = await loadLocalNotes(allLocalFilePaths, {
-		fileFunctions,
+		fileAdapters,
 		namespace,
 		obsidianVault,
 		syncMediaAssets,
@@ -153,7 +149,7 @@ export async function renameFiles(
 
 	const renamedNotes = await renameNotes(notes, {
 		dryRun,
-		fileFunctions,
+		fileAdapters,
 		manageFilenames,
 		maxFilenameLength,
 	})

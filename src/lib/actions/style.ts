@@ -1,6 +1,6 @@
 import { yankiDefaultCss } from '../model/constants'
 import { yankiModelNames } from '../model/model'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import { requestPermission, updateModelStyle } from '../utilities/anki-connect'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'

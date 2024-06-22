@@ -1,7 +1,7 @@
 import { yankiDefaultEmptyNotePlaceholderText } from '../model/constants'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
-import type { ManageFilenames } from '../shared/options'
+import type { ManageFilenames } from '../shared/types'
 import { emptyIsUndefined, truncateWithEllipsis } from './string'
 import filenamify from 'filenamify'
 import { nanoid } from 'nanoid'

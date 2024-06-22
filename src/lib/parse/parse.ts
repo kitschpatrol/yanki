@@ -4,8 +4,8 @@
 
 import { yankiDefaultCssClassName } from '../model/constants'
 import { type YankiNote } from '../model/note'
-import { defaultGlobalOptions } from '../shared/options'
-import { type GlobalOptions } from '../shared/options'
+import { defaultGlobalOptions } from '../shared/types'
+import { type GlobalOptions } from '../shared/types'
 import { mdastToHtml } from './rehype-utilities'
 import {
 	deleteFirstNodeOfType,

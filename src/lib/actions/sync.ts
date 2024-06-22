@@ -1,6 +1,6 @@
 import { yankiDefaultDeckName } from '../model/constants'
 import { type YankiNote } from '../model/note'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import {
 	addNote,
 	deleteNotes,

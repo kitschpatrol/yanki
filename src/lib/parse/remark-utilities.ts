@@ -4,7 +4,7 @@
 
 import type { Frontmatter } from '../model/frontmatter'
 import type { YankiModelName } from '../model/model'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import remarkObsidianWikilink from './remark-obsidian-wikilink'
 import { deepmerge } from 'deepmerge-ts'
 import type { Emphasis, Node, Parent, PhrasingContent, Root, Text } from 'mdast'

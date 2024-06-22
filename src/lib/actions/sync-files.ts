@@ -1,9 +1,5 @@
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
-import {
-	type GlobalOptions,
-	defaultGlobalOptions,
-	getDefaultFileFunctions,
-} from '../shared/options'
+import { type GlobalOptions, defaultGlobalOptions, getDefaultFileAdapters } from '../shared/types'
 import { capitalize } from '../utilities/string'
 import { loadLocalNotes } from './load-local-notes'
 import { renameNotes } from './rename'
@@ -22,7 +18,7 @@ import type { PartialDeep, Simplify } from 'type-fest'
 export type SyncFilesOptions = Simplify<
 	Pick<
 		GlobalOptions,
-		| 'fileFunctions'
+		| 'fileAdapters'
 		| 'manageFilenames'
 		| 'maxFilenameLength'
 		| 'namespace'
@@ -72,7 +68,7 @@ export async function syncFiles(
 		ankiConnectOptions,
 		ankiWeb,
 		dryRun,
-		fileFunctions = getDefaultFileFunctions(),
+		fileAdapters = getDefaultFileAdapters(),
 		manageFilenames,
 		maxFilenameLength,
 		namespace,
@@ -81,7 +77,7 @@ export async function syncFiles(
 	} = deepmerge(defaultSyncFilesOptions, options ?? {}) as SyncFilesOptions
 
 	const localNotes = await loadLocalNotes(allLocalFilePaths, {
-		fileFunctions,
+		fileAdapters,
 		namespace,
 		obsidianVault,
 		syncMediaAssets,
@@ -89,7 +85,7 @@ export async function syncFiles(
 
 	const renamedLocalNotes = await renameNotes(localNotes, {
 		dryRun,
-		fileFunctions,
+		fileAdapters,
 		manageFilenames,
 		maxFilenameLength,
 	})
@@ -121,7 +117,7 @@ export async function syncFiles(
 				loadedAndRenamedNote.markdown,
 				liveNote.note.noteId,
 			)
-			await fileFunctions.writeFile(loadedAndRenamedNote.filePath, updatedMarkdown)
+			await fileAdapters.writeFile(loadedAndRenamedNote.filePath, updatedMarkdown)
 		}
 
 		// Set file paths

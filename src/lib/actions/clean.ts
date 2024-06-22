@@ -1,6 +1,6 @@
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import {
 	deleteNotes,
 	deleteOrphanedDecks,
@@ -47,6 +47,9 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	// Defaults
 	const { ankiConnectOptions, ankiWeb, dryRun, namespace, syncToAnkiWebEvenIfUnchanged } =
 		deepmerge(defaultCleanOptions, options ?? {}) as CleanOptions
+
+	console.log('----------------------------------')
+	console.log(ankiConnectOptions)
 
 	const client = new YankiConnect(ankiConnectOptions)
 

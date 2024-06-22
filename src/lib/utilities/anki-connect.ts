@@ -1,7 +1,7 @@
 import { type YankiModelName, yankiModelNames, yankiModels } from '../model/model'
 import { type YankiNote } from '../model/note'
 import { extractMediaFromHtml } from '../parse/rehype-utilities'
-import { defaultGlobalOptions } from '../shared/options'
+import { defaultGlobalOptions } from '../shared/types'
 import { getNamespaceHash } from './string'
 import { isUrl } from './url'
 import { type YankiConnect } from 'yanki-connect'

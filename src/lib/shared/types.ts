@@ -4,7 +4,7 @@ import { type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-conn
 
 export type ManageFilenames = 'off' | 'prompt' | 'response'
 export type SyncMediaAssets = 'all' | 'local' | 'none' | 'remote'
-export type FileFunctions = {
+export type FileAdapters = {
 	readFile: (filePath: string, encoding?: 'utf8') => Promise<string>
 	rename: (oldPath: string, newPath: string) => Promise<void>
 	writeFile: (filePath: string, data: string, encoding?: 'utf8') => Promise<void> // Not used, yet
@@ -22,7 +22,7 @@ export type GlobalOptions = {
 	ankiWeb: boolean
 	cwd: string
 	dryRun: boolean
-	fileFunctions: FileFunctions | undefined
+	fileAdapters: FileAdapters | undefined
 	manageFilenames: ManageFilenames
 	/** Only applies if manageFilenames is `true`. Will _not_ truncate user-specified file names in other cases. */
 	maxFilenameLength: number
@@ -48,7 +48,7 @@ export const defaultGlobalOptions: GlobalOptions = {
 	ankiWeb: false,
 	cwd: path.process_cwd,
 	dryRun: false,
-	fileFunctions: undefined, // Must be passed in later, deepmerge will not work
+	fileAdapters: undefined, // Must be passed in later, deepmerge will not work
 	manageFilenames: 'off',
 	maxFilenameLength: 60,
 	namespace: 'Yanki',
@@ -59,10 +59,9 @@ export const defaultGlobalOptions: GlobalOptions = {
 
 // Helpers ---------------------------
 
-const fs =
-	environment === 'node' ? ((await import('node:fs/promises')) as FileFunctions) : undefined
+const fs = environment === 'node' ? ((await import('node:fs/promises')) as FileAdapters) : undefined
 
-export function getDefaultFileFunctions(): FileFunctions {
+export function getDefaultFileAdapters(): FileAdapters {
 	if (environment === 'node') {
 		if (fs === undefined) {
 			throw new Error('Issue loading file functions in Node environment')

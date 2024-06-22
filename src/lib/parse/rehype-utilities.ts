@@ -4,7 +4,7 @@
 
 import { yankiDefaultEmptyNotePlaceholderHast } from '../model/constants'
 import { yankiSupportedAudioVideoFormats, yankiSupportedImageFormats } from '../model/model'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
 import { cleanClassName } from '../utilities/string'
 import { isUrl } from '../utilities/url'

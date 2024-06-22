@@ -1,6 +1,6 @@
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/options'
+import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import { getRemoteNotes, requestPermission } from '../utilities/anki-connect'
 import { truncateWithEllipsis } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
