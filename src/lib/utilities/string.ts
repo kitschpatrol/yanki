@@ -1,10 +1,5 @@
 import fnv1a from '@sindresorhus/fnv1a'
 
-// Don't touch
-export function getNamespaceHash(namespace: string): string {
-	return `yanki-${getHash(namespace, 16)}`
-}
-
 // Don't touch this either
 export function getHash(text: string, length: 8 | 16): string {
 	// Clunky for types
@@ -24,18 +19,25 @@ export function capitalize(text: string): string {
  * @param maxLength Maximum length excluding ellipsis
  * @returns Truncated string
  */
-export function truncateWithEllipsis(text: string, maxLength: number): string {
+export function truncateOnWordBoundary(
+	text: string,
+	maxLength: number,
+	truncationString = '...',
+): string {
 	if (text.length <= maxLength) {
 		return text
 	}
 
+	const maxLengthSafe = maxLength - truncationString.length
+
 	const words = text.split(' ')
 
-	while (words.length > 1 && words.join(' ').length > maxLength) {
+	while (words.length > 1 && words.join(' ').length > maxLengthSafe) {
 		words.pop()
 	}
 
-	return `${words.join(' ').slice(0, maxLength)}...`
+	// Slice again just in case the text had no spaces...
+	return `${words.join(' ').slice(0, maxLengthSafe)}${truncationString}`
 }
 
 export function urlToHostAndPort(url: string): { host: string; port: number } {

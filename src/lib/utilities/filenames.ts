@@ -1,8 +1,11 @@
-import { yankiDefaultEmptyNotePlaceholderText } from '../model/constants'
+import {
+	yankiDefaultEmptyNotePlaceholderText,
+	yankiMaxMediaFilenameLength,
+} from '../model/constants'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
 import type { ManageFilenames } from '../shared/types'
-import { emptyIsUndefined, truncateWithEllipsis } from './string'
+import { emptyIsUndefined, truncateOnWordBoundary } from './string'
 import filenamify from 'filenamify'
 import { nanoid } from 'nanoid'
 import path from 'path-browserify-esm'
@@ -108,8 +111,11 @@ function getSafeFilename(text: string, maxLength?: number | undefined): string {
 		return basicSafeFilename
 	}
 
-	const safeMaxLength = Math.min(maxLength, 255 - (5 + 3 + 9)) // 5 for extension and dot, 3 for ellipsis, 9 for increment
-	return truncateWithEllipsis(basicSafeFilename, safeMaxLength)
+	// Use yanki's max media filename as an upper limit
+	// 3 `.md`, 9 for increment (temporarily 8 character nanoid + dot)
+	// truncateOnWordBoundary factors ellipses
+	const safeMaxLength = Math.min(maxLength, yankiMaxMediaFilenameLength - (3 + 9))
+	return truncateOnWordBoundary(basicSafeFilename, safeMaxLength)
 }
 
 // Always prefixes with increment! Cleaned up in a subsequent pass.

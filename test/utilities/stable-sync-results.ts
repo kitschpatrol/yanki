@@ -4,6 +4,10 @@ import sortKeys from 'sort-keys'
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
 
+export function stablePrettyMs(text: string): string {
+	return text.replaceAll(/\s\d+[ms]+/g, ' XXX')
+}
+
 export function cleanUpTempPath(filePath: string | undefined): string | undefined {
 	if (filePath === undefined) {
 		return undefined
@@ -13,7 +17,11 @@ export function cleanUpTempPath(filePath: string | undefined): string | undefine
 }
 
 function cleanUpHashes(text: string): string {
-	return text.replaceAll(/-[\da-f]{8}-/g, '-HASH-')
+	return text.replaceAll(/-[\da-f]{16}-/g, '-HASH-')
+}
+
+export function stableNoteIds(text: string): string {
+	return text.replaceAll(/\d{13}/g, 'XXXXXXXXXXXXX')
 }
 
 type SyncResults = UnwrapPromise<ReturnType<typeof syncFiles>>

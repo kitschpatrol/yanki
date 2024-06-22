@@ -7,7 +7,7 @@ import { yankiSupportedAudioVideoFormats, yankiSupportedImageFormats } from '../
 import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
 import { cleanClassName } from '../utilities/string'
-import { isUrl } from '../utilities/url'
+import { fileUrlToPath, getSrcType } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
 import { deepmerge } from 'deepmerge-ts'
 import { type Element, type Root as HastRoot } from 'hast'
@@ -124,18 +124,37 @@ export async function mdastToHtml(
 				return CONTINUE
 			}
 
-			const srcIsUrl = isUrl(node.properties.src)
+			// Turn file URLs into paths before doing the URL check so they'll
+			// be routed the local asset logic (Anki can't load file URLs anyway)
+			const srcType = getSrcType(node.properties.src)
 
-			if (syncMediaAssets === 'local' && srcIsUrl) {
+			if (srcType === 'unsupportedProtocolUrl') {
+				console.warn(`Unsupported URL protocol for media asset: "${node.properties.src}"`)
 				return CONTINUE
 			}
 
-			if (syncMediaAssets === 'remote' && !srcIsUrl) {
+			if (syncMediaAssets === 'local' && srcType === 'remoteHttpUrl') {
+				return CONTINUE
+			}
+
+			if (
+				syncMediaAssets === 'remote' &&
+				(srcType === 'localFileUrl' || srcType === 'localFilePath')
+			) {
 				return CONTINUE
 			}
 
 			const allowUnknownUrlExtension = true
-			const absoluteSrcOrUrl = srcIsUrl ? node.properties.src : path.resolve(node.properties.src)
+
+			// The src will be URI-encoded at this point, which we don't want for local files
+			// Local file URLs must be converted into paths before decoding, and must be absolute
+			// already so they are not resolved
+			const absoluteSrcOrUrl =
+				srcType === 'remoteHttpUrl'
+					? node.properties.src
+					: srcType === 'localFilePath'
+						? path.resolve(decodeURIComponent(node.properties.src))
+						: decodeURIComponent(fileUrlToPath(node.properties.src))
 
 			// These handle url vs. file path internally..
 			const safeFilename = getSafeAnkiMediaFilename(
@@ -169,6 +188,7 @@ export async function mdastToHtml(
 						{
 							properties: {
 								className: ['yanki-media', 'yanki-media-audio-video'],
+								'data-alt-text': node.properties.alt, // If available, why not
 								'data-filename': safeFilename,
 								'data-src-original': absoluteSrcOrUrl,
 							},

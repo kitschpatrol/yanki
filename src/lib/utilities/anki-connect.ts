@@ -2,7 +2,7 @@ import { type YankiModelName, yankiModelNames, yankiModels } from '../model/mode
 import { type YankiNote } from '../model/note'
 import { extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
-import { getNamespaceHash } from './string'
+import { getSlugifiedNamespace } from './namespace'
 import { isUrl } from './url'
 import { type YankiConnect } from 'yanki-connect'
 
@@ -33,8 +33,9 @@ export async function deleteUnusedMedia(
 		return []
 	}
 
-	// TODO revisit this after global hashing is implemented
-	const hashedNamespace = getNamespaceHash(namespace)
+	// Note this always includes a `yanki-` prefix for ease of identification
+	// in the Anki media asset manager UI
+	const slugifiedNamespace = getSlugifiedNamespace(namespace)
 
 	const activeMediaFilenames: string[] = []
 	for (const note of liveNotes) {
@@ -46,7 +47,7 @@ export async function deleteUnusedMedia(
 	}
 
 	const allMediaInNamespace = await client.media.getMediaFilesNames({
-		pattern: `${hashedNamespace}-*`,
+		pattern: `${slugifiedNamespace}-*`,
 	})
 
 	const deletedMediaFilenames: string[] = []

@@ -1,5 +1,7 @@
+import { yankiMaxMediaFilenameLength } from '../model/constants'
 import { yankiSupportedAudioVideoFormats, yankiSupportedImageFormats } from '../model/model'
-import { getHash, getNamespaceHash } from './string'
+import { getSlugifiedNamespace } from './namespace'
+import { getHash, truncateOnWordBoundary } from './string'
 import slugify from '@sindresorhus/slugify'
 import path from 'path-browserify-esm'
 
@@ -54,7 +56,8 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 
 	try {
 		const url = new URL(pathOrUrl)
-		legibleFilename = url.pathname
+		// Also remove extension from URL if it's there, but it won't always be
+		legibleFilename = path.basename(url.pathname, path.extname(url.pathname))
 	} catch {
 		// Must be a file path
 		const filePath = pathOrUrl
@@ -66,26 +69,44 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 		throw new Error(`Could not create a legible file name for: ${pathOrUrl}`)
 	}
 
-	return slugify(legibleFilename.trim()).slice(0, maxLength).replace(/-+$/, '')
+	// Slugify without double-dashes, temporarily convert to spaces for truncation on word boundaries
+	const fullSpacedSlug = slugify(legibleFilename.trim()).replaceAll(/-+/g, ' ')
+
+	return truncateOnWordBoundary(fullSpacedSlug, maxLength).replaceAll(' ', '-')
 }
+
+// Anki truncates long file names... so we crush the complete path down to a hash
 
 export function getSafeAnkiMediaFilename(
 	absolutePathOrUrl: string,
 	namespace: string,
 	allowUnknownUrlExtension: boolean,
 ): string {
-	const namespaceHash = getNamespaceHash(namespace)
-	const assetPathHash = getHash(absolutePathOrUrl, 8)
-	const fileExtension = getAnkiMediaFilenameExtension(absolutePathOrUrl, allowUnknownUrlExtension)
-	const legibleFilename = getLegibleFilename(absolutePathOrUrl, 55)
+	// Can be a bit more than 40 characters, since it's always prefixed with `yanki-media-`
+	const safeNamespace = getSlugifiedNamespace(namespace)
 
-	const safeFilename =
-		`${namespaceHash}-${assetPathHash}-${legibleFilename}.${fileExtension}`.replaceAll('?', '')
+	// TODO actually hash the content... pass in Fetch and File adapters? Use
+	// crypto-hash thing for performant isomorphic hashing? How slow?
+	// Or fstat for files and headers for URLs would be faster?
+	const assetPathHash = getHash(absolutePathOrUrl, 16)
+
+	const rawFileExtension = getAnkiMediaFilenameExtension(
+		absolutePathOrUrl,
+		allowUnknownUrlExtension,
+	)
+	const fileExtension = rawFileExtension === undefined ? '' : `.${rawFileExtension}`
+
+	// Make the legible filename as long as possible, add in the dash widths, dot is included in the extension
+	const legibleFilenameLength =
+		yankiMaxMediaFilenameLength -
+		(safeNamespace.length + 1 + assetPathHash.length + 1 + fileExtension.length)
+
+	const legibleFilename = getLegibleFilename(absolutePathOrUrl, legibleFilenameLength)
+	// 40 + 1 + 16 + 1 + ? + 1 + 8
+	const safeFilename = `${safeNamespace}-${assetPathHash}-${legibleFilename}${fileExtension}`
 
 	// Should never happen
-	// Anki truncates long file names... so we crush the complete path down to a hash
-	// Observed max length in Anki seems to be 115... we leave some breathing room
-	if (safeFilename.length > 100) {
+	if (safeFilename.length > yankiMaxMediaFilenameLength) {
 		throw new Error(`Filename too long: ${safeFilename}`)
 	}
 
