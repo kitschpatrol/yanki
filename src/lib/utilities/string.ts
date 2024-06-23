@@ -14,30 +14,32 @@ export function capitalize(text: string): string {
 
 /**
  * Truncates on word boundary and adds ellipsis. Does not give special treatment
- * to file extensions.
+ * to file extensions. If there are no spaces in the text, it will truncate at
+ * `maxLength` without respect for word boundaries.
  * @param text Text to truncate
  * @param maxLength Maximum length excluding ellipsis
+ * @param truncationString String to append to truncated text. Defaults to '...'
+ * @param wordBoundary Character to consider a word boundary. Defaults to a space.
  * @returns Truncated string
  */
 export function truncateOnWordBoundary(
 	text: string,
 	maxLength: number,
 	truncationString = '...',
+	wordBoundary = ' ',
 ): string {
 	if (text.length <= maxLength) {
 		return text
 	}
 
 	const maxLengthSafe = maxLength - truncationString.length
-
-	const words = text.split(' ')
-
-	while (words.length > 1 && words.join(' ').length > maxLengthSafe) {
+	const words = text.split(wordBoundary)
+	while (words.length > 1 && words.join(wordBoundary).length > maxLengthSafe) {
 		words.pop()
 	}
 
 	// Slice again just in case the text had no spaces...
-	return `${words.join(' ').slice(0, maxLengthSafe)}${truncationString}`
+	return `${words.join(wordBoundary).slice(0, maxLengthSafe)}${truncationString}`
 }
 
 export function urlToHostAndPort(url: string): { host: string; port: number } {

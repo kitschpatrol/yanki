@@ -22,6 +22,12 @@ export default defineConfig({
 		open: true,
 	},
 	test: {
+		coverage: {
+			all: false,
+			include: ['src/**/*.ts'],
+			provider: 'v8',
+		},
+
 		// Disable concurrent test execution across files
 		// Yanki's tests count total file counts, irrespective of namespace, before
 		// and after each test to ensure the integrity of pre-existing Anki notes.

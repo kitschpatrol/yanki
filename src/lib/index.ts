@@ -13,10 +13,13 @@ export {
 	renameFiles,
 } from './actions/rename'
 export {
-	type StyleOptions,
-	type StyleResult,
-	defaultStyleOptions,
-	formatStyleResult,
+	type GetStyleOptions,
+	type SetStyleOptions,
+	type SetStyleResult,
+	defaultGetStyleOptions,
+	defaultSetStyleOptions,
+	formatSetStyleResult,
+	getStyle,
 	setStyle,
 } from './actions/style'
 export {

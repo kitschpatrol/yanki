@@ -70,9 +70,12 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 	}
 
 	// Slugify without double-dashes, temporarily convert to spaces for truncation on word boundaries
-	const fullSpacedSlug = slugify(legibleFilename.trim()).replaceAll(/-+/g, ' ')
-
-	return truncateOnWordBoundary(fullSpacedSlug, maxLength).replaceAll(' ', '-')
+	return truncateOnWordBoundary(
+		slugify(legibleFilename.trim()).replaceAll(/-+/g, '-'),
+		maxLength,
+		'...',
+		'-',
+	)
 }
 
 // Anki truncates long file names... so we crush the complete path down to a hash

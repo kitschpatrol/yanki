@@ -8,7 +8,7 @@ import {
 	getRemoteNotes,
 	requestPermission,
 } from '../utilities/anki-connect'
-import { truncateWithEllipsis } from '../utilities/string'
+import { truncateOnWordBoundary } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
@@ -47,9 +47,6 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	// Defaults
 	const { ankiConnectOptions, ankiWeb, dryRun, namespace, syncToAnkiWebEvenIfUnchanged } =
 		deepmerge(defaultCleanOptions, options ?? {}) as CleanOptions
-
-	console.log('----------------------------------')
-	console.log(ankiConnectOptions)
 
 	const client = new YankiConnect(ankiConnectOptions)
 
@@ -102,7 +99,7 @@ export function formatCleanResult(result: CleanResult, verbose = false): string 
 		if (noteCount > 0) {
 			lines.push('', result.dryRun ? 'Notes to delete:' : 'Deleted notes:')
 			for (const note of result.deleted) {
-				const noteFrontText = truncateWithEllipsis(
+				const noteFrontText = truncateOnWordBoundary(
 					getFirstLineOfHtmlAsPlainText(note.fields.Front),
 					50,
 				)

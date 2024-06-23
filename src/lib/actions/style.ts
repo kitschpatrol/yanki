@@ -1,26 +1,26 @@
 import { yankiDefaultCss } from '../model/constants'
 import { yankiModelNames } from '../model/model'
 import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
-import { requestPermission, updateModelStyle } from '../utilities/anki-connect'
+import { getModelStyle, requestPermission, updateModelStyle } from '../utilities/anki-connect'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
 import type { PartialDeep, Simplify } from 'type-fest'
 import { YankiConnect } from 'yanki-connect'
 
-export type StyleOptions = {
+export type SetStyleOptions = {
 	css: string
 } & Pick<
 	GlobalOptions,
 	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'syncToAnkiWebEvenIfUnchanged'
 >
 
-export const defaultStyleOptions: StyleOptions = {
+export const defaultSetStyleOptions: SetStyleOptions = {
 	css: yankiDefaultCss,
 	...defaultGlobalOptions,
 }
 
-export type StyleResult = Simplify<
+export type SetStyleResult = Simplify<
 	{
 		duration: number
 		models: Array<{
@@ -30,14 +30,48 @@ export type StyleResult = Simplify<
 	} & Pick<GlobalOptions, 'ankiWeb' | 'dryRun'>
 >
 
-export async function setStyle(options: PartialDeep<StyleOptions>): Promise<StyleResult> {
+export type GetStyleOptions = Pick<GlobalOptions, 'ankiConnectOptions'>
+export const defaultGetStyleOptions: GetStyleOptions = {
+	...defaultGlobalOptions,
+}
+
+export async function getStyle(options: PartialDeep<GetStyleOptions>): Promise<string> {
+	// Defaults
+	const { ankiConnectOptions } = deepmerge(defaultSetStyleOptions, options ?? {}) as GetStyleOptions
+
+	const client = new YankiConnect(ankiConnectOptions)
+	const permissionStatus = await requestPermission(client)
+	if (permissionStatus === 'ankiUnreachable') {
+		throw new Error('Anki is unreachable. Is Anki running?')
+	}
+
+	// Create string set
+	const cssSet = new Set<string>()
+
+	for (const modelName of yankiModelNames) {
+		const css = await getModelStyle(client, modelName)
+		cssSet.add(css)
+	}
+
+	if (cssSet.size === 0) {
+		throw new Error('No CSS found in any Yanki model.')
+	}
+
+	if (cssSet.size > 1) {
+		throw new Error('Expected all Yanki models to have identical CSS.')
+	}
+
+	return [...cssSet][0]
+}
+
+export async function setStyle(options: PartialDeep<SetStyleOptions>): Promise<SetStyleResult> {
 	const startTime = performance.now()
 
 	// Defaults
 	const { ankiConnectOptions, ankiWeb, css, dryRun, syncToAnkiWebEvenIfUnchanged } = deepmerge(
-		defaultStyleOptions,
+		defaultSetStyleOptions,
 		options ?? {},
-	) as StyleOptions
+	) as SetStyleOptions
 
 	const client = new YankiConnect(ankiConnectOptions)
 
@@ -46,7 +80,7 @@ export async function setStyle(options: PartialDeep<StyleOptions>): Promise<Styl
 		throw new Error('Anki is unreachable. Is Anki running?')
 	}
 
-	const modelsReport: StyleResult['models'] = []
+	const modelsReport: SetStyleResult['models'] = []
 
 	for (const modelName of yankiModelNames) {
 		const updated = await updateModelStyle(client, modelName, css, dryRun)
@@ -71,7 +105,7 @@ export async function setStyle(options: PartialDeep<StyleOptions>): Promise<Styl
 	}
 }
 
-export function formatStyleResult(result: StyleResult, verbose = false): string {
+export function formatSetStyleResult(result: SetStyleResult, verbose = false): string {
 	const lines: string[] = []
 
 	const unchangedModels = result.models.filter((model) => model.action === 'unchanged')

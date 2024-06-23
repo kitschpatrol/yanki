@@ -1,8 +1,8 @@
-import { getNoteFromMarkdown, syncFiles } from '../src/lib'
+import { formatSyncFilesResult, getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter } from '../src/lib/model/frontmatter'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { countLinesOfFrontmatter } from './utilities/frontmatter-counter'
-import { stableResults } from './utilities/stable-sync-results'
+import { stableNoteIds, stablePrettyMs, stableResults } from './utilities/stable-sync-results'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -108,6 +108,9 @@ describeWithFileFixture(
 	(context) => {
 		it('adds media to anki when appropriate', { timeout: 60_000 }, async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -129,6 +132,9 @@ describeWithFileFixture(
 	(context) => {
 		it('fetches and adds media urls to anki when appropriate', { timeout: 60_000 }, async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -150,6 +156,9 @@ describeWithFileFixture(
 	(context) => {
 		it('synchronizes notes to anki and has the correct deck name', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -173,6 +182,49 @@ describeWithFileFixture(
 			for (const deckName of deckNames) {
 				expect(deckName).toBe(path.basename(context.assetPath))
 			}
+
+			const syncFormatted = formatSyncFilesResult(results)
+			expect(stablePrettyMs(syncFormatted)).toMatchInlineSnapshot(
+				`"Successfully synced 27 notes to Anki in XXX."`,
+			)
+
+			// Verbose report
+			const runFormattedVerbose = formatSyncFilesResult(results, true)
+			expect(stablePrettyMs(stableNoteIds(runFormattedVerbose))).toMatchInlineSnapshot(`
+				"Successfully synced 27 notes to Anki in XXX.
+
+				Sync Summary:
+				  Created: 27
+
+				Sync Details:
+				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card-with-no-back.md
+				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card-with-no-front.md
+				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card.md
+				  Note ID 0 Created /test-minimal-notes/basic-type-in-the-answer-with-empty-frontmatter.md
+				  Note ID 0 Created /test-minimal-notes/basic-type-in-the-answer-with-frontmatter.md
+				  Note ID 0 Created /test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md
+				  Note ID 0 Created /test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis.md
+				  Note ID 0 Created /test-minimal-notes/basic-type-in-the-answer.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-back-and-no-front.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-cloze-like-back-and-no-front.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-empty-everything.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-empty-frontmatter.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-front-and-cloze-like-back.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-front-and-no-back.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md
+				  Note ID 0 Created /test-minimal-notes/basic.md
+				  Note ID 0 Created /test-minimal-notes/cloze-with-extra-empty.md
+				  Note ID 0 Created /test-minimal-notes/cloze-with-extra.md
+				  Note ID 0 Created /test-minimal-notes/cloze-with-no-preamble.md
+				  Note ID 0 Created /test-minimal-notes/cloze-with-nothing-else.md
+				  Note ID 0 Created /test-minimal-notes/cloze-with-style.md
+				  Note ID 0 Created /test-minimal-notes/cloze.md"
+			`)
 		})
 
 		it('writes anki note IDs to the markdown files frontmatter', async () => {
@@ -198,6 +250,9 @@ describeWithFileFixture(
 	(context) => {
 		it('preserves and merges unrelated surplus frontmatter', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -235,6 +290,9 @@ describeWithFileFixture(
 	(context) => {
 		it('makes the right decisions about deck naming with a file in the root', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -281,6 +339,9 @@ describeWithFileFixture(
 	(context) => {
 		it('makes the right decisions about deck naming without a file in the root', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -327,6 +388,9 @@ describeWithFileFixture(
 		it('updates the model if it changes without destroying the note', async () => {
 			// First sync
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -349,6 +413,9 @@ describeWithFileFixture(
 
 			// Second sync
 			const newModelResults = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -375,6 +442,9 @@ describeWithFileFixture(
 	(context) => {
 		it('handles fancy markdown', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -400,6 +470,9 @@ describeWithFileFixture(
 			const initialLinesOfFrontmatter = await countLinesOfFrontmatter(context.files[0])
 
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -427,6 +500,9 @@ describeWithFileFixture(
 		it('idempotent syncing', async () => {
 			// First sync should be all "created"
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -443,6 +519,9 @@ describeWithFileFixture(
 			`)
 
 			const secondSyncResults = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -474,6 +553,9 @@ describeWithFileFixture(
 		it('handles duplicate node ids for notes with different content gracefully', async () => {
 			// First, sync the file so it comes back with an id
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
@@ -500,6 +582,9 @@ describeWithFileFixture(
 			const newFileList = await globby(`${path.dirname(filePathWithId)}/*.md`)
 
 			const resultsWithDuplicates = await syncFiles(newFileList, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,

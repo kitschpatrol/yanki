@@ -1688,7 +1688,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
 }
 `;
 
-exports[`media > adds media to anki when appropriate bla 1`] = `
+exports[`media > adds media to anki when appropriate 1`] = `
 {
   "ankiWeb": false,
   "deletedDecks": [],
@@ -1893,19 +1893,30 @@ exports[`media > adds media to anki when appropriate bla 1`] = `
           "Front": "<div class="yanki namespace-yanki-test-media front model-yanki-basic"><h1>Weird filenames</h1>
 <h2>Markdown syntax</h2>
 <p>(Image path must be URI-encoded for compliance with CommonMark)</p>
+<h3>Spaces</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-have-so-many-spaces.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have so many spaces.jpg"></p>
+<h3>Question marks</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-have-questions.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have? questions??.jpg"></p>
+<h3>Dots</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-have-many-dots.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i.have.many.dots.jpg"></p>
+<h3>Length</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
 <h2>Markdown syntax with file URIs</h2>
 <p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" alt="" class="yanki-media yanki-media-image" data-src-original="/Users/mika/Code/yanki/test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
 <h2>Obsidian wikilink syntax</h2>
+<p>Image path does not have to be encoded for compatibility with Obsidian</p>
+<h3>Spaces</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-have-so-many-spaces.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have so many spaces.jpg"></p>
+<h3>Question marks</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-have-questions.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have? questions??.jpg"></p>
+<h3>Dots</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-have-many-dots.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i.have.many.dots.jpg"></p>
+<h3>Long</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
 <h2>Obsidian wikilink syntax with file URIs</h2>
+<h3>With alt</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" class="yanki-media yanki-media-image" data-src-original="/Users/mika/Code/yanki/test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
+<h3>Without alt</h3>
 <p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" class="yanki-media yanki-media-image" data-src-original="/Users/mika/Code/yanki/test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p></div>",
           "YankiNamespace": "Yanki Test - media",
         },
@@ -1926,253 +1937,6 @@ exports[`remote media > fetches and adds media urls to anki when appropriate 1`]
   "duration": 0,
   "namespace": "Yanki Test - remote media",
   "synced": [
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-audio-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-audio-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><h1>Remote Audio</h1>
-<h2>3gp</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.3gp" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.3gp?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.3gp]</span></p>
-<h2>aac</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.aac" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.aac?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.aac]</span></p>
-<h2>avi</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.avi" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.avi?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.avi]</span></p>
-<h2>flac</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.flac" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.flac?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.flac]</span></p>
-<h2>flv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.flv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.flv?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.flv]</span></p>
-<h2>m4a</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.m4a" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.m4a?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.m4a]</span></p>
-<h2>mkv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mkv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mkv?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mkv]</span></p>
-<h2>mov</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mov" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mov?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mov]</span></p>
-<h2>mp3</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mp3" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mp3?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mp3]</span></p>
-<h2>mp4</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mp4" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mp4?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mp4]</span></p>
-<h2>mpeg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mpeg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mpeg?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mpeg]</span></p>
-<h2>mpg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mpg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mpg?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.mpg]</span></p>
-<h2>oga</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.oga" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.oga?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.oga]</span></p>
-<h2>ogg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.ogg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogg?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.ogg]</span></p>
-<h2>ogv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.ogv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogv?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.ogv]</span></p>
-<h2>ogx</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.ogx" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogx?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.ogx]</span></p>
-<h2>opus</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.opus" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.opus?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.opus]</span></p>
-<h2>spx</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.spx" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.spx?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.spx]</span></p>
-<h2>swf</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.swf" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.swf?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.swf]</span></p>
-<h2>wav</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.wav" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.wav?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.wav]</span></p>
-<h2>webm</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.webm" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.webm?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-audi.webm]</span></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-compound-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-compound-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><h1>Compound remote</h1>
-<h2>Audio URL</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-blob-main-test-assets-test-media-aud.wav" data-src-original="https://github.com/kitschpatrol/yanki/blob/main/test/assets/test-media/audio/yanki.wav?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-blob-main-test-assets-test-media-aud.wav]</span></p>
-<h2>Image URL</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-blob-main-test-assets-test-media-ima.png" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/blob/main/test/assets/test-media/image/yanki.png?raw=true"></p>
-<h2>Video URL</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mp4" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mp4?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mp4]</span></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-image-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-image-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><h1>Image</h1>
-<h2>Png</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.png" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.png?raw=true"></p>
-<h2>Jpeg</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.jpeg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.jpeg?raw=true"></p>
-<h2>Jpg</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.jpg?raw=true"></p>
-<h2>Avif</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.avif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.avif?raw=true"></p>
-<h2>Gif (static)</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.gif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.gif?raw=true"></p>
-<h2>Ico (static)</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.ico" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.ico?raw=true"></p>
-<h2>Svg</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.svg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.svg?raw=true"></p>
-<h2>Tif (Works on iOS mobile, broken on Mac desktop...)</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.tif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.tif?raw=true"></p>
-<h2>Tiff (Works on iOS mobile, broken on Mac desktop...)</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.tiff" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.tiff?raw=true"></p>
-<h2>Webp</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-imag.webp" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.webp?raw=true"></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-unknown-extension-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-unknown-extension-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><p>This duplicates a test in fancy markdown</p>
-<p><img src="yanki-59db0fc8ee037658-HASH-photo-1555685812-4b943f1cb0eb.unknown" alt="kitten" class="yanki-media yanki-media-image" data-src-original="https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8a2l0dGVufHx8fHx8MTcxNzI5MTk1OQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800"></p>
-<p><img src="yanki-59db0fc8ee037658-HASH-photo-1574235664854-92e1da7d229a.unknown" alt="cat" class="yanki-media yanki-media-image" data-src-original="https://images.unsplash.com/photo-1574235664854-92e1da7d229a?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8Y2F0fHx8fHx8MTcxNzI5MjE0NQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800"></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-video-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-video-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><h1>Video</h1>
-<h2>3gp (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.3gp" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.3gp?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.3gp]</span></p>
-<h2>avi (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.avi" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.avi?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.avi]</span></p>
-<h2>flv (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.flv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.flv?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.flv]</span></p>
-<h2>gif</h2>
-<p><img src="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.gif" alt="Yanki test video" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.gif?raw=true"></p>
-<h2>mkv (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mkv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mkv?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mkv]</span></p>
-<h2>mov</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mov" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mov?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mov]</span></p>
-<h2>mp4</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mp4" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mp4?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mp4]</span></p>
-<h2>mpeg (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mpeg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mpeg?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mpeg]</span></p>
-<h2>mpg (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mpg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mpg?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.mpg]</span></p>
-<h2>ogv (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.ogv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.ogv?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.ogv]</span></p>
-<h2>swf (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.swf" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.swf?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.swf]</span></p>
-<h2>webm (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.webm" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.webm?raw=true">[sound:yanki-59db0fc8ee037658-HASH-kitschpatrol-yanki-raw-main-test-assets-test-media-vide.webm]</span></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-  ],
-}
-`;
-
-exports[`remote media > fetches and adds media urls to anki when appropriate bla 1`] = `
-{
-  "ankiWeb": false,
-  "deletedDecks": [],
-  "dryRun": false,
-  "duration": 0,
-  "namespace": "Yanki Test - remote media",
-  "synced": [
-    {
-      "action": "deleted",
-      "filePath": undefined,
-      "filePathOriginal": undefined,
-      "note": {
-        "cards": [
-          1719031718045,
-        ],
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><h1>Remote Audio</h1>
-<h2>3gp</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.3gp" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.3gp?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.3gp]</span></p>
-<h2>aac</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.aac" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.aac?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.aac]</span></p>
-<h2>avi</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.avi" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.avi?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.avi]</span></p>
-<h2>flac</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.flac" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.flac?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.flac]</span></p>
-<h2>flv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.flv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.flv?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.flv]</span></p>
-<h2>m4a</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.m4a" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.m4a?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.m4a]</span></p>
-<h2>mkv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mkv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mkv?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mkv]</span></p>
-<h2>mov</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mov" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mov?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mov]</span></p>
-<h2>mp3</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mp3" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mp3?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mp3]</span></p>
-<h2>mp4</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mp4" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mp4?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mp4]</span></p>
-<h2>mpeg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mpeg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mpeg?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mpeg]</span></p>
-<h2>mpg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mpg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mpg?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mpg]</span></p>
-<h2>oga</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.oga" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.oga?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.oga]</span></p>
-<h2>ogg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.ogg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogg?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.ogg]</span></p>
-<h2>ogv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.ogv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogv?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.ogv]</span></p>
-<h2>ogx</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.ogx" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogx?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.ogx]</span></p>
-<h2>opus</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.opus" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.opus?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.opus]</span></p>
-<h2>spx</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.spx" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.spx?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.spx]</span></p>
-<h2>swf</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.swf" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.swf?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.swf]</span></p>
-<h2>wav</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.wav" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.wav?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.wav]</span></p>
-<h2>webm</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.webm" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.webm?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.webm]</span></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
     {
       "action": "created",
       "filePath": "/test-media-remote/basic-audio-remote.md",

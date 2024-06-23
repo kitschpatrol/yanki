@@ -579,17 +579,19 @@ export async function createModels(client: YankiConnect) {
 }
 
 /**
- * For testing purposes only
  * @param client
+ * @param modelName
  * @returns css
  */
-export async function getStyle(client: YankiConnect): Promise<string> {
-	const { css } = await client.model.modelStyling({ modelName: yankiModelNames[0] })
+export async function getModelStyle(
+	client: YankiConnect,
+	modelName: string = yankiModelNames[0],
+): Promise<string> {
+	const { css } = await client.model.modelStyling({ modelName })
 	return css
 }
 
 /**
- * For testing purposes only
  * @param client
  * @returns 'ankiUnreachable' if Anki is not open, or 'granted' if everything is copacetic
  * @throws if access is denied

@@ -2,7 +2,7 @@ import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
 import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import { getRemoteNotes, requestPermission } from '../utilities/anki-connect'
-import { truncateWithEllipsis } from '../utilities/string'
+import { truncateOnWordBoundary } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
 import type { PartialDeep } from 'type-fest'
 import { YankiConnect } from 'yanki-connect'
@@ -55,7 +55,10 @@ export function formatListResult(result: ListResult): string {
 	const lines: string[] = []
 
 	for (const note of result.notes) {
-		const noteFrontText = truncateWithEllipsis(getFirstLineOfHtmlAsPlainText(note.fields.Front), 50)
+		const noteFrontText = truncateOnWordBoundary(
+			getFirstLineOfHtmlAsPlainText(note.fields.Front),
+			50,
+		)
 		lines.push(`Note ID ${note.noteId} ${noteFrontText}`)
 	}
 

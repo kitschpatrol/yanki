@@ -1,7 +1,7 @@
 import { version } from '../../package.json'
 import { cleanNotes, formatCleanResult } from '../lib/actions/clean'
 import { formatListResult, listNotes } from '../lib/actions/list'
-import { formatStyleResult, setStyle } from '../lib/actions/style'
+import { formatSetStyleResult, setStyle } from '../lib/actions/style'
 import { formatSyncFilesResult, syncFiles } from '../lib/actions/sync-files'
 import { defaultGlobalOptions } from '../lib/shared/types'
 import log from '../lib/utilities/log'
@@ -287,7 +287,7 @@ await yargsInstance
 				process.stdout.write(JSON.stringify(result, undefined, 2))
 				process.stdout.write('\n')
 			} else {
-				process.stderr.write(formatStyleResult(result, verbose))
+				process.stderr.write(formatSetStyleResult(result, verbose))
 				process.stderr.write('\n')
 			}
 		},

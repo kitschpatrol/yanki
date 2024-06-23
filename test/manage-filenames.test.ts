@@ -15,6 +15,9 @@ describeWithFileFixture(
 	(context) => {
 		it('uses the prompt as a filename', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				manageFilenames: 'prompt',
@@ -45,7 +48,7 @@ describeWithFileFixture(
 				  "/test-filename-management/subfolder/some-question.md" => "/test-filename-management/subfolder/some-question (2).md",
 				  "/test-filename-management/subfolder/something.md" => "/test-filename-management/subfolder/some-question (3).md",
 				  "/test-filename-management/very-long-title-one-word.md" => "/test-filename-management/this note has a very long title indeed what can be done....md",
-				  "/test-filename-management/very-long-title.md" => "/test-filename-management/thisnotehasaverylongonewordtitlecanwestillsplititusingthetru....md",
+				  "/test-filename-management/very-long-title.md" => "/test-filename-management/thisnotehasaverylongonewordtitlecanwestillsplititusingthe....md",
 				}
 			`)
 
@@ -56,6 +59,9 @@ describeWithFileFixture(
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				manageFilenames: 'prompt',
@@ -87,6 +93,9 @@ describeWithFileFixture(
 	(context) => {
 		it('uses the response as a filename', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				manageFilenames: 'response',
@@ -117,7 +126,7 @@ describeWithFileFixture(
 				  "/test-filename-management/subfolder/some-question.md" => "/test-filename-management/subfolder/some-answer (2).md",
 				  "/test-filename-management/subfolder/something.md" => "/test-filename-management/subfolder/some-answer (3).md",
 				  "/test-filename-management/very-long-title-one-word.md" => "/test-filename-management/this note has a very long title indeed what can be done....md",
-				  "/test-filename-management/very-long-title.md" => "/test-filename-management/thisnotehasaverylongonewordtitlecanwestillsplititusingthetru....md",
+				  "/test-filename-management/very-long-title.md" => "/test-filename-management/thisnotehasaverylongonewordtitlecanwestillsplititusingthe....md",
 				}
 			`)
 
@@ -128,6 +137,9 @@ describeWithFileFixture(
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				manageFilenames: 'response',
@@ -159,6 +171,9 @@ describeWithFileFixture(
 	(context) => {
 		it('does not touch the filename unless asked', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				manageFilenames: 'off',
@@ -205,6 +220,9 @@ describeWithFileFixture(
 	(context) => {
 		it('uses the prompt as a filename across many note types', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				manageFilenames: 'prompt',
@@ -258,6 +276,9 @@ describeWithFileFixture(
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				manageFilenames: 'prompt',
@@ -289,6 +310,9 @@ describeWithFileFixture(
 	(context) => {
 		it('uses the response as a filename across many note types', async () => {
 			const results = await syncFiles(context.files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				manageFilenames: 'response',
@@ -342,6 +366,9 @@ describeWithFileFixture(
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
 				ankiWeb: false,
 				dryRun: false,
 				manageFilenames: 'response',
