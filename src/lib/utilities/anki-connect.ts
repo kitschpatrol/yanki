@@ -1,6 +1,6 @@
 import { type YankiModelName, yankiModelNames, yankiModels } from '../model/model'
 import { type YankiNote } from '../model/note'
-import { extractMediaFromHtml } from '../parse/rehype-utilities'
+import { type Media, extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
 import { getSlugifiedNamespace } from './namespace'
 import { isUrl } from './url'
@@ -21,45 +21,6 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 	}
 
 	await client.note.deleteNotes({ notes: noteIds })
-}
-
-export async function deleteUnusedMedia(
-	client: YankiConnect,
-	liveNotes: YankiNote[],
-	namespace: string,
-	dryRun: boolean,
-): Promise<string[]> {
-	if (dryRun) {
-		return []
-	}
-
-	// Note this always includes a `yanki-` prefix for ease of identification
-	// in the Anki media asset manager UI
-	const slugifiedNamespace = getSlugifiedNamespace(namespace)
-
-	const activeMediaFilenames: string[] = []
-	for (const note of liveNotes) {
-		// Room for optimization to avoid re-parsing the HTML...
-		const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
-		for (const { filename } of mediaPaths) {
-			activeMediaFilenames.push(filename)
-		}
-	}
-
-	const allMediaInNamespace = await client.media.getMediaFilesNames({
-		pattern: `${slugifiedNamespace}-*`,
-	})
-
-	const deletedMediaFilenames: string[] = []
-
-	for (const remoteMediaFilename of allMediaInNamespace) {
-		if (!activeMediaFilenames.includes(remoteMediaFilename)) {
-			await client.media.deleteMediaFile({ filename: remoteMediaFilename })
-			deletedMediaFilenames.push(remoteMediaFilename)
-		}
-	}
-
-	return deletedMediaFilenames
 }
 
 export async function updateNoteModel(client: YankiConnect, note: YankiNote, dryRun = false) {
@@ -86,52 +47,6 @@ export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun =
 	}
 
 	await client.note.deleteNotes({ notes: [note.noteId] })
-}
-
-// TODO actually get the local hash?
-async function uploadMediaForNote(
-	client: YankiConnect,
-	note: YankiNote,
-	dryRun: boolean,
-): Promise<number> {
-	// Upload media
-	const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
-
-	if (dryRun) {
-		return mediaPaths.length
-	}
-
-	for (const { filename, originalSrc } of mediaPaths) {
-		// Check if it already exists... TODO optimization
-		const existing = await client.media.getMediaFilesNames({ pattern: filename })
-
-		if (existing.length === 0) {
-			const ankiMediaFilename = await client.media.storeMediaFile(
-				isUrl(originalSrc)
-					? {
-							deleteExisting: true,
-							filename,
-							url: originalSrc,
-						}
-					: {
-							deleteExisting: true,
-							filename,
-							path: originalSrc,
-						},
-			)
-
-			if (filename !== ankiMediaFilename) {
-				console.warn(
-					`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
-				)
-			}
-		} else {
-			// Debugging
-			// console.log(`Media file ${filename} already exists in Anki`)
-		}
-	}
-
-	return mediaPaths.length
 }
 
 /**
@@ -257,7 +172,10 @@ export async function updateNote(
 				note: { ...localNote, id: localNote.noteId },
 			})
 
-			await uploadMediaForNote(client, localNote, dryRun)
+			// Also update media if relevant
+			if (!areMediaElementsEqual(localNote.fields, remoteNote.fields)) {
+				await uploadMediaForNote(client, localNote, dryRun)
+			}
 		}
 
 		updated = true
@@ -295,6 +213,31 @@ function areFieldsEqual(
 
 	for (const key of keys) {
 		if (localFields[key] !== remoteFields[key]) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// TODO is this faster than querying Anki-Connect for media files?
+function areMediaElementsEqual(
+	localFields: Record<string, string>,
+	remoteFields: Record<string, string>,
+): boolean {
+	const localMediaFilenames = extractMediaFromHtml(`${localFields.Front}\n${localFields.Back}`)
+		.map(({ filename }) => filename)
+		.sort()
+	const remoteMediaFilenames = extractMediaFromHtml(`${remoteFields.Front}\n${remoteFields.Back}`)
+		.map(({ filename }) => filename)
+		.sort()
+
+	if (localMediaFilenames.length !== remoteMediaFilenames.length) {
+		return false
+	}
+
+	for (const [i, filename] of localMediaFilenames.entries()) {
+		if (filename !== remoteMediaFilenames[i]) {
 			return false
 		}
 	}
@@ -596,6 +539,102 @@ export async function getModelStyle(
 ): Promise<string> {
 	const { css } = await client.model.modelStyling({ modelName })
 	return css
+}
+
+/**
+ *
+ * @param client
+ * @param note
+ * @param dryRun
+ * @returns Original source name of media files uploaded
+ */
+async function uploadMediaForNote(
+	client: YankiConnect,
+	note: YankiNote,
+	dryRun: boolean,
+): Promise<Media[]> {
+	// Upload media
+	const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
+
+	const uploadedMedia = []
+
+	for (const { filename, originalSrc } of mediaPaths) {
+		// Check if it already exists... TODO optimization
+		const existing = await client.media.getMediaFilesNames({ pattern: filename })
+
+		if (existing.length === 0) {
+			if (!dryRun) {
+				const ankiMediaFilename = await client.media.storeMediaFile(
+					isUrl(originalSrc)
+						? {
+								deleteExisting: true,
+								filename,
+								url: originalSrc,
+							}
+						: {
+								deleteExisting: true,
+								filename,
+								path: originalSrc,
+							},
+				)
+
+				if (filename !== ankiMediaFilename) {
+					console.warn(
+						`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
+					)
+				}
+			}
+
+			uploadedMedia.push({
+				filename,
+				originalSrc,
+			})
+		} else {
+			// Debugging
+			// console.log(`Media file ${filename} already exists in Anki`)
+		}
+	}
+
+	return uploadedMedia
+}
+
+export async function deleteUnusedMedia(
+	client: YankiConnect,
+	liveNotes: YankiNote[],
+	namespace: string,
+	dryRun: boolean,
+): Promise<string[]> {
+	if (dryRun) {
+		return []
+	}
+
+	// Note this always includes a `yanki-` prefix for ease of identification
+	// in the Anki media asset manager UI
+	const slugifiedNamespace = getSlugifiedNamespace(namespace)
+
+	const activeMediaFilenames: string[] = []
+	for (const note of liveNotes) {
+		// Room for optimization to avoid re-parsing the HTML...
+		const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
+		for (const { filename } of mediaPaths) {
+			activeMediaFilenames.push(filename)
+		}
+	}
+
+	const allMediaInNamespace = await client.media.getMediaFilesNames({
+		pattern: `${slugifiedNamespace}-*`,
+	})
+
+	const deletedMediaFilenames: string[] = []
+
+	for (const remoteMediaFilename of allMediaInNamespace) {
+		if (!activeMediaFilenames.includes(remoteMediaFilename)) {
+			await client.media.deleteMediaFile({ filename: remoteMediaFilename })
+			deletedMediaFilenames.push(remoteMediaFilename)
+		}
+	}
+
+	return deletedMediaFilenames
 }
 
 /**

@@ -33,12 +33,14 @@ describeWithFileFixture(
 				namespace: context.namespace,
 			})
 
-			expect(dryRunResult.deleted).toHaveLength(context.files.length)
+			expect(dryRunResult.deletedNotes).toHaveLength(context.files.length)
 			expect(dryRunResult.dryRun).toBe(true)
 			expect(dryRunResult.namespace).toBe(context.namespace)
 
 			const dryRunFormatted = formatCleanResult(dryRunResult)
-			expect(dryRunFormatted).toMatchInlineSnapshot(`"Will deleted 9 notes and 7 decks from Anki."`)
+			expect(dryRunFormatted).toMatchInlineSnapshot(
+				`"Will deleted 9 notes, 7 decks, and 0 media assets from Anki."`,
+			)
 
 			const ankiNotes = await listNotes({
 				ankiConnectOptions: {
@@ -57,19 +59,19 @@ describeWithFileFixture(
 				namespace: context.namespace,
 			})
 
-			expect(runResult.deleted).toHaveLength(context.files.length)
+			expect(runResult.deletedNotes).toHaveLength(context.files.length)
 			expect(runResult.dryRun).toBe(false)
 			expect(runResult.namespace).toBe(context.namespace)
 
 			const runFormatted = formatCleanResult(runResult)
 			expect(stablePrettyMs(runFormatted)).toMatchInlineSnapshot(
-				`"Successfully deleted 9 notes and 15 decks from Anki in XXX."`,
+				`"Successfully deleted 9 notes, 15 decks, and 0 media assets from Anki in XXX."`,
 			)
 
 			// Verbose report
 			const runFormattedVerbose = formatCleanResult(runResult, true)
 			expect(stablePrettyMs(stableNoteIds(runFormattedVerbose))).toMatchInlineSnapshot(`
-				"Successfully deleted 9 notes and 15 decks from Anki in XXX.
+				"Successfully deleted 9 notes, 15 decks, and 0 media assets from Anki in XXX.
 
 				Deleted notes:
 				  Note ID XXXXXXXXXXXXX I should be in the deck 'deep-contiguous'

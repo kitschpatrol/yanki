@@ -27,9 +27,9 @@ export const defaultCleanOptions: CleanOptions = {
 
 export type CleanResult = Simplify<
 	{
-		decks: string[]
-		deleted: YankiNote[]
-
+		deletedDecks: string[]
+		deletedMedia: string[]
+		deletedNotes: YankiNote[]
 		duration: number
 	} & Pick<GlobalOptions, 'ankiWeb' | 'dryRun' | 'namespace'>
 >
@@ -69,7 +69,7 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	const deletedDecks = await deleteOrphanedDecks(client, [], remoteNotes, dryRun)
 
 	// Media deletion pass
-	await deleteUnusedMedia(client, [], sanitizedNamespace, dryRun)
+	const deletedMedia = await deleteUnusedMedia(client, [], sanitizedNamespace, dryRun)
 
 	// AnkiWeb sync
 	const isChanged = remoteNotes.length > 0 || deletedDecks.length > 0
@@ -79,8 +79,9 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 
 	return {
 		ankiWeb,
-		decks: deletedDecks,
-		deleted: remoteNotes,
+		deletedDecks,
+		deletedMedia,
+		deletedNotes: remoteNotes,
 		dryRun,
 		duration: performance.now() - startTime,
 		namespace: sanitizedNamespace,
@@ -88,23 +89,24 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 }
 
 export function formatCleanResult(result: CleanResult, verbose = false): string {
-	const deckCount = result.decks.length
-	const noteCount = result.deleted.length
+	const deckCount = result.deletedDecks.length
+	const noteCount = result.deletedNotes.length
+	const mediaCount = result.deletedMedia.length
 
-	if (deckCount === 0 && noteCount === 0) {
+	if (deckCount === 0 && noteCount === 0 && mediaCount === 0) {
 		return 'Nothing to delete'
 	}
 
 	const lines: string[] = []
 
 	lines.push(
-		`${result.dryRun ? 'Will' : 'Successfully'} deleted ${result.deleted.length} ${plur('note', noteCount)} and ${result.decks.length} ${plur('deck', deckCount)} from Anki${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,
+		`${result.dryRun ? 'Will' : 'Successfully'} deleted ${noteCount} ${plur('note', noteCount)}, ${deckCount} ${plur('deck', deckCount)}, and ${mediaCount} media ${plur('asset', mediaCount)} from Anki${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,
 	)
 
 	if (verbose) {
 		if (noteCount > 0) {
 			lines.push('', result.dryRun ? 'Notes to delete:' : 'Deleted notes:')
-			for (const note of result.deleted) {
+			for (const note of result.deletedNotes) {
 				const noteFrontText = truncateOnWordBoundary(
 					getFirstLineOfHtmlAsPlainText(note.fields.Front),
 					50,
@@ -115,8 +117,15 @@ export function formatCleanResult(result: CleanResult, verbose = false): string 
 
 		if (deckCount > 0) {
 			lines.push('', result.dryRun ? 'Decks to delete:' : 'Deleted decks:')
-			for (const deck of result.decks) {
+			for (const deck of result.deletedDecks) {
 				lines.push(`  ${deck}`)
+			}
+		}
+
+		if (mediaCount > 0) {
+			lines.push('', result.dryRun ? 'Media assets to delete:' : 'Deleted media assets:')
+			for (const asset of result.deletedMedia) {
+				lines.push(`  ${asset}`)
 			}
 		}
 	}

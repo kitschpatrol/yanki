@@ -104,7 +104,7 @@ export async function syncFiles(
 
 	const allLocalNotes = renamedLocalNotes.map((note) => note.note)
 
-	const { deletedDecks, synced } = await syncNotes(allLocalNotes, {
+	const { deletedDecks, deletedMedia, synced } = await syncNotes(allLocalNotes, {
 		ankiConnectOptions,
 		ankiWeb,
 		dryRun,
@@ -154,6 +154,7 @@ export async function syncFiles(
 	return {
 		ankiWeb,
 		deletedDecks,
+		deletedMedia,
 		dryRun,
 		duration: performance.now() - startTime,
 		namespace: sanitizedNamespace,
@@ -191,6 +192,10 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 
 		if (result.deletedDecks.length > 0) {
 			lines.push('', `Decks pruned: ${result.deletedDecks.length}`)
+		}
+
+		if (result.deletedMedia.length > 0) {
+			lines.push('', `Media assets deleted: ${result.deletedMedia.length}`)
 		}
 
 		lines.push('', result.dryRun ? 'Sync Plan Details:' : 'Sync Details:')

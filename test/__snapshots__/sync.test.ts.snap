@@ -4,6 +4,7 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
 {
   "ankiWeb": false,
   "deletedDecks": [],
+  "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
   "namespace": "Yanki Test - b9918cfa0f62798d",
@@ -463,6 +464,7 @@ exports[`complex trees > makes the right decisions about deck naming with a file
 {
   "ankiWeb": false,
   "deletedDecks": [],
+  "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
   "namespace": "Yanki Test - b5346192b9b2fb82",
@@ -650,6 +652,7 @@ exports[`complex trees > makes the right decisions about deck naming without a f
 {
   "ankiWeb": false,
   "deletedDecks": [],
+  "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
   "namespace": "Yanki Test - b5346192b9b2fb82",
@@ -821,6 +824,7 @@ exports[`duplicate node ids > handles duplicate node ids for notes with differen
 {
   "ankiWeb": false,
   "deletedDecks": [],
+  "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
   "namespace": "Yanki Test - 00e8048e96c5000c",
@@ -849,6 +853,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
 {
   "ankiWeb": false,
   "deletedDecks": [],
+  "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
   "namespace": "Yanki Test - 4b7d855f1825e39f",
@@ -1692,6 +1697,7 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
 {
   "ankiWeb": false,
   "deletedDecks": [],
+  "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
   "namespace": "Yanki Test - ee8a558c89d868bf",

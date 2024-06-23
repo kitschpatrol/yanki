@@ -34,6 +34,7 @@ export const defaultSyncOptions: SyncOptions = {
 export type SyncResult = Simplify<
 	{
 		deletedDecks: string[]
+		deletedMedia: string[]
 		duration: number
 		synced: SyncedNote[]
 	} & Pick<GlobalOptions, 'ankiWeb' | 'dryRun' | 'namespace'>
@@ -71,6 +72,7 @@ export async function syncNotes(
 		return {
 			ankiWeb,
 			deletedDecks: [],
+			deletedMedia: [],
 			dryRun,
 			duration: performance.now() - startTime,
 			namespace: sanitizedNamespace,
@@ -196,7 +198,7 @@ export async function syncNotes(
 	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, existingRemoteNotes, dryRun)
 
 	// Clean up unused media files
-	await deleteUnusedMedia(client, liveNotes, sanitizedNamespace, dryRun)
+	const deletedMedia = await deleteUnusedMedia(client, liveNotes, sanitizedNamespace, dryRun)
 
 	// AnkiWeb sync
 	const isChanged = deletedDecks.length > 0 || synced.some((note) => note.action !== 'unchanged')
@@ -207,6 +209,7 @@ export async function syncNotes(
 	return {
 		ankiWeb,
 		deletedDecks,
+		deletedMedia,
 		dryRun,
 		duration: performance.now() - startTime,
 		namespace: sanitizedNamespace,
