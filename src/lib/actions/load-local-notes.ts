@@ -1,13 +1,18 @@
 import type { YankiNote } from '../model/note'
 import { getNoteFromMarkdown } from '../parse/parse'
-import { type GlobalOptions, defaultGlobalOptions, getDefaultFileAdapters } from '../shared/types'
+import {
+	type GlobalOptions,
+	defaultGlobalOptions,
+	getDefaultFetchAdapter,
+	getDefaultFileAdapters,
+} from '../shared/types'
 import { environment } from '../utilities/platform'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 
 export type LoadOptions = Pick<
 	GlobalOptions,
-	'fileAdapters' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
+	'fetchAdapter' | 'fileAdapters' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
 >
 
 export const defaultLoadOptions: LoadOptions = {
@@ -26,6 +31,7 @@ export async function loadLocalNotes(
 	options: Partial<LoadOptions>,
 ): Promise<LocalNote[]> {
 	const {
+		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapters = getDefaultFileAdapters(),
 		namespace,
 		obsidianVault,
@@ -43,6 +49,8 @@ export async function loadLocalNotes(
 		const markdown = await fileAdapters.readFile(filePath)
 		const note = await getNoteFromMarkdown(markdown, {
 			cwd: path.dirname(filePath),
+			fetchAdapter,
+			fileAdapters,
 			namespace,
 			obsidianVault,
 			syncMediaAssets,

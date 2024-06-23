@@ -1,12 +1,24 @@
 import { environment } from '../utilities/platform'
 import path from 'path-browserify-esm'
-import { type YankiConnectOptions, defaultYankiConnectOptions } from 'yanki-connect'
+import {
+	type YankiConnectOptions,
+	type YankiFetchAdapter,
+	defaultYankiConnectOptions,
+} from 'yanki-connect'
 
+export type FetchAdapter = YankiFetchAdapter
 export type ManageFilenames = 'off' | 'prompt' | 'response'
 export type SyncMediaAssets = 'all' | 'local' | 'none' | 'remote'
 export type FileAdapters = {
 	readFile: (filePath: string, encoding?: 'utf8') => Promise<string>
 	rename: (oldPath: string, newPath: string) => Promise<void>
+	stat: (filePath: string) => Promise<{
+		// Used for detecting media file changes
+		// Require only the fields we can also get in Obsidian
+		ctimeMs: number // Time of creation, represented as a unix timestamp, in milliseconds.
+		mtimeMs: number // Time of last modification, represented as a unix timestamp, in milliseconds.
+		size: number // Size on disk, as bytes.
+	}> // Not used, yet
 	writeFile: (filePath: string, data: string, encoding?: 'utf8') => Promise<void> // Not used, yet
 }
 
@@ -22,6 +34,13 @@ export type GlobalOptions = {
 	ankiWeb: boolean
 	cwd: string
 	dryRun: boolean
+	/**
+	 * Exposed for Obsidian, currently only used for getting URL content hashes
+	 * and inferring MIME types of URLs without extensions.
+	 * Note that ankiConnectOptions ALSO has a fetch adapter option specifically
+	 * for communicating with Anki-Connect.
+	 */
+	fetchAdapter: FetchAdapter | undefined
 	fileAdapters: FileAdapters | undefined
 	manageFilenames: ManageFilenames
 	/** Only applies if manageFilenames is `true`. Will _not_ truncate user-specified file names in other cases. */
@@ -48,6 +67,8 @@ export const defaultGlobalOptions: GlobalOptions = {
 	ankiWeb: false,
 	cwd: path.process_cwd,
 	dryRun: false,
+
+	fetchAdapter: undefined, // Must be passed in later, deepmerge will not work
 	fileAdapters: undefined, // Must be passed in later, deepmerge will not work
 	manageFilenames: 'off',
 	maxFilenameLength: 60,
@@ -74,6 +95,9 @@ export function getDefaultFileAdapters(): FileAdapters {
 			async rename(oldPath, newPath) {
 				return fs.rename(oldPath, newPath)
 			},
+			async stat(filePath) {
+				return fs.stat(filePath)
+			},
 			async writeFile(filePath, data) {
 				return fs.writeFile(filePath, data, 'utf8')
 			},
@@ -83,4 +107,9 @@ export function getDefaultFileAdapters(): FileAdapters {
 	throw new Error(
 		'The "readFile", "writeFile", and "rename" file function implementations must be provided to the function when running in the browser',
 	)
+}
+
+export function getDefaultFetchAdapter(): FetchAdapter {
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	return fetch.bind(globalThis)
 }

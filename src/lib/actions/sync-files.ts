@@ -1,5 +1,10 @@
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
-import { type GlobalOptions, defaultGlobalOptions, getDefaultFileAdapters } from '../shared/types'
+import {
+	type GlobalOptions,
+	defaultGlobalOptions,
+	getDefaultFetchAdapter,
+	getDefaultFileAdapters,
+} from '../shared/types'
 import { capitalize } from '../utilities/string'
 import { loadLocalNotes } from './load-local-notes'
 import { renameNotes } from './rename'
@@ -18,6 +23,7 @@ import type { PartialDeep, Simplify } from 'type-fest'
 export type SyncFilesOptions = Simplify<
 	Pick<
 		GlobalOptions,
+		| 'fetchAdapter'
 		| 'fileAdapters'
 		| 'manageFilenames'
 		| 'maxFilenameLength'
@@ -68,6 +74,7 @@ export async function syncFiles(
 		ankiConnectOptions,
 		ankiWeb,
 		dryRun,
+		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapters = getDefaultFileAdapters(),
 		manageFilenames,
 		maxFilenameLength,
@@ -77,6 +84,7 @@ export async function syncFiles(
 	} = deepmerge(defaultSyncFilesOptions, options ?? {}) as SyncFilesOptions
 
 	const localNotes = await loadLocalNotes(allLocalFilePaths, {
+		fetchAdapter,
 		fileAdapters,
 		namespace,
 		obsidianVault,

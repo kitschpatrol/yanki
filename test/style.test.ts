@@ -71,7 +71,9 @@ describeWithFileFixture(
 			`)
 
 			const resultReport = formatSetStyleResult(result)
-			expect(stablePrettyMs(resultReport)).toMatchInlineSnapshot(`"Successfully update 4 models and left 0 models unchanged in XXX."`)
+			expect(stablePrettyMs(resultReport)).toMatchInlineSnapshot(
+				`"Successfully update 4 models and left 0 models unchanged in XXX."`,
+			)
 
 			const verboseResultReport = formatSetStyleResult(result, true)
 			expect(stablePrettyMs(verboseResultReport)).toMatchInlineSnapshot(`

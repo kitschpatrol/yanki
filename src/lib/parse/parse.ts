@@ -4,7 +4,11 @@
 
 import { yankiDefaultCssClassName } from '../model/constants'
 import { type YankiNote } from '../model/note'
-import { defaultGlobalOptions } from '../shared/types'
+import {
+	defaultGlobalOptions,
+	getDefaultFetchAdapter,
+	getDefaultFileAdapters,
+} from '../shared/types'
 import { type GlobalOptions } from '../shared/types'
 import { mdastToHtml } from './rehype-utilities'
 import {
@@ -21,7 +25,7 @@ import { u } from 'unist-builder'
 
 export type GetNoteFromMarkdownOptions = Pick<
 	GlobalOptions,
-	'cwd' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
+	'cwd' | 'fetchAdapter' | 'fileAdapters' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
 >
 
 export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
@@ -32,10 +36,14 @@ export async function getNoteFromMarkdown(
 	markdown: string,
 	options?: Partial<GetNoteFromMarkdownOptions>,
 ): Promise<YankiNote> {
-	const { cwd, namespace, obsidianVault, syncMediaAssets } = deepmerge(
-		defaultGetNoteFromMarkdownOptions,
-		options ?? {},
-	)
+	const {
+		cwd,
+		fetchAdapter = getDefaultFetchAdapter(),
+		fileAdapters = getDefaultFileAdapters(),
+		namespace,
+		obsidianVault,
+		syncMediaAssets,
+	} = deepmerge(defaultGetNoteFromMarkdownOptions, options ?? {})
 
 	// Anki won't create notes at all if the front field is blank, but we want
 	// parity between markdown files and notes at all costs, so we'll put
@@ -70,6 +78,8 @@ export async function getNoteFromMarkdown(
 					`model-${modelName}`,
 				],
 				cwd,
+				fetchAdapter,
+				fileAdapters,
 				namespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
@@ -82,6 +92,8 @@ export async function getNoteFromMarkdown(
 					`model-${modelName}`,
 				],
 				cwd,
+				fetchAdapter,
+				fileAdapters,
 				namespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
@@ -103,6 +115,8 @@ export async function getNoteFromMarkdown(
 					`model-${modelName}`,
 				],
 				cwd,
+				fetchAdapter,
+				fileAdapters,
 				namespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
@@ -115,9 +129,10 @@ export async function getNoteFromMarkdown(
 					`model-${modelName}`,
 				],
 				cwd,
+				fetchAdapter,
+				fileAdapters,
 				namespace,
 				syncMediaAssets,
-
 				useEmptyPlaceholder: false,
 			})
 
@@ -146,9 +161,10 @@ export async function getNoteFromMarkdown(
 					`model-${modelName}`,
 				],
 				cwd,
+				fetchAdapter,
+				fileAdapters,
 				namespace,
 				syncMediaAssets,
-
 				useEmptyPlaceholder: true,
 			})
 
@@ -161,9 +177,10 @@ export async function getNoteFromMarkdown(
 					`model-${modelName}`,
 				],
 				cwd,
+				fetchAdapter,
+				fileAdapters,
 				namespace,
 				syncMediaAssets,
-
 				useEmptyPlaceholder: false,
 			})
 			break

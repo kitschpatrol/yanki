@@ -102,24 +102,32 @@ async function uploadMediaForNote(
 	}
 
 	for (const { filename, originalSrc } of mediaPaths) {
-		const ankiMediaFilename = await client.media.storeMediaFile(
-			isUrl(originalSrc)
-				? {
-						deleteExisting: true,
-						filename,
-						url: originalSrc,
-					}
-				: {
-						deleteExisting: true,
-						filename,
-						path: originalSrc,
-					},
-		)
+		// Check if it already exists... TODO optimization
+		const existing = await client.media.getMediaFilesNames({ pattern: filename })
 
-		if (filename !== ankiMediaFilename) {
-			console.warn(
-				`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
+		if (existing.length === 0) {
+			const ankiMediaFilename = await client.media.storeMediaFile(
+				isUrl(originalSrc)
+					? {
+							deleteExisting: true,
+							filename,
+							url: originalSrc,
+						}
+					: {
+							deleteExisting: true,
+							filename,
+							path: originalSrc,
+						},
 			)
+
+			if (filename !== ankiMediaFilename) {
+				console.warn(
+					`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
+				)
+			}
+		} else {
+			// Debugging
+			// console.log(`Media file ${filename} already exists in Anki`)
 		}
 	}
 
@@ -248,9 +256,9 @@ export async function updateNote(
 			await client.note.updateNote({
 				note: { ...localNote, id: localNote.noteId },
 			})
-		}
 
-		await uploadMediaForNote(client, localNote, dryRun)
+			await uploadMediaForNote(client, localNote, dryRun)
+		}
 
 		updated = true
 	}

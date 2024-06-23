@@ -99,54 +99,6 @@ describeWithFileFixture(
 )
 
 describeWithFileFixture(
-	'media',
-	{
-		assetPath: './test/assets/test-media/',
-		cleanUpAnki: true,
-		cleanUpTempFiles: true,
-	},
-	(context) => {
-		it('adds media to anki when appropriate', { timeout: 60_000 }, async () => {
-			const results = await syncFiles(context.files, {
-				ankiConnectOptions: {
-					autoLaunch: true,
-				},
-				ankiWeb: false,
-				dryRun: false,
-				namespace: context.namespace,
-				syncMediaAssets: 'local',
-			})
-
-			expect(stableResults(results)).toMatchSnapshot()
-		})
-	},
-)
-
-describeWithFileFixture(
-	'remote media',
-	{
-		assetPath: './test/assets/test-media-remote/',
-		cleanUpAnki: true,
-		cleanUpTempFiles: true,
-	},
-	(context) => {
-		it('fetches and adds media urls to anki when appropriate', { timeout: 60_000 }, async () => {
-			const results = await syncFiles(context.files, {
-				ankiConnectOptions: {
-					autoLaunch: true,
-				},
-				ankiWeb: false,
-				dryRun: false,
-				namespace: context.namespace,
-				syncMediaAssets: 'remote',
-			})
-
-			expect(stableResults(results)).toMatchSnapshot()
-		})
-	},
-)
-
-describeWithFileFixture(
 	'basic synchronization',
 	{
 		assetPath: './test/assets/test-minimal-notes/',

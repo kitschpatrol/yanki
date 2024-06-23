@@ -1,4 +1,9 @@
-import { type GlobalOptions, defaultGlobalOptions, getDefaultFileAdapters } from '../shared/types'
+import {
+	type GlobalOptions,
+	defaultGlobalOptions,
+	getDefaultFetchAdapter,
+	getDefaultFileAdapters,
+} from '../shared/types'
 import {
 	auditUniqueFilePath,
 	getSafeTitleForNote,
@@ -132,7 +137,8 @@ export async function renameFiles(
 ): Promise<RenameFilesResult> {
 	const {
 		dryRun,
-		fileAdapters,
+		fetchAdapter = getDefaultFetchAdapter(),
+		fileAdapters = getDefaultFileAdapters(),
 		manageFilenames,
 		maxFilenameLength,
 		namespace,
@@ -141,6 +147,7 @@ export async function renameFiles(
 	} = deepmerge(defaultRenameFilesOptions, options ?? {})
 
 	const notes = await loadLocalNotes(allLocalFilePaths, {
+		fetchAdapter,
 		fileAdapters,
 		namespace,
 		obsidianVault,

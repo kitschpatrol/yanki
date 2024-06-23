@@ -7,12 +7,7 @@
 import { cleanNotes } from '../../src/lib'
 import { yankiDefaultCss } from '../../src/lib/model/constants'
 import { yankiModelNames } from '../../src/lib/model/model'
-import {
-	createModels,
-	getModelStyle,
-	getStyle,
-	updateModelStyle,
-} from '../../src/lib/utilities/anki-connect'
+import { createModels, getModelStyle, updateModelStyle } from '../../src/lib/utilities/anki-connect'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
