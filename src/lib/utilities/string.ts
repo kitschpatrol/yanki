@@ -70,3 +70,25 @@ export function emptyIsUndefined(text: string | undefined): string | undefined {
 
 	return text.trim() === '' ? undefined : text
 }
+
+/**
+ * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ */
+export function html(strings: TemplateStringsArray, ...values: unknown[]): string {
+	const conjoined = strings.reduce(
+		(result, text, i) => `${result}${text}${String(values[i] ?? '')}`,
+		'',
+	)
+	return conjoined.replaceAll(/\s+/g, ' ')
+}
+
+/**
+ * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ */
+export function css(strings: TemplateStringsArray, ...values: unknown[]): string {
+	const conjoined = strings.reduce(
+		(result, text, i) => `${result}${text}${String(values[i] ?? '')}`,
+		'',
+	)
+	return conjoined.replaceAll(/\s+/g, ' ')
+}

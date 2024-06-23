@@ -1,4 +1,5 @@
 import { formatSetStyleResult, getStyle, setStyle } from '../src/lib'
+import { css } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stablePrettyMs } from './utilities/stable-sync-results'
 import { expect, it } from 'vitest'
@@ -19,27 +20,21 @@ describeWithFileFixture(
 				},
 			})
 
-			expect(result).toMatchInlineSnapshot(`
-				"
-					.card {
-						font-family: arial;
-						font-size: 20px;
-						text-align: center;
-						color: black;
-						background-color: white;
-					}
-				"
-			`)
+			expect(result).toMatchInlineSnapshot(
+				`" .card { font-family: arial; font-size: 20px; text-align: center; color: black; background-color: white; } "`,
+			)
 		})
 
 		it('sets the style', async () => {
-			const customStyle = `.card {
-														 font-family: monospace;
-														 font-size: 200px;
-														 text-align: left;
-														 color: blue;
-														 background-color: gray;
-													}`
+			const customStyle = css`
+				.card {
+					font-family: monospace;
+					font-size: 200px;
+					text-align: left;
+					color: blue;
+					background-color: gray;
+				}
+			`
 
 			const result = await setStyle({
 				ankiConnectOptions: {

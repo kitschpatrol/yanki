@@ -1,5 +1,5 @@
-import { yankiDefaultDeckName } from '../model/constants'
 import { type YankiNote } from '../model/note'
+import { NOTE_DEFAULT_DECK_NAME, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
 import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import {
 	addNote,
@@ -23,7 +23,7 @@ export type SyncedNote = {
 
 export type SyncOptions = Pick<
 	GlobalOptions,
-	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace' | 'syncToAnkiWebEvenIfUnchanged'
+	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace'
 >
 
 export const defaultSyncOptions: SyncOptions = {
@@ -53,8 +53,10 @@ export async function syncNotes(
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, ankiWeb, dryRun, namespace, syncToAnkiWebEvenIfUnchanged } =
-		deepmerge(defaultSyncOptions, options ?? {}) as SyncOptions
+	const { ankiConnectOptions, ankiWeb, dryRun, namespace } = deepmerge(
+		defaultSyncOptions,
+		options ?? {},
+	) as SyncOptions
 
 	// Namespace validation
 	// Can't be too long because of Anki's limitations around media asset filename length
@@ -108,7 +110,7 @@ export async function syncNotes(
 	// Set undefined local note decks to the default
 	for (const note of allLocalNotes) {
 		if (note.deckName === '') {
-			note.deckName = yankiDefaultDeckName
+			note.deckName = NOTE_DEFAULT_DECK_NAME
 		}
 	}
 
@@ -208,7 +210,7 @@ export async function syncNotes(
 
 	// AnkiWeb sync
 	const isChanged = deletedDecks.length > 0 || synced.some((note) => note.action !== 'unchanged')
-	if (!dryRun && ankiWeb && (isChanged || syncToAnkiWebEvenIfUnchanged)) {
+	if (!dryRun && ankiWeb && (isChanged || SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED)) {
 		await client.miscellaneous.sync()
 	}
 

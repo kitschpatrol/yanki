@@ -1,8 +1,8 @@
-export const environment =
+export const ENVIRONMENT =
 	typeof window === 'undefined' ? (typeof process === 'undefined' ? 'other' : 'node') : 'browser'
 
-export const platform =
-	environment === 'browser'
+export const PLATFORM =
+	ENVIRONMENT === 'browser'
 		? // eslint-disable-next-line n/no-unsupported-features/node-builtins
 			/windows/i.test(navigator.userAgent)
 			? 'windows'
@@ -10,7 +10,7 @@ export const platform =
 				/mac/i.test(navigator.userAgent)
 				? 'mac'
 				: 'other'
-		: environment === 'node'
+		: ENVIRONMENT === 'node'
 			? process.platform === 'win32'
 				? 'windows'
 				: process.platform === 'darwin'

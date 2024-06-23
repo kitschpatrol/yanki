@@ -1,4 +1,9 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
+import {
+	MEDIA_ALLOW_UNKNOWN_URL_EXTENSION,
+	MEDIA_HASH_MODE,
+	MEDIA_URL_CONTENT_TYPE_MODE,
+} from '../shared/constants'
 import { type FetchAdapter } from '../shared/types'
 import { getFileExtensionForMimeType } from './mime'
 import { getHash } from './string'
@@ -62,9 +67,13 @@ export function getSrcType(
  * @returns a concatenated string of the header contents, suitable for hashing, or undefined if no matching headers are present
  */
 function getHeadersString(
-	headers: Headers | Record<string, string>,
+	headers: Headers | Record<string, string> | undefined,
 	headerKeys: string[],
 ): string | undefined {
+	if (headers === undefined) {
+		return undefined
+	}
+
 	if (!(headers instanceof Headers)) {
 		headers = convertKeysToLowercase(headers)
 	}
@@ -96,42 +105,104 @@ function convertKeysToLowercase(object: Record<string, string>): Record<string, 
 
 export async function getFileExtensionFromUrl(
 	url: string,
-	fetchAdapter: FetchAdapter,
+	fetchAdapter: FetchAdapter | undefined,
+	mode = MEDIA_URL_CONTENT_TYPE_MODE,
+	allowUnknown = MEDIA_ALLOW_UNKNOWN_URL_EXTENSION,
 ): Promise<string | undefined> {
-	const response = await fetchAdapter(url, { method: 'HEAD' })
+	switch (mode) {
+		case 'metadata': {
+			if (fetchAdapter === undefined) {
+				// Fall through to name mode
+				return getFileExtensionFromUrl(url, fetchAdapter, 'name')
+			}
 
-	if (response === undefined) {
-		return undefined
+			const response = await fetchAdapter(url, { method: 'HEAD' })
+			const contentTypeHeaderValue = getHeadersString(response?.headers, ['content-type'])
+
+			if (contentTypeHeaderValue === undefined) {
+				// Fall through to name mode
+				return getFileExtensionFromUrl(url, fetchAdapter, 'name')
+			}
+
+			return getFileExtensionForMimeType(contentTypeHeaderValue)
+		}
+
+		case 'name': {
+			let extensionInUrl: string | undefined
+			const urlObject = new URL(url)
+
+			const pathnameParts = urlObject.pathname.split('.')
+			if (pathnameParts.length > 1) {
+				extensionInUrl = pathnameParts.at(-1)
+			} else {
+				// Look in the query string if we must...
+				const searchParts = urlObject.search.split('.')
+				extensionInUrl = searchParts.at(-1)
+			}
+
+			const validExtension = getFileExtensionForMimeType(extensionInUrl ?? '')
+
+			if (validExtension === undefined && allowUnknown) {
+				return 'unknown'
+			}
+
+			return validExtension
+		}
 	}
-
-	const contentType = getHeadersString(response.headers, ['content-type'])
-
-	if (contentType === undefined) {
-		return undefined
-	}
-
-	return getFileExtensionForMimeType(contentType)
 }
 
+/**
+ *  Tradeoffs between content change sensitivity and speed / efficiency,
+ * especially for remote assets.
+ *
+ * - `filename`: Use the filename of the media asset, no network required.
+ * - `metadata`: Use the metadata of the media asset, either fstat stuff for
+ *   files, or reading the headers for URLs... requires a network request for
+ *   remote urls. Falls through to `filename` if not available.
+ * - `content`: Actually read the content of the media asset, requires reading
+ *   the file or fetching the URL. Not yet implemented. Falls through to
+ *   `metadata` if not available.
+ *
+ * @param url
+ * @param fetchAdapter
+ * @param mode
+ * @returns
+ */
 export async function getUrlContentHash(
 	url: string,
 	fetchAdapter: FetchAdapter,
-): Promise<string | undefined> {
-	const response = await fetchAdapter(url, { method: 'HEAD' })
+	mode = MEDIA_HASH_MODE,
+): Promise<string> {
+	// Obliging the no-fallthrough lint rule, but this effectively falls through
+	// via recursion instead...
+	switch (mode) {
+		case 'content': {
+			// TODO do a real hash of the actual response content?
+			// Try more performance metadata approach first?
+			// Use crypto-hash thing for performant isomorphic hashing? How slow?
+			console.warn('`content` hash mode is not yet implemented for URLs')
+			// Use metadata mode
+			return getUrlContentHash(url, fetchAdapter, 'metadata')
+		}
 
-	if (response === undefined) {
-		return undefined
+		case 'metadata': {
+			const response = await fetchAdapter(url, { method: 'HEAD' })
+			const stringToHash = getHeadersString(response?.headers, [
+				'etag',
+				'last-modified',
+				'content-length',
+			])
+
+			if (stringToHash === undefined) {
+				// Fall through to name mode
+				return getUrlContentHash(url, fetchAdapter, 'name')
+			}
+
+			return getHash(stringToHash, 16)
+		}
+
+		case 'name': {
+			return getHash(url, 16)
+		}
 	}
-
-	const stringToHash = getHeadersString(response.headers, [
-		'etag',
-		'last-modified',
-		'content-length',
-	])
-
-	if (stringToHash === undefined) {
-		return undefined
-	}
-
-	return getHash(stringToHash, 16)
 }

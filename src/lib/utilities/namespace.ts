@@ -1,5 +1,5 @@
 /* eslint-disable no-control-regex */
-import { yankiMaxNamespaceLength } from '../model/constants'
+import { NOTE_NAMESPACE_MAX_LENGTH } from '../shared/constants'
 import slugify from '@sindresorhus/slugify'
 
 /**
@@ -38,8 +38,8 @@ export function validateNamespace(namespace: string, allowAsterisk = false) {
 		errorMessages.push('Cannot be empty')
 	}
 
-	if (namespace.trim().length > yankiMaxNamespaceLength) {
-		errorMessages.push(`Cannot be longer than ${yankiMaxNamespaceLength} characters`)
+	if (namespace.trim().length > NOTE_NAMESPACE_MAX_LENGTH) {
+		errorMessages.push(`Cannot be longer than ${NOTE_NAMESPACE_MAX_LENGTH} characters`)
 	}
 
 	const forbiddenCharacters: Array<[RegExp, string]> = [

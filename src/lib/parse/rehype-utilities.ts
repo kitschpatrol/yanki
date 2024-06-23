@@ -2,8 +2,11 @@
 // https://github.com/Microflash/rehype-starry-night
 // https://github.com/rehypejs/rehype-highlight
 
-import { yankiDefaultEmptyNotePlaceholderHast } from '../model/constants'
-import { yankiSupportedAudioVideoFormats, yankiSupportedImageFormats } from '../model/model'
+import {
+	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
+	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
+	NOTE_DEFAULT_EMPTY_HAST,
+} from '../shared/constants'
 import {
 	type GlobalOptions,
 	defaultGlobalOptions,
@@ -95,7 +98,7 @@ export async function mdastToHtml(
 
 	// Add a wrapper div with a specific class to the HTML
 	// This is useful for styling the HTML output
-	const nonEmptyHast = isEmpty ? yankiDefaultEmptyNotePlaceholderHast : hast
+	const nonEmptyHast = isEmpty ? NOTE_DEFAULT_EMPTY_HAST : hast
 	const hastWithClass: HastRoot = u('root', [
 		u(
 			'element',
@@ -156,8 +159,6 @@ export async function mdastToHtml(
 				return CONTINUE
 			}
 
-			const allowUnknownUrlExtension = true
-
 			// The src will be URI-encoded at this point, which we don't want for local files
 			// Local file URLs must be converted into paths before decoding, and must be absolute
 			// already so they are not resolved
@@ -174,31 +175,29 @@ export async function mdastToHtml(
 				const safeFilename = await getSafeAnkiMediaFilename(
 					absoluteSrcOrUrl,
 					namespace,
-					allowUnknownUrlExtension,
 					fileAdapters,
 					fetchAdapter,
 				)
 
-				const extension = await getAnkiMediaFilenameExtension(
-					absoluteSrcOrUrl,
-					allowUnknownUrlExtension,
-					true,
-					fetchAdapter,
-				)
+				const extension = await getAnkiMediaFilenameExtension(absoluteSrcOrUrl, fetchAdapter)
 
 				if (extension === undefined) {
 					console.warn(`Could not determine extension for ${String(node.properties.src)}`)
 					return
 				}
 
-				// Assume remote image assets without a valid extension  are images... they will have 'unknown' as their extension if allowUnknownUrlExtension is true
+				// Assume remote image assets without a valid extension  are images... they will have 'unknown' as their extension if MEDIA_ALLOW_UNKNOWN_URL_EXTENSION is true
 				if (
-					(['unknown', ...yankiSupportedImageFormats] as unknown as string[]).includes(extension)
+					(['unknown', ...MEDIA_SUPPORTED_IMAGE_EXTENSIONS] as unknown as string[]).includes(
+						extension,
+					)
 				) {
 					node.properties.src = safeFilename
 					node.properties.className = ['yanki-media', 'yanki-media-image']
 					node.properties['data-src-original'] = absoluteSrcOrUrl
-				} else if ((yankiSupportedAudioVideoFormats as unknown as string[]).includes(extension)) {
+				} else if (
+					(MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS as unknown as string[]).includes(extension)
+				) {
 					// Replace the current node with a span
 					// containing the Anki media embedding syntax
 					// Using <audio> and <video> tags would be nicer, and <audio> kind of works on desktop,

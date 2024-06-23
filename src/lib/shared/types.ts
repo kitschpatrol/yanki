@@ -1,4 +1,4 @@
-import { environment } from '../utilities/platform'
+import { ENVIRONMENT } from '../utilities/platform'
 import path from 'path-browserify-esm'
 import {
 	type YankiConnectOptions,
@@ -50,16 +50,6 @@ export type GlobalOptions = {
 	obsidianVault: string | undefined
 	/** Sync image, video, and audio assets to Anki's media storage system */
 	syncMediaAssets: SyncMediaAssets
-	/**
-	 * Whether to require changes to notes, models, or decks before invoking an
-	 * AnkiWeb sync. Seems like a good idea, but this is tricky... because if you
-	 * change the AnkiWeb flag after doing a sync, and haven't changed any files,
-	 * you won't end up pushing changes to AnkiWeb, which seems to contradict
-	 * expectations even though it would be more performant in the typical case.
-	 *
-	 * Still requires the AnkiWeb flag to be true.
-	 * */
-	syncToAnkiWebEvenIfUnchanged: boolean
 }
 
 export const defaultGlobalOptions: GlobalOptions = {
@@ -67,7 +57,6 @@ export const defaultGlobalOptions: GlobalOptions = {
 	ankiWeb: false,
 	cwd: path.process_cwd,
 	dryRun: false,
-
 	fetchAdapter: undefined, // Must be passed in later, deepmerge will not work
 	fileAdapters: undefined, // Must be passed in later, deepmerge will not work
 	manageFilenames: 'off',
@@ -75,15 +64,14 @@ export const defaultGlobalOptions: GlobalOptions = {
 	namespace: 'Yanki',
 	obsidianVault: undefined,
 	syncMediaAssets: 'local',
-	syncToAnkiWebEvenIfUnchanged: true,
 }
 
 // Helpers ---------------------------
 
-const fs = environment === 'node' ? ((await import('node:fs/promises')) as FileAdapters) : undefined
+const fs = ENVIRONMENT === 'node' ? ((await import('node:fs/promises')) as FileAdapters) : undefined
 
 export function getDefaultFileAdapters(): FileAdapters {
-	if (environment === 'node') {
+	if (ENVIRONMENT === 'node') {
 		if (fs === undefined) {
 			throw new Error('Issue loading file functions in Node environment')
 		}

@@ -414,11 +414,10 @@ export async function getRemoteNotesById(
 			cards: ankiNote.cards,
 			deckName: [...deckSet][0],
 			fields: {
-				// eslint-disable-next-line @typescript-eslint/naming-convention
 				Back: ankiNote.fields.Back.value ?? '',
-				// eslint-disable-next-line @typescript-eslint/naming-convention
+
 				Front: ankiNote.fields.Front.value ?? '',
-				// eslint-disable-next-line @typescript-eslint/naming-convention
+
 				YankiNamespace: ankiNote.fields.YankiNamespace.value ?? '',
 			},
 			modelName: ankiNote.modelName as YankiModelName, // Checked above

@@ -1,16 +1,15 @@
-import {
-	yankiDefaultEmptyNotePlaceholderText,
-	yankiMaxMediaFilenameLength,
-} from '../model/constants'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
+import {
+	MEDIA_DEFAULT_EMPTY_FILENAME,
+	MEDIA_FILENAME_MAX_LENGTH,
+	NOTE_DEFAULT_EMPTY_TEXT,
+} from '../shared/constants'
 import type { ManageFilenames } from '../shared/types'
 import { emptyIsUndefined, truncateOnWordBoundary } from './string'
 import filenamify from 'filenamify'
 import { nanoid } from 'nanoid'
 import path from 'path-browserify-esm'
-
-export const defaultEmptyFilenamePlaceholderText = 'Untitled'
 
 // eslint-disable-next-line complexity
 export function getSafeTitleForNote(
@@ -28,13 +27,13 @@ export function getSafeTitleForNote(
 		case 'Yanki - Basic (type in the answer)': {
 			const cleanFront = emptyIsUndefined(
 				getSafeFilename(note.fields.Front)
-					.replace(yankiDefaultEmptyNotePlaceholderText, '')
-					.replace(defaultEmptyFilenamePlaceholderText, ''),
+					.replace(NOTE_DEFAULT_EMPTY_TEXT, '')
+					.replace(MEDIA_DEFAULT_EMPTY_FILENAME, ''),
 			)
 			const cleanBack = emptyIsUndefined(
 				getSafeFilename(note.fields.Back)
-					.replace(yankiDefaultEmptyNotePlaceholderText, '')
-					.replace(defaultEmptyFilenamePlaceholderText, ''),
+					.replace(NOTE_DEFAULT_EMPTY_TEXT, '')
+					.replace(MEDIA_DEFAULT_EMPTY_FILENAME, ''),
 			)
 
 			// Always try to provide some semantic value
@@ -53,8 +52,8 @@ export function getSafeTitleForNote(
 		case 'Yanki - Cloze': {
 			const cleanFront = emptyIsUndefined(
 				getSafeFilename(note.fields.Front)
-					.replace(yankiDefaultEmptyNotePlaceholderText, '')
-					.replace(defaultEmptyFilenamePlaceholderText, ''),
+					.replace(NOTE_DEFAULT_EMPTY_TEXT, '')
+					.replace(MEDIA_DEFAULT_EMPTY_FILENAME, ''),
 			)
 
 			if (cleanFront === undefined) {
@@ -104,7 +103,7 @@ function getSafeFilename(text: string, maxLength?: number | undefined): string {
 
 	// Edge case where the filename is empty
 	if (basicSafeFilename.length === 0) {
-		basicSafeFilename = defaultEmptyFilenamePlaceholderText
+		basicSafeFilename = MEDIA_DEFAULT_EMPTY_FILENAME
 	}
 
 	if (maxLength === undefined) {
@@ -114,7 +113,7 @@ function getSafeFilename(text: string, maxLength?: number | undefined): string {
 	// Use yanki's max media filename as an upper limit
 	// 3 `.md`, 9 for increment (temporarily 8 character nanoid + dot)
 	// truncateOnWordBoundary factors ellipses
-	const safeMaxLength = Math.min(maxLength, yankiMaxMediaFilenameLength - (3 + 9))
+	const safeMaxLength = Math.min(maxLength, MEDIA_FILENAME_MAX_LENGTH - (3 + 9))
 	return truncateOnWordBoundary(basicSafeFilename, safeMaxLength)
 }
 

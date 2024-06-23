@@ -1,5 +1,6 @@
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
+import { SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
 import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import {
 	deleteNotes,
@@ -17,7 +18,7 @@ import { YankiConnect } from 'yanki-connect'
 
 export type CleanOptions = Pick<
 	GlobalOptions,
-	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace' | 'syncToAnkiWebEvenIfUnchanged'
+	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace'
 >
 export const defaultCleanOptions: CleanOptions = {
 	...defaultGlobalOptions,
@@ -45,8 +46,10 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, ankiWeb, dryRun, namespace, syncToAnkiWebEvenIfUnchanged } =
-		deepmerge(defaultCleanOptions, options ?? {}) as CleanOptions
+	const { ankiConnectOptions, ankiWeb, dryRun, namespace } = deepmerge(
+		defaultCleanOptions,
+		options ?? {},
+	) as CleanOptions
 
 	const client = new YankiConnect(ankiConnectOptions)
 
@@ -67,7 +70,7 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 
 	// AnkiWeb sync
 	const isChanged = remoteNotes.length > 0 || deletedDecks.length > 0
-	if (!dryRun && ankiWeb && (isChanged || syncToAnkiWebEvenIfUnchanged)) {
+	if (!dryRun && ankiWeb && (isChanged || SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED)) {
 		await client.miscellaneous.sync()
 	}
 

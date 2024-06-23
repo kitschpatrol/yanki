@@ -1,9 +1,12 @@
-import { yankiMaxMediaFilenameLength } from '../model/constants'
-import { yankiSupportedAudioVideoFormats, yankiSupportedImageFormats } from '../model/model'
+import {
+	MEDIA_FILENAME_MAX_LENGTH,
+	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
+	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
+} from '../shared/constants'
 import { type FetchAdapter, type FileAdapters } from '../shared/types'
 import { getFileContentHash } from './file'
 import { getSlugifiedNamespace } from './namespace'
-import { getHash, truncateOnWordBoundary } from './string'
+import { truncateOnWordBoundary } from './string'
 import { getFileExtensionFromUrl, getUrlContentHash, isUrl } from './url'
 import slugify from '@sindresorhus/slugify'
 import path from 'path-browserify-esm'
@@ -14,55 +17,23 @@ import path from 'path-browserify-esm'
  */
 export async function getAnkiMediaFilenameExtension(
 	pathOrUrl: string,
-	allowUnknownUrlExtension: boolean,
-	fetchContentTypeForUrls: boolean,
 	fetchAdapter: FetchAdapter | undefined,
 ): Promise<string | undefined> {
-	let extensionCandidate: string | undefined
-	let isUrl = false
+	const extensionCandidate = isUrl(pathOrUrl)
+		? await getFileExtensionFromUrl(pathOrUrl, fetchAdapter)
+		: path.extname(pathOrUrl).slice(1)
 
-	try {
-		const url = new URL(pathOrUrl)
-		isUrl = true
-
-		if (fetchContentTypeForUrls && fetchAdapter !== undefined) {
-			extensionCandidate = await getFileExtensionFromUrl(pathOrUrl, fetchAdapter)
-
-			if (extensionCandidate === undefined) {
-				console.warn(
-					`Could not determine extension for ${pathOrUrl}, falling back to inference from URL.`,
-				)
-			}
-		}
-
-		if (extensionCandidate === undefined) {
-			const pathnameParts = url.pathname.split('.')
-			if (pathnameParts.length > 1) {
-				extensionCandidate = pathnameParts.at(-1)
-			} else {
-				// Look in the query string if we must...
-				const searchParts = url.search.split('.')
-				extensionCandidate = searchParts.at(-1)
-			}
-		}
-	} catch {
-		// Must be a file path
-		const filePath = pathOrUrl
-		extensionCandidate = path.extname(filePath).slice(1)
-	}
-
-	// Make sure it's supported
-
+	// Make sure it's supported, note 'unknown' special case for URLs
 	if (
 		extensionCandidate === undefined ||
-		!([...yankiSupportedAudioVideoFormats, ...yankiSupportedImageFormats] as string[]).includes(
-			extensionCandidate,
-		)
+		!(
+			[
+				'unknown',
+				...MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
+				...MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
+			] as string[]
+		).includes(extensionCandidate)
 	) {
-		if (isUrl && allowUnknownUrlExtension) {
-			return 'unknown'
-		}
-
 		return undefined
 	}
 
@@ -101,31 +72,18 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 export async function getSafeAnkiMediaFilename(
 	absolutePathOrUrl: string,
 	namespace: string,
-	allowUnknownUrlExtension: boolean,
 	fileAdapters: FileAdapters,
 	fetchAdapter: FetchAdapter,
 ): Promise<string> {
 	// Can be a bit more than 40 characters, since it's always prefixed with `yanki-media-`
 	const safeNamespace = getSlugifiedNamespace(namespace)
-
-	// TODO actually hash the content... pass in Fetch and File adapters? Use
-	// crypto-hash thing for performant isomorphic hashing? How slow?
-	// Or fstat for files and headers for URLs would be faster?
-	const assetHash =
-		(await getContentHash(absolutePathOrUrl, fileAdapters, fetchAdapter)) ??
-		getHash(absolutePathOrUrl, 16)
-
-	const rawFileExtension = await getAnkiMediaFilenameExtension(
-		absolutePathOrUrl,
-		allowUnknownUrlExtension,
-		true,
-		fetchAdapter,
-	)
+	const assetHash = await getContentHash(absolutePathOrUrl, fileAdapters, fetchAdapter)
+	const rawFileExtension = await getAnkiMediaFilenameExtension(absolutePathOrUrl, fetchAdapter)
 	const fileExtension = rawFileExtension === undefined ? '' : `.${rawFileExtension}`
 
 	// Make the legible filename as long as possible, add in the dash widths, dot is included in the extension
 	const legibleFilenameLength =
-		yankiMaxMediaFilenameLength -
+		MEDIA_FILENAME_MAX_LENGTH -
 		(safeNamespace.length + 1 + assetHash.length + 1 + fileExtension.length)
 
 	const legibleFilename = getLegibleFilename(absolutePathOrUrl, legibleFilenameLength)
@@ -133,7 +91,7 @@ export async function getSafeAnkiMediaFilename(
 	const safeFilename = `${safeNamespace}-${assetHash}-${legibleFilename}${fileExtension}`
 
 	// Should never happen
-	if (safeFilename.length > yankiMaxMediaFilenameLength) {
+	if (safeFilename.length > MEDIA_FILENAME_MAX_LENGTH) {
 		throw new Error(`Filename too long: ${safeFilename}`)
 	}
 
@@ -144,14 +102,8 @@ async function getContentHash(
 	absolutePathOrUrl: string,
 	fileAdapters: FileAdapters,
 	fetchAdapter: FetchAdapter,
-): Promise<string | undefined> {
-	const hash = isUrl(absolutePathOrUrl)
-		? await getUrlContentHash(absolutePathOrUrl, fetchAdapter)
-		: await getFileContentHash(absolutePathOrUrl, fileAdapters)
-
-	if (hash === undefined) {
-		console.warn(`Could not get content hash for: ${absolutePathOrUrl}, falling back to path hash.`)
-	}
-
-	return hash
+): Promise<string> {
+	return isUrl(absolutePathOrUrl)
+		? getUrlContentHash(absolutePathOrUrl, fetchAdapter)
+		: getFileContentHash(absolutePathOrUrl, fileAdapters)
 }

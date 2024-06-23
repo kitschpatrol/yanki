@@ -1,5 +1,5 @@
-import { yankiDefaultCss } from '../model/constants'
 import { yankiModelNames } from '../model/model'
+import { CSS_DEFAULT_STYLE, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
 import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
 import { getModelStyle, requestPermission, updateModelStyle } from '../utilities/anki-connect'
 import { deepmerge } from 'deepmerge-ts'
@@ -10,13 +10,10 @@ import { YankiConnect } from 'yanki-connect'
 
 export type SetStyleOptions = {
 	css: string
-} & Pick<
-	GlobalOptions,
-	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'syncToAnkiWebEvenIfUnchanged'
->
+} & Pick<GlobalOptions, 'ankiConnectOptions' | 'ankiWeb' | 'dryRun'>
 
 export const defaultSetStyleOptions: SetStyleOptions = {
-	css: yankiDefaultCss,
+	css: CSS_DEFAULT_STYLE,
 	...defaultGlobalOptions,
 }
 
@@ -68,7 +65,7 @@ export async function setStyle(options: PartialDeep<SetStyleOptions>): Promise<S
 	const startTime = performance.now()
 
 	// Defaults
-	const { ankiConnectOptions, ankiWeb, css, dryRun, syncToAnkiWebEvenIfUnchanged } = deepmerge(
+	const { ankiConnectOptions, ankiWeb, css, dryRun } = deepmerge(
 		defaultSetStyleOptions,
 		options ?? {},
 	) as SetStyleOptions
@@ -93,7 +90,7 @@ export async function setStyle(options: PartialDeep<SetStyleOptions>): Promise<S
 
 	// AnkiWeb sync
 	const isChanged = modelsReport.some((model) => model.action !== 'unchanged')
-	if (!dryRun && ankiWeb && (isChanged || syncToAnkiWebEvenIfUnchanged)) {
+	if (!dryRun && ankiWeb && (isChanged || SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED)) {
 		await client.miscellaneous.sync()
 	}
 

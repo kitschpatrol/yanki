@@ -1,10 +1,10 @@
 import { requestPermission } from '../../src/lib/utilities/anki-connect'
-import { platform } from '../../src/lib/utilities/platform'
+import { PLATFORM } from '../../src/lib/utilities/platform'
 import { execa } from 'execa'
 import { YankiConnect } from 'yanki-connect'
 
 export async function closeAnki(): Promise<void> {
-	if (platform !== 'mac') {
+	if (PLATFORM !== 'mac') {
 		throw new Error('This function only works on Mac')
 	}
 

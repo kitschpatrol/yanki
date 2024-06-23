@@ -2,8 +2,8 @@
  * Turns a markdown string into a YankiNote object.
  */
 
-import { yankiDefaultCssClassName } from '../model/constants'
 import { type YankiNote } from '../model/note'
+import { CSS_DEFAULT_CLASS_NAME } from '../shared/constants'
 import {
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
@@ -72,7 +72,7 @@ export async function getNoteFromMarkdown(
 			// Basic can technically have no back , but it's confusing so we throw in the placeholder.
 			front = await mdastToHtml(firstPart, {
 				cssClassNames: [
-					yankiDefaultCssClassName,
+					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${namespace}`,
 					'front',
 					`model-${modelName}`,
@@ -86,7 +86,7 @@ export async function getNoteFromMarkdown(
 			})
 			back = await mdastToHtml(secondPart, {
 				cssClassNames: [
-					yankiDefaultCssClassName,
+					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${namespace}`,
 					'back',
 					`model-${modelName}`,
@@ -109,7 +109,7 @@ export async function getNoteFromMarkdown(
 			// Cloze can't have empty front? But what does that even mean?
 			front = await mdastToHtml(firstPart, {
 				cssClassNames: [
-					yankiDefaultCssClassName,
+					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${namespace}`,
 					'front',
 					`model-${modelName}`,
@@ -123,7 +123,7 @@ export async function getNoteFromMarkdown(
 			})
 			back = await mdastToHtml(secondPart, {
 				cssClassNames: [
-					yankiDefaultCssClassName,
+					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${namespace}`,
 					'back',
 					`model-${modelName}`,
@@ -155,7 +155,7 @@ export async function getNoteFromMarkdown(
 
 			front = await mdastToHtml(firstPart, {
 				cssClassNames: [
-					yankiDefaultCssClassName,
+					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${namespace}`,
 					'front',
 					`model-${modelName}`,
@@ -171,7 +171,7 @@ export async function getNoteFromMarkdown(
 			// HTML in the "blank" seems to parse correctly in Anki, but appears as plain text
 			back = await mdastToHtml(secondPartHast, {
 				cssClassNames: [
-					yankiDefaultCssClassName,
+					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${namespace}`,
 					'back',
 					`model-${modelName}`,
@@ -192,11 +192,10 @@ export async function getNoteFromMarkdown(
 		// deckName: frontmatter.deckName ?? '',
 		deckName: '', // Set later based on file path if undefined
 		fields: {
-			// eslint-disable-next-line @typescript-eslint/naming-convention
 			Back: back,
-			// eslint-disable-next-line @typescript-eslint/naming-convention
+
 			Front: front,
-			// eslint-disable-next-line @typescript-eslint/naming-convention
+
 			YankiNamespace: namespace,
 		},
 		modelName,

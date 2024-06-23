@@ -6,7 +6,7 @@ import {
 	getDefaultFetchAdapter,
 	getDefaultFileAdapters,
 } from '../shared/types'
-import { environment } from '../utilities/platform'
+import { ENVIRONMENT } from '../utilities/platform'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 
@@ -101,7 +101,7 @@ function getDeckNamesFromFilePaths(
 	absoluteFilePaths: string[],
 	mode: 'common-parent' | 'common-root' = 'common-root',
 ) {
-	if (environment === 'node') {
+	if (ENVIRONMENT === 'node') {
 		path.setCWD(process.cwd())
 	}
 

@@ -1,5 +1,5 @@
 /* eslint-disable no-irregular-whitespace */
-import { yankiMaxNamespaceLength } from '../src/lib/model/constants'
+import { NOTE_NAMESPACE_MAX_LENGTH } from '../src/lib/shared/constants'
 import { sanitizeNamespace, validateNamespace } from '../src/lib/utilities/namespace'
 import { expect, it } from 'vitest'
 
@@ -21,12 +21,12 @@ it('allows valid namespaces', () => {
 	}).not.toThrow()
 
 	expect(() => {
-		validateNamespace(Array.from({ length: yankiMaxNamespaceLength }, () => 'A').join(''))
+		validateNamespace(Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH }, () => 'A').join(''))
 	}).not.toThrow()
 
 	expect(() => {
 		validateNamespace(
-			`   ${Array.from({ length: yankiMaxNamespaceLength }, () => 'A').join('')}   `,
+			`   ${Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH }, () => 'A').join('')}   `,
 		)
 	}).not.toThrow()
 })
@@ -57,7 +57,7 @@ it('catches invalid namespaces', () => {
 			- Forbidden character: Asterisk: "*"]
 	`)
 	expect(() => {
-		validateNamespace(Array.from({ length: yankiMaxNamespaceLength + 1 }, () => 'A').join(''))
+		validateNamespace(Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH + 1 }, () => 'A').join(''))
 	}).toThrowErrorMatchingInlineSnapshot(`
 		[Error: Invalid namespace provided:
 			- Cannot be longer than 40 characters]
