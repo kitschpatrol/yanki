@@ -18,8 +18,8 @@ importers:
         specifier: ^4.0.4
         version: 4.0.4
       '@types/node':
-        specifier: ^20.14.7
-        version: 20.14.7
+        specifier: ^20.14.8
+        version: 20.14.8
       '@types/unist':
         specifier: ^3.0.2
         version: 3.0.2
@@ -56,7 +56,7 @@ importers:
         version: 2.2.1
       '@vitest/coverage-v8':
         specifier: ^1.6.0
-        version: 1.6.0(vitest@1.6.0(@types/node@20.14.7)(jsdom@23.2.0))
+        version: 1.6.0(vitest@1.6.0(@types/node@20.14.8)(jsdom@23.2.0))
       bumpp:
         specifier: ^9.4.1
         version: 9.4.1(magicast@0.3.4)
@@ -152,16 +152,16 @@ importers:
         version: 5.0.0
       vite:
         specifier: ^5.3.1
-        version: 5.3.1(@types/node@20.14.7)
+        version: 5.3.1(@types/node@20.14.8)
       vitest:
         specifier: ^1.6.0
-        version: 1.6.0(@types/node@20.14.7)(jsdom@23.2.0)
+        version: 1.6.0(@types/node@20.14.8)(jsdom@23.2.0)
       yaml:
         specifier: ^2.4.5
         version: 2.4.5
       yanki-connect:
-        specifier: ^2.0.0
-        version: 2.0.0
+        specifier: ^2.0.2
+        version: 2.0.2
 
 packages:
 
@@ -1133,8 +1133,8 @@ packages:
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
 
-  '@types/node@20.14.7':
-    resolution: {integrity: sha512-uTr2m2IbJJucF3KUxgnGOZvYbN0QgkGyWxG6973HCpMYFy2KfcgYuIwkJQMQkt1VbBMlvWRbpshFTLxnxCZjKQ==}
+  '@types/node@20.14.8':
+    resolution: {integrity: sha512-DO+2/jZinXfROG7j7WKFn/3C6nFwxy2lLpgLjEXJz+0XKphZlTLJ14mo8Vfg8X5BWN6XjyESXq+LcYdT7tR3bA==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -4992,8 +4992,8 @@ packages:
     engines: {node: '>= 14'}
     hasBin: true
 
-  yanki-connect@2.0.0:
-    resolution: {integrity: sha512-rCEqSZRxKUwuE0TkyewZavB8ySh9xfdtC5LEL3E9lXpccEIpEaVwJGXOarSp+eo9Vw3yHizLpgh/UvgtBEm77Q==}
+  yanki-connect@2.0.2:
+    resolution: {integrity: sha512-wdP1PoTa6Q6+ZElu4zGp2hpKeq2e9fPiZhskj85VQP7401edmxAgftMAeqSauLytBNB3E9cXYRTVGs+60Iw2Gw==}
     engines: {node: '>=18.0.0', pnpm: '>=8.0.0'}
 
   yargs-parser@21.1.1:
@@ -5962,7 +5962,7 @@ snapshots:
 
   '@types/concat-stream@2.0.3':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.8
 
   '@types/debug@4.1.12':
     dependencies:
@@ -6002,7 +6002,7 @@ snapshots:
 
   '@types/ms@0.7.34': {}
 
-  '@types/node@20.14.7':
+  '@types/node@20.14.8':
     dependencies:
       undici-types: 5.26.5
 
@@ -6028,7 +6028,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.8
     optional: true
 
   '@typescript-eslint/eslint-plugin@7.13.0(@typescript-eslint/parser@7.13.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.57.0)(typescript@5.5.2)':
@@ -6114,7 +6114,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@20.14.7)(jsdom@23.2.0))':
+  '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@20.14.8)(jsdom@23.2.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -6129,7 +6129,7 @@ snapshots:
       std-env: 3.7.0
       strip-literal: 2.1.0
       test-exclude: 6.0.0
-      vitest: 1.6.0(@types/node@20.14.7)(jsdom@23.2.0)
+      vitest: 1.6.0(@types/node@20.14.8)(jsdom@23.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -6642,9 +6642,9 @@ snapshots:
 
   core-util-is@1.0.3: {}
 
-  cosmiconfig-typescript-loader@5.0.0(@types/node@20.14.7)(cosmiconfig@9.0.0(typescript@5.5.2))(typescript@5.5.2):
+  cosmiconfig-typescript-loader@5.0.0(@types/node@20.14.8)(cosmiconfig@9.0.0(typescript@5.5.2))(typescript@5.5.2):
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.8
       cosmiconfig: 9.0.0(typescript@5.5.2)
       jiti: 1.21.6
       typescript: 5.5.2
@@ -8590,12 +8590,12 @@ snapshots:
       '@clack/prompts': 0.7.0
       '@kitschpatrol/tldraw-cli': 4.6.3(typescript@5.5.2)
       '@types/mdast': 4.0.4
-      '@types/node': 20.14.7
+      '@types/node': 20.14.8
       '@types/unist': 3.0.2
       '@types/which': 3.0.4
       '@types/yargs': 17.0.32
       cosmiconfig: 9.0.0(typescript@5.5.2)
-      cosmiconfig-typescript-loader: 5.0.0(@types/node@20.14.7)(cosmiconfig@9.0.0(typescript@5.5.2))(typescript@5.5.2)
+      cosmiconfig-typescript-loader: 5.0.0(@types/node@20.14.8)(cosmiconfig@9.0.0(typescript@5.5.2))(typescript@5.5.2)
       execa: 9.3.0
       globby: 14.0.1
       read-pkg: 9.0.1
@@ -10709,7 +10709,7 @@ snapshots:
       '@types/concat-stream': 2.0.3
       '@types/debug': 4.1.12
       '@types/is-empty': 1.2.3
-      '@types/node': 20.14.7
+      '@types/node': 20.14.8
       '@types/unist': 3.0.2
       concat-stream: 2.0.0
       debug: 4.3.5
@@ -10917,13 +10917,13 @@ snapshots:
       unist-util-stringify-position: 4.0.0
       vfile-message: 4.0.2
 
-  vite-node@1.6.0(@types/node@20.14.7):
+  vite-node@1.6.0(@types/node@20.14.8):
     dependencies:
       cac: 6.7.14
       debug: 4.3.5
       pathe: 1.1.2
       picocolors: 1.0.1
-      vite: 5.3.1(@types/node@20.14.7)
+      vite: 5.3.1(@types/node@20.14.8)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -10934,16 +10934,16 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.3.1(@types/node@20.14.7):
+  vite@5.3.1(@types/node@20.14.8):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.38
       rollup: 4.18.0
     optionalDependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.8
       fsevents: 2.3.3
 
-  vitest@1.6.0(@types/node@20.14.7)(jsdom@23.2.0):
+  vitest@1.6.0(@types/node@20.14.8)(jsdom@23.2.0):
     dependencies:
       '@vitest/expect': 1.6.0
       '@vitest/runner': 1.6.0
@@ -10962,11 +10962,11 @@ snapshots:
       strip-literal: 2.1.0
       tinybench: 2.8.0
       tinypool: 0.8.4
-      vite: 5.3.1(@types/node@20.14.7)
-      vite-node: 1.6.0(@types/node@20.14.7)
+      vite: 5.3.1(@types/node@20.14.8)
+      vite-node: 1.6.0(@types/node@20.14.8)
       why-is-node-running: 2.2.2
     optionalDependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.8
       jsdom: 23.2.0
     transitivePeerDependencies:
       - less
@@ -11098,9 +11098,9 @@ snapshots:
 
   yaml@2.4.5: {}
 
-  yanki-connect@2.0.0:
+  yanki-connect@2.0.2:
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.8
       open: 10.1.0
 
   yargs-parser@21.1.1: {}
