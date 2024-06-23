@@ -8,6 +8,7 @@ import { cleanNotes } from '../../src/lib'
 import { yankiModelNames } from '../../src/lib/model/model'
 import { CSS_DEFAULT_STYLE } from '../../src/lib/shared/constants'
 import { createModels, getModelStyle, updateModelStyle } from '../../src/lib/utilities/anki-connect'
+import { getHash } from '../../src/lib/utilities/string'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
@@ -37,7 +38,7 @@ export function describeWithFileFixture(
 		const context: TestContext = {
 			assetPath: '',
 			files: [],
-			namespace: `Yanki Test - ${description}`,
+			namespace: `Yanki Test - ${getHash(description, 16)}`,
 			yankiConnect: new YankiConnect({ autoLaunch: true }),
 		}
 		let tempAssetPath: string

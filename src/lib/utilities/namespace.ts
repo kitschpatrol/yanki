@@ -3,6 +3,17 @@ import { NOTE_NAMESPACE_MAX_LENGTH } from '../shared/constants'
 import slugify from '@sindresorhus/slugify'
 
 /**
+ * Convenience
+ * @param namespace
+ * @returns sanitized valid namespace
+ * @throws If namespace is invalid
+ */
+export function validateAndSanitizeNamespace(namespace: string, allowAsterisk = false): string {
+	validateNamespace(namespace, allowAsterisk)
+	return sanitizeNamespace(namespace)
+}
+
+/**
  * Used internally before storing and searching
  * @param namespace
  * @returns sanitized namespace

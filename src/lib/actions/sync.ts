@@ -12,6 +12,7 @@ import {
 	updateNote,
 	updateNoteModel,
 } from '../utilities/anki-connect'
+import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { deepmerge } from 'deepmerge-ts'
 import type { PartialDeep, Simplify } from 'type-fest'
 import { YankiConnect } from 'yanki-connect'
@@ -58,18 +59,7 @@ export async function syncNotes(
 		options ?? {},
 	) as SyncOptions
 
-	// Namespace validation
-	// Can't be too long because of Anki's limitations around media asset filename length
-	// TODO just use a hash internally? Safety vs. legibility in Anki...
-	const validNamespace = namespace.trim()
-
-	if (validNamespace === '') {
-		throw new Error('Namespace must not be empty')
-	}
-
-	if (validNamespace.includes('*') || validNamespace.includes(':')) {
-		throw new Error(`Namespace for sync may not contain the characters '*' or ':'`)
-	}
+	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
 
 	const synced: SyncedNote[] = []
 
@@ -83,7 +73,7 @@ export async function syncNotes(
 			deletedDecks: [],
 			dryRun,
 			duration: performance.now() - startTime,
-			namespace,
+			namespace: sanitizedNamespace,
 			synced: allLocalNotes.map((note) => ({
 				action: 'ankiUnreachable',
 				note,
@@ -92,7 +82,7 @@ export async function syncNotes(
 	}
 
 	// Deletion pass, we need the full info to do deck cleanup later on
-	const existingRemoteNotes = await getRemoteNotes(client, namespace)
+	const existingRemoteNotes = await getRemoteNotes(client, sanitizedNamespace)
 
 	const orphanedNotes = existingRemoteNotes.filter(
 		(remoteNote) => !allLocalNotes.some((localNote) => localNote.noteId === remoteNote?.noteId),
@@ -206,7 +196,7 @@ export async function syncNotes(
 	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, existingRemoteNotes, dryRun)
 
 	// Clean up unused media files
-	await deleteUnusedMedia(client, liveNotes, namespace, dryRun)
+	await deleteUnusedMedia(client, liveNotes, sanitizedNamespace, dryRun)
 
 	// AnkiWeb sync
 	const isChanged = deletedDecks.length > 0 || synced.some((note) => note.action !== 'unchanged')
@@ -219,7 +209,7 @@ export async function syncNotes(
 		deletedDecks,
 		dryRun,
 		duration: performance.now() - startTime,
-		namespace,
+		namespace: sanitizedNamespace,
 		synced,
 	}
 }

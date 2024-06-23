@@ -6,7 +6,7 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,
-  "namespace": "Yanki Test - basic synchronization",
+  "namespace": "Yanki Test - b9918cfa0f62798d",
   "synced": [
     {
       "action": "created",
@@ -15,9 +15,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-and-reversed-card"><p><em>(Empty)</em></p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-and-reversed-card"><p>I'm a <strong>question</strong> to which there is no answer.</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic-and-reversed-card"><p><em>(Empty)</em></p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic-and-reversed-card"><p>I'm a <strong>question</strong> to which there is no answer.</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic (and reversed card)",
         "noteId": 0,
@@ -31,9 +31,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-and-reversed-card"><p>I'm an <strong>answer</strong> to which there is no question.</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-and-reversed-card"><p><em>(Empty)</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic-and-reversed-card"><p>I'm an <strong>answer</strong> to which there is no question.</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic-and-reversed-card"><p><em>(Empty)</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic (and reversed card)",
         "noteId": 0,
@@ -47,9 +47,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-and-reversed-card"><p>I'm an <strong>answer</strong> which is sometimes the question</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-and-reversed-card"><p>I'm <em>question</em> which is sometimes the answer</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic-and-reversed-card"><p>I'm an <strong>answer</strong> which is sometimes the question</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic-and-reversed-card"><p>I'm <em>question</em> which is sometimes the answer</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic (and reversed card)",
         "noteId": 0,
@@ -63,10 +63,10 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic (type in the answer)",
         "noteId": 0,
@@ -80,10 +80,10 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic (type in the answer)",
         "noteId": 0,
@@ -99,11 +99,11 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you <strong>need</strong> to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic-type-in-the-answer">I'm the thing you <strong>need</strong> to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p><em>I'm actually also part of the prompt!</em>
 </p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic (type in the answer)",
         "noteId": 0,
@@ -117,11 +117,11 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p><em>I'm actually also part of the prompt!</em>
 </p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic (type in the answer)",
         "noteId": 0,
@@ -135,10 +135,10 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic-type-in-the-answer">I'm the thing you need to type on the card</div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic-type-in-the-answer"><p>I'm the prompt</p>
 <p></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic (type in the answer)",
         "noteId": 0,
@@ -152,10 +152,10 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic"><p>I'm the back of the card</p>
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic"><p>I'm the back of the card</p>
 <p>I have no front.</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p><em>(Empty)</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p><em>(Empty)</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -169,10 +169,10 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic"><p>I'm the back of the card</p>
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic"><p>I'm the back of the card</p>
 <p>I have no front.</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p><em>(Empty)</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p><em>(Empty)</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -186,9 +186,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic"><p>This looks a lot like a <del>cloze</del> but it's a basic answer.</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p><em>(Empty)</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic"><p>This looks a lot like a <del>cloze</del> but it's a basic answer.</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p><em>(Empty)</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -203,8 +203,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p><em>(Empty)</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p><em>(Empty)</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -219,8 +219,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p>My frontmatter is empty.</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p>My frontmatter is empty.</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -234,9 +234,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic"><p>This looks a lot like a <del>cloze</del> or <del>two <em>here's a hint</em></del>.</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p>I'm the question</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic"><p>This looks a lot like a <del>cloze</del> or <del>two <em>here's a hint</em></del>.</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p>I'm the question</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -251,9 +251,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p>I'm the front of the card</p>
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p>I'm the front of the card</p>
 <p>I have no back.</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -267,9 +267,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a back-only emphasized note.</em></p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p><em>(Empty)</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a back-only emphasized note.</em></p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p><em>(Empty)</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -283,9 +283,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic"><p><em>(Empty)</em></p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a front-only emphasized note.</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic"><p><em>(Empty)</em></p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a front-only emphasized note.</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -300,8 +300,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a front-only emphasized note.</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a front-only emphasized note.</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -316,8 +316,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a front-only emphasized note.</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a front-only emphasized note.</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -334,8 +334,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a front-only emphasized note.</em></p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p><em>I look a lot like the thing you need to type in, but i'm just a front-only emphasized note.</em></p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -349,9 +349,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-basic"><p>I'm the back of the card</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-basic"><p>I'm the front of the card</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-basic"><p>I'm the back of the card</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-basic"><p>I'm the front of the card</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -366,8 +366,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-cloze"><p>This card has a {{c1::cloze}} or {{c2::two ::<em>here's a hint</em>}}.</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-cloze"><p>This card has a {{c1::cloze}} or {{c2::two ::<em>here's a hint</em>}}.</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Cloze",
         "noteId": 0,
@@ -381,9 +381,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-basic-synchronization back model-yanki-cloze"><p>And some extra stuff.</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-cloze"><p>This card has a {{c1::cloze}} or {{c2::two ::<em>here's a hint</em>}}.</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Back": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d back model-yanki-cloze"><p>And some extra stuff.</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-cloze"><p>This card has a {{c1::cloze}} or {{c2::two ::<em>here's a hint</em>}}.</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Cloze",
         "noteId": 0,
@@ -398,8 +398,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-cloze"><p>{{c1::cloze}} is the {{c2::start of the card ::<em>here's a hint</em>}}.</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-cloze"><p>{{c1::cloze}} is the {{c2::start of the card ::<em>here's a hint</em>}}.</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Cloze",
         "noteId": 0,
@@ -414,8 +414,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-cloze"><p>{{c1::a lonely cloze}}</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-cloze"><p>{{c1::a lonely cloze}}</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Cloze",
         "noteId": 0,
@@ -430,9 +430,9 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-cloze"><p>This card has a {{c1::<em>emphasized but un-hinted cloze</em>}} {{c2::<strong>cloze</strong> with style}} or {{c3::two}} and {{c4::plus another::<em>a really <strong>bold</strong> hint</em>}}.</p>
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-cloze"><p>This card has a {{c1::<em>emphasized but un-hinted cloze</em>}} {{c2::<strong>cloze</strong> with style}} or {{c3::two}} and {{c4::plus another::<em>a really <strong>bold</strong> hint</em>}}.</p>
 <p>{{c5::All}} will be {{c6::revealed ::<em>here's a hint: "shown"</em>}}.</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Cloze",
         "noteId": 0,
@@ -447,8 +447,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
         "deckName": "test-minimal-notes",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-basic-synchronization front model-yanki-cloze"><p>This card has a {{c1::cloze}} or {{c2::two ::<em>here's a hint</em>}}.</p></div>",
-          "YankiNamespace": "Yanki Test - basic synchronization",
+          "Front": "<div class="yanki namespace-yanki-test-b9918cfa0f62798d front model-yanki-cloze"><p>This card has a {{c1::cloze}} or {{c2::two ::<em>here's a hint</em>}}.</p></div>",
+          "YankiNamespace": "Yanki Test - b9918cfa0f62798d",
         },
         "modelName": "Yanki - Cloze",
         "noteId": 0,
@@ -465,7 +465,7 @@ exports[`complex trees > makes the right decisions about deck naming with a file
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,
-  "namespace": "Yanki Test - complex trees",
+  "namespace": "Yanki Test - b5346192b9b2fb82",
   "synced": [
     {
       "action": "created",
@@ -475,8 +475,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -491,8 +491,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note::deep-contiguous",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'deep-contiguous'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'deep-contiguous'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -507,8 +507,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note::deep-contiguous::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -526,8 +526,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note::deep-contiguous::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -545,8 +545,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note::deep-contiguous::within::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -564,8 +564,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note::deep-island::within::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -580,8 +580,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note::deep-non-contiguous::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -596,8 +596,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note::sibling-folders::brother",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'brother'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'brother'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -615,8 +615,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note::sibling-folders::sister",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'sister'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'sister'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -634,8 +634,8 @@ exports[`complex trees > makes the right decisions about deck naming with a file
         "deckName": "test-complex-tree-root-note::solo-note",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -652,7 +652,7 @@ exports[`complex trees > makes the right decisions about deck naming without a f
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,
-  "namespace": "Yanki Test - complex trees",
+  "namespace": "Yanki Test - b5346192b9b2fb82",
   "synced": [
     {
       "action": "created",
@@ -662,8 +662,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
         "deckName": "deep-contiguous",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'deep-contiguous'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'deep-contiguous'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -678,8 +678,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
         "deckName": "deep-contiguous::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -697,8 +697,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
         "deckName": "deep-contiguous::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'another'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -716,8 +716,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
         "deckName": "deep-contiguous::within::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -735,8 +735,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
         "deckName": "deep-island::within::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -751,8 +751,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
         "deckName": "deep-non-contiguous::within::within",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'within'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -767,8 +767,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
         "deckName": "sibling-folders::brother",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'brother'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'brother'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -786,8 +786,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
         "deckName": "sibling-folders::sister",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'sister'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'sister'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -805,8 +805,8 @@ exports[`complex trees > makes the right decisions about deck naming without a f
         "deckName": "solo-note",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-complex-trees front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
-          "YankiNamespace": "Yanki Test - complex trees",
+          "Front": "<div class="yanki namespace-yanki-test-b5346192b9b2fb82 front model-yanki-basic"><p>I should be in the deck 'solo-note'</p></div>",
+          "YankiNamespace": "Yanki Test - b5346192b9b2fb82",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -823,7 +823,7 @@ exports[`duplicate node ids > handles duplicate node ids for notes with differen
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,
-  "namespace": "Yanki Test - duplicate node ids",
+  "namespace": "Yanki Test - 00e8048e96c5000c",
   "synced": [
     {
       "action": "created",
@@ -833,8 +833,8 @@ exports[`duplicate node ids > handles duplicate node ids for notes with differen
         "deckName": "test-duplicate-node-ids",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-duplicate-node-ids front model-yanki-basic"><p>Replace me</p></div>",
-          "YankiNamespace": "Yanki Test - duplicate node ids",
+          "Front": "<div class="yanki namespace-yanki-test-00e8048e96c5000c front model-yanki-basic"><p>Replace me</p></div>",
+          "YankiNamespace": "Yanki Test - 00e8048e96c5000c",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -851,7 +851,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,
-  "namespace": "Yanki Test - fancy markdown",
+  "namespace": "Yanki Test - 4b7d855f1825e39f",
   "synced": [
     {
       "action": "created",
@@ -861,8 +861,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p><a href="https://ericmika.com">https://ericmika.com</a></p></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p><a href="https://ericmika.com">https://ericmika.com</a></p></div>",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -876,7 +876,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-fancy-markdown back model-yanki-basic-and-reversed-card"><h2>2</h2>
+          "Back": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f back model-yanki-basic-and-reversed-card"><h2>2</h2>
 <table>
 <thead>
 <tr>
@@ -919,7 +919,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
 </table>
 <hr>
 <p>And I'm the back</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic-and-reversed-card"><h1>GFM Tables</h1>
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic-and-reversed-card"><h1>GFM Tables</h1>
 <h2>1</h2>
 <table>
 <thead>
@@ -935,7 +935,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
 </tr>
 </tbody>
 </table></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic (and reversed card)",
         "noteId": 0,
@@ -949,7 +949,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-fancy-markdown back model-yanki-basic"><div class="admonition">
+          "Back": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f back model-yanki-basic"><div class="admonition">
 <p class="admonition-title">TIP</p>
 <p>Nothing more</p>
 </div>
@@ -957,7 +957,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
 <p class="admonition-title">WARNING</p>
 <p>I'm not liable</p>
 </div></div>",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><div class="admonition">
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><div class="admonition">
 <p class="admonition-title">CAUTION</p>
 <p>Be careful</p>
 </div>
@@ -969,7 +969,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
 <p class="admonition-title">NOTE</p>
 <p>How meta</p>
 </div></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -984,8 +984,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p>This note has a <mark class="flexible-marker flexible-marker-default">highlighted</mark> statement.</p></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>This note has a <mark class="flexible-marker flexible-marker-default">highlighted</mark> statement.</p></div>",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -999,9 +999,9 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-fancy-markdown back model-yanki-basic-and-reversed-card"><p><img src="https://images.unsplash.com/photo-1574235664854-92e1da7d229a?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8Y2F0fHx8fHx8MTcxNzI5MjE0NQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="cat"></p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic-and-reversed-card"><p><img src="https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8a2l0dGVufHx8fHx8MTcxNzI5MTk1OQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="kitten"></p></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "Back": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f back model-yanki-basic-and-reversed-card"><p><img src="https://images.unsplash.com/photo-1574235664854-92e1da7d229a?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8Y2F0fHx8fHx8MTcxNzI5MjE0NQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="cat"></p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic-and-reversed-card"><p><img src="https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8a2l0dGVufHx8fHx8MTcxNzI5MTk1OQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="kitten"></p></div>",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic (and reversed card)",
         "noteId": 0,
@@ -1015,8 +1015,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-fancy-markdown back model-yanki-basic"><p>There have been issues when the front of the card is only MathJax.</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="19.965ex" height="2.587ex" role="img" focusable="false" viewBox="0 -893.3 8824.4 1143.3" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-B-1D41A" d="M64 349Q64 399 107 426T255 453Q346 453 402 423T473 341Q478 327 478 310T479 196V77Q493 63 529 62Q549 62 553 57T558 31Q558 9 552 5T514 0H497H481Q375 0 367 56L356 46Q300 -6 210 -6Q130 -6 81 30T32 121Q32 188 111 226T332 272H350V292Q350 313 348 327T337 361T306 391T248 402T194 399H189Q204 376 204 354Q204 327 187 306T134 284Q97 284 81 305T64 349ZM164 121Q164 89 186 67T238 45Q274 45 307 63T346 108L350 117V226H347Q248 218 206 189T164 121Z"></path><path id="MJX-1-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-1-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-1-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-1-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-1-TEX-I-1D70E" d="M184 -11Q116 -11 74 34T31 147Q31 247 104 333T274 430Q275 431 414 431H552Q553 430 555 429T559 427T562 425T565 422T567 420T569 416T570 412T571 407T572 401Q572 357 507 357Q500 357 490 357T476 358H416L421 348Q439 310 439 263Q439 153 359 71T184 -11ZM361 278Q361 358 276 358Q152 358 115 184Q114 180 114 178Q106 141 106 117Q106 67 131 47T188 26Q242 26 287 73Q316 103 334 153T356 233T361 278Z"></path><path id="MJX-1-TEX-B-1D416" d="M915 686L1052 683Q1142 683 1157 686H1164V624H1073L957 320Q930 249 900 170T855 52T839 10Q834 0 826 -5Q821 -7 799 -7H792Q777 -7 772 -5T759 10Q759 11 748 39T716 122T676 228L594 442L512 228Q486 159 455 78Q433 19 428 9T416 -5Q411 -7 389 -7H379Q356 -7 349 10Q349 12 334 51T288 170T231 320L116 624H24V686H35Q44 683 183 683Q331 683 355 686H368V624H323Q278 624 278 623L437 207L499 369L561 531L526 624H434V686H445Q454 683 593 683Q741 683 765 686H778V624H733Q688 624 688 623L847 207Q848 207 927 415T1006 624H905V686H915Z"></path><path id="MJX-1-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-1-TEX-N-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path><path id="MJX-1-TEX-B-1D41B" d="M32 686L123 690Q214 694 215 694H221V409Q289 450 378 450Q479 450 539 387T600 221Q600 122 535 58T358 -6H355Q272 -6 203 53L160 1L129 0H98V301Q98 362 98 435T99 525Q99 591 97 604T83 620Q69 624 42 624H29V686H32ZM227 105L232 99Q237 93 242 87T258 73T280 59T306 49T339 45Q380 45 411 66T451 131Q457 160 457 230Q457 264 456 284T448 329T430 367T396 389T343 398Q282 398 235 355L227 348V105Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(1823.5,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mi" transform="translate(2879.2,0)"><use data-c="1D70E" xlink:href="#MJX-1-TEX-I-1D70E"></use></g><g data-mml-node="mo" transform="translate(3450.2,0)"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(3839.2,0)"><g data-mml-node="mi"><use data-c="1D416" xlink:href="#MJX-1-TEX-B-1D416"></use></g></g><g data-mml-node="msup" transform="translate(5028.2,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="30" xlink:href="#MJX-1-TEX-N-30"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(6796.1,0)"><use data-c="2B" xlink:href="#MJX-1-TEX-N-2B"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(7796.4,0)"><g data-mml-node="mi"><use data-c="1D41B" xlink:href="#MJX-1-TEX-B-1D41B"></use></g></g><g data-mml-node="mo" transform="translate(8435.4,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g></svg></mjx-container><span style="display: none;">Not empty</span></p><style>
+          "Back": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f back model-yanki-basic"><p>There have been issues when the front of the card is only MathJax.</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="19.965ex" height="2.587ex" role="img" focusable="false" viewBox="0 -893.3 8824.4 1143.3" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-B-1D41A" d="M64 349Q64 399 107 426T255 453Q346 453 402 423T473 341Q478 327 478 310T479 196V77Q493 63 529 62Q549 62 553 57T558 31Q558 9 552 5T514 0H497H481Q375 0 367 56L356 46Q300 -6 210 -6Q130 -6 81 30T32 121Q32 188 111 226T332 272H350V292Q350 313 348 327T337 361T306 391T248 402T194 399H189Q204 376 204 354Q204 327 187 306T134 284Q97 284 81 305T64 349ZM164 121Q164 89 186 67T238 45Q274 45 307 63T346 108L350 117V226H347Q248 218 206 189T164 121Z"></path><path id="MJX-1-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-1-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-1-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-1-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-1-TEX-I-1D70E" d="M184 -11Q116 -11 74 34T31 147Q31 247 104 333T274 430Q275 431 414 431H552Q553 430 555 429T559 427T562 425T565 422T567 420T569 416T570 412T571 407T572 401Q572 357 507 357Q500 357 490 357T476 358H416L421 348Q439 310 439 263Q439 153 359 71T184 -11ZM361 278Q361 358 276 358Q152 358 115 184Q114 180 114 178Q106 141 106 117Q106 67 131 47T188 26Q242 26 287 73Q316 103 334 153T356 233T361 278Z"></path><path id="MJX-1-TEX-B-1D416" d="M915 686L1052 683Q1142 683 1157 686H1164V624H1073L957 320Q930 249 900 170T855 52T839 10Q834 0 826 -5Q821 -7 799 -7H792Q777 -7 772 -5T759 10Q759 11 748 39T716 122T676 228L594 442L512 228Q486 159 455 78Q433 19 428 9T416 -5Q411 -7 389 -7H379Q356 -7 349 10Q349 12 334 51T288 170T231 320L116 624H24V686H35Q44 683 183 683Q331 683 355 686H368V624H323Q278 624 278 623L437 207L499 369L561 531L526 624H434V686H445Q454 683 593 683Q741 683 765 686H778V624H733Q688 624 688 623L847 207Q848 207 927 415T1006 624H905V686H915Z"></path><path id="MJX-1-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-1-TEX-N-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path><path id="MJX-1-TEX-B-1D41B" d="M32 686L123 690Q214 694 215 694H221V409Q289 450 378 450Q479 450 539 387T600 221Q600 122 535 58T358 -6H355Q272 -6 203 53L160 1L129 0H98V301Q98 362 98 435T99 525Q99 591 97 604T83 620Q69 624 42 624H29V686H32ZM227 105L232 99Q237 93 242 87T258 73T280 59T306 49T339 45Q380 45 411 66T451 131Q457 160 457 230Q457 264 456 284T448 329T430 367T396 389T343 398Q282 398 235 355L227 348V105Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(1823.5,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mi" transform="translate(2879.2,0)"><use data-c="1D70E" xlink:href="#MJX-1-TEX-I-1D70E"></use></g><g data-mml-node="mo" transform="translate(3450.2,0)"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(3839.2,0)"><g data-mml-node="mi"><use data-c="1D416" xlink:href="#MJX-1-TEX-B-1D416"></use></g></g><g data-mml-node="msup" transform="translate(5028.2,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="30" xlink:href="#MJX-1-TEX-N-30"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(6796.1,0)"><use data-c="2B" xlink:href="#MJX-1-TEX-N-2B"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(7796.4,0)"><g data-mml-node="mi"><use data-c="1D41B" xlink:href="#MJX-1-TEX-B-1D41B"></use></g></g><g data-mml-node="mo" transform="translate(8435.4,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g></svg></mjx-container><span style="display: none;">Not empty</span></p><style>
 mjx-container[jax="SVG"] {
   direction: ltr;
 }
@@ -1133,7 +1133,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
   stroke-width: 3;
 }
 </style></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1148,7 +1148,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p>Display "block" MathJax follows:</p>
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>Display "block" MathJax follows:</p>
 <p><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="19.965ex" height="2.587ex" role="img" focusable="false" viewBox="0 -893.3 8824.4 1143.3" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-B-1D41A" d="M64 349Q64 399 107 426T255 453Q346 453 402 423T473 341Q478 327 478 310T479 196V77Q493 63 529 62Q549 62 553 57T558 31Q558 9 552 5T514 0H497H481Q375 0 367 56L356 46Q300 -6 210 -6Q130 -6 81 30T32 121Q32 188 111 226T332 272H350V292Q350 313 348 327T337 361T306 391T248 402T194 399H189Q204 376 204 354Q204 327 187 306T134 284Q97 284 81 305T64 349ZM164 121Q164 89 186 67T238 45Q274 45 307 63T346 108L350 117V226H347Q248 218 206 189T164 121Z"></path><path id="MJX-1-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-1-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-1-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-1-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-1-TEX-I-1D70E" d="M184 -11Q116 -11 74 34T31 147Q31 247 104 333T274 430Q275 431 414 431H552Q553 430 555 429T559 427T562 425T565 422T567 420T569 416T570 412T571 407T572 401Q572 357 507 357Q500 357 490 357T476 358H416L421 348Q439 310 439 263Q439 153 359 71T184 -11ZM361 278Q361 358 276 358Q152 358 115 184Q114 180 114 178Q106 141 106 117Q106 67 131 47T188 26Q242 26 287 73Q316 103 334 153T356 233T361 278Z"></path><path id="MJX-1-TEX-B-1D416" d="M915 686L1052 683Q1142 683 1157 686H1164V624H1073L957 320Q930 249 900 170T855 52T839 10Q834 0 826 -5Q821 -7 799 -7H792Q777 -7 772 -5T759 10Q759 11 748 39T716 122T676 228L594 442L512 228Q486 159 455 78Q433 19 428 9T416 -5Q411 -7 389 -7H379Q356 -7 349 10Q349 12 334 51T288 170T231 320L116 624H24V686H35Q44 683 183 683Q331 683 355 686H368V624H323Q278 624 278 623L437 207L499 369L561 531L526 624H434V686H445Q454 683 593 683Q741 683 765 686H778V624H733Q688 624 688 623L847 207Q848 207 927 415T1006 624H905V686H915Z"></path><path id="MJX-1-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-1-TEX-N-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path><path id="MJX-1-TEX-B-1D41B" d="M32 686L123 690Q214 694 215 694H221V409Q289 450 378 450Q479 450 539 387T600 221Q600 122 535 58T358 -6H355Q272 -6 203 53L160 1L129 0H98V301Q98 362 98 435T99 525Q99 591 97 604T83 620Q69 624 42 624H29V686H32ZM227 105L232 99Q237 93 242 87T258 73T280 59T306 49T339 45Q380 45 411 66T451 131Q457 160 457 230Q457 264 456 284T448 329T430 367T396 389T343 398Q282 398 235 355L227 348V105Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(1823.5,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mi" transform="translate(2879.2,0)"><use data-c="1D70E" xlink:href="#MJX-1-TEX-I-1D70E"></use></g><g data-mml-node="mo" transform="translate(3450.2,0)"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(3839.2,0)"><g data-mml-node="mi"><use data-c="1D416" xlink:href="#MJX-1-TEX-B-1D416"></use></g></g><g data-mml-node="msup" transform="translate(5028.2,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="30" xlink:href="#MJX-1-TEX-N-30"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(6796.1,0)"><use data-c="2B" xlink:href="#MJX-1-TEX-N-2B"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(7796.4,0)"><g data-mml-node="mi"><use data-c="1D41B" xlink:href="#MJX-1-TEX-B-1D41B"></use></g></g><g data-mml-node="mo" transform="translate(8435.4,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g></svg></mjx-container><span style="display: none;">Not empty</span></p><style>
 mjx-container[jax="SVG"] {
   direction: ltr;
@@ -1266,7 +1266,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
   stroke-width: 3;
 }
 </style></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1281,7 +1281,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p><strong>The Cauchy-Schwarz Inequality</strong></p>
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p><strong>The Cauchy-Schwarz Inequality</strong></p>
 <mjx-container class="MathJax" jax="SVG" display="true"><svg style="vertical-align: -2.864ex;" xmlns="http://www.w3.org/2000/svg" width="34.485ex" height="7.27ex" role="img" focusable="false" viewBox="0 -1947.5 15242.4 3213.2" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-S4-28" d="M758 -1237T758 -1240T752 -1249H736Q718 -1249 717 -1248Q711 -1245 672 -1199Q237 -706 237 251T672 1700Q697 1730 716 1749Q718 1750 735 1750H752Q758 1744 758 1741Q758 1737 740 1713T689 1644T619 1537T540 1380T463 1176Q348 802 348 251Q348 -242 441 -599T744 -1218Q758 -1237 758 -1240Z"></path><path id="MJX-1-TEX-LO-2211" d="M60 948Q63 950 665 950H1267L1325 815Q1384 677 1388 669H1348L1341 683Q1320 724 1285 761Q1235 809 1174 838T1033 881T882 898T699 902H574H543H251L259 891Q722 258 724 252Q725 250 724 246Q721 243 460 -56L196 -356Q196 -357 407 -357Q459 -357 548 -357T676 -358Q812 -358 896 -353T1063 -332T1204 -283T1307 -196Q1328 -170 1348 -124H1388Q1388 -125 1381 -145T1356 -210T1325 -294L1267 -449L666 -450Q64 -450 61 -448Q55 -446 55 -439Q55 -437 57 -433L590 177Q590 178 557 222T452 366T322 544L56 909L55 924Q55 945 60 948Z"></path><path id="MJX-1-TEX-I-1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path><path id="MJX-1-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-1-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-1-TEX-I-1D45B" d="M21 287Q22 293 24 303T36 341T56 388T89 425T135 442Q171 442 195 424T225 390T231 369Q231 367 232 367L243 378Q304 442 382 442Q436 442 469 415T503 336T465 179T427 52Q427 26 444 26Q450 26 453 27Q482 32 505 65T540 145Q542 153 560 153Q580 153 580 145Q580 144 576 130Q568 101 554 73T508 17T439 -10Q392 -10 371 17T350 73Q350 92 386 193T423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 180T152 343Q153 348 153 366Q153 405 129 405Q91 405 66 305Q60 285 60 284Q58 278 41 278H27Q21 284 21 287Z"></path><path id="MJX-1-TEX-I-1D44E" d="M33 157Q33 258 109 349T280 441Q331 441 370 392Q386 422 416 422Q429 422 439 414T449 394Q449 381 412 234T374 68Q374 43 381 35T402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487Q506 153 506 144Q506 138 501 117T481 63T449 13Q436 0 417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157ZM351 328Q351 334 346 350T323 385T277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q217 26 254 59T298 110Q300 114 325 217T351 328Z"></path><path id="MJX-1-TEX-I-1D44F" d="M73 647Q73 657 77 670T89 683Q90 683 161 688T234 694Q246 694 246 685T212 542Q204 508 195 472T180 418L176 399Q176 396 182 402Q231 442 283 442Q345 442 383 396T422 280Q422 169 343 79T173 -11Q123 -11 82 27T40 150V159Q40 180 48 217T97 414Q147 611 147 623T109 637Q104 637 101 637H96Q86 637 83 637T76 640T73 647ZM336 325V331Q336 405 275 405Q258 405 240 397T207 376T181 352T163 330L157 322L136 236Q114 150 114 114Q114 66 138 42Q154 26 178 26Q211 26 245 58Q270 81 285 114T318 219Q336 291 336 325Z"></path><path id="MJX-1-TEX-S4-29" d="M33 1741Q33 1750 51 1750H60H65Q73 1750 81 1743T119 1700Q554 1207 554 251Q554 -707 119 -1199Q76 -1250 66 -1250Q65 -1250 62 -1250T56 -1249Q55 -1249 53 -1249T49 -1250Q33 -1250 33 -1239Q33 -1236 50 -1214T98 -1150T163 -1052T238 -910T311 -727Q443 -335 443 251Q443 402 436 532T405 831T339 1142T224 1438T50 1716Q33 1737 33 1741Z"></path><path id="MJX-1-TEX-N-32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path><path id="MJX-1-TEX-N-2264" d="M674 636Q682 636 688 630T694 615T687 601Q686 600 417 472L151 346L399 228Q687 92 691 87Q694 81 694 76Q694 58 676 56H670L382 192Q92 329 90 331Q83 336 83 348Q84 359 96 365Q104 369 382 500T665 634Q669 636 674 636ZM84 -118Q84 -108 99 -98H678Q694 -104 694 -118Q694 -130 679 -138H98Q84 -131 84 -118Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="mrow"><g data-mml-node="mo" transform="translate(0 -0.5)"><use data-c="28" xlink:href="#MJX-1-TEX-S4-28"></use></g><g data-mml-node="munderover" transform="translate(792,0)"><g data-mml-node="mo"><use data-c="2211" xlink:href="#MJX-1-TEX-LO-2211"></use></g><g data-mml-node="TeXAtom" transform="translate(86,-1107.7) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D458" xlink:href="#MJX-1-TEX-I-1D458"></use></g><g data-mml-node="mo" transform="translate(521,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mn" transform="translate(1299,0)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g></g><g data-mml-node="mi" transform="translate(509.9,1150) scale(0.707)"><use data-c="1D45B" xlink:href="#MJX-1-TEX-I-1D45B"></use></g></g><g data-mml-node="msub" transform="translate(2402.7,0)"><g data-mml-node="mi"><use data-c="1D44E" xlink:href="#MJX-1-TEX-I-1D44E"></use></g><g data-mml-node="mi" transform="translate(562,-150) scale(0.707)"><use data-c="1D458" xlink:href="#MJX-1-TEX-I-1D458"></use></g></g><g data-mml-node="msub" transform="translate(3383.1,0)"><g data-mml-node="mi"><use data-c="1D44F" xlink:href="#MJX-1-TEX-I-1D44F"></use></g><g data-mml-node="mi" transform="translate(462,-150) scale(0.707)"><use data-c="1D458" xlink:href="#MJX-1-TEX-I-1D458"></use></g></g><g data-mml-node="mo" transform="translate(4263.5,0) translate(0 -0.5)"><use data-c="29" xlink:href="#MJX-1-TEX-S4-29"></use></g></g><g data-mml-node="mn" transform="translate(5088.5,1476.6) scale(0.707)"><use data-c="32" xlink:href="#MJX-1-TEX-N-32"></use></g></g><g data-mml-node="mo" transform="translate(5769.8,0)"><use data-c="2264" xlink:href="#MJX-1-TEX-N-2264"></use></g><g data-mml-node="mrow" transform="translate(6825.6,0)"><g data-mml-node="mo" transform="translate(0 -0.5)"><use data-c="28" xlink:href="#MJX-1-TEX-S4-28"></use></g><g data-mml-node="munderover" transform="translate(792,0)"><g data-mml-node="mo"><use data-c="2211" xlink:href="#MJX-1-TEX-LO-2211"></use></g><g data-mml-node="TeXAtom" transform="translate(86,-1107.7) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D458" xlink:href="#MJX-1-TEX-I-1D458"></use></g><g data-mml-node="mo" transform="translate(521,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mn" transform="translate(1299,0)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g></g><g data-mml-node="mi" transform="translate(509.9,1150) scale(0.707)"><use data-c="1D45B" xlink:href="#MJX-1-TEX-I-1D45B"></use></g></g><g data-mml-node="msubsup" transform="translate(2402.7,0)"><g data-mml-node="mi"><use data-c="1D44E" xlink:href="#MJX-1-TEX-I-1D44E"></use></g><g data-mml-node="mn" transform="translate(562,413) scale(0.707)"><use data-c="32" xlink:href="#MJX-1-TEX-N-32"></use></g><g data-mml-node="mi" transform="translate(562,-257.7) scale(0.707)"><use data-c="1D458" xlink:href="#MJX-1-TEX-I-1D458"></use></g></g><g data-mml-node="mo" transform="translate(3383.1,0) translate(0 -0.5)"><use data-c="29" xlink:href="#MJX-1-TEX-S4-29"></use></g></g><g data-mml-node="mrow" transform="translate(11167.3,0)"><g data-mml-node="mo" transform="translate(0 -0.5)"><use data-c="28" xlink:href="#MJX-1-TEX-S4-28"></use></g><g data-mml-node="munderover" transform="translate(792,0)"><g data-mml-node="mo"><use data-c="2211" xlink:href="#MJX-1-TEX-LO-2211"></use></g><g data-mml-node="TeXAtom" transform="translate(86,-1107.7) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D458" xlink:href="#MJX-1-TEX-I-1D458"></use></g><g data-mml-node="mo" transform="translate(521,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mn" transform="translate(1299,0)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g></g><g data-mml-node="mi" transform="translate(509.9,1150) scale(0.707)"><use data-c="1D45B" xlink:href="#MJX-1-TEX-I-1D45B"></use></g></g><g data-mml-node="msubsup" transform="translate(2402.7,0)"><g data-mml-node="mi"><use data-c="1D44F" xlink:href="#MJX-1-TEX-I-1D44F"></use></g><g data-mml-node="mn" transform="translate(462,413) scale(0.707)"><use data-c="32" xlink:href="#MJX-1-TEX-N-32"></use></g><g data-mml-node="mi" transform="translate(462,-257.7) scale(0.707)"><use data-c="1D458" xlink:href="#MJX-1-TEX-I-1D458"></use></g></g><g data-mml-node="mo" transform="translate(3283.1,0) translate(0 -0.5)"><use data-c="29" xlink:href="#MJX-1-TEX-S4-29"></use></g></g></g></g></svg></mjx-container><span style="display: none;">Not empty</span><style>
 mjx-container[jax="SVG"] {
   direction: ltr;
@@ -1399,7 +1399,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
   stroke-width: 3;
 }
 </style></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1414,7 +1414,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p>This is some "inline" MathJax <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="19.965ex" height="2.587ex" role="img" focusable="false" viewBox="0 -893.3 8824.4 1143.3" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-B-1D41A" d="M64 349Q64 399 107 426T255 453Q346 453 402 423T473 341Q478 327 478 310T479 196V77Q493 63 529 62Q549 62 553 57T558 31Q558 9 552 5T514 0H497H481Q375 0 367 56L356 46Q300 -6 210 -6Q130 -6 81 30T32 121Q32 188 111 226T332 272H350V292Q350 313 348 327T337 361T306 391T248 402T194 399H189Q204 376 204 354Q204 327 187 306T134 284Q97 284 81 305T64 349ZM164 121Q164 89 186 67T238 45Q274 45 307 63T346 108L350 117V226H347Q248 218 206 189T164 121Z"></path><path id="MJX-1-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-1-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-1-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-1-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-1-TEX-I-1D70E" d="M184 -11Q116 -11 74 34T31 147Q31 247 104 333T274 430Q275 431 414 431H552Q553 430 555 429T559 427T562 425T565 422T567 420T569 416T570 412T571 407T572 401Q572 357 507 357Q500 357 490 357T476 358H416L421 348Q439 310 439 263Q439 153 359 71T184 -11ZM361 278Q361 358 276 358Q152 358 115 184Q114 180 114 178Q106 141 106 117Q106 67 131 47T188 26Q242 26 287 73Q316 103 334 153T356 233T361 278Z"></path><path id="MJX-1-TEX-B-1D416" d="M915 686L1052 683Q1142 683 1157 686H1164V624H1073L957 320Q930 249 900 170T855 52T839 10Q834 0 826 -5Q821 -7 799 -7H792Q777 -7 772 -5T759 10Q759 11 748 39T716 122T676 228L594 442L512 228Q486 159 455 78Q433 19 428 9T416 -5Q411 -7 389 -7H379Q356 -7 349 10Q349 12 334 51T288 170T231 320L116 624H24V686H35Q44 683 183 683Q331 683 355 686H368V624H323Q278 624 278 623L437 207L499 369L561 531L526 624H434V686H445Q454 683 593 683Q741 683 765 686H778V624H733Q688 624 688 623L847 207Q848 207 927 415T1006 624H905V686H915Z"></path><path id="MJX-1-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-1-TEX-N-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path><path id="MJX-1-TEX-B-1D41B" d="M32 686L123 690Q214 694 215 694H221V409Q289 450 378 450Q479 450 539 387T600 221Q600 122 535 58T358 -6H355Q272 -6 203 53L160 1L129 0H98V301Q98 362 98 435T99 525Q99 591 97 604T83 620Q69 624 42 624H29V686H32ZM227 105L232 99Q237 93 242 87T258 73T280 59T306 49T339 45Q380 45 411 66T451 131Q457 160 457 230Q457 264 456 284T448 329T430 367T396 389T343 398Q282 398 235 355L227 348V105Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(1823.5,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mi" transform="translate(2879.2,0)"><use data-c="1D70E" xlink:href="#MJX-1-TEX-I-1D70E"></use></g><g data-mml-node="mo" transform="translate(3450.2,0)"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(3839.2,0)"><g data-mml-node="mi"><use data-c="1D416" xlink:href="#MJX-1-TEX-B-1D416"></use></g></g><g data-mml-node="msup" transform="translate(5028.2,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="30" xlink:href="#MJX-1-TEX-N-30"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(6796.1,0)"><use data-c="2B" xlink:href="#MJX-1-TEX-N-2B"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(7796.4,0)"><g data-mml-node="mi"><use data-c="1D41B" xlink:href="#MJX-1-TEX-B-1D41B"></use></g></g><g data-mml-node="mo" transform="translate(8435.4,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g></svg></mjx-container><span style="display: none;">Not empty</span> and it really falls in line.</p><style>
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>This is some "inline" MathJax <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="19.965ex" height="2.587ex" role="img" focusable="false" viewBox="0 -893.3 8824.4 1143.3" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-B-1D41A" d="M64 349Q64 399 107 426T255 453Q346 453 402 423T473 341Q478 327 478 310T479 196V77Q493 63 529 62Q549 62 553 57T558 31Q558 9 552 5T514 0H497H481Q375 0 367 56L356 46Q300 -6 210 -6Q130 -6 81 30T32 121Q32 188 111 226T332 272H350V292Q350 313 348 327T337 361T306 391T248 402T194 399H189Q204 376 204 354Q204 327 187 306T134 284Q97 284 81 305T64 349ZM164 121Q164 89 186 67T238 45Q274 45 307 63T346 108L350 117V226H347Q248 218 206 189T164 121Z"></path><path id="MJX-1-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-1-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-1-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-1-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-1-TEX-I-1D70E" d="M184 -11Q116 -11 74 34T31 147Q31 247 104 333T274 430Q275 431 414 431H552Q553 430 555 429T559 427T562 425T565 422T567 420T569 416T570 412T571 407T572 401Q572 357 507 357Q500 357 490 357T476 358H416L421 348Q439 310 439 263Q439 153 359 71T184 -11ZM361 278Q361 358 276 358Q152 358 115 184Q114 180 114 178Q106 141 106 117Q106 67 131 47T188 26Q242 26 287 73Q316 103 334 153T356 233T361 278Z"></path><path id="MJX-1-TEX-B-1D416" d="M915 686L1052 683Q1142 683 1157 686H1164V624H1073L957 320Q930 249 900 170T855 52T839 10Q834 0 826 -5Q821 -7 799 -7H792Q777 -7 772 -5T759 10Q759 11 748 39T716 122T676 228L594 442L512 228Q486 159 455 78Q433 19 428 9T416 -5Q411 -7 389 -7H379Q356 -7 349 10Q349 12 334 51T288 170T231 320L116 624H24V686H35Q44 683 183 683Q331 683 355 686H368V624H323Q278 624 278 623L437 207L499 369L561 531L526 624H434V686H445Q454 683 593 683Q741 683 765 686H778V624H733Q688 624 688 623L847 207Q848 207 927 415T1006 624H905V686H915Z"></path><path id="MJX-1-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-1-TEX-N-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path><path id="MJX-1-TEX-B-1D41B" d="M32 686L123 690Q214 694 215 694H221V409Q289 450 378 450Q479 450 539 387T600 221Q600 122 535 58T358 -6H355Q272 -6 203 53L160 1L129 0H98V301Q98 362 98 435T99 525Q99 591 97 604T83 620Q69 624 42 624H29V686H32ZM227 105L232 99Q237 93 242 87T258 73T280 59T306 49T339 45Q380 45 411 66T451 131Q457 160 457 230Q457 264 456 284T448 329T430 367T396 389T343 398Q282 398 235 355L227 348V105Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(1823.5,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mi" transform="translate(2879.2,0)"><use data-c="1D70E" xlink:href="#MJX-1-TEX-I-1D70E"></use></g><g data-mml-node="mo" transform="translate(3450.2,0)"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(3839.2,0)"><g data-mml-node="mi"><use data-c="1D416" xlink:href="#MJX-1-TEX-B-1D416"></use></g></g><g data-mml-node="msup" transform="translate(5028.2,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D41A" xlink:href="#MJX-1-TEX-B-1D41A"></use></g></g><g data-mml-node="TeXAtom" transform="translate(592,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mn" transform="translate(389,0)"><use data-c="30" xlink:href="#MJX-1-TEX-N-30"></use></g><g data-mml-node="mo" transform="translate(889,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g><g data-mml-node="mo" transform="translate(6796.1,0)"><use data-c="2B" xlink:href="#MJX-1-TEX-N-2B"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(7796.4,0)"><g data-mml-node="mi"><use data-c="1D41B" xlink:href="#MJX-1-TEX-B-1D41B"></use></g></g><g data-mml-node="mo" transform="translate(8435.4,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g></svg></mjx-container><span style="display: none;">Not empty</span> and it really falls in line.</p><style>
 mjx-container[jax="SVG"] {
   direction: ltr;
 }
@@ -1531,7 +1531,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
   stroke-width: 3;
 }
 </style></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1546,14 +1546,14 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p>This note has a Mermaid flowchart, which is NOT supported.</p>
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>This note has a Mermaid flowchart, which is NOT supported.</p>
 <pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">graph TD;</span></span>
 <span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  A-->B;</span></span>
 <span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  A-->C;</span></span>
 <span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  B-->D;</span></span>
 <span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  C-->D;</span></span>
 <span class="line"></span></code></pre></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1568,13 +1568,13 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p>Let's link to Obsidian:</p>
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>Let's link to Obsidian:</p>
 <p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTackling%20TypeScript%20Book%20Notes.md">Tackling TypeScript Book Notes</a></p>
 <p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTypeScript%20Cheat%20Sheets%20Notes.md">TypeScript Cheat Sheets Notes</a></p>
 <p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTypeScript%20Cheat%20Sheets%20Notes.md">Technology/Languages/TypeScript/TypeScript Cheat Sheets Notes</a></p>
 <p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTypeScript%23Working%20with%20the%20AST.md">TypeScript</a></p>
 <p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTypeScript%23Working%20with%20the%20AST.md">Working with the AST</a></p></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1588,8 +1588,8 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-fancy-markdown back model-yanki-basic"><p>I'm the back</p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> function</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> emptyIsUndefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">text</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+          "Back": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f back model-yanki-basic"><p>I'm the back</p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> function</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> emptyIsUndefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">text</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
 <span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (text </span><span style="color:#D73A49;--shiki-dark:#F97583">===</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
 <span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span></span>
 <span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
@@ -1597,7 +1597,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
 <span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> text.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">trim</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">===</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ''</span><span style="color:#D73A49;--shiki-dark:#F97583"> ?</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#D73A49;--shiki-dark:#F97583"> :</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> text</span></span>
 <span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
 <span class="line"></span></code></pre></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1612,7 +1612,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p>My code block has nice syntax highlighting.</p>
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>My code block has nice syntax highlighting.</p>
 <pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> function</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> emptyIsUndefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">text</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
 <span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (text </span><span style="color:#D73A49;--shiki-dark:#F97583">===</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
 <span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span></span>
@@ -1621,7 +1621,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
 <span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> text.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">trim</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">===</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ''</span><span style="color:#D73A49;--shiki-dark:#F97583"> ?</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#D73A49;--shiki-dark:#F97583"> :</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> text</span></span>
 <span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
 <span class="line"></span></code></pre></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1636,7 +1636,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p>My code block has nice syntax highlighting.</p>
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>My code block has nice syntax highlighting.</p>
 <pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> function</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> emptyIsUndefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">text</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
 <span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (text </span><span style="color:#D73A49;--shiki-dark:#F97583">===</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
 <span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span></span>
@@ -1645,7 +1645,7 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
 <span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> text.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">trim</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">===</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ''</span><span style="color:#D73A49;--shiki-dark:#F97583"> ?</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> undefined</span><span style="color:#D73A49;--shiki-dark:#F97583"> :</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> text</span></span>
 <span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
 <span class="line"></span></code></pre></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1660,8 +1660,8 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p><code>inline = true</code></p></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p><code>inline = true</code></p></div>",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -1676,435 +1676,8 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-fancy-markdown front model-yanki-basic"><p>My code has <code>inline = true</code> code syntax.</p></div>",
-          "YankiNamespace": "Yanki Test - fancy markdown",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-  ],
-}
-`;
-
-exports[`media > adds media to anki when appropriate 1`] = `
-{
-  "ankiWeb": false,
-  "deletedDecks": [],
-  "dryRun": false,
-  "duration": 0,
-  "namespace": "Yanki Test - media",
-  "synced": [
-    {
-      "action": "created",
-      "filePath": "/test-media/basic-audio.md",
-      "filePathOriginal": "/test-media/basic-audio.md",
-      "note": {
-        "deckName": "test-media",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-media front model-yanki-basic"><h1>Audio</h1>
-<h2>3gp</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.3gp" data-src-original="/test-media/audio/yanki.3gp">[sound:yanki-media-yanki-test-media-HASH-yanki.3gp]</span></p>
-<h2>aac</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.aac" data-src-original="/test-media/audio/yanki.aac">[sound:yanki-media-yanki-test-media-HASH-yanki.aac]</span></p>
-<h2>avi</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.avi" data-src-original="/test-media/audio/yanki.avi">[sound:yanki-media-yanki-test-media-HASH-yanki.avi]</span></p>
-<h2>flac</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.flac" data-src-original="/test-media/audio/yanki.flac">[sound:yanki-media-yanki-test-media-HASH-yanki.flac]</span></p>
-<h2>flv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.flv" data-src-original="/test-media/audio/yanki.flv">[sound:yanki-media-yanki-test-media-HASH-yanki.flv]</span></p>
-<h2>m4a</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.m4a" data-src-original="/test-media/audio/yanki.m4a">[sound:yanki-media-yanki-test-media-HASH-yanki.m4a]</span></p>
-<h2>mkv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.mkv" data-src-original="/test-media/audio/yanki.mkv">[sound:yanki-media-yanki-test-media-HASH-yanki.mkv]</span></p>
-<h2>mov</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.mov" data-src-original="/test-media/audio/yanki.mov">[sound:yanki-media-yanki-test-media-HASH-yanki.mov]</span></p>
-<h2>mp3</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.mp3" data-src-original="/test-media/audio/yanki.mp3">[sound:yanki-media-yanki-test-media-HASH-yanki.mp3]</span></p>
-<h2>mp4</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.mp4" data-src-original="/test-media/audio/yanki.mp4">[sound:yanki-media-yanki-test-media-HASH-yanki.mp4]</span></p>
-<h2>mpeg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.mpeg" data-src-original="/test-media/audio/yanki.mpeg">[sound:yanki-media-yanki-test-media-HASH-yanki.mpeg]</span></p>
-<h2>mpg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.mpg" data-src-original="/test-media/audio/yanki.mpg">[sound:yanki-media-yanki-test-media-HASH-yanki.mpg]</span></p>
-<h2>oga</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.oga" data-src-original="/test-media/audio/yanki.oga">[sound:yanki-media-yanki-test-media-HASH-yanki.oga]</span></p>
-<h2>ogg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.ogg" data-src-original="/test-media/audio/yanki.ogg">[sound:yanki-media-yanki-test-media-HASH-yanki.ogg]</span></p>
-<h2>ogv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.ogv" data-src-original="/test-media/audio/yanki.ogv">[sound:yanki-media-yanki-test-media-HASH-yanki.ogv]</span></p>
-<h2>ogx</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.ogx" data-src-original="/test-media/audio/yanki.ogx">[sound:yanki-media-yanki-test-media-HASH-yanki.ogx]</span></p>
-<h2>opus</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.opus" data-src-original="/test-media/audio/yanki.opus">[sound:yanki-media-yanki-test-media-HASH-yanki.opus]</span></p>
-<h2>spx</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.spx" data-src-original="/test-media/audio/yanki.spx">[sound:yanki-media-yanki-test-media-HASH-yanki.spx]</span></p>
-<h2>swf</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.swf" data-src-original="/test-media/audio/yanki.swf">[sound:yanki-media-yanki-test-media-HASH-yanki.swf]</span></p>
-<h2>wav</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.wav" data-src-original="/test-media/audio/yanki.wav">[sound:yanki-media-yanki-test-media-HASH-yanki.wav]</span></p>
-<h2>webm</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.webm" data-src-original="/test-media/audio/yanki.webm">[sound:yanki-media-yanki-test-media-HASH-yanki.webm]</span></p></div>",
-          "YankiNamespace": "Yanki Test - media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media/basic-compound-wikilinks.md",
-      "filePathOriginal": "/test-media/basic-compound-wikilinks.md",
-      "note": {
-        "deckName": "test-media",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-media front model-yanki-basic"><h1>Compound WikiLinks</h1>
-<h2>Audio</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-media-HASH-yanki.wav" data-src-original="/test-media/audio/yanki.wav">[sound:yanki-media-yanki-test-media-HASH-yanki.wav]</span></p>
-<h2>Audio with alt text</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-media-HASH-yanki.wav" data-src-original="/test-media/audio/yanki.wav">[sound:yanki-media-yanki-test-media-HASH-yanki.wav]</span></p>
-<h2>Image</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.png" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.png"></p>
-<h2>Image with alt text</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.png" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.png"></p>
-<h2>Image inline</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.png" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.png"> <img src="yanki-media-yanki-test-media-HASH-yanki.png" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.png"></p>
-<h2>Video</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-media-HASH-yanki.mp4" data-src-original="/test-media/video/yanki.mp4">[sound:yanki-media-yanki-test-media-HASH-yanki.mp4]</span></p>
-<h2>Video with alt text</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-filename="yanki-media-yanki-test-media-HASH-yanki.mp4" data-src-original="/test-media/video/yanki.mp4">[sound:yanki-media-yanki-test-media-HASH-yanki.mp4]</span></p></div>",
-          "YankiNamespace": "Yanki Test - media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media/basic-compound.md",
-      "filePathOriginal": "/test-media/basic-compound.md",
-      "note": {
-        "deckName": "test-media",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-media front model-yanki-basic"><h1>Compound</h1>
-<h2>Audio</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-media-HASH-yanki.wav" data-src-original="/test-media/audio/yanki.wav">[sound:yanki-media-yanki-test-media-HASH-yanki.wav]</span></p>
-<h2>Image</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.png" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.png"></p>
-<h2>Video</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.mp4" data-src-original="/test-media/video/yanki.mp4">[sound:yanki-media-yanki-test-media-HASH-yanki.mp4]</span></p></div>",
-          "YankiNamespace": "Yanki Test - media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media/basic-image.md",
-      "filePathOriginal": "/test-media/basic-image.md",
-      "note": {
-        "deckName": "test-media",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-media front model-yanki-basic"><h1>Image</h1>
-<h2>Png</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.png" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.png"></p>
-<h2>Jpeg</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.jpeg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.jpeg"></p>
-<h2>Jpg</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.jpg"></p>
-<h2>Avif</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.avif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.avif"></p>
-<h2>Gif (static)</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.gif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.gif"></p>
-<h2>Ico (static)</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.ico" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.ico"></p>
-<h2>Svg</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.svg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.svg"></p>
-<h2>Tif (Works on iOS mobile, broken on Mac desktop...)</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.tif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.tif"></p>
-<h2>Tiff (Works on iOS mobile, broken on Mac desktop...)</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.tiff" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.tiff"></p>
-<h2>Webp</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.webp" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.webp"></p></div>",
-          "YankiNamespace": "Yanki Test - media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media/basic-video.md",
-      "filePathOriginal": "/test-media/basic-video.md",
-      "note": {
-        "deckName": "test-media",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-media front model-yanki-basic"><h1>Video</h1>
-<h2>3gp (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.3gp" data-src-original="/test-media/video/yanki.3gp">[sound:yanki-media-yanki-test-media-HASH-yanki.3gp]</span></p>
-<h2>avi (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.avi" data-src-original="/test-media/video/yanki.avi">[sound:yanki-media-yanki-test-media-HASH-yanki.avi]</span></p>
-<h2>flv (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.flv" data-src-original="/test-media/video/yanki.flv">[sound:yanki-media-yanki-test-media-HASH-yanki.flv]</span></p>
-<h2>gif</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-yanki.gif" alt="Yanki test video" class="yanki-media yanki-media-image" data-src-original="/test-media/video/yanki.gif"></p>
-<h2>mkv (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.mkv" data-src-original="/test-media/video/yanki.mkv">[sound:yanki-media-yanki-test-media-HASH-yanki.mkv]</span></p>
-<h2>mov</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.mov" data-src-original="/test-media/video/yanki.mov">[sound:yanki-media-yanki-test-media-HASH-yanki.mov]</span></p>
-<h2>mp4</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.mp4" data-src-original="/test-media/video/yanki.mp4">[sound:yanki-media-yanki-test-media-HASH-yanki.mp4]</span></p>
-<h2>mpeg (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.mpeg" data-src-original="/test-media/video/yanki.mpeg">[sound:yanki-media-yanki-test-media-HASH-yanki.mpeg]</span></p>
-<h2>mpg (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.mpg" data-src-original="/test-media/video/yanki.mpg">[sound:yanki-media-yanki-test-media-HASH-yanki.mpg]</span></p>
-<h2>ogv (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.ogv" data-src-original="/test-media/video/yanki.ogv">[sound:yanki-media-yanki-test-media-HASH-yanki.ogv]</span></p>
-<h2>swf (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.swf" data-src-original="/test-media/video/yanki.swf">[sound:yanki-media-yanki-test-media-HASH-yanki.swf]</span></p>
-<h2>webm (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-media-HASH-yanki.webm" data-src-original="/test-media/video/yanki.webm">[sound:yanki-media-yanki-test-media-HASH-yanki.webm]</span></p></div>",
-          "YankiNamespace": "Yanki Test - media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media/basic-weird-filenames.md",
-      "filePathOriginal": "/test-media/basic-weird-filenames.md",
-      "note": {
-        "deckName": "test-media",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-media front model-yanki-basic"><h1>Weird filenames</h1>
-<h2>Markdown syntax</h2>
-<p>(Image path must be URI-encoded for compliance with CommonMark)</p>
-<h3>Spaces</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-have-so-many-spaces.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have so many spaces.jpg"></p>
-<h3>Question marks</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-have-questions.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have? questions??.jpg"></p>
-<h3>Dots</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-have-many-dots.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i.have.many.dots.jpg"></p>
-<h3>Length</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
-<h2>Markdown syntax with file URIs</h2>
-<p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" alt="" class="yanki-media yanki-media-image" data-src-original="/Users/mika/Code/yanki/test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
-<h2>Obsidian wikilink syntax</h2>
-<p>Image path does not have to be encoded for compatibility with Obsidian</p>
-<h3>Spaces</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-have-so-many-spaces.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have so many spaces.jpg"></p>
-<h3>Question marks</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-have-questions.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have? questions??.jpg"></p>
-<h3>Dots</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-have-many-dots.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i.have.many.dots.jpg"></p>
-<h3>Long</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
-<h2>Obsidian wikilink syntax with file URIs</h2>
-<h3>With alt</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" class="yanki-media yanki-media-image" data-src-original="/Users/mika/Code/yanki/test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
-<h3>Without alt</h3>
-<p><img src="yanki-media-yanki-test-media-HASH-i-am-an-obscenely-long-filename-of-tremendous-length-that-will-have....jpg" class="yanki-media yanki-media-image" data-src-original="/Users/mika/Code/yanki/test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p></div>",
-          "YankiNamespace": "Yanki Test - media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-  ],
-}
-`;
-
-exports[`remote media > fetches and adds media urls to anki when appropriate 1`] = `
-{
-  "ankiWeb": false,
-  "deletedDecks": [],
-  "dryRun": false,
-  "duration": 0,
-  "namespace": "Yanki Test - remote media",
-  "synced": [
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-audio-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-audio-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><h1>Remote Audio</h1>
-<h2>3gp</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.3gp" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.3gp?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.3gp]</span></p>
-<h2>aac</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.aac" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.aac?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.aac]</span></p>
-<h2>avi</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.avi" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.avi?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.avi]</span></p>
-<h2>flac</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.flac" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.flac?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.flac]</span></p>
-<h2>flv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.flv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.flv?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.flv]</span></p>
-<h2>m4a</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.m4a" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.m4a?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.m4a]</span></p>
-<h2>mkv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mkv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mkv?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mkv]</span></p>
-<h2>mov</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mov" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mov?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mov]</span></p>
-<h2>mp3</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mp3" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mp3?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mp3]</span></p>
-<h2>mp4</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mp4" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mp4?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mp4]</span></p>
-<h2>mpeg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mpeg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mpeg?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mpeg]</span></p>
-<h2>mpg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mpg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mpg?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mpg]</span></p>
-<h2>oga</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.oga" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.oga?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.oga]</span></p>
-<h2>ogg</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.ogg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogg?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.ogg]</span></p>
-<h2>ogv</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.ogv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogv?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.ogv]</span></p>
-<h2>ogx</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.ogx" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogx?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.ogx]</span></p>
-<h2>opus</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.opus" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.opus?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.opus]</span></p>
-<h2>spx</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.spx" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.spx?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.spx]</span></p>
-<h2>swf</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.swf" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.swf?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.swf]</span></p>
-<h2>wav</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.wav" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.wav?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.wav]</span></p>
-<h2>webm</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.webm" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.webm?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.webm]</span></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-compound-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-compound-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><h1>Compound remote</h1>
-<h2>Audio URL</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test audio" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.wav" data-src-original="https://github.com/kitschpatrol/yanki/blob/main/test/assets/test-media/audio/yanki.wav?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.wav]</span></p>
-<h2>Image URL</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.png" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/blob/main/test/assets/test-media/image/yanki.png?raw=true"></p>
-<h2>Video URL</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mp4" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mp4?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mp4]</span></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-image-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-image-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><h1>Image</h1>
-<h2>Png</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.png" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.png?raw=true"></p>
-<h2>Jpeg</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.jpeg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.jpeg?raw=true"></p>
-<h2>Jpg</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.jpg?raw=true"></p>
-<h2>Avif</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.avif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.avif?raw=true"></p>
-<h2>Gif (static)</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.gif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.gif?raw=true"></p>
-<h2>Ico (static)</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.ico" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.ico?raw=true"></p>
-<h2>Svg</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.svg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.svg?raw=true"></p>
-<h2>Tif (Works on iOS mobile, broken on Mac desktop...)</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.tif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.tif?raw=true"></p>
-<h2>Tiff (Works on iOS mobile, broken on Mac desktop...)</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.tiff" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.tiff?raw=true"></p>
-<h2>Webp</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.webp" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.webp?raw=true"></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-unknown-extension-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-unknown-extension-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><p>This duplicates a test in fancy markdown</p>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-photo-1555685812-4b943f1cb0eb.unknown" alt="kitten" class="yanki-media yanki-media-image" data-src-original="https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8a2l0dGVufHx8fHx8MTcxNzI5MTk1OQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800"></p>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-photo-1574235664854-92e1da7d229a.unknown" alt="cat" class="yanki-media yanki-media-image" data-src-original="https://images.unsplash.com/photo-1574235664854-92e1da7d229a?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8Y2F0fHx8fHx8MTcxNzI5MjE0NQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800"></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
-        },
-        "modelName": "Yanki - Basic",
-        "noteId": 0,
-        "tags": [],
-      },
-    },
-    {
-      "action": "created",
-      "filePath": "/test-media-remote/basic-video-remote.md",
-      "filePathOriginal": "/test-media-remote/basic-video-remote.md",
-      "note": {
-        "deckName": "test-media-remote",
-        "fields": {
-          "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-remote-media front model-yanki-basic"><h1>Video</h1>
-<h2>3gp (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.3gp" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.3gp?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.3gp]</span></p>
-<h2>avi (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.avi" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.avi?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.avi]</span></p>
-<h2>flv (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.flv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.flv?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.flv]</span></p>
-<h2>gif</h2>
-<p><img src="yanki-media-yanki-test-remote-media-HASH-yanki.gif" alt="Yanki test video" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.gif?raw=true"></p>
-<h2>mkv (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mkv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mkv?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mkv]</span></p>
-<h2>mov</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mov" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mov?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mov]</span></p>
-<h2>mp4</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mp4" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mp4?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mp4]</span></p>
-<h2>mpeg (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mpeg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mpeg?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mpeg]</span></p>
-<h2>mpg (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.mpg" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.mpg?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.mpg]</span></p>
-<h2>ogv (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.ogv" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.ogv?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.ogv]</span></p>
-<h2>swf (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.swf" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.swf?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.swf]</span></p>
-<h2>webm (Broken on iOS mobile)</h2>
-<p><span class="yanki-media yanki-media-audio-video" data-alt-text="Yanki test video" data-filename="yanki-media-yanki-test-remote-media-HASH-yanki.webm" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/video/yanki.webm?raw=true">[sound:yanki-media-yanki-test-remote-media-HASH-yanki.webm]</span></p></div>",
-          "YankiNamespace": "Yanki Test - remote media",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>My code has <code>inline = true</code> code syntax.</p></div>",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -2121,7 +1694,7 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
   "deletedDecks": [],
   "dryRun": false,
   "duration": 0,
-  "namespace": "Yanki Test - surplus frontmatter",
+  "namespace": "Yanki Test - ee8a558c89d868bf",
   "synced": [
     {
       "action": "created",
@@ -2131,8 +1704,8 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
         "deckName": "test-surplus-frontmatter",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-surplus-frontmatter front model-yanki-basic"><p>I'm a note</p></div>",
-          "YankiNamespace": "Yanki Test - surplus frontmatter",
+          "Front": "<div class="yanki namespace-yanki-test-ee8a558c89d868bf front model-yanki-basic"><p>I'm a note</p></div>",
+          "YankiNamespace": "Yanki Test - ee8a558c89d868bf",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,
@@ -2147,8 +1720,8 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
         "deckName": "test-surplus-frontmatter",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-surplus-frontmatter front model-yanki-basic"><p>I'm a note</p></div>",
-          "YankiNamespace": "Yanki Test - surplus frontmatter",
+          "Front": "<div class="yanki namespace-yanki-test-ee8a558c89d868bf front model-yanki-basic"><p>I'm a note</p></div>",
+          "YankiNamespace": "Yanki Test - ee8a558c89d868bf",
         },
         "modelName": "Yanki - Basic",
         "noteId": 0,

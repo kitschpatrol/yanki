@@ -152,7 +152,7 @@ export async function getFileExtensionFromUrl(
 }
 
 /**
- *  Tradeoffs between content change sensitivity and speed / efficiency,
+ * Tradeoffs between content change sensitivity and sync speed / efficiency,
  * especially for remote assets.
  *
  * - `filename`: Use the filename of the media asset, no network required.

@@ -9,6 +9,7 @@ import {
 	getRemoteNotes,
 	requestPermission,
 } from '../utilities/anki-connect'
+import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { truncateOnWordBoundary } from '../utilities/string'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
@@ -51,6 +52,8 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 		options ?? {},
 	) as CleanOptions
 
+	const sanitizedNamespace = validateAndSanitizeNamespace(namespace, true)
+
 	const client = new YankiConnect(ankiConnectOptions)
 
 	const permissionStatus = await requestPermission(client)
@@ -59,14 +62,14 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 		throw new Error('Anki is unreachable. Is Anki running?')
 	}
 
-	const remoteNotes = await getRemoteNotes(client, namespace)
+	const remoteNotes = await getRemoteNotes(client, sanitizedNamespace)
 
 	// Deletion pass
 	await deleteNotes(client, remoteNotes, dryRun)
 	const deletedDecks = await deleteOrphanedDecks(client, [], remoteNotes, dryRun)
 
 	// Media deletion pass
-	await deleteUnusedMedia(client, [], namespace, dryRun)
+	await deleteUnusedMedia(client, [], sanitizedNamespace, dryRun)
 
 	// AnkiWeb sync
 	const isChanged = remoteNotes.length > 0 || deletedDecks.length > 0
@@ -80,7 +83,7 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 		deleted: remoteNotes,
 		dryRun,
 		duration: performance.now() - startTime,
-		namespace,
+		namespace: sanitizedNamespace,
 	}
 }
 

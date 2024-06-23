@@ -10,6 +10,7 @@ import {
 	getTemporarilyUniqueFilePath,
 	getUniqueFilePath,
 } from '../utilities/filenames'
+import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { type LoadOptions, type LocalNote, loadLocalNotes } from './load-local-notes'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
@@ -146,10 +147,13 @@ export async function renameFiles(
 		syncMediaAssets,
 	} = deepmerge(defaultRenameFilesOptions, options ?? {})
 
+	// Technically redundant with validation in loadLocalNotes...
+	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
+
 	const notes = await loadLocalNotes(allLocalFilePaths, {
 		fetchAdapter,
 		fileAdapters,
-		namespace,
+		namespace: sanitizedNamespace,
 		obsidianVault,
 		syncMediaAssets,
 	})

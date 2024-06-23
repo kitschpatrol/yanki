@@ -5,6 +5,7 @@ import {
 	getDefaultFetchAdapter,
 	getDefaultFileAdapters,
 } from '../shared/types'
+import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { capitalize } from '../utilities/string'
 import { loadLocalNotes } from './load-local-notes'
 import { renameNotes } from './rename'
@@ -83,10 +84,13 @@ export async function syncFiles(
 		syncMediaAssets,
 	} = deepmerge(defaultSyncFilesOptions, options ?? {}) as SyncFilesOptions
 
+	// Technically redundant with validation in loadLocalNotes...
+	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
+
 	const localNotes = await loadLocalNotes(allLocalFilePaths, {
 		fetchAdapter,
 		fileAdapters,
-		namespace,
+		namespace: sanitizedNamespace,
 		obsidianVault,
 		syncMediaAssets,
 	})
@@ -104,7 +108,7 @@ export async function syncFiles(
 		ankiConnectOptions,
 		ankiWeb,
 		dryRun,
-		namespace,
+		namespace: sanitizedNamespace,
 	})
 
 	// Write IDs to the local files as necessary
@@ -152,7 +156,7 @@ export async function syncFiles(
 		deletedDecks,
 		dryRun,
 		duration: performance.now() - startTime,
-		namespace,
+		namespace: sanitizedNamespace,
 		synced: syncedAndSorted,
 	}
 }

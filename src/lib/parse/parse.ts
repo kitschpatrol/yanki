@@ -10,6 +10,7 @@ import {
 	getDefaultFileAdapters,
 } from '../shared/types'
 import { type GlobalOptions } from '../shared/types'
+import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { mdastToHtml } from './rehype-utilities'
 import {
 	deleteFirstNodeOfType,
@@ -23,12 +24,16 @@ import {
 import { deepmerge } from 'deepmerge-ts'
 import { u } from 'unist-builder'
 
-export type GetNoteFromMarkdownOptions = Pick<
+export type GetNoteFromMarkdownOptions = {
+	/** Needed for the public API, but optional for more efficient use internally when the namespace is already validated. */
+	namespaceValidationAndSanitization: boolean
+} & Pick<
 	GlobalOptions,
 	'cwd' | 'fetchAdapter' | 'fileAdapters' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
 >
 
 export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
+	namespaceValidationAndSanitization: true,
 	...defaultGlobalOptions,
 }
 
@@ -41,9 +46,14 @@ export async function getNoteFromMarkdown(
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapters = getDefaultFileAdapters(),
 		namespace,
+		namespaceValidationAndSanitization,
 		obsidianVault,
 		syncMediaAssets,
 	} = deepmerge(defaultGetNoteFromMarkdownOptions, options ?? {})
+
+	const sanitizedNamespace = namespaceValidationAndSanitization
+		? validateAndSanitizeNamespace(namespace)
+		: namespace
 
 	// Anki won't create notes at all if the front field is blank, but we want
 	// parity between markdown files and notes at all costs, so we'll put
@@ -73,28 +83,28 @@ export async function getNoteFromMarkdown(
 			front = await mdastToHtml(firstPart, {
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
-					`namespace-${namespace}`,
+					`namespace-${sanitizedNamespace}`,
 					'front',
 					`model-${modelName}`,
 				],
 				cwd,
 				fetchAdapter,
 				fileAdapters,
-				namespace,
+				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
 			})
 			back = await mdastToHtml(secondPart, {
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
-					`namespace-${namespace}`,
+					`namespace-${sanitizedNamespace}`,
 					'back',
 					`model-${modelName}`,
 				],
 				cwd,
 				fetchAdapter,
 				fileAdapters,
-				namespace,
+				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
 			})
@@ -110,28 +120,28 @@ export async function getNoteFromMarkdown(
 			front = await mdastToHtml(firstPart, {
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
-					`namespace-${namespace}`,
+					`namespace-${sanitizedNamespace}`,
 					'front',
 					`model-${modelName}`,
 				],
 				cwd,
 				fetchAdapter,
 				fileAdapters,
-				namespace,
+				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
 			})
 			back = await mdastToHtml(secondPart, {
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
-					`namespace-${namespace}`,
+					`namespace-${sanitizedNamespace}`,
 					'back',
 					`model-${modelName}`,
 				],
 				cwd,
 				fetchAdapter,
 				fileAdapters,
-				namespace,
+				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: false,
 			})
@@ -156,14 +166,14 @@ export async function getNoteFromMarkdown(
 			front = await mdastToHtml(firstPart, {
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
-					`namespace-${namespace}`,
+					`namespace-${sanitizedNamespace}`,
 					'front',
 					`model-${modelName}`,
 				],
 				cwd,
 				fetchAdapter,
 				fileAdapters,
-				namespace,
+				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
 			})
@@ -172,14 +182,14 @@ export async function getNoteFromMarkdown(
 			back = await mdastToHtml(secondPartHast, {
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
-					`namespace-${namespace}`,
+					`namespace-${sanitizedNamespace}`,
 					'back',
 					`model-${modelName}`,
 				],
 				cwd,
 				fetchAdapter,
 				fileAdapters,
-				namespace,
+				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: false,
 			})
@@ -193,10 +203,8 @@ export async function getNoteFromMarkdown(
 		deckName: '', // Set later based on file path if undefined
 		fields: {
 			Back: back,
-
 			Front: front,
-
-			YankiNamespace: namespace,
+			YankiNamespace: sanitizedNamespace,
 		},
 		modelName,
 		noteId: frontmatter.noteId ?? undefined,

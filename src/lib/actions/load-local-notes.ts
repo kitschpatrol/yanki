@@ -6,6 +6,7 @@ import {
 	getDefaultFetchAdapter,
 	getDefaultFileAdapters,
 } from '../shared/types'
+import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { ENVIRONMENT } from '../utilities/platform'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
@@ -38,6 +39,8 @@ export async function loadLocalNotes(
 		syncMediaAssets,
 	} = deepmerge(defaultLoadOptions, options ?? {})
 
+	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
+
 	allLocalFilePaths.sort((a, b) => a.localeCompare(b))
 
 	// Use file paths as deck names
@@ -51,7 +54,8 @@ export async function loadLocalNotes(
 			cwd: path.dirname(filePath),
 			fetchAdapter,
 			fileAdapters,
-			namespace,
+			namespace: sanitizedNamespace,
+			namespaceValidationAndSanitization: false, // Optimization
 			obsidianVault,
 			syncMediaAssets,
 		})
