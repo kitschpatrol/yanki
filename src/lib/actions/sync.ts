@@ -31,7 +31,7 @@ export const defaultSyncOptions: SyncOptions = {
 	...defaultGlobalOptions,
 }
 
-export type SyncResult = Simplify<
+export type SyncNotesResult = Simplify<
 	{
 		deletedDecks: string[]
 		deletedMedia: string[]
@@ -51,7 +51,7 @@ export type SyncResult = Simplify<
 export async function syncNotes(
 	allLocalNotes: YankiNote[],
 	options?: PartialDeep<SyncOptions>,
-): Promise<SyncResult> {
+): Promise<SyncNotesResult> {
 	const startTime = performance.now()
 
 	// Defaults

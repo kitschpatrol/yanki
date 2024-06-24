@@ -11,7 +11,7 @@ import { loadLocalNotes } from './load-local-notes'
 import { renameNotes } from './rename'
 import {
 	type SyncOptions,
-	type SyncResult,
+	type SyncNotesResult,
 	type SyncedNote,
 	defaultSyncOptions,
 	syncNotes,
@@ -50,7 +50,7 @@ export type SyncedFile = Simplify<
 export type SyncFilesResult = Simplify<
 	{
 		synced: SyncedFile[]
-	} & Omit<SyncResult, 'synced'>
+	} & Omit<SyncNotesResult, 'synced'>
 >
 
 /**
