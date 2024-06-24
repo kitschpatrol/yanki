@@ -61,7 +61,7 @@ export async function getStyle(options: PartialDeep<GetStyleOptions>): Promise<s
 	return [...cssSet][0]
 }
 
-export async function setStyle(options: PartialDeep<SetStyleOptions>): Promise<SetStyleResult> {
+export async function setStyle(options?: PartialDeep<SetStyleOptions>): Promise<SetStyleResult> {
 	const startTime = performance.now()
 
 	// Defaults
