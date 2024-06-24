@@ -7,7 +7,7 @@ import { CSS_DEFAULT_CLASS_NAME } from '../shared/constants'
 import {
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
-	getDefaultFileAdapters,
+	getDefaultFileAdapter,
 } from '../shared/types'
 import { type GlobalOptions } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
@@ -29,7 +29,7 @@ export type GetNoteFromMarkdownOptions = {
 	namespaceValidationAndSanitization: boolean
 } & Pick<
 	GlobalOptions,
-	'cwd' | 'fetchAdapter' | 'fileAdapters' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
+	'cwd' | 'fetchAdapter' | 'fileAdapter' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
 >
 
 export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
@@ -44,7 +44,7 @@ export async function getNoteFromMarkdown(
 	const {
 		cwd,
 		fetchAdapter = getDefaultFetchAdapter(),
-		fileAdapters = getDefaultFileAdapters(),
+		fileAdapter = await getDefaultFileAdapter(),
 		namespace,
 		namespaceValidationAndSanitization,
 		obsidianVault,
@@ -89,7 +89,7 @@ export async function getNoteFromMarkdown(
 				],
 				cwd,
 				fetchAdapter,
-				fileAdapters,
+				fileAdapter,
 				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
@@ -103,7 +103,7 @@ export async function getNoteFromMarkdown(
 				],
 				cwd,
 				fetchAdapter,
-				fileAdapters,
+				fileAdapter,
 				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
@@ -126,7 +126,7 @@ export async function getNoteFromMarkdown(
 				],
 				cwd,
 				fetchAdapter,
-				fileAdapters,
+				fileAdapter,
 				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
@@ -140,7 +140,7 @@ export async function getNoteFromMarkdown(
 				],
 				cwd,
 				fetchAdapter,
-				fileAdapters,
+				fileAdapter,
 				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: false,
@@ -172,7 +172,7 @@ export async function getNoteFromMarkdown(
 				],
 				cwd,
 				fetchAdapter,
-				fileAdapters,
+				fileAdapter,
 				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
@@ -188,7 +188,7 @@ export async function getNoteFromMarkdown(
 				],
 				cwd,
 				fetchAdapter,
-				fileAdapters,
+				fileAdapter,
 				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: false,

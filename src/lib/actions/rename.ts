@@ -2,7 +2,7 @@ import {
 	type GlobalOptions,
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
-	getDefaultFileAdapters,
+	getDefaultFileAdapter,
 } from '../shared/types'
 import {
 	auditUniqueFilePath,
@@ -18,7 +18,7 @@ import { type Simplify } from 'type-fest'
 
 export type RenameNotesOptions = Pick<
 	GlobalOptions,
-	'dryRun' | 'fileAdapters' | 'manageFilenames' | 'maxFilenameLength'
+	'dryRun' | 'fileAdapter' | 'manageFilenames' | 'maxFilenameLength'
 >
 
 export const defaultRenameNotesOptions: RenameNotesOptions = {
@@ -31,7 +31,7 @@ export async function renameNotes(
 ): Promise<LocalNote[]> {
 	const {
 		dryRun,
-		fileAdapters = getDefaultFileAdapters(),
+		fileAdapter = await getDefaultFileAdapter(),
 		manageFilenames,
 		maxFilenameLength,
 	} = deepmerge(defaultRenameNotesOptions, options ?? {})
@@ -104,14 +104,14 @@ export async function renameNotes(
 			}
 
 			if (!dryRun) {
-				await fileAdapters.rename(filePathOriginal, safeNewFilePath)
+				await fileAdapter.rename(filePathOriginal, safeNewFilePath)
 			}
 		}
 
 		// One more pass to fix the intermediates
 		for (const [temporarilyUniquePath, newPath] of intermediateRenamePlan) {
 			if (!dryRun) {
-				await fileAdapters.rename(temporarilyUniquePath, newPath)
+				await fileAdapter.rename(temporarilyUniquePath, newPath)
 			}
 		}
 	}
@@ -139,7 +139,7 @@ export async function renameFiles(
 	const {
 		dryRun,
 		fetchAdapter = getDefaultFetchAdapter(),
-		fileAdapters = getDefaultFileAdapters(),
+		fileAdapter = await getDefaultFileAdapter(),
 		manageFilenames,
 		maxFilenameLength,
 		namespace,
@@ -152,7 +152,7 @@ export async function renameFiles(
 
 	const notes = await loadLocalNotes(allLocalFilePaths, {
 		fetchAdapter,
-		fileAdapters,
+		fileAdapter,
 		namespace: sanitizedNamespace,
 		obsidianVault,
 		syncMediaAssets,
@@ -160,7 +160,7 @@ export async function renameFiles(
 
 	const renamedNotes = await renameNotes(notes, {
 		dryRun,
-		fileAdapters,
+		fileAdapter,
 		manageFilenames,
 		maxFilenameLength,
 	})

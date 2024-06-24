@@ -114,7 +114,7 @@ describeWithFileFixture(
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			// Check the stuff that's elided from the stable results snapshot
@@ -208,7 +208,7 @@ describeWithFileFixture(
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 			expect(stableResults(results)).toMatchSnapshot()
 
@@ -248,7 +248,7 @@ describeWithFileFixture(
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			// Log inline for legibility
@@ -297,7 +297,7 @@ describeWithFileFixture(
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			// Log inline for legibility
@@ -347,7 +347,7 @@ describeWithFileFixture(
 				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			// Now change the synced note in a way that would require a model update
@@ -372,7 +372,7 @@ describeWithFileFixture(
 				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const newNote = newModelResults.synced[0]
@@ -401,7 +401,7 @@ describeWithFileFixture(
 				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			expect(stableResults(results)).toMatchSnapshot()
@@ -429,7 +429,7 @@ describeWithFileFixture(
 				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			expect(results.synced[0].filePath).toBeDefined()
@@ -459,7 +459,7 @@ describeWithFileFixture(
 				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const syncActions = [...new Set(results.synced.map((syncInfo) => syncInfo.action))]
@@ -478,7 +478,7 @@ describeWithFileFixture(
 				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const secondSyncActions = [
@@ -512,7 +512,7 @@ describeWithFileFixture(
 				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			expect(stableResults(results)).toMatchSnapshot()
@@ -541,7 +541,7 @@ describeWithFileFixture(
 				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			// TODO revisit these results

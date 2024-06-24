@@ -11,7 +11,7 @@ import {
 	type GlobalOptions,
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
-	getDefaultFileAdapters,
+	getDefaultFileAdapter,
 } from '../shared/types'
 import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
 import { cleanClassName } from '../utilities/string'
@@ -58,7 +58,7 @@ export type MdastToHtmlOptions = Simplify<
 		cssClassNames?: string[]
 		/** Whether to use an empty placeholder if the output is empty */
 		useEmptyPlaceholder?: boolean
-	} & Pick<GlobalOptions, 'cwd' | 'fetchAdapter' | 'fileAdapters' | 'namespace' | 'syncMediaAssets'>
+	} & Pick<GlobalOptions, 'cwd' | 'fetchAdapter' | 'fileAdapter' | 'namespace' | 'syncMediaAssets'>
 >
 
 const defaultMdastToHtmlOptions: MdastToHtmlOptions = {
@@ -77,7 +77,7 @@ export async function mdastToHtml(
 		cssClassNames,
 		cwd,
 		fetchAdapter = getDefaultFetchAdapter(),
-		fileAdapters = getDefaultFileAdapters(),
+		fileAdapter = await getDefaultFileAdapter(),
 		namespace,
 		syncMediaAssets,
 		useEmptyPlaceholder,
@@ -175,7 +175,7 @@ export async function mdastToHtml(
 				const safeFilename = await getSafeAnkiMediaFilename(
 					absoluteSrcOrUrl,
 					namespace,
-					fileAdapters,
+					fileAdapter,
 					fetchAdapter,
 				)
 

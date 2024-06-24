@@ -29,11 +29,11 @@ export {
 	formatSyncFilesResult,
 	syncFiles,
 } from './actions/sync-files'
-
 export { type YankiNote } from './model/note'
 export {
 	type GetNoteFromMarkdownOptions,
 	defaultGetNoteFromMarkdownOptions,
 	getNoteFromMarkdown,
 } from './parse/parse'
+export { type FetchAdapter, type FileAdapter } from './shared/types'
 export { hostAndPortToUrl, urlToHostAndPort } from './utilities/string'

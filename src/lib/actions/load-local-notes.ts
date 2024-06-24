@@ -4,7 +4,7 @@ import {
 	type GlobalOptions,
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
-	getDefaultFileAdapters,
+	getDefaultFileAdapter,
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { ENVIRONMENT } from '../utilities/platform'
@@ -13,7 +13,7 @@ import path from 'path-browserify-esm'
 
 export type LoadOptions = Pick<
 	GlobalOptions,
-	'fetchAdapter' | 'fileAdapters' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
+	'fetchAdapter' | 'fileAdapter' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
 >
 
 export const defaultLoadOptions: LoadOptions = {
@@ -33,7 +33,7 @@ export async function loadLocalNotes(
 ): Promise<LocalNote[]> {
 	const {
 		fetchAdapter = getDefaultFetchAdapter(),
-		fileAdapters = getDefaultFileAdapters(),
+		fileAdapter = await getDefaultFileAdapter(),
 		namespace,
 		obsidianVault,
 		syncMediaAssets,
@@ -49,11 +49,11 @@ export async function loadLocalNotes(
 	const localNotes: LocalNote[] = []
 
 	for (const [index, filePath] of allLocalFilePaths.entries()) {
-		const markdown = await fileAdapters.readFile(filePath)
+		const markdown = await fileAdapter.readFile(filePath)
 		const note = await getNoteFromMarkdown(markdown, {
 			cwd: path.dirname(filePath),
 			fetchAdapter,
-			fileAdapters,
+			fileAdapter,
 			namespace: sanitizedNamespace,
 			namespaceValidationAndSanitization: false, // Optimization
 			obsidianVault,

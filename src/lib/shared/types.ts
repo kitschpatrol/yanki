@@ -10,7 +10,7 @@ export type FetchAdapter = YankiFetchAdapter
 export type ManageFilenames = 'off' | 'prompt' | 'response'
 export type SyncMediaAssets = 'all' | 'local' | 'off' | 'remote'
 
-export type FileAdapters = {
+export type FileAdapter = {
 	readFile(filePath: string): Promise<string>
 	// Simpler than making the user implement overloads
 	readFileBuffer(filePath: string): Promise<Uint8Array>
@@ -43,7 +43,7 @@ export type GlobalOptions = {
 	 * for communicating with Anki-Connect.
 	 */
 	fetchAdapter: FetchAdapter | undefined
-	fileAdapters: FileAdapters | undefined
+	fileAdapter: FileAdapter | undefined
 	manageFilenames: ManageFilenames
 	/** Only applies if manageFilenames is `true`. Will _not_ truncate user-specified file names in other cases. */
 	maxFilenameLength: number
@@ -60,7 +60,7 @@ export const defaultGlobalOptions: GlobalOptions = {
 	cwd: path.process_cwd,
 	dryRun: false,
 	fetchAdapter: undefined, // Must be passed in later, deepmerge will not work
-	fileAdapters: undefined, // Must be passed in later, deepmerge will not work
+	fileAdapter: undefined, // Must be passed in later, deepmerge will not work
 	manageFilenames: 'off',
 	maxFilenameLength: 60,
 	namespace: 'Yanki',
@@ -70,39 +70,39 @@ export const defaultGlobalOptions: GlobalOptions = {
 
 // Helpers ---------------------------
 
-const fs = ENVIRONMENT === 'node' ? await import('node:fs/promises') : undefined
-
-export function getDefaultFileAdapters(): FileAdapters {
+export async function getDefaultFileAdapter(): Promise<FileAdapter> {
 	if (ENVIRONMENT === 'node') {
-		if (fs === undefined) {
+		// TODO memoize
+		const nodeFs = await import('node:fs/promises')
+		if (nodeFs === undefined) {
 			throw new Error('Issue loading file functions in Node environment')
 		}
 
 		return {
 			async readFile(filePath: string): Promise<string> {
-				return fs.readFile(filePath, { encoding: 'utf8' })
+				return nodeFs.readFile(filePath, 'utf8')
 			},
 
 			async readFileBuffer(filePath: string): Promise<Uint8Array> {
-				return fs.readFile(filePath)
+				return nodeFs.readFile(filePath)
 			},
 
 			async rename(oldPath: string, newPath: string): Promise<void> {
-				await fs.rename(oldPath, newPath)
+				await nodeFs.rename(oldPath, newPath)
 			},
 
 			async stat(filePath) {
-				return fs.stat(filePath)
+				return nodeFs.stat(filePath)
 			},
 
 			async writeFile(filePath: string, data: string): Promise<void> {
-				await fs.writeFile(filePath, data, { encoding: 'utf8' })
+				await nodeFs.writeFile(filePath, data, 'utf8')
 			},
 		}
 	}
 
 	throw new Error(
-		'The "readFile", "writeFile", and "rename" file function implementations must be provided to the function when running in the browser',
+		'The "readFile", "readFileBuffer", "rename" , "stat", and "writeFile" function implementations must be provided to the function when running in the browser',
 	)
 }
 

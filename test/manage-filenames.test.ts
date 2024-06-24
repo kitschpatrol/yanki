@@ -22,7 +22,7 @@ describeWithFileFixture(
 				dryRun: false,
 				manageFilenames: 'prompt',
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const changeMap = new Map<string, string>()
@@ -40,6 +40,8 @@ describeWithFileFixture(
 				  "/test-filename-management/case-sensitivity/something-lowercase.md" => "/test-filename-management/case-sensitivity/a (4).md",
 				  "/test-filename-management/case-sensitivity/something.md" => "/test-filename-management/case-sensitivity/A (5).md",
 				  "/test-filename-management/illegal-characters.md" => "/test-filename-management/I might have some deviant filename characters.md",
+				  "/test-filename-management/long-content/a.md" => "/test-filename-management/long-content/Lorem ipsum dolor sit amet, consectetur adipiscing elit,... (1).md",
+				  "/test-filename-management/long-content/b.md" => "/test-filename-management/long-content/Lorem ipsum dolor sit amet, consectetur adipiscing elit,... (2).md",
 				  "/test-filename-management/multi-line/i-have-many-lines.md" => "/test-filename-management/multi-line/This.md",
 				  "/test-filename-management/some-question-too.md" => "/test-filename-management/some-question (1).md",
 				  "/test-filename-management/some-question.md" => "/test-filename-management/some-question (2).md",
@@ -66,7 +68,7 @@ describeWithFileFixture(
 				dryRun: false,
 				manageFilenames: 'prompt',
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const renamedFilesMap = new Map<string, string>()
@@ -100,7 +102,7 @@ describeWithFileFixture(
 				dryRun: false,
 				manageFilenames: 'response',
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const changeMap = new Map<string, string>()
@@ -118,6 +120,8 @@ describeWithFileFixture(
 				  "/test-filename-management/case-sensitivity/something-lowercase.md" => "/test-filename-management/case-sensitivity/b (4).md",
 				  "/test-filename-management/case-sensitivity/something.md" => "/test-filename-management/case-sensitivity/B (5).md",
 				  "/test-filename-management/illegal-characters.md" => "/test-filename-management/I might have some deviant filename characters.md",
+				  "/test-filename-management/long-content/a.md" => "/test-filename-management/long-content/Jowl sausage, spare ribs meatloaf ham fatback pork... (1).md",
+				  "/test-filename-management/long-content/b.md" => "/test-filename-management/long-content/Jowl sausage, spare ribs meatloaf ham fatback pork... (2).md",
 				  "/test-filename-management/multi-line/i-have-many-lines.md" => "/test-filename-management/multi-line/And this.md",
 				  "/test-filename-management/some-question-too.md" => "/test-filename-management/some-answer (1).md",
 				  "/test-filename-management/some-question.md" => "/test-filename-management/some-answer (2).md",
@@ -144,7 +148,7 @@ describeWithFileFixture(
 				dryRun: false,
 				manageFilenames: 'response',
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const renamedFilesMap = new Map<string, string>()
@@ -195,6 +199,8 @@ describeWithFileFixture(
 				  "/test-filename-management/case-sensitivity/something-lowercase.md" => "/test-filename-management/case-sensitivity/something-lowercase.md",
 				  "/test-filename-management/case-sensitivity/something.md" => "/test-filename-management/case-sensitivity/something.md",
 				  "/test-filename-management/illegal-characters.md" => "/test-filename-management/illegal-characters.md",
+				  "/test-filename-management/long-content/a.md" => "/test-filename-management/long-content/a.md",
+				  "/test-filename-management/long-content/b.md" => "/test-filename-management/long-content/b.md",
 				  "/test-filename-management/multi-line/i-have-many-lines.md" => "/test-filename-management/multi-line/i-have-many-lines.md",
 				  "/test-filename-management/some-question-too.md" => "/test-filename-management/some-question-too.md",
 				  "/test-filename-management/some-question.md" => "/test-filename-management/some-question.md",
@@ -227,7 +233,7 @@ describeWithFileFixture(
 				dryRun: false,
 				manageFilenames: 'prompt',
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const changeMap = new Map<string, string>()
@@ -239,11 +245,11 @@ describeWithFileFixture(
 
 			expect(changeMap).toMatchInlineSnapshot(`
 				Map {
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (1).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (2).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (3).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (4).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (5).md",
 				  "/test-minimal-notes/basic-and-reversed-card-with-no-back.md" => "/test-minimal-notes/I'm a question to which there is no answer.md",
 				  "/test-minimal-notes/basic-and-reversed-card-with-no-front.md" => "/test-minimal-notes/I'm an answer to which there is no question.md",
 				  "/test-minimal-notes/basic-and-reversed-card.md" => "/test-minimal-notes/I'm question which is sometimes the answer.md",
@@ -283,7 +289,7 @@ describeWithFileFixture(
 				dryRun: false,
 				manageFilenames: 'prompt',
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const renamedFilesMap = new Map<string, string>()
@@ -317,7 +323,7 @@ describeWithFileFixture(
 				dryRun: false,
 				manageFilenames: 'response',
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const changeMap = new Map<string, string>()
@@ -329,11 +335,11 @@ describeWithFileFixture(
 
 			expect(changeMap).toMatchInlineSnapshot(`
 				Map {
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
-				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm....md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (1).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (2).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (3).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (4).md",
+				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (5).md",
 				  "/test-minimal-notes/basic-and-reversed-card-with-no-back.md" => "/test-minimal-notes/I'm a question to which there is no answer.md",
 				  "/test-minimal-notes/basic-and-reversed-card-with-no-front.md" => "/test-minimal-notes/I'm an answer to which there is no question.md",
 				  "/test-minimal-notes/basic-and-reversed-card.md" => "/test-minimal-notes/I'm an answer which is sometimes the question.md",
@@ -373,7 +379,7 @@ describeWithFileFixture(
 				dryRun: false,
 				manageFilenames: 'response',
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const renamedFilesMap = new Map<string, string>()

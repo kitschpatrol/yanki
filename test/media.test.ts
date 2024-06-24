@@ -1,5 +1,5 @@
 import { syncFiles } from '../src/lib'
-import { getDefaultFileAdapters } from '../src/lib/shared/types'
+import { getDefaultFileAdapter } from '../src/lib/shared/types'
 import { getFileContentHash } from '../src/lib/utilities/file'
 import { getFileExtensionFromUrl, getUrlContentHash } from '../src/lib/utilities/url'
 import { describeWithFileFixture } from './fixtures/file-fixture'
@@ -443,16 +443,11 @@ it('gets content hash from url name', { timeout: 60_000 }, async () => {
 it('gets content hash from file content', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
 
-	const startTime = performance.now()
-	console.log('----------------------------------')
-
 	for (const filePath of allLocalMediaPaths) {
-		const result = await getFileContentHash(filePath, getDefaultFileAdapters(), 'content')
+		const result = await getFileContentHash(filePath, await getDefaultFileAdapter(), 'content')
 		const key = path.basename(filePath)
 		results.push({ [key]: result ?? 'undefined' })
 	}
-
-	console.log(performance.now() - startTime)
 
 	const compactResults = results.map(
 		(entry) => `${Object.keys(entry)[0]}: ${Object.values(entry)[0]}`,
@@ -515,7 +510,7 @@ it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
 
 	for (const filePath of allLocalMediaPaths) {
-		const result = await getFileContentHash(filePath, getDefaultFileAdapters(), 'metadata')
+		const result = await getFileContentHash(filePath, await getDefaultFileAdapter(), 'metadata')
 		const key = path.basename(filePath)
 		results.push({ [key]: result ?? 'undefined' })
 	}
@@ -581,7 +576,7 @@ it('gets content hash from file name', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
 
 	for (const filePath of allLocalMediaPaths) {
-		const result = await getFileContentHash(filePath, getDefaultFileAdapters(), 'name')
+		const result = await getFileContentHash(filePath, await getDefaultFileAdapter(), 'name')
 		const key = path.basename(filePath)
 		results.push({ [key]: result ?? 'undefined' })
 	}

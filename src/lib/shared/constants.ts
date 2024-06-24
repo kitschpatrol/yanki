@@ -38,7 +38,7 @@ export const SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED = true
  * is easy to type in CLI commands and doesn't hog too much semantic space in
  * Media filenames.
  */
-export const NOTE_NAMESPACE_MAX_LENGTH = 40
+export const NOTE_NAMESPACE_MAX_LENGTH = 60
 
 /**
  * The default deck to put a card in if the deck deck can not be inferred from

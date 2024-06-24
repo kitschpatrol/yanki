@@ -3,15 +3,15 @@ import {
 	type GlobalOptions,
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
-	getDefaultFileAdapters,
+	getDefaultFileAdapter,
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { capitalize } from '../utilities/string'
 import { loadLocalNotes } from './load-local-notes'
 import { renameNotes } from './rename'
 import {
-	type SyncOptions,
 	type SyncNotesResult,
+	type SyncOptions,
 	type SyncedNote,
 	defaultSyncOptions,
 	syncNotes,
@@ -25,7 +25,7 @@ export type SyncFilesOptions = Simplify<
 	Pick<
 		GlobalOptions,
 		| 'fetchAdapter'
-		| 'fileAdapters'
+		| 'fileAdapter'
 		| 'manageFilenames'
 		| 'maxFilenameLength'
 		| 'namespace'
@@ -76,7 +76,7 @@ export async function syncFiles(
 		ankiWeb,
 		dryRun,
 		fetchAdapter = getDefaultFetchAdapter(),
-		fileAdapters = getDefaultFileAdapters(),
+		fileAdapter = await getDefaultFileAdapter(),
 		manageFilenames,
 		maxFilenameLength,
 		namespace,
@@ -89,7 +89,7 @@ export async function syncFiles(
 
 	const localNotes = await loadLocalNotes(allLocalFilePaths, {
 		fetchAdapter,
-		fileAdapters,
+		fileAdapter,
 		namespace: sanitizedNamespace,
 		obsidianVault,
 		syncMediaAssets,
@@ -97,7 +97,7 @@ export async function syncFiles(
 
 	const renamedLocalNotes = await renameNotes(localNotes, {
 		dryRun,
-		fileAdapters,
+		fileAdapter,
 		manageFilenames,
 		maxFilenameLength,
 	})
@@ -129,7 +129,7 @@ export async function syncFiles(
 				loadedAndRenamedNote.markdown,
 				liveNote.note.noteId,
 			)
-			await fileAdapters.writeFile(loadedAndRenamedNote.filePath, updatedMarkdown)
+			await fileAdapter.writeFile(loadedAndRenamedNote.filePath, updatedMarkdown)
 		}
 
 		// Set file paths

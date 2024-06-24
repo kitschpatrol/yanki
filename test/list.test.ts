@@ -20,7 +20,7 @@ describeWithFileFixture(
 				ankiWeb: false,
 				dryRun: false,
 				namespace: context.namespace,
-				syncMediaAssets: 'none',
+				syncMediaAssets: 'off',
 			})
 
 			const result = await listNotes({

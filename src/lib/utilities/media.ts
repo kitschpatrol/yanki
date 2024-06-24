@@ -4,7 +4,7 @@ import {
 	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
 	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
 } from '../shared/constants'
-import { type FetchAdapter, type FileAdapters } from '../shared/types'
+import { type FetchAdapter, type FileAdapter } from '../shared/types'
 import { getFileContentHash } from './file'
 import { getSlugifiedNamespace } from './namespace'
 import { truncateOnWordBoundary } from './string'
@@ -73,12 +73,12 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 export async function getSafeAnkiMediaFilename(
 	absolutePathOrUrl: string,
 	namespace: string,
-	fileAdapters: FileAdapters,
+	fileAdapter: FileAdapter,
 	fetchAdapter: FetchAdapter,
 ): Promise<string> {
-	// Can be a bit more than 40 characters, since it's always prefixed with `yanki-media-`
+	// Can be a bit more than max namespace length, since it's always prefixed with `yanki-media-`
 	const safeNamespace = getSlugifiedNamespace(namespace)
-	const assetHash = await getContentHash(absolutePathOrUrl, fileAdapters, fetchAdapter)
+	const assetHash = await getContentHash(absolutePathOrUrl, fileAdapter, fetchAdapter)
 	const rawFileExtension = await getAnkiMediaFilenameExtension(absolutePathOrUrl, fetchAdapter)
 	const fileExtension = rawFileExtension === undefined ? '' : `.${rawFileExtension}`
 
@@ -107,10 +107,10 @@ export async function getSafeAnkiMediaFilename(
 
 async function getContentHash(
 	absolutePathOrUrl: string,
-	fileAdapters: FileAdapters,
+	fileAdapter: FileAdapter,
 	fetchAdapter: FetchAdapter,
 ): Promise<string> {
 	return isUrl(absolutePathOrUrl)
 		? getUrlContentHash(absolutePathOrUrl, fetchAdapter)
-		: getFileContentHash(absolutePathOrUrl, fileAdapters)
+		: getFileContentHash(absolutePathOrUrl, fileAdapter)
 }

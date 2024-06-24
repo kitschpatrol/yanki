@@ -154,7 +154,7 @@ export function validateNamespace(namespace: string, allowAsterisk = false) {
 	}
 
 	if (errorMessages.length > 0) {
-		throw new Error(`Invalid namespace provided:\n\t- ${errorMessages.join('\n\t- ')}`)
+		throw new Error(`Invalid namespace "${namespace}":\n\t- ${errorMessages.join('\n\t- ')}`)
 	}
 }
 

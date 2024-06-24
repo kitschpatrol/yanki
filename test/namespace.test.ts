@@ -35,49 +35,50 @@ it('catches invalid namespaces', () => {
 	expect(() => {
 		validateNamespace('')
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace provided:
+		[Error: Invalid namespace "":
 			- Cannot be empty]
 	`)
 	expect(() => {
 		validateNamespace(' ')
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace provided:
+		[Error: Invalid namespace " ":
 			- Cannot be empty]
 	`)
 	expect(() => {
 		validateNamespace('    ')
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace provided:
+		[Error: Invalid namespace "    ":
 			- Cannot be empty]
 	`)
 	expect(() => {
 		validateNamespace('Wow *')
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace provided:
+		[Error: Invalid namespace "Wow *":
 			- Forbidden character: Asterisk: "*"]
 	`)
 	expect(() => {
 		validateNamespace(Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH + 1 }, () => 'A').join(''))
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace provided:
-			- Cannot be longer than 40 characters]
+		[Error: Invalid namespace "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA":
+			- Cannot be longer than 60 characters]
 	`)
 	expect(() => {
 		validateNamespace('a\nb')
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace provided:
+		[Error: Invalid namespace "a
+		b":
 			- Forbidden character: Line Feed: "\\n"]
 	`)
 	expect(() => {
 		validateNamespace('a\tb')
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace provided:
+		[Error: Invalid namespace "a	b":
 			- Forbidden character: Horizontal Tab: "\\t"]
 	`)
 	expect(() => {
 		validateNamespace('t\u200Bh\u200Ci\u200Ds contains hidden spaces.')
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace provided:
+		[Error: Invalid namespace "t​h‌i‍s contains hidden spaces.":
 			- Forbidden character: Zero-width Space: "​"
 			- Forbidden character: Zero-width Non-joiner: "‌"
 			- Forbidden character: Zero-width Joiner: "‍"]
