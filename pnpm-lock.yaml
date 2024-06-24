@@ -60,6 +60,9 @@ importers:
       bumpp:
         specifier: ^9.4.1
         version: 9.4.1(magicast@0.3.4)
+      crypto-hash:
+        specifier: ^3.0.0
+        version: 3.0.0
       deepmerge-ts:
         specifier: ^7.0.3
         version: 7.0.3
@@ -1697,6 +1700,10 @@ packages:
   cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
     engines: {node: '>= 8'}
+
+  crypto-hash@3.0.0:
+    resolution: {integrity: sha512-5l5xGtzuvGTU28GXxGV1JYVFou68buZWpkV1Fx5hIDRPnfbQ8KzabTlNIuDIeSCYGVPFehupzDqlnbXm2IXmdQ==}
+    engines: {node: '>=18'}
 
   cspell-config-lib@8.8.4:
     resolution: {integrity: sha512-Xf+aL669Cm+MYZTZULVWRQXB7sRWx9qs0hPrgqxeaWabLUISK57/qwcI24TPVdYakUCoud9Nv+woGi5FcqV5ZQ==}
@@ -6663,6 +6670,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  crypto-hash@3.0.0: {}
 
   cspell-config-lib@8.8.4:
     dependencies:

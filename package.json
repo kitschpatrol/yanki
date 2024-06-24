@@ -78,6 +78,7 @@
 		"@sindresorhus/slugify": "^2.2.1",
 		"@vitest/coverage-v8": "^1.6.0",
 		"bumpp": "^9.4.1",
+		"crypto-hash": "^3.0.0",
 		"deepmerge-ts": "^7.0.3",
 		"execa": "^9.3.0",
 		"filenamify": "^6.0.0",

@@ -79,7 +79,9 @@ export const NOTE_DEFAULT_EMPTY_HAST = u('root', [
 /**
  * How / where to get a hash to determine if media assets have changes.
  */
-export const MEDIA_HASH_MODE: 'content' | 'metadata' | 'name' = 'metadata'
+export type MediaHashMode = 'content' | 'metadata' | 'name'
+export const MEDIA_DEFAULT_HASH_MODE_FILE: MediaHashMode = 'content'
+export const MEDIA_DEFAULT_HASH_MODE_URL: MediaHashMode = 'metadata'
 
 /**
  * How to infer the asset type behind a URL.

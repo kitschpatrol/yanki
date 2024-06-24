@@ -242,6 +242,72 @@ it('gets content type extension from url name', { timeout: 60_000 }, async () =>
 	`)
 })
 
+it('gets content hash from url content', { timeout: 60_000 }, async () => {
+	const results: Array<Record<string, string>> = []
+	for (const url of allRemoteMediaUrls) {
+		const result = await getUrlContentHash(url, fetchAdapter, 'content')
+		const { pathname } = new URL(url)
+		const key = pathname.split('/').at(-1) ?? 'undefined'
+		results.push({ [key]: result ?? 'undefined' })
+	}
+
+	const compactResults = results.map(
+		(entry) => `${Object.keys(entry)[0]}: ${Object.values(entry)[0]}`,
+	)
+
+	expect(compactResults).toMatchInlineSnapshot(`
+		[
+		  "yanki.wav: cb606ffee01736cb",
+		  "yanki.png: c8b37aeccc867deb",
+		  "yanki.3gp: 47dd565df439dfd7",
+		  "yanki.aac: 9383612f5f369316",
+		  "yanki.avi: 4f90e907db61d2a8",
+		  "yanki.flac: c0f8886fc75ac3be",
+		  "yanki.flv: c63881042f607fd6",
+		  "yanki.m4a: 08616299535d38fc",
+		  "yanki.mkv: 709316eb037d59c4",
+		  "yanki.mov: 8f784796233cfff7",
+		  "yanki.mp3: 88d3407c7bd4183e",
+		  "yanki.mp4: c153f74a48eb3e19",
+		  "yanki.mpeg: d73435b159cc7bf7",
+		  "yanki.mpg: d73435b159cc7bf7",
+		  "yanki.oga: f951458ca48fe841",
+		  "yanki.ogg: cfb1898c20340c8c",
+		  "yanki.ogv: ca4de9ea8761b3cf",
+		  "yanki.ogx: 761717bbaf50ca4a",
+		  "yanki.opus: a9e401fab8103e53",
+		  "yanki.spx: 79deee151e96700a",
+		  "yanki.swf: a04e1fea4d00a296",
+		  "yanki.wav: cb606ffee01736cb",
+		  "yanki.webm: 90965bdf99db0abd",
+		  "yanki.avif: 0b44281837970327",
+		  "yanki.gif: 37db5d477188a1f2",
+		  "yanki.ico: 3a950c00367472e2",
+		  "yanki.jpeg: 64140e940e0eb276",
+		  "yanki.jpg: 64140e940e0eb276",
+		  "yanki.png: c8b37aeccc867deb",
+		  "yanki.svg: 195a484048295fc6",
+		  "yanki.tif: f44450f0e7d4f47d",
+		  "yanki.tiff: f44450f0e7d4f47d",
+		  "yanki.webp: f45cd13d1b867070",
+		  "yanki.3gp: d395ea86537bdcf7",
+		  "yanki.avi: b470c485d1d7235d",
+		  "yanki.flv: 1a314ce217012ad7",
+		  "yanki.gif: 331e0f2fa33119c6",
+		  "yanki.mkv: 4582db56c31c8128",
+		  "yanki.mov: 553425008d4f011f",
+		  "yanki.mp4: 15650cc23035e306",
+		  "yanki.mpeg: 3a1f9bd184d72afb",
+		  "yanki.mpg: 3a1f9bd184d72afb",
+		  "yanki.ogv: 375c411b96f9548f",
+		  "yanki.swf: a6d2cff538706b9e",
+		  "yanki.webm: 383e8f0b7284a148",
+		  "photo-1555685812-4b943f1cb0eb: c8f0f244d1a0cde9",
+		  "photo-1574235664854-92e1da7d229a: ca2954941f3dc020",
+		]
+	`)
+})
+
 it('gets content hash from url metadata', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
 	for (const url of allRemoteMediaUrls) {
@@ -374,11 +440,80 @@ it('gets content hash from url name', { timeout: 60_000 }, async () => {
 	`)
 })
 
-it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
-	console.log('----------------------------------')
-	console.log(process.cwd())
-
+it('gets content hash from file content', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
+
+	const startTime = performance.now()
+	console.log('----------------------------------')
+
+	for (const filePath of allLocalMediaPaths) {
+		const result = await getFileContentHash(filePath, getDefaultFileAdapters(), 'content')
+		const key = path.basename(filePath)
+		results.push({ [key]: result ?? 'undefined' })
+	}
+
+	console.log(performance.now() - startTime)
+
+	const compactResults = results.map(
+		(entry) => `${Object.keys(entry)[0]}: ${Object.values(entry)[0]}`,
+	)
+
+	expect(compactResults).toMatchInlineSnapshot(`
+		[
+		  "yanki.3gp: bba78bb94b9e6e05",
+		  "yanki.aac: dea3afc906fbd199",
+		  "yanki.avi: da3e19e63e94a698",
+		  "yanki.flac: 17f3b98b233cac56",
+		  "yanki.flv: 24f434ca151b2f64",
+		  "yanki.m4a: 2745ab23d6596804",
+		  "yanki.mkv: ec05fb9ca9000b1a",
+		  "yanki.mov: c110680575442a1b",
+		  "yanki.mp3: 6f2a55dc001652e4",
+		  "yanki.mp4: 5725aa25f2d4df11",
+		  "yanki.mpeg: 4146e06c885e6e90",
+		  "yanki.mpg: 4146e06c885e6e90",
+		  "yanki.oga: a440bf0b758da0a9",
+		  "yanki.ogg: d66588713dad1e8f",
+		  "yanki.ogv: a676e89ef81b3e10",
+		  "yanki.ogx: 4420873255ff5fe4",
+		  "yanki.opus: 78105101f4040297",
+		  "yanki.spx: ea862d6a3a61686f",
+		  "yanki.swf: 2f4a7a6a9e7364fb",
+		  "yanki.wav: 1c643b9e7bd7829e",
+		  "yanki.webm: 30dad8fffde9b2af",
+		  "yanki.avif: 13dd44beaa1aaaeb",
+		  "yanki.gif: 2fd4962fc749d790",
+		  "yanki.ico: 00d3a18bbad0fe99",
+		  "yanki.jpeg: 2d66184d2677c1a5",
+		  "yanki.jpg: 2d66184d2677c1a5",
+		  "yanki.png: a2b3b387877733a3",
+		  "yanki.svg: f8bf3e4129b4bd19",
+		  "yanki.tif: a0ead4239da4d4eb",
+		  "yanki.tiff: a0ead4239da4d4eb",
+		  "yanki.webp: 8f960d8c851e0749",
+		  "yanki.3gp: ab6f2b977dec6c89",
+		  "yanki.avi: 749d588a8c5739c4",
+		  "yanki.flv: c1cf7aa628221dfd",
+		  "yanki.gif: 21d8e458040c9c59",
+		  "yanki.mkv: 5309b62e7a392acc",
+		  "yanki.mov: 66a671253ea9c410",
+		  "yanki.mp4: 50bd852f752e86ad",
+		  "yanki.mpeg: 009e8b68e7fbbeec",
+		  "yanki.mpg: 009e8b68e7fbbeec",
+		  "yanki.ogv: d75b1b60a458d1e4",
+		  "yanki.swf: 7ea99adc8ba79bec",
+		  "yanki.webm: 967e6b2dc20b54b3",
+		  "i.have.many.dots.jpg: 2d66184d2677c1a5",
+		  "i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg: 2d66184d2677c1a5",
+		  "i have so many spaces.jpg: 2d66184d2677c1a5",
+		  "i have? questions??.jpg: 2d66184d2677c1a5",
+		]
+	`)
+})
+
+it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
+	const results: Array<Record<string, string>> = []
+
 	for (const filePath of allLocalMediaPaths) {
 		const result = await getFileContentHash(filePath, getDefaultFileAdapters(), 'metadata')
 		const key = path.basename(filePath)
@@ -444,6 +579,7 @@ it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
 
 it('gets content hash from file name', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
+
 	for (const filePath of allLocalMediaPaths) {
 		const result = await getFileContentHash(filePath, getDefaultFileAdapters(), 'name')
 		const key = path.basename(filePath)

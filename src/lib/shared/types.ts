@@ -9,17 +9,19 @@ import {
 export type FetchAdapter = YankiFetchAdapter
 export type ManageFilenames = 'off' | 'prompt' | 'response'
 export type SyncMediaAssets = 'all' | 'local' | 'none' | 'remote'
+
 export type FileAdapters = {
-	readFile: (filePath: string, encoding?: 'utf8') => Promise<string>
-	rename: (oldPath: string, newPath: string) => Promise<void>
-	stat: (filePath: string) => Promise<{
-		// Used for detecting media file changes
+	readFile(filePath: string): Promise<string>
+	// Simpler than making the user implement overloads
+	readFileBuffer(filePath: string): Promise<Uint8Array>
+	rename(oldPath: string, newPath: string): Promise<void>
+	stat(filePath: string): Promise<{
 		// Require only the fields we can also get in Obsidian
 		ctimeMs: number // Time of creation, represented as a unix timestamp, in milliseconds.
 		mtimeMs: number // Time of last modification, represented as a unix timestamp, in milliseconds.
 		size: number // Size on disk, as bytes.
-	}> // Not used, yet
-	writeFile: (filePath: string, data: string, encoding?: 'utf8') => Promise<void> // Not used, yet
+	}>
+	writeFile(filePath: string, data: string): Promise<void> // Not used, yet
 }
 
 // Options used in more than one place... diamond problem prevents a pure hierarchy
@@ -68,7 +70,7 @@ export const defaultGlobalOptions: GlobalOptions = {
 
 // Helpers ---------------------------
 
-const fs = ENVIRONMENT === 'node' ? ((await import('node:fs/promises')) as FileAdapters) : undefined
+const fs = ENVIRONMENT === 'node' ? await import('node:fs/promises') : undefined
 
 export function getDefaultFileAdapters(): FileAdapters {
 	if (ENVIRONMENT === 'node') {
@@ -77,17 +79,24 @@ export function getDefaultFileAdapters(): FileAdapters {
 		}
 
 		return {
-			async readFile(filePath) {
-				return fs.readFile(filePath, 'utf8')
+			async readFile(filePath: string): Promise<string> {
+				return fs.readFile(filePath, { encoding: 'utf8' })
 			},
-			async rename(oldPath, newPath) {
-				return fs.rename(oldPath, newPath)
+
+			async readFileBuffer(filePath: string): Promise<Uint8Array> {
+				return fs.readFile(filePath)
 			},
+
+			async rename(oldPath: string, newPath: string): Promise<void> {
+				await fs.rename(oldPath, newPath)
+			},
+
 			async stat(filePath) {
 				return fs.stat(filePath)
 			},
-			async writeFile(filePath, data) {
-				return fs.writeFile(filePath, data, 'utf8')
+
+			async writeFile(filePath: string, data: string): Promise<void> {
+				await fs.writeFile(filePath, data, { encoding: 'utf8' })
 			},
 		}
 	}

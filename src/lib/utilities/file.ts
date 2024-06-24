@@ -1,22 +1,19 @@
-import { MEDIA_HASH_MODE } from '../shared/constants'
+import { MEDIA_DEFAULT_HASH_MODE_FILE } from '../shared/constants'
 import type { FileAdapters } from '../shared/types'
 import { getHash } from './string'
+import { sha256 } from 'crypto-hash'
 
 export async function getFileContentHash(
 	absoluteFilePath: string,
 	fileAdapters: FileAdapters,
-	mode = MEDIA_HASH_MODE,
+	mode = MEDIA_DEFAULT_HASH_MODE_FILE,
 ): Promise<string> {
-	// Obliging the no-fallthrough lint rule, but this effectively falls through
-	// via recursion instead...
 	switch (mode) {
 		case 'content': {
-			// TODO do a real hash of the actual content?
-			// Try more performance metadata approach first?
-			// Use crypto-hash thing for performant isomorphic hashing? How slow?
-			console.warn('`content` hash mode is not yet implemented for URLs')
-			// Fall through to metadata mode
-			return getFileContentHash(absoluteFilePath, fileAdapters, 'metadata')
+			const fileContent = await fileAdapters.readFileBuffer(absoluteFilePath)
+			// Sha1 would technically be fine but is not measurably more performant...
+			const shaHash = await sha256(fileContent)
+			return shaHash.slice(0, 16)
 		}
 
 		case 'metadata': {

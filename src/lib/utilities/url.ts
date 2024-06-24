@@ -1,7 +1,7 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
 import {
 	MEDIA_ALLOW_UNKNOWN_URL_EXTENSION,
-	MEDIA_HASH_MODE,
+	MEDIA_DEFAULT_HASH_MODE_URL,
 	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
 	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
 	MEDIA_URL_CONTENT_TYPE_MODE,
@@ -182,15 +182,12 @@ export async function getFileExtensionFromUrl(
 export async function getUrlContentHash(
 	url: string,
 	fetchAdapter: FetchAdapter,
-	mode = MEDIA_HASH_MODE,
+	mode = MEDIA_DEFAULT_HASH_MODE_URL,
 ): Promise<string> {
 	// Obliging the no-fallthrough lint rule, but this effectively falls through
 	// via recursion instead...
 	switch (mode) {
 		case 'content': {
-			// TODO do a real hash of the actual response content?
-			// Try more performance metadata approach first?
-			// Use crypto-hash thing for performant isomorphic hashing? How slow?
 			console.warn('`content` hash mode is not yet implemented for URLs')
 			// Use metadata mode
 			return getUrlContentHash(url, fetchAdapter, 'metadata')
