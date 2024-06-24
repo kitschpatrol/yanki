@@ -126,7 +126,7 @@ export async function mdastToHtml(
 
 	const treeMutationPromises: Array<() => Promise<void>> = []
 
-	if (syncMediaAssets !== 'none') {
+	if (syncMediaAssets !== 'off') {
 		const originalCwd = path.process_cwd
 		path.setCWD(cwd)
 

@@ -90,10 +90,10 @@ await yargsInstance
 				})
 				.option('sync-media', {
 					alias: 's',
-					choices: ['none', 'all', 'local', 'remote'] as const,
+					choices: ['off', 'all', 'local', 'remote'] as const,
 					default: defaultGlobalOptions.syncMediaAssets,
 					describe:
-						"Sync image, video, and audio assets to Anki's media storage system. Clean up is managed automatically. The `all` argument will save both local and remote assets to Anki, while `local` will only save local assets, `remote` will only save remote assets, and `none` will not save any assets.",
+						"Sync image, video, and audio assets to Anki's media storage system. Clean up is managed automatically. The `all` argument will save both local and remote assets to Anki, while `local` will only save local assets, `remote` will only save remote assets, and `off` will not save any assets.",
 					type: 'string',
 				})
 				.option(jsonOption('Output the sync report as JSON.'))

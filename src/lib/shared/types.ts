@@ -8,7 +8,7 @@ import {
 
 export type FetchAdapter = YankiFetchAdapter
 export type ManageFilenames = 'off' | 'prompt' | 'response'
-export type SyncMediaAssets = 'all' | 'local' | 'none' | 'remote'
+export type SyncMediaAssets = 'all' | 'local' | 'off' | 'remote'
 
 export type FileAdapters = {
 	readFile(filePath: string): Promise<string>
