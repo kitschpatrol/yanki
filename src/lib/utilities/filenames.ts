@@ -26,12 +26,12 @@ export function getSafeTitleForNote(
 		case 'Yanki - Basic (and reversed card)':
 		case 'Yanki - Basic (type in the answer)': {
 			const cleanFront = emptyIsUndefined(
-				getSafeFilename(note.fields.Front)
+				getSafeFilename(note.fields.Front) // Truncated later!
 					.replace(NOTE_DEFAULT_EMPTY_TEXT, '')
 					.replace(MEDIA_DEFAULT_EMPTY_FILENAME, ''),
 			)
 			const cleanBack = emptyIsUndefined(
-				getSafeFilename(note.fields.Back)
+				getSafeFilename(note.fields.Back) // Truncated later!
 					.replace(NOTE_DEFAULT_EMPTY_TEXT, '')
 					.replace(MEDIA_DEFAULT_EMPTY_FILENAME, ''),
 			)
@@ -141,21 +141,30 @@ export function auditUniqueFilePath(filePath: string, existingFilenames: string[
 }
 
 /**
- * @param filename File name without extension, but possible with an (1)
+ * @param filename File name with or without an extension, and possibly with a (1)
  * @returns filename without the increment
  */
 function stripFilenameIncrement(filename: string): string {
-	const extension = path.extname(filename)
+	// Don't mistake '... (1)' suffixes for extensions
+	// TODO make this less precarious
+	const validExtension =
+		filename.endsWith('.') || filename.endsWith(')') ? undefined : path.extname(filename)
+
 	const strippedBaseNameWithoutExtension = path
-		.basename(filename, extension)
+		.basename(filename, validExtension)
 		.replace(/\s\(\d+\)$/, '')
-	return path.join(path.dirname(filename), `${strippedBaseNameWithoutExtension}${extension}`)
+	return path.join(
+		path.dirname(filename),
+		`${strippedBaseNameWithoutExtension}${validExtension ?? ''}`,
+	)
 }
 
 function appendFilenameIncrement(filename: string, value: number): string {
 	const extension = path.extname(filename)
 	const baseNameWithoutExtension = path.basename(filename, extension)
+
 	const baseNameWithIncrement = `${stripFilenameIncrement(baseNameWithoutExtension)} (${value})`
+
 	return path.join(path.dirname(filename), `${baseNameWithIncrement}${extension}`)
 }
 
