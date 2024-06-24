@@ -418,27 +418,24 @@ The primary functions of interest are:
 ```ts
 function getNoteFromMarkdown(
   markdown: string,
-  options: GetNoteFromMarkdownOptions,
+  options?: Partial<GetNoteFromMarkdownOptions>,
 ): Promise<YankiNote>
-
-function syncFiles(
-  allLocalFilePaths: string[],
-  options?: PartialDeep<SyncOptions>,
-  readFile?: (filePath: string) => Promise<string>,
-  writeFile?: (filePath: string, data: string) => Promise<void>,
-  rename?: (oldPath: string, newPath: string) => Promise<void>,
-): Promise<SyncReport>
 
 function syncNotes(
   allLocalNotes: YankiNote[],
   options?: PartialDeep<SyncOptions>,
-): Promise<SyncReport>
+): Promise<SyncNotesResult>
 
-function listNotes(options?: PartialDeep<ListOptions>): Promise<ListReport>
+function syncFiles(
+  allLocalFilePaths: string[],
+  options?: PartialDeep<SyncFilesOptions>,
+): Promise<SyncFilesResult>
+
+function listNotes(options?: PartialDeep<ListOptions>): Promise<ListResult>
 
 function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanResult>
 
-function setStyle(options: PartialDeep<StyleOptions>): Promise<StyleResult>
+function setStyle(options?: PartialDeep<StyleOptions>): Promise<StyleResult>
 ```
 
 See the [source code](https://github.com/kitschpatrol/yanki/blob/main/src/lib/index.ts) for additional exports and inline documentation.
