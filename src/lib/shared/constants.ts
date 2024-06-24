@@ -83,6 +83,8 @@ export type MediaHashMode = 'content' | 'metadata' | 'name'
 export const MEDIA_DEFAULT_HASH_MODE_FILE: MediaHashMode = 'content'
 export const MEDIA_DEFAULT_HASH_MODE_URL: MediaHashMode = 'metadata'
 
+export const MEDIA_INCLUDE_LEGIBLE_FILENAME = false
+
 /**
  * How to infer the asset type behind a URL.
  *

@@ -1,5 +1,6 @@
 import {
 	MEDIA_FILENAME_MAX_LENGTH,
+	MEDIA_INCLUDE_LEGIBLE_FILENAME,
 	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
 	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
 } from '../shared/constants'
@@ -81,14 +82,20 @@ export async function getSafeAnkiMediaFilename(
 	const rawFileExtension = await getAnkiMediaFilenameExtension(absolutePathOrUrl, fetchAdapter)
 	const fileExtension = rawFileExtension === undefined ? '' : `.${rawFileExtension}`
 
-	// Make the legible filename as long as possible, add in the dash widths, dot is included in the extension
-	const legibleFilenameLength =
-		MEDIA_FILENAME_MAX_LENGTH -
-		(safeNamespace.length + 1 + assetHash.length + 1 + fileExtension.length)
+	let safeFilename: string | undefined
 
-	const legibleFilename = getLegibleFilename(absolutePathOrUrl, legibleFilenameLength)
-	// 40 + 1 + 16 + 1 + ? + 1 + 8
-	const safeFilename = `${safeNamespace}-${assetHash}-${legibleFilename}${fileExtension}`
+	if (MEDIA_INCLUDE_LEGIBLE_FILENAME) {
+		// Make the legible filename as long as possible, add in the dash widths, dot is included in the extension
+		const legibleFilenameLength =
+			MEDIA_FILENAME_MAX_LENGTH -
+			(safeNamespace.length + 1 + assetHash.length + 1 + fileExtension.length)
+
+		const legibleFilename = getLegibleFilename(absolutePathOrUrl, legibleFilenameLength)
+		// 40 + 1 + 16 + 1 + ? + 1 + 8
+		safeFilename = `${safeNamespace}-${assetHash}-${legibleFilename}${fileExtension}`
+	} else {
+		safeFilename = `${safeNamespace}-${assetHash}${fileExtension}`
+	}
 
 	// Should never happen
 	if (safeFilename.length > MEDIA_FILENAME_MAX_LENGTH) {
