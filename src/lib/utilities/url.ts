@@ -2,6 +2,8 @@
 import {
 	MEDIA_ALLOW_UNKNOWN_URL_EXTENSION,
 	MEDIA_HASH_MODE,
+	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
+	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
 	MEDIA_URL_CONTENT_TYPE_MODE,
 } from '../shared/constants'
 import { type FetchAdapter } from '../shared/types'
@@ -140,13 +142,22 @@ export async function getFileExtensionFromUrl(
 				extensionInUrl = searchParts.at(-1)
 			}
 
-			const validExtension = getFileExtensionForMimeType(extensionInUrl ?? '')
+			if (
+				(
+					[
+						...MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
+						...MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
+					] as unknown as string[]
+				).includes(extensionInUrl ?? '')
+			) {
+				return extensionInUrl
+			}
 
-			if (validExtension === undefined && allowUnknown) {
+			if (allowUnknown) {
 				return 'unknown'
 			}
 
-			return validExtension
+			return undefined
 		}
 	}
 }

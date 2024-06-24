@@ -50,7 +50,11 @@ export function describeWithFileFixture(
 			context.assetPath = assetPath
 			tempAssetPath = path.join(os.tmpdir(), Date.now().toString(), path.basename(assetPath))
 			// eslint-disable-next-line n/no-unsupported-features/node-builtins
-			await fs.cp(assetPath, tempAssetPath, { force: true, recursive: true })
+			await fs.cp(assetPath, tempAssetPath, {
+				force: true,
+				preserveTimestamps: true,
+				recursive: true,
+			})
 			context.files = await globby(`${tempAssetPath}/**/*.md`)
 			expect(context.files.length).toBeGreaterThan(0)
 

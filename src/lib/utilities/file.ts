@@ -20,16 +20,18 @@ export async function getFileContentHash(
 		}
 
 		case 'metadata': {
-			const { ctimeMs, mtimeMs, size } = await fileAdapters.stat(absoluteFilePath)
+			// Skipping ctimeMs, as it's not stable across systems
+			const { mtimeMs, size } = await fileAdapters.stat(absoluteFilePath)
 
-			const stringToHash = `${ctimeMs ?? ''}${mtimeMs ?? ''}${size ?? ''}`
+			// Ctime not stable?
+			const stringToHash = `${mtimeMs ?? ''}${size ?? ''}`
 
 			if (stringToHash === '') {
 				// Fall through to name mode
 				return getFileContentHash(absoluteFilePath, fileAdapters, 'name')
 			}
 
-			return getHash(`${ctimeMs}${mtimeMs}${size}`, 16)
+			return getHash(stringToHash, 16)
 		}
 
 		case 'name': {

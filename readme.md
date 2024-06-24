@@ -487,6 +487,12 @@ This makes `~/cards` the single source of truth, and spares the cognitive overhe
 
 Yanki will put the cards in eponymous decks, so you'll still have a clean separation of the two groups of cards in Anki.
 
+### Media asset synchronization
+
+By default, Yanki will automatically copy local image, media, and audio media linked in your notes' markdown to Anki's media storage system. With an option, it can do the same for remote assets.
+
+Note that there Anki's underlying implementation requires media assets to be less than 100 MB in size. There are also internal limits around filename length, but Yanki manages the filename for you internally, so this is not a concern.
+
 ### Styles
 
 The [`yanki style`](#subcommand-yanki-style) command lets you assign a CSS stylesheet to all Yanki-managed notes.
