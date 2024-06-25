@@ -15,7 +15,7 @@
 
 <!-- short-description -->
 
-**An ultra-simple CLI tool and TypeScript library for syncing Markdown to Anki flashcards.**
+**A CLI tool and TypeScript library for syncing Markdown to Anki flashcards.**
 
 <!-- /short-description -->
 
@@ -145,7 +145,7 @@ Both wiki-style `![[something.png]]` and `![markdown](style.png)` asset embeddin
 
 ## Markdown note types
 
-Yanki automatically infers the _type_ of Note you'd like to create in Anki based on the presence or absence of certain element in your Markdown files.
+Yanki automatically infers the _type_ of Note you'd like to create in Anki based on the presence or absence of certain elements in your Markdown files.
 
 The rules were designed with the semantic and visual nature of Markdown in mind.
 

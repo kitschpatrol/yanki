@@ -2,7 +2,7 @@
 	"name": "yanki",
 	"version": "0.8.1",
 	"type": "module",
-	"description": "An ultra-simple CLI tool and TypeScript library for syncing Markdown to Anki flashcards.",
+	"description": "A CLI tool and TypeScript library for syncing Markdown to Anki flashcards.",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/kitschpatrol/yanki.git"
