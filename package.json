@@ -73,7 +73,7 @@
 	},
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^4.7.2",
-		"@shikijs/rehype": "^1.9.0",
+		"@shikijs/rehype": "^1.9.1",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^2.2.1",
 		"@vitest/coverage-v8": "^1.6.0",
