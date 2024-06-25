@@ -118,15 +118,19 @@ export async function getFileExtensionFromUrl(
 				return getFileExtensionFromUrl(url, fetchAdapter, 'name')
 			}
 
-			const response = await fetchAdapter(url, { method: 'HEAD' })
-			const contentTypeHeaderValue = getHeadersString(response?.headers, ['content-type'])
+			try {
+				const response = await fetchAdapter(url, { method: 'HEAD' })
+				const contentTypeHeaderValue = getHeadersString(response?.headers, ['content-type'])
 
-			if (contentTypeHeaderValue === undefined) {
+				if (contentTypeHeaderValue === undefined) {
+					throw new Error('No content-type header found')
+				}
+
+				return getFileExtensionForMimeType(contentTypeHeaderValue)
+			} catch {
 				// Fall through to name mode
 				return getFileExtensionFromUrl(url, fetchAdapter, 'name')
 			}
-
-			return getFileExtensionForMimeType(contentTypeHeaderValue)
 		}
 
 		case 'name': {
@@ -194,19 +198,23 @@ export async function getUrlContentHash(
 		}
 
 		case 'metadata': {
-			const response = await fetchAdapter(url, { method: 'HEAD' })
-			const stringToHash = getHeadersString(response?.headers, [
-				'etag',
-				'last-modified',
-				'content-length',
-			])
+			try {
+				const response = await fetchAdapter(url, { method: 'HEAD' })
+				const stringToHash = getHeadersString(response?.headers, [
+					'etag',
+					'last-modified',
+					'content-length',
+				])
 
-			if (stringToHash === undefined) {
+				if (stringToHash === undefined) {
+					throw new Error('No headers found')
+				}
+
+				return getHash(stringToHash, 16)
+			} catch {
 				// Fall through to name mode
 				return getUrlContentHash(url, fetchAdapter, 'name')
 			}
-
-			return getHash(stringToHash, 16)
 		}
 
 		case 'name': {

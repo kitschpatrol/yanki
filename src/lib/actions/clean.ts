@@ -8,6 +8,7 @@ import {
 	deleteUnusedMedia,
 	getRemoteNotes,
 	requestPermission,
+	syncToAnkiWeb,
 } from '../utilities/anki-connect'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { truncateOnWordBoundary } from '../utilities/string'
@@ -74,7 +75,7 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	// AnkiWeb sync
 	const isChanged = remoteNotes.length > 0 || deletedDecks.length > 0
 	if (!dryRun && ankiWeb && (isChanged || SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED)) {
-		await client.miscellaneous.sync()
+		await syncToAnkiWeb(client)
 	}
 
 	return {

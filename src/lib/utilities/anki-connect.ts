@@ -564,24 +564,31 @@ async function uploadMediaForNote(
 
 		if (existing.length === 0) {
 			if (!dryRun) {
-				const ankiMediaFilename = await client.media.storeMediaFile(
-					isUrl(originalSrc)
-						? {
-								deleteExisting: true,
-								filename,
-								url: originalSrc,
-							}
-						: {
-								deleteExisting: true,
-								filename,
-								path: originalSrc,
-							},
-				)
-
-				if (filename !== ankiMediaFilename) {
-					console.warn(
-						`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
+				try {
+					const ankiMediaFilename = await client.media.storeMediaFile(
+						isUrl(originalSrc)
+							? {
+									deleteExisting: true,
+									filename,
+									url: originalSrc,
+								}
+							: {
+									deleteExisting: true,
+									filename,
+									path: originalSrc,
+								},
 					)
+
+					// eslint-disable-next-line max-depth
+					if (filename !== ankiMediaFilename) {
+						console.warn(
+							`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
+						)
+					}
+				} catch {
+					// E.g. offline...
+					// TODO richer errors here
+					console.warn(`Anki could not store media file: "${filename}"`)
 				}
 			}
 
@@ -665,5 +672,15 @@ export async function requestPermission(
 		}
 
 		throw error
+	}
+}
+
+export async function syncToAnkiWeb(client: YankiConnect): Promise<void> {
+	try {
+		await client.miscellaneous.sync()
+	} catch {
+		// E.g. offline
+		// TODO richer errors here
+		console.warn('Could not sync to AnkiWeb.')
 	}
 }

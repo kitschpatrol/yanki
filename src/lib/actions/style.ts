@@ -1,7 +1,12 @@
 import { yankiModelNames } from '../model/model'
 import { CSS_DEFAULT_STYLE, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
 import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
-import { getModelStyle, requestPermission, updateModelStyle } from '../utilities/anki-connect'
+import {
+	getModelStyle,
+	requestPermission,
+	syncToAnkiWeb,
+	updateModelStyle,
+} from '../utilities/anki-connect'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
@@ -91,7 +96,7 @@ export async function setStyle(options?: PartialDeep<SetStyleOptions>): Promise<
 	// AnkiWeb sync
 	const isChanged = modelsReport.some((model) => model.action !== 'unchanged')
 	if (!dryRun && ankiWeb && (isChanged || SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED)) {
-		await client.miscellaneous.sync()
+		await syncToAnkiWeb(client)
 	}
 
 	return {

@@ -9,6 +9,7 @@ import {
 	getRemoteNotes,
 	getRemoteNotesById,
 	requestPermission,
+	syncToAnkiWeb,
 	updateNote,
 	updateNoteModel,
 } from '../utilities/anki-connect'
@@ -203,7 +204,7 @@ export async function syncNotes(
 	// AnkiWeb sync
 	const isChanged = deletedDecks.length > 0 || synced.some((note) => note.action !== 'unchanged')
 	if (!dryRun && ankiWeb && (isChanged || SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED)) {
-		await client.miscellaneous.sync()
+		await syncToAnkiWeb(client)
 	}
 
 	return {
