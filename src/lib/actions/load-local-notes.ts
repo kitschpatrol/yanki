@@ -6,8 +6,8 @@ import {
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
 } from '../shared/types'
+import { resolveWithBasePath } from '../utilities/file'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
-import { ENVIRONMENT } from '../utilities/platform'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 
@@ -46,7 +46,7 @@ export async function loadLocalNotes(
 
 	// Use file paths as deck names
 	// TODO pass base path?
-	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths)
+	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths, { basePath })
 
 	const localNotes: LocalNote[] = []
 
@@ -79,6 +79,15 @@ export async function loadLocalNotes(
 	return localNotes
 }
 
+type DeckNamesFromFilePathsOptions = {
+	mode: 'common-parent' | 'common-root'
+} & Pick<GlobalOptions, 'basePath' | 'cwd'>
+
+const defaultDeckNamesFromFilePathsOptions: DeckNamesFromFilePathsOptions = {
+	...defaultGlobalOptions,
+	mode: 'common-root',
+}
+
 /**
  * Helper function to infer deck names from file paths if `deckName` not defined in the note's frontmatter.
  *
@@ -103,19 +112,16 @@ export async function loadLocalNotes(
  * /base/foo/note.md -> foo
  *
  * @param absoluteFilePaths Absolute paths to all markdown Anki note files. (Ensures proper resolution if path module is polyfilled.)
- * @param prune If true, deck names are not allowed to "jump" over empty directories, even if there are other note files somewhere up the hierarchy
  * @returns array of ::-delimited deck paths
  */
 function getDeckNamesFromFilePaths(
 	absoluteFilePaths: string[],
-	mode: 'common-parent' | 'common-root' = 'common-root',
+	options: Partial<DeckNamesFromFilePathsOptions>,
 ) {
-	if (ENVIRONMENT === 'node') {
-		path.setCWD(process.cwd())
-	}
+	const { basePath, cwd, mode } = deepmerge(defaultDeckNamesFromFilePathsOptions, options ?? {})
 
 	const filePathSegments = absoluteFilePaths.map((filePath) =>
-		path.dirname(path.resolve(filePath)).split(path.sep),
+		path.dirname(resolveWithBasePath(filePath, { basePath, cwd })).split(path.sep),
 	)
 
 	// Trim to the shortest common path
