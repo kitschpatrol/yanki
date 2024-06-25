@@ -13,6 +13,7 @@ import {
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
 } from '../shared/types'
+import { resolveWithBasePath } from '../utilities/file'
 import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
 import { cleanClassName } from '../utilities/string'
 import { fileUrlToPath, getSrcType } from '../utilities/url'
@@ -58,7 +59,10 @@ export type MdastToHtmlOptions = Simplify<
 		cssClassNames?: string[]
 		/** Whether to use an empty placeholder if the output is empty */
 		useEmptyPlaceholder?: boolean
-	} & Pick<GlobalOptions, 'cwd' | 'fetchAdapter' | 'fileAdapter' | 'namespace' | 'syncMediaAssets'>
+	} & Pick<
+		GlobalOptions,
+		'basePath' | 'cwd' | 'fetchAdapter' | 'fileAdapter' | 'namespace' | 'syncMediaAssets'
+	>
 >
 
 const defaultMdastToHtmlOptions: MdastToHtmlOptions = {
@@ -74,6 +78,7 @@ export async function mdastToHtml(
 	}
 
 	const {
+		basePath,
 		cssClassNames,
 		cwd,
 		fetchAdapter = getDefaultFetchAdapter(),
@@ -166,8 +171,8 @@ export async function mdastToHtml(
 				srcType === 'remoteHttpUrl'
 					? node.properties.src
 					: srcType === 'localFilePath'
-						? path.resolve(decodeURIComponent(node.properties.src))
-						: decodeURIComponent(fileUrlToPath(node.properties.src))
+						? resolveWithBasePath(decodeURIComponent(node.properties.src), { basePath, cwd }) // Todo relative to asset path?
+						: decodeURIComponent(fileUrlToPath(node.properties.src)) // Always absolute
 
 			// Run these after visit since visit can not be asynchronous
 			treeMutationPromises.push(async () => {

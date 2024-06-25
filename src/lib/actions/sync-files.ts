@@ -24,6 +24,7 @@ import type { PartialDeep, Simplify } from 'type-fest'
 export type SyncFilesOptions = Simplify<
 	Pick<
 		GlobalOptions,
+		| 'basePath'
 		| 'fetchAdapter'
 		| 'fileAdapter'
 		| 'manageFilenames'
@@ -74,6 +75,7 @@ export async function syncFiles(
 	const {
 		ankiConnectOptions,
 		ankiWeb,
+		basePath,
 		dryRun,
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
@@ -88,6 +90,7 @@ export async function syncFiles(
 	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
 
 	const localNotes = await loadLocalNotes(allLocalFilePaths, {
+		basePath,
 		fetchAdapter,
 		fileAdapter,
 		namespace: sanitizedNamespace,

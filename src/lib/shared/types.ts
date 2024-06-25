@@ -34,6 +34,8 @@ export type GlobalOptions = {
 	 * button in the Anki app.
 	 */
 	ankiWeb: boolean
+	/** Override where "/" should resolve to... useful in Obsidian to set the vault path as the "root" */
+	basePath: string | undefined
 	cwd: string
 	dryRun: boolean
 	/**
@@ -57,6 +59,7 @@ export type GlobalOptions = {
 export const defaultGlobalOptions: GlobalOptions = {
 	ankiConnectOptions: defaultYankiConnectOptions,
 	ankiWeb: false,
+	basePath: undefined,
 	cwd: path.process_cwd,
 	dryRun: false,
 	fetchAdapter: undefined, // Must be passed in later, deepmerge will not work

@@ -29,7 +29,13 @@ export type GetNoteFromMarkdownOptions = {
 	namespaceValidationAndSanitization: boolean
 } & Pick<
 	GlobalOptions,
-	'cwd' | 'fetchAdapter' | 'fileAdapter' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
+	| 'basePath'
+	| 'cwd'
+	| 'fetchAdapter'
+	| 'fileAdapter'
+	| 'namespace'
+	| 'obsidianVault'
+	| 'syncMediaAssets'
 >
 
 export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
@@ -42,6 +48,7 @@ export async function getNoteFromMarkdown(
 	options?: Partial<GetNoteFromMarkdownOptions>,
 ): Promise<YankiNote> {
 	const {
+		basePath,
 		cwd,
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
@@ -81,6 +88,7 @@ export async function getNoteFromMarkdown(
 			// Basic and reverse always needs both sides to have content.
 			// Basic can technically have no back , but it's confusing so we throw in the placeholder.
 			front = await mdastToHtml(firstPart, {
+				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
@@ -95,6 +103,7 @@ export async function getNoteFromMarkdown(
 				useEmptyPlaceholder: true,
 			})
 			back = await mdastToHtml(secondPart, {
+				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
@@ -118,6 +127,7 @@ export async function getNoteFromMarkdown(
 
 			// Cloze can't have empty front? But what does that even mean?
 			front = await mdastToHtml(firstPart, {
+				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
@@ -132,6 +142,7 @@ export async function getNoteFromMarkdown(
 				useEmptyPlaceholder: true,
 			})
 			back = await mdastToHtml(secondPart, {
+				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
@@ -164,6 +175,7 @@ export async function getNoteFromMarkdown(
 			const secondPartHast = u('root', u('paragraph', secondPart.children))
 
 			front = await mdastToHtml(firstPart, {
+				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
@@ -180,6 +192,7 @@ export async function getNoteFromMarkdown(
 
 			// HTML in the "blank" seems to parse correctly in Anki, but appears as plain text
 			back = await mdastToHtml(secondPartHast, {
+				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,

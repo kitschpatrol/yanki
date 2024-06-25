@@ -2,6 +2,7 @@ import { MEDIA_DEFAULT_HASH_MODE_FILE } from '../shared/constants'
 import type { FileAdapter } from '../shared/types'
 import { getHash } from './string'
 import { sha256 } from 'crypto-hash'
+import path from 'path-browserify-esm'
 
 export async function getFileContentHash(
 	absoluteFilePath: string,
@@ -35,4 +36,31 @@ export async function getFileContentHash(
 			return getHash(absoluteFilePath, 16)
 		}
 	}
+}
+
+/**
+ * Obsidian treats absolute links, and certain relative links, as relative to
+ * the vault root.
+ *
+ * When a `basePath` (likely the vault root) is provided and `obsidianMode` is
+ * true:
+ *
+ *  `Assets/image.png'`--> `/Vault/Assets/image.png`
+ *  `/Assets/image.png` --> `/Vault/Assets/image.png`
+ * 	`../Something/Else.png` --> `/Vault/CWD/../Something/Else.png`
+ * 	`./Something/Else.png` --> `/Vault/CWD/Something/Else.png`
+ *
+ * @param filePath
+ * @param options
+ * @returns
+ */
+export function resolveWithBasePath(
+	filePath: string,
+	options: { basePath?: string; cwd?: string; obsidianMode?: boolean },
+): string {
+	const { basePath, cwd, obsidianMode = true } = options
+
+	const includeCwd = !(obsidianMode && basePath !== undefined && !filePath.startsWith('.'))
+	const resolvedPath = path.join(basePath ?? '', includeCwd ? cwd ?? '' : '', filePath)
+	return path.normalize(resolvedPath)
 }
