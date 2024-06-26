@@ -50,7 +50,7 @@
 	],
 	"scripts": {
 		"build": "pkgroll --clean-dist --minify",
-		"clean": "git clean -fdX && rm ./pnpm-lock.yaml",
+		"clean": "git clean -fdX && rimraf ./pnpm-lock.yaml",
 		"coverage": "vitest run --coverage",
 		"fix": "shared-config --fix",
 		"lint": "shared-config --lint",
@@ -102,6 +102,7 @@
 		"remark-rehype": "^11.1.0",
 		"remark-remove-comments": "^1.0.1",
 		"remark-wiki-link": "^2.0.1",
+		"rimraf": "^5.0.7",
 		"sort-keys": "^5.0.0",
 		"tsx": "^4.15.7",
 		"type-fest": "^4.20.1",

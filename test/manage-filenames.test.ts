@@ -3,6 +3,7 @@ import { describeWithFileFixture } from './fixtures/file-fixture'
 import { cleanUpTempPath } from './utilities/stable-sync-results'
 import { globby } from 'globby'
 import path from 'node:path'
+import slash from 'slash'
 import { expect, it } from 'vitest'
 
 describeWithFileFixture(
