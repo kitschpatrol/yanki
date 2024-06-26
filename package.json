@@ -69,6 +69,7 @@
 		"globby": "^14.0.1",
 		"rehype-mathjax": "^6.0.0",
 		"rehype-parse": "^9.0.0",
+		"slash": "^5.1.0",
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {

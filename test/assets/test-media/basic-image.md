@@ -28,11 +28,15 @@
 
 ![Yanki test image](./image/yanki.svg)
 
-## Tif (Works on iOS mobile, broken on Mac desktop...)
+## Tif
+
+(Works on iOS mobile, broken on Mac and Windows desktop...)
 
 ![Yanki test image](./image/yanki.tif)
 
-## Tiff (Works on iOS mobile, broken on Mac desktop...)
+## Tiff
+
+(Works on iOS mobile, broken on Mac and Windows desktop...)
 
 ![Yanki test image](./image/yanki.tiff)
 

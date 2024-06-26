@@ -1,5 +1,6 @@
 import { type syncFiles } from '../../src/lib'
 import os from 'node:os'
+import slash from 'slash'
 import sortKeys from 'sort-keys'
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
@@ -8,12 +9,16 @@ export function stablePrettyMs(text: string): string {
 	return text.replaceAll(/\s\d+[ms]+/g, ' XXX')
 }
 
+export function sortMultiline(text: string): string {
+	return text.split('\n').sort().join('\n')
+}
+
 export function cleanUpTempPath(filePath: string | undefined): string | undefined {
 	if (filePath === undefined) {
 		return undefined
 	}
 
-	return filePath.replaceAll(os.tmpdir(), '/').replaceAll(/\/\d{13}\//g, '')
+	return filePath.replaceAll(slash(os.tmpdir()), '/').replaceAll(/\/\d{13}\//g, '')
 }
 
 function cleanUpHashes(text: string): string {

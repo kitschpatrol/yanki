@@ -56,7 +56,7 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.dirname(context.files[0])
-			const newFileList = await globby(`${tempPath}/**/*.md`, {
+			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
 				absolute: true,
 			})
 
@@ -136,7 +136,7 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.dirname(context.files[0])
-			const newFileList = await globby(`${tempPath}/**/*.md`, {
+			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
 				absolute: true,
 			})
 
@@ -277,7 +277,7 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.dirname(context.files[0])
-			const newFileList = await globby(`${tempPath}/**/*.md`, {
+			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
 				absolute: true,
 			})
 
@@ -367,7 +367,7 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.dirname(context.files[0])
-			const newFileList = await globby(`${tempPath}/**/*.md`, {
+			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
 				absolute: true,
 			})
 

@@ -27,7 +27,7 @@ export async function setNoteIdInFrontmatter(
 ): Promise<string> {
 	const [frontmatterStart, frontmatterEnd] = getFrontmatterRange(markdown)
 
-	const lines = markdown.split('\n')
+	const lines = markdown.split(/\r?\n/)
 
 	if (frontmatterStart === undefined || frontmatterEnd === undefined) {
 		// No frontmatter if no noteId is provided
@@ -64,7 +64,7 @@ export async function setNoteIdInFrontmatter(
 function getFrontmatterRange(
 	markdown: string,
 ): [start: number | undefined, end: number | undefined] {
-	const lines = markdown.split('\n')
+	const lines = markdown.split(/\r?\n/)
 
 	// Ensure that the frontmatter is at the top of the file
 	if (!lines.join('').trim().startsWith('---')) {
@@ -95,8 +95,9 @@ export async function getAllFrontmatter(markdown: string): Promise<Record<string
 		return {}
 	}
 
+	// TODO rejoin with same ending...
 	const frontmatter = markdown
-		.split('\n')
+		.split(/\r?\n/)
 		.slice(frontmatterStart + 1, frontmatterEnd)
 		.join('\n')
 

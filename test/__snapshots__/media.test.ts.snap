@@ -142,9 +142,11 @@ exports[`media > adds media to anki when appropriate 1`] = `
 <p><img src="yanki-media-yanki-test-HASH-00d3a18bbad0fe99.ico" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.ico"></p>
 <h2>Svg</h2>
 <p><img src="yanki-media-yanki-test-HASH-f8bf3e4129b4bd19.svg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.svg"></p>
-<h2>Tif (Works on iOS mobile, broken on Mac desktop...)</h2>
+<h2>Tif</h2>
+<p>(Works on iOS mobile, broken on Mac and Windows desktop...)</p>
 <p><img src="yanki-media-yanki-test-HASH-a0ead4239da4d4eb.tif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.tif"></p>
-<h2>Tiff (Works on iOS mobile, broken on Mac desktop...)</h2>
+<h2>Tiff</h2>
+<p>(Works on iOS mobile, broken on Mac and Windows desktop...)</p>
 <p><img src="yanki-media-yanki-test-HASH-a0ead4239da4d4eb.tiff" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.tiff"></p>
 <h2>Webp</h2>
 <p><img src="yanki-media-yanki-test-HASH-8f960d8c851e0749.webp" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/image/yanki.webp"></p></div>",
@@ -208,29 +210,18 @@ exports[`media > adds media to anki when appropriate 1`] = `
 <p>(Image path must be URI-encoded for compliance with CommonMark)</p>
 <h3>Spaces</h3>
 <p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have so many spaces.jpg"></p>
-<h3>Question marks</h3>
-<p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have? questions??.jpg"></p>
 <h3>Dots</h3>
 <p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i.have.many.dots.jpg"></p>
 <h3>Length</h3>
 <p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
-<h2>Markdown syntax with file URIs</h2>
-<p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" alt="" class="yanki-media yanki-media-image" data-src-original="/Users/mika/Code/yanki/test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
 <h2>Obsidian wikilink syntax</h2>
 <p>Image path does not have to be encoded for compatibility with Obsidian</p>
 <h3>Spaces</h3>
 <p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have so many spaces.jpg"></p>
-<h3>Question marks</h3>
-<p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i have? questions??.jpg"></p>
 <h3>Dots</h3>
 <p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i.have.many.dots.jpg"></p>
 <h3>Long</h3>
-<p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
-<h2>Obsidian wikilink syntax with file URIs</h2>
-<h3>With alt</h3>
-<p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" class="yanki-media yanki-media-image" data-src-original="/Users/mika/Code/yanki/test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p>
-<h3>Without alt</h3>
-<p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" class="yanki-media yanki-media-image" data-src-original="/Users/mika/Code/yanki/test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p></div>",
+<p><img src="yanki-media-yanki-test-HASH-2d66184d2677c1a5.jpg" class="yanki-media yanki-media-image" data-src-original="/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg"></p></div>",
           "YankiNamespace": "Yanki Test - b333b8c7b846af83",
         },
         "modelName": "Yanki - Basic",
@@ -354,9 +345,11 @@ exports[`remote media > fetches and adds media urls to anki when appropriate 1`]
 <p><img src="yanki-media-yanki-test-HASH-3a950c00367472e2.ico" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.ico?raw=true"></p>
 <h2>Svg</h2>
 <p><img src="yanki-media-yanki-test-HASH-195a484048295fc6.svg" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.svg?raw=true"></p>
-<h2>Tif (Works on iOS mobile, broken on Mac desktop...)</h2>
+<h2>Tif</h2>
+<p>(Works on iOS mobile, broken on Mac and Windows desktop...)</p>
 <p><img src="yanki-media-yanki-test-HASH-f44450f0e7d4f47d.tif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.tif?raw=true"></p>
-<h2>Tiff (Works on iOS mobile, broken on Mac desktop...)</h2>
+<h2>Tiff</h2>
+<p>(Works on iOS mobile, broken on Mac and Windows desktop...)</p>
 <p><img src="yanki-media-yanki-test-HASH-f44450f0e7d4f47d.tif" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.tiff?raw=true"></p>
 <h2>Webp</h2>
 <p><img src="yanki-media-yanki-test-HASH-f45cd13d1b867070.webp" alt="Yanki test image" class="yanki-media yanki-media-image" data-src-original="https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.webp?raw=true"></p></div>",

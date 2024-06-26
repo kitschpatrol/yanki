@@ -6,6 +6,7 @@ import { stableNoteIds, stablePrettyMs, stableResults } from './utilities/stable
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import slash from 'slash'
 import sortKeys from 'sort-keys'
 import { expect, it } from 'vitest'
 
@@ -531,7 +532,7 @@ describeWithFileFixture(
 
 			// Sync again
 
-			const newFileList = await globby(`${path.dirname(filePathWithId)}/*.md`)
+			const newFileList = await globby(`${slash(path.dirname(filePathWithId))}/*.md`)
 
 			const resultsWithDuplicates = await syncFiles(newFileList, {
 				ankiConnectOptions: {

@@ -3,6 +3,7 @@ import { type YankiNote } from '../model/note'
 import { type Media, extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
 import { getSlugifiedNamespace } from './namespace'
+import { PLATFORM } from './platform'
 import { isUrl } from './url'
 import { type YankiConnect } from 'yanki-connect'
 
@@ -585,10 +586,9 @@ async function uploadMediaForNote(
 							`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
 						)
 					}
-				} catch {
+				} catch (error) {
 					// E.g. offline...
-					// TODO richer errors here
-					console.warn(`Anki could not store media file: "${filename}"`)
+					console.warn(`Anki could not store media file: "${filename}"\n${String(error)}`)
 				}
 			}
 

@@ -18,6 +18,7 @@ import {
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import slash from 'slash'
 import untildify from 'untildify'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -114,7 +115,7 @@ await yargsInstance
 			verbose,
 		}) => {
 			log.verbose = verbose
-			const expandedDirectory = untildify(directory)
+			const expandedDirectory = slash(untildify(directory))
 			const globPattern = recursive ? `${expandedDirectory}/**/*.md` : `${expandedDirectory}/*.md`
 			const paths = await globby(globPattern, { absolute: true })
 

@@ -12,7 +12,8 @@ import { getHash } from '../../src/lib/utilities/string'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
-import path from 'node:path'
+import path from 'path-browserify-esm'
+import slash from 'slash'
 import { afterAll, beforeAll, describe, expect } from 'vitest'
 import { YankiConnect } from 'yanki-connect'
 
@@ -50,12 +51,14 @@ export function describeWithFileFixture(
 			context.assetPath = assetPath
 			tempAssetPath = path.join(os.tmpdir(), Date.now().toString(), path.basename(assetPath))
 			// eslint-disable-next-line n/no-unsupported-features/node-builtins
-			await fs.cp(assetPath, tempAssetPath, {
+			await fs.cp(context.assetPath, tempAssetPath, {
 				force: true,
 				preserveTimestamps: true,
 				recursive: true,
 			})
-			context.files = await globby(`${tempAssetPath}/**/*.md`)
+
+			context.files = await globby(`${slash(tempAssetPath)}/**/*.md`)
+
 			expect(context.files.length).toBeGreaterThan(0)
 
 			// Save CSS, so that we're always using the same stuff

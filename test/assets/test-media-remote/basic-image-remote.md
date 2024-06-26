@@ -28,11 +28,15 @@
 
 ![Yanki test image](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.svg?raw=true)
 
-## Tif (Works on iOS mobile, broken on Mac desktop...)
+## Tif
+
+(Works on iOS mobile, broken on Mac and Windows desktop...)
 
 ![Yanki test image](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.tif?raw=true)
 
-## Tiff (Works on iOS mobile, broken on Mac desktop...)
+## Tiff
+
+(Works on iOS mobile, broken on Mac and Windows desktop...)
 
 ![Yanki test image](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.tiff?raw=true)
 

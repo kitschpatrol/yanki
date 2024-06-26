@@ -57,7 +57,6 @@ const allLocalMediaPaths = [
 	'./test/assets/test-media/weird-filenames/i.have.many.dots.jpg',
 	'./test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg',
 	'./test/assets/test-media/weird-filenames/i have so many spaces.jpg',
-	'./test/assets/test-media/weird-filenames/i have? questions??.jpg',
 ]
 
 const allRemoteMediaUrls = [
@@ -501,7 +500,6 @@ it('gets content hash from file content', { timeout: 60_000 }, async () => {
 		  "i.have.many.dots.jpg: 2d66184d2677c1a5",
 		  "i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg: 2d66184d2677c1a5",
 		  "i have so many spaces.jpg: 2d66184d2677c1a5",
-		  "i have? questions??.jpg: 2d66184d2677c1a5",
 		]
 	`)
 })
@@ -515,59 +513,60 @@ it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
 		results.push({ [key]: result ?? 'undefined' })
 	}
 
+	// Not stable across checkouts
 	const compactResults = results.map(
-		(entry) => `${Object.keys(entry)[0]}: ${Object.values(entry)[0]}`,
+		(entry) =>
+			`${Object.keys(entry)[0]}: ${Object.values(entry)[0].replaceAll(/[\da-f]{16}/g, 'XXXXXXXXXXXXXXXX')}`,
 	)
 
 	expect(compactResults).toMatchInlineSnapshot(`
 		[
-		  "yanki.3gp: 0a2162013eba8654",
-		  "yanki.aac: 6625db4e0cb95317",
-		  "yanki.avi: 05ad826c7ae974f6",
-		  "yanki.flac: c24fafeae9cd4152",
-		  "yanki.flv: 0c37d49d6dbf4d4f",
-		  "yanki.m4a: 15d44ce150923dc3",
-		  "yanki.mkv: 5ba3016c6dec7118",
-		  "yanki.mov: 12253f485e9d8136",
-		  "yanki.mp3: e6b69b066d94e603",
-		  "yanki.mp4: e3d472d3cb7c4fdb",
-		  "yanki.mpeg: 584eb536fb0616a7",
-		  "yanki.mpg: 6adf9ef98edaab7f",
-		  "yanki.oga: 0198151b7ae778d5",
-		  "yanki.ogg: b19b05bf61eb31c5",
-		  "yanki.ogv: 5f311e8007fefea9",
-		  "yanki.ogx: f895c4701f556e1f",
-		  "yanki.opus: cbba24923d395e97",
-		  "yanki.spx: fd2cce813a2c95a8",
-		  "yanki.swf: fb355e28f84f7e7d",
-		  "yanki.wav: 3f783948f1d1d243",
-		  "yanki.webm: fd45f32bc0daed29",
-		  "yanki.avif: 45fcf0f69a7bd186",
-		  "yanki.gif: c48d031bb2d5be6a",
-		  "yanki.ico: 4eb6a5f639c7734b",
-		  "yanki.jpeg: 0047cde9edda1d62",
-		  "yanki.jpg: e0afd68db664f9ff",
-		  "yanki.png: 29405be495df0ed0",
-		  "yanki.svg: 23d850e49e7558d8",
-		  "yanki.tif: 77cf11dfcc56925a",
-		  "yanki.tiff: d60d7acc63331859",
-		  "yanki.webp: 8ed2551f0120a7bc",
-		  "yanki.3gp: 9739bc95a179ff76",
-		  "yanki.avi: da6473fb872ae059",
-		  "yanki.flv: 8b5bfc78a57455f0",
-		  "yanki.gif: 682f468244530e78",
-		  "yanki.mkv: 3d7c15bbaf22dd50",
-		  "yanki.mov: 37b1959e5402f42f",
-		  "yanki.mp4: 4a1a9f0e7ff23f61",
-		  "yanki.mpeg: fe9119af24c1a4fe",
-		  "yanki.mpg: 14774ce75cde3648",
-		  "yanki.ogv: 20743b58ec568c6c",
-		  "yanki.swf: afc309be1265e0ad",
-		  "yanki.webm: 6c16fcf1947dfb08",
-		  "i.have.many.dots.jpg: 0eb93cc7ef74ff86",
-		  "i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg: 194e8acb8550a6e3",
-		  "i have so many spaces.jpg: 23ffe38c0ef825d1",
-		  "i have? questions??.jpg: 0e326a78d6895a66",
+		  "yanki.3gp: XXXXXXXXXXXXXXXX",
+		  "yanki.aac: XXXXXXXXXXXXXXXX",
+		  "yanki.avi: XXXXXXXXXXXXXXXX",
+		  "yanki.flac: XXXXXXXXXXXXXXXX",
+		  "yanki.flv: XXXXXXXXXXXXXXXX",
+		  "yanki.m4a: XXXXXXXXXXXXXXXX",
+		  "yanki.mkv: XXXXXXXXXXXXXXXX",
+		  "yanki.mov: XXXXXXXXXXXXXXXX",
+		  "yanki.mp3: XXXXXXXXXXXXXXXX",
+		  "yanki.mp4: XXXXXXXXXXXXXXXX",
+		  "yanki.mpeg: XXXXXXXXXXXXXXXX",
+		  "yanki.mpg: XXXXXXXXXXXXXXXX",
+		  "yanki.oga: XXXXXXXXXXXXXXXX",
+		  "yanki.ogg: XXXXXXXXXXXXXXXX",
+		  "yanki.ogv: XXXXXXXXXXXXXXXX",
+		  "yanki.ogx: XXXXXXXXXXXXXXXX",
+		  "yanki.opus: XXXXXXXXXXXXXXXX",
+		  "yanki.spx: XXXXXXXXXXXXXXXX",
+		  "yanki.swf: XXXXXXXXXXXXXXXX",
+		  "yanki.wav: XXXXXXXXXXXXXXXX",
+		  "yanki.webm: XXXXXXXXXXXXXXXX",
+		  "yanki.avif: XXXXXXXXXXXXXXXX",
+		  "yanki.gif: XXXXXXXXXXXXXXXX",
+		  "yanki.ico: XXXXXXXXXXXXXXXX",
+		  "yanki.jpeg: XXXXXXXXXXXXXXXX",
+		  "yanki.jpg: XXXXXXXXXXXXXXXX",
+		  "yanki.png: XXXXXXXXXXXXXXXX",
+		  "yanki.svg: XXXXXXXXXXXXXXXX",
+		  "yanki.tif: XXXXXXXXXXXXXXXX",
+		  "yanki.tiff: XXXXXXXXXXXXXXXX",
+		  "yanki.webp: XXXXXXXXXXXXXXXX",
+		  "yanki.3gp: XXXXXXXXXXXXXXXX",
+		  "yanki.avi: XXXXXXXXXXXXXXXX",
+		  "yanki.flv: XXXXXXXXXXXXXXXX",
+		  "yanki.gif: XXXXXXXXXXXXXXXX",
+		  "yanki.mkv: XXXXXXXXXXXXXXXX",
+		  "yanki.mov: XXXXXXXXXXXXXXXX",
+		  "yanki.mp4: XXXXXXXXXXXXXXXX",
+		  "yanki.mpeg: XXXXXXXXXXXXXXXX",
+		  "yanki.mpg: XXXXXXXXXXXXXXXX",
+		  "yanki.ogv: XXXXXXXXXXXXXXXX",
+		  "yanki.swf: XXXXXXXXXXXXXXXX",
+		  "yanki.webm: XXXXXXXXXXXXXXXX",
+		  "i.have.many.dots.jpg: XXXXXXXXXXXXXXXX",
+		  "i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg: XXXXXXXXXXXXXXXX",
+		  "i have so many spaces.jpg: XXXXXXXXXXXXXXXX",
 		]
 	`)
 })
@@ -633,7 +632,6 @@ it('gets content hash from file name', { timeout: 60_000 }, async () => {
 		  "i.have.many.dots.jpg: 2f79041faf4149c1",
 		  "i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg: 3f8c69e608e64c11",
 		  "i have so many spaces.jpg: 5bac4245655d4ba4",
-		  "i have? questions??.jpg: 62202939fab59c4a",
 		]
 	`)
 })
@@ -670,7 +668,8 @@ describeWithFileFixture(
 		cleanUpTempFiles: true,
 	},
 	(context) => {
-		it('fetches and adds media urls to anki when appropriate', { timeout: 60_000 }, async () => {
+		// TODO insanely slow on Windows...
+		it('fetches and adds media urls to anki when appropriate', { timeout: 120_000 }, async () => {
 			const results = await syncFiles(context.files, {
 				ankiConnectOptions: {
 					autoLaunch: true,

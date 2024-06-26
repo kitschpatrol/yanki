@@ -44,11 +44,11 @@ export async function getAnkiMediaFilenameExtension(
 function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 	let legibleFilename: string | undefined
 
-	try {
+	if (isUrl(pathOrUrl)) {
 		const url = new URL(pathOrUrl)
 		// Also remove extension from URL if it's there, but it won't always be
 		legibleFilename = path.basename(url.pathname, path.extname(url.pathname))
-	} catch {
+	} else {
 		// Must be a file path
 		const filePath = pathOrUrl
 		legibleFilename = path.basename(filePath, path.extname(filePath))

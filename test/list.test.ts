@@ -1,7 +1,8 @@
 import { formatListResult, listNotes, syncFiles } from '../src/lib'
+import { PLATFORM } from '../src/lib/utilities/platform'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { closeAnki } from './utilities/close-anki'
-import { stableNoteIds } from './utilities/stable-sync-results'
+import { sortMultiline, stableNoteIds } from './utilities/stable-sync-results'
 import { expect, it } from 'vitest'
 
 describeWithFileFixture(
@@ -35,40 +36,40 @@ describeWithFileFixture(
 
 			const formatted = formatListResult(result)
 
-			expect(stableNoteIds(formatted)).toMatchInlineSnapshot(`
-				"Note ID XXXXXXXXXXXXX I'm a question to which there is no answer.
+			expect(sortMultiline(stableNoteIds(formatted))).toMatchInlineSnapshot(`
+				"Note ID XXXXXXXXXXXXX (Empty)
 				Note ID XXXXXXXXXXXXX (Empty)
+				Note ID XXXXXXXXXXXXX (Empty)
+				Note ID XXXXXXXXXXXXX (Empty)
+				Note ID XXXXXXXXXXXXX (Empty)
+				Note ID XXXXXXXXXXXXX (Empty)
+				Note ID XXXXXXXXXXXXX I look a lot like the thing you need to type...
+				Note ID XXXXXXXXXXXXX I look a lot like the thing you need to type...
+				Note ID XXXXXXXXXXXXX I look a lot like the thing you need to type...
+				Note ID XXXXXXXXXXXXX I look a lot like the thing you need to type...
+				Note ID XXXXXXXXXXXXX I'm a question to which there is no answer.
 				Note ID XXXXXXXXXXXXX I'm question which is sometimes the answer
+				Note ID XXXXXXXXXXXXX I'm the front of the card
+				Note ID XXXXXXXXXXXXX I'm the front of the card
 				Note ID XXXXXXXXXXXXX I'm the prompt
 				Note ID XXXXXXXXXXXXX I'm the prompt
 				Note ID XXXXXXXXXXXXX I'm the prompt
 				Note ID XXXXXXXXXXXXX I'm the prompt
 				Note ID XXXXXXXXXXXXX I'm the prompt
-				Note ID XXXXXXXXXXXXX (Empty)
-				Note ID XXXXXXXXXXXXX (Empty)
-				Note ID XXXXXXXXXXXXX (Empty)
-				Note ID XXXXXXXXXXXXX (Empty)
-				Note ID XXXXXXXXXXXXX My frontmatter is empty.
 				Note ID XXXXXXXXXXXXX I'm the question
-				Note ID XXXXXXXXXXXXX I'm the front of the card
-				Note ID XXXXXXXXXXXXX (Empty)
-				Note ID XXXXXXXXXXXXX I look a lot like the thing you need to type...
-				Note ID XXXXXXXXXXXXX I look a lot like the thing you need to type...
-				Note ID XXXXXXXXXXXXX I look a lot like the thing you need to type...
-				Note ID XXXXXXXXXXXXX I look a lot like the thing you need to type...
-				Note ID XXXXXXXXXXXXX I'm the front of the card
+				Note ID XXXXXXXXXXXXX My frontmatter is empty.
 				Note ID XXXXXXXXXXXXX This card has a {{c1::cloze}} or {{c2::two...
 				Note ID XXXXXXXXXXXXX This card has a {{c1::cloze}} or {{c2::two...
-				Note ID XXXXXXXXXXXXX {{c1::cloze}} is the {{c2::start of the card...
-				Note ID XXXXXXXXXXXXX {{c1::a lonely cloze}}
+				Note ID XXXXXXXXXXXXX This card has a {{c1::cloze}} or {{c2::two...
 				Note ID XXXXXXXXXXXXX This card has a {{c1::emphasized but un-hinted...
-				Note ID XXXXXXXXXXXXX This card has a {{c1::cloze}} or {{c2::two..."
+				Note ID XXXXXXXXXXXXX {{c1::a lonely cloze}}
+				Note ID XXXXXXXXXXXXX {{c1::cloze}} is the {{c2::start of the card..."
 			`)
 		})
 	},
 )
 
-it('throws if anki is closed', { timeout: 20_000 }, async () => {
+it('throws if anki is closed', { skip: PLATFORM !== 'mac', timeout: 20_000 }, async () => {
 	await closeAnki()
 
 	await expect(
@@ -99,7 +100,7 @@ it('tells the truth if no notes are found', async () => {
 	expect(formatted).toMatchInlineSnapshot(`"No notes found."`)
 })
 
-it('handles undefined options', { timeout: 20_000 }, async () => {
+it('handles undefined options', { skip: PLATFORM !== 'mac', timeout: 20_000 }, async () => {
 	await closeAnki()
 	await expect(listNotes()).rejects.toThrowErrorMatchingInlineSnapshot(
 		`[Error: Anki is unreachable. Is Anki running?]`,

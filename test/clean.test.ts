@@ -1,4 +1,5 @@
 import { cleanNotes, formatCleanResult, listNotes, syncFiles } from '../src/lib'
+import { PLATFORM } from '../src/lib/utilities/platform'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { closeAnki } from './utilities/close-anki'
 import { stableNoteIds, stablePrettyMs } from './utilities/stable-sync-results'
@@ -123,7 +124,7 @@ describeWithFileFixture(
 	},
 )
 
-it('throws if anki is closed', { timeout: 20_000 }, async () => {
+it('throws if anki is closed', { skip: PLATFORM !== 'mac', timeout: 20_000 }, async () => {
 	await closeAnki()
 
 	await expect(
@@ -138,7 +139,7 @@ it('throws if anki is closed', { timeout: 20_000 }, async () => {
 	).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Anki is unreachable. Is Anki running?]`)
 })
 
-it('handles undefined options', { timeout: 20_000 }, async () => {
+it('handles undefined options', { skip: PLATFORM !== 'mac', timeout: 20_000 }, async () => {
 	await closeAnki()
 	await expect(cleanNotes()).rejects.toThrowErrorMatchingInlineSnapshot(
 		`[Error: Anki is unreachable. Is Anki running?]`,

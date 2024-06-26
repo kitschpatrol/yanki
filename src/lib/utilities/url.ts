@@ -13,10 +13,14 @@ import { getHash } from './string'
 export function isUrl(text: string): boolean {
 	// Waiting for URL.canParse in node 19+...
 	// return URL.canParse(text)
+	// TODO this is confused by windows paths, e.g. `C:/Bla bla bla`... which is why there's an explicit protocol check.
 	try {
-		// eslint-disable-next-line no-new
-		new URL(text)
-		return true
+		const { protocol } = new URL(text)
+		if (protocol === 'https:' || protocol === 'http:') {
+			return true
+		}
+
+		return false
 	} catch {
 		return false
 	}
@@ -59,7 +63,10 @@ export function getSrcType(
 		return 'localFilePath'
 	}
 
-	return 'unsupportedProtocolUrl'
+	// TODO windows issue...
+	// Treat other protocols like c: as local paths
+	// TODO actually return unsupportedProtocolUrl
+	return 'localFilePath'
 }
 
 /**
