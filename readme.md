@@ -44,9 +44,19 @@
 
 ## Overview
 
-Yanki simply syncs a folder of Markdown notes to Anki. The primary novelty of its approach is in how Markdown is translated into Anki notes. The **structure** of a Markdown note determines the **type** of Anki note it becomes, so no extra syntax or Anki-specific markup is required — just pure Markdown.
+Yanki simply syncs a folder of Markdown notes to Anki.
 
-This library leverages the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) library, and powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) Obsidian plugin.
+e primary novelty of its approach is in how Markdown is translated into Anki notes, and how folders are translated into Anki decks:
+
+- **One** Markdown file maps to **one** Anki note.
+
+- The **structure** of a Markdown note determines the **type** of Anki note it becomes, so no extra syntax or Anki-specific markup is required — just pure Markdown.
+
+- The **parent folder** of your Markdown note determines its **deck name** in Anki, with any intermediate hierarchies created as needed.
+
+This package provides both a stand-alone CLI tool and a TypeScript library for ease of integration in other projects.
+
+The library powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) Obsidian plugin. And for lower-level access to Anki, please take a look at the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) TypeScript library.
 
 The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
 
@@ -489,6 +499,16 @@ Yanki will put the cards in eponymous decks, so you'll still have a clean separa
 By default, Yanki will automatically copy local image, media, and audio media linked in your notes' markdown to Anki's media storage system. With an option, it can do the same for remote assets.
 
 Note that there Anki's underlying implementation requires media assets to be less than 100 MB in size. There are also internal limits around filename length, but Yanki manages the filename for you internally, so this is not a concern.
+
+Support file formats / codecs is a bit nuanced, and some variations have been observed between what is officially supported according to the Anki source code and what actually works in practice on different platforms.
+
+The subset of the officially supported formats that have shown the broadest compatibility in testing Yanki are:
+
+- Image: `jpeg`, `png`, `svg`
+- Audio: `mp3`
+- Video: `mp4`, `gif`
+
+See the [document on file formats](./docs/file-formats.md) for additional details and a full compatibility matrix.
 
 ### Styles
 
