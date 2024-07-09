@@ -46,7 +46,7 @@
 
 Yanki simply syncs a folder of Markdown notes to Anki.
 
-e primary novelty of its approach is in how Markdown is translated into Anki notes, and how folders are translated into Anki decks:
+The primary novelty of its approach is in how Markdown is translated into Anki notes, and how folders are translated into Anki decks:
 
 - **One** Markdown file maps to **one** Anki note.
 
@@ -61,6 +61,8 @@ The library powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-
 The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
 
 ## Quick start
+
+Install [Node.js](https://nodejs.org) if you haven't already. (Version 20 or newer is recommended.)
 
 Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on installed:
 
