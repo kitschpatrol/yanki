@@ -575,6 +575,8 @@ Areas of improvement before a 1.0.0 release:
 
 Possible features on the horizon:
 
+- [ ] Sync and store Anki's review statistics to the Markdown file's frontmatter.
+
 - [ ] Including some built-in CSS stylesheet options might be nice, since Anki's defaults can't always anticipate the kinds of HTML you're likely to generate from Markdown.
 
 - [ ] Support for Mermaid diagrams. (Unlikely since rendering to an SVG seems to require a browser. See [rehype-mermaid](https://github.com/remcohaszing/rehype-mermaid) and [remark-mermaidjs](https://github.com/remcohaszing/remark-mermaidjs).)

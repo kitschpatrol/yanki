@@ -301,8 +301,8 @@ it('gets content hash from url content', { timeout: 60_000 }, async () => {
 		  "yanki.ogv: 375c411b96f9548f",
 		  "yanki.swf: a6d2cff538706b9e",
 		  "yanki.webm: 383e8f0b7284a148",
-		  "photo-1555685812-4b943f1cb0eb: c8f0f244d1a0cde9",
-		  "photo-1574235664854-92e1da7d229a: ca2954941f3dc020",
+		  "photo-1555685812-4b943f1cb0eb: b24b0b19dc684cc3",
+		  "photo-1574235664854-92e1da7d229a: 9674cddd20b7e0b9",
 		]
 	`)
 })
@@ -367,8 +367,8 @@ it('gets content hash from url metadata', { timeout: 60_000 }, async () => {
 		  "yanki.ogv: 375c411b96f9548f",
 		  "yanki.swf: a6d2cff538706b9e",
 		  "yanki.webm: 383e8f0b7284a148",
-		  "photo-1555685812-4b943f1cb0eb: c8f0f244d1a0cde9",
-		  "photo-1574235664854-92e1da7d229a: ca2954941f3dc020",
+		  "photo-1555685812-4b943f1cb0eb: b24b0b19dc684cc3",
+		  "photo-1574235664854-92e1da7d229a: 9674cddd20b7e0b9",
 		]
 	`)
 })
