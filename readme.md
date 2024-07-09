@@ -122,7 +122,7 @@ If you use [AnkiWeb](https://ankiweb.net/) to sync your notes to the cloud, Yank
 
 ### Existing notes are untouched
 
-Yanki tags the notes it's in charge of with a hidden field, so it will never touch your existing Anki notes. (_But please exercise caution until the 1.0 release..._)
+Yanki tags the notes it's in charge of with a hidden field, so it will never touch your existing Anki notes. (_But please exercise caution until the 1.0.0 release..._)
 
 ### Fancy markdown
 
@@ -423,7 +423,7 @@ yanki style [options]
 
 #### API
 
-This package also exposes an API for integrating syncing capability programmatically in other contexts. (For example, in the soon-to-be-released `yanki-obsidian` plugin.
+This package also exposes an API for integrating syncing capability programmatically in other contexts. (For example, in the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) plugin.)
 
 The primary functions of interest are:
 
