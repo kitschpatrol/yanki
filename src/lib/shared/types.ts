@@ -78,7 +78,7 @@ export async function getDefaultFileAdapter(): Promise<FileAdapter> {
 		// TODO memoize
 		const nodeFs = await import('node:fs/promises')
 		if (nodeFs === undefined) {
-			throw new Error('Issue loading file functions in Node environment')
+			throw new Error('Error loading file functions in Node environment')
 		}
 
 		return {
