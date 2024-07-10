@@ -669,7 +669,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		// TODO insanely slow on Windows...
-		it('fetches and adds media urls to anki when appropriate', { timeout: 120_000 }, async () => {
+		it('fetches and adds media urls to anki when appropriate', { timeout: 240_000 }, async () => {
 			const results = await syncFiles(context.files, {
 				ankiConnectOptions: {
 					autoLaunch: true,

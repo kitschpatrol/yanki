@@ -20,9 +20,15 @@ describeWithFileFixture(
 				},
 			})
 
-			expect(result).toMatchInlineSnapshot(
-				`" .card { font-family: arial; font-size: 20px; text-align: center; color: black; background-color: white; } "`,
-			)
+			expect(result).toMatchInlineSnapshot(`
+				".card {
+					font-family: arial;
+					font-size: 20px;
+					text-align: center;
+					color: black;
+					background-color: white;
+				}"
+			`)
 		})
 
 		it('sets the style', async () => {
