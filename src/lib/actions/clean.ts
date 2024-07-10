@@ -58,7 +58,6 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	const client = new YankiConnect(ankiConnectOptions)
 
 	const permissionStatus = await requestPermission(client)
-
 	if (permissionStatus === 'ankiUnreachable') {
 		throw new Error('Anki is unreachable. Is Anki running?')
 	}

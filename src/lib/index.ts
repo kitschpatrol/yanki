@@ -29,6 +29,12 @@ export {
 	formatSyncFilesResult,
 	syncFiles,
 } from './actions/sync-files'
+export {
+	type SyncNotesOptions,
+	type SyncNotesResult,
+	defaultSyncNotesOptions,
+	syncNotes,
+} from './actions/sync-notes'
 export { type YankiNote } from './model/note'
 export {
 	type GetNoteFromMarkdownOptions,

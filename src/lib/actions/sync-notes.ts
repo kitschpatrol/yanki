@@ -23,12 +23,12 @@ export type SyncedNote = {
 	note: YankiNote
 }
 
-export type SyncOptions = Pick<
+export type SyncNotesOptions = Pick<
 	GlobalOptions,
 	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace'
 >
 
-export const defaultSyncOptions: SyncOptions = {
+export const defaultSyncNotesOptions: SyncNotesOptions = {
 	...defaultGlobalOptions,
 }
 
@@ -51,15 +51,15 @@ export type SyncNotesResult = Simplify<
 // eslint-disable-next-line complexity
 export async function syncNotes(
 	allLocalNotes: YankiNote[],
-	options?: PartialDeep<SyncOptions>,
+	options?: PartialDeep<SyncNotesOptions>,
 ): Promise<SyncNotesResult> {
 	const startTime = performance.now()
 
 	// Defaults
 	const { ankiConnectOptions, ankiWeb, dryRun, namespace } = deepmerge(
-		defaultSyncOptions,
+		defaultSyncNotesOptions,
 		options ?? {},
-	) as SyncOptions
+	) as SyncNotesOptions
 
 	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
 

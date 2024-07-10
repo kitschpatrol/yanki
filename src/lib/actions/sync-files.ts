@@ -11,11 +11,11 @@ import { loadLocalNotes } from './load-local-notes'
 import { renameNotes } from './rename'
 import {
 	type SyncNotesResult,
-	type SyncOptions,
+	type SyncNotesOptions,
 	type SyncedNote,
-	defaultSyncOptions,
+	defaultSyncNotesOptions,
 	syncNotes,
-} from './sync'
+} from './sync-notes'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
@@ -33,12 +33,12 @@ export type SyncFilesOptions = Simplify<
 		| 'obsidianVault'
 		| 'syncMediaAssets'
 	> &
-		SyncOptions
+		SyncNotesOptions
 >
 
 export const defaultSyncFilesOptions: SyncFilesOptions = {
 	...defaultGlobalOptions,
-	...defaultSyncOptions,
+	...defaultSyncNotesOptions,
 }
 
 export type SyncedFile = Simplify<
