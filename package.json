@@ -1,6 +1,6 @@
 {
 	"name": "yanki",
-	"version": "0.8.6",
+	"version": "0.9.0",
 	"type": "module",
 	"description": "A CLI tool and TypeScript library for syncing Markdown to Anki flashcards.",
 	"repository": {
