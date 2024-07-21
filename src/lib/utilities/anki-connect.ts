@@ -3,7 +3,6 @@ import { type YankiNote } from '../model/note'
 import { type Media, extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
 import { getSlugifiedNamespace } from './namespace'
-import { PLATFORM } from './platform'
 import { isUrl } from './url'
 import { type YankiConnect } from 'yanki-connect'
 
@@ -12,15 +11,7 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 		return
 	}
 
-	// TODO TypeScript regression
-	// const noteIds = notes.map((note) => note.noteId).filter((noteId) => noteId !== undefined)
-	const noteIds: number[] = []
-	for (const note of notes) {
-		if (note.noteId !== undefined) {
-			noteIds.push(note.noteId)
-		}
-	}
-
+	const noteIds = notes.map((note) => note.noteId).filter((noteId) => noteId !== undefined)
 	await client.note.deleteNotes({ notes: noteIds })
 }
 
