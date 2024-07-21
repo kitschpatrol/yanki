@@ -470,9 +470,9 @@ Followed by:
 yanki sync ./more-important-cards
 ```
 
-Any notes synced from the `important-cards` folder _will be deleted_ from Anki by the second command to sync `more-important-cards`, because they share the same default namespace, and because you local notes are a single source of truth for the sync system.
+Any notes synced from the `important-cards` folder _will be deleted_ from Anki by the second command to sync `more-important-cards`, because they share the same default namespace, and because your local notes are a single source of truth for the sync system.
 
-If you don't want this behavior, then you can pass the `--namespace` flag to explicitly state that you want the commands to exist in separate namespaces:
+If you don't want this behavior, then you can pass the `--namespace` flag to explicitly state that you want the commands to execute in separate namespaces:
 
 ```sh
 yanki sync ./important-cards --namespace "Foo"
