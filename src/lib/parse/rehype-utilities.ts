@@ -45,6 +45,8 @@ const processor = unified()
 	// Super slow...
 	.use(rehypeShiki, {
 		// See https://shiki.style/packages/rehype
+		defaultLanguage: 'plaintext',
+		fallbackLanguage: 'plaintext',
 		themes: {
 			dark: 'github-dark',
 			light: 'github-light',

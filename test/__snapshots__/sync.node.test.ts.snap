@@ -1635,6 +1635,57 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
     },
     {
       "action": "created",
+      "filePath": "/test-fancy-markdown/syntax-highlighting-unspecified.md",
+      "filePathOriginal": "/test-fancy-markdown/syntax-highlighting-unspecified.md",
+      "note": {
+        "deckName": "test-fancy-markdown",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>My code block has nice syntax highlighting.</p>
+<pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span>export function emptyIsUndefined(text: string | undefined): string | undefined {</span></span>
+<span class="line"><span>  if (text === undefined) {</span></span>
+<span class="line"><span>    return undefined</span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  return text.trim() === '' ? undefined : text</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre></div>",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
+      "filePath": "/test-fancy-markdown/syntax-highlighting-unsupported.md",
+      "filePathOriginal": "/test-fancy-markdown/syntax-highlighting-unsupported.md",
+      "note": {
+        "deckName": "test-fancy-markdown",
+        "fields": {
+          "Back": "",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>My code block has nice syntax highlighting.</p>
+<pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span># My Document Title</span></span>
+<span class="line"><span>## group name (optional)</span></span>
+<span class="line"><span>- 2023 A full year event.</span></span>
+<span class="line"><span>  - 2023-01~2023-03 subevent</span></span>
+<span class="line"><span>  - 2023-05~2023-08 subevent 2</span></span>
+<span class="line"><span>- 2023-01 month event name.</span></span>
+<span class="line"><span>- 2023-01-02 event name with [link](https://github.com/hotoo/obsidian-markline).</span></span>
+<span class="line"><span>## another group</span></span>
+<span class="line"><span>- 2013 another list item.</span></span>
+<span class="line"><span>- 2013-05-05 yet another list item.</span></span>
+<span class="line"><span></span></span></code></pre></div>",
+          "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
+        },
+        "modelName": "Yanki - Basic",
+        "noteId": 0,
+        "tags": [],
+      },
+    },
+    {
+      "action": "created",
       "filePath": "/test-fancy-markdown/syntax-highlighting.md",
       "filePathOriginal": "/test-fancy-markdown/syntax-highlighting.md",
       "note": {
