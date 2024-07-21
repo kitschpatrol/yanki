@@ -41,7 +41,7 @@ const plugin: Plugin<[Options], Root> = function (options = {}) {
 						let [url, alias] = $1.split('|') as [string, string | undefined]
 						const heading = url.split('#')?.at(-1)
 
-						alias ??= (automaticAlias ? heading ?? url.split('/').pop() : url)!
+						alias ??= (automaticAlias ? (heading ?? url.split('/').pop()) : url)!
 						url = obsidianVault
 							? `obsidian://open?vault=${encodeURIComponent(obsidianVault)}&file=${encodeURIComponent(url)}.md`
 							: isUrl(url)

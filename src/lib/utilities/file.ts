@@ -61,6 +61,6 @@ export function resolveWithBasePath(
 	const { basePath, cwd, obsidianMode = true } = options
 
 	const includeCwd = !(obsidianMode && basePath !== undefined && !filePath.startsWith('.'))
-	const resolvedPath = path.join(basePath ?? '', includeCwd ? cwd ?? '' : '', filePath)
+	const resolvedPath = path.join(basePath ?? '', includeCwd ? (cwd ?? '') : '', filePath)
 	return path.normalize(resolvedPath)
 }

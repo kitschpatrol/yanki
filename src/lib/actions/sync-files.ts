@@ -10,8 +10,8 @@ import { capitalize } from '../utilities/string'
 import { loadLocalNotes } from './load-local-notes'
 import { renameNotes } from './rename'
 import {
-	type SyncNotesResult,
 	type SyncNotesOptions,
+	type SyncNotesResult,
 	type SyncedNote,
 	defaultSyncNotesOptions,
 	syncNotes,
