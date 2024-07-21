@@ -1004,8 +1004,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f back model-yanki-basic-and-reversed-card"><p><img src="https://images.unsplash.com/photo-1574235664854-92e1da7d229a?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8Y2F0fHx8fHx8MTcxNzI5MjE0NQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="cat"></p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic-and-reversed-card"><p><img src="https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?crop=entropy&#x26;cs=tinysrgb&#x26;fit=crop&#x26;fm=jpg&#x26;h=800&#x26;ixid=MnwxfDB8MXxyYW5kb218MHx8a2l0dGVufHx8fHx8MTcxNzI5MTk1OQ&#x26;ixlib=rb-4.0.3&#x26;q=80&#x26;utm_campaign=api-credit&#x26;utm_medium=referral&#x26;utm_source=unsplash_source&#x26;w=800" alt="kitten"></p></div>",
+          "Back": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f back model-yanki-basic-and-reversed-card"><p><img src="https://storage.kitschpatrol.com/example-image-2.jpeg" alt="tiny"></p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic-and-reversed-card"><p><img src="https://storage.kitschpatrol.com/example-image-1.jpeg" alt="tiny"></p></div>",
           "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic (and reversed card)",
