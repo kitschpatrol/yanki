@@ -20,4 +20,15 @@ pnpm-lock.yaml
 package-lock.json
 
 # Customizations
+test/assets/test-obsidian-vault/Cards/Group 1/test card.md
+test/assets/test-obsidian-vault/Cards/Group 2/test card.md
+test/assets/test-obsidian-vault/Cards/Markdown/audio.md
+test/assets/test-obsidian-vault/Cards/Markdown/embedding.md
+test/assets/test-obsidian-vault/Cards/Markdown/images.md
+test/assets/test-obsidian-vault/Cards/Markdown/links.md
+test/assets/test-obsidian-vault/Cards/Markdown/rules.md
+test/assets/test-obsidian-vault/Cards/Markdown/style.md
+test/assets/test-obsidian-vault/Cards/Markdown/tables.md
+test/assets/test-obsidian-vault/Cards/Markdown/video.md
+test/assets/test-obsidian-vault/test card.md
 test/assets/test-unexpected-formatting/
