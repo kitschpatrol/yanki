@@ -19,7 +19,7 @@ import {
 	getSafeAnkiMediaFilename,
 	mediaAssetExists,
 } from '../utilities/media'
-import { cleanClassName } from '../utilities/string'
+import { cleanClassName, emptyIsUndefined } from '../utilities/string'
 import { fileUrlToPath, getSrcType } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
 import { deepmerge } from 'deepmerge-ts'
@@ -290,6 +290,39 @@ export async function mdastToHtml(
 		}
 	})
 
+	// Extract image size metadata from alt text
+	// This is an Obsidian feature...
+	// Do this here instead of in generic HAST plugin because
+	// some images are converted to spans prior...
+	visit(hastWithClass, 'element', (node, index, parent) => {
+		if (
+			parent === undefined ||
+			index === undefined ||
+			node.tagName !== 'img' ||
+			emptyIsUndefined(String(node.properties.alt)) === undefined
+		) {
+			return CONTINUE
+		}
+
+		// Get dimensions from the alt text
+		const originalAltText = String(node.properties.alt ?? '')
+		const { alt, height, width } = parseDimensionsFromAltText(originalAltText)
+
+		if (alt === undefined) {
+			delete node.properties.alt
+		} else {
+			node.properties.alt = alt
+		}
+
+		if (height !== undefined) {
+			node.properties.height = height
+		}
+
+		if (width !== undefined) {
+			node.properties.width = width
+		}
+	})
+
 	const htmlWithClass = processor.stringify(hastWithClass)
 
 	return htmlWithClass.trim()
@@ -344,4 +377,66 @@ export function extractMediaFromHtml(html: string): Media[] {
 	})
 
 	return media
+}
+
+function parseDimensionsFromAltText(alt: string): {
+	alt: string | undefined
+	height: number | undefined
+	width: number | undefined
+} {
+	// Obsidian only parses last | delimited element of alt text
+	const altParts = alt.split('|')
+	const lastAltPart = emptyIsUndefined(altParts.pop())
+	const firstAltPart = emptyIsUndefined(altParts.join('|'))
+
+	if (lastAltPart !== undefined) {
+		const { height, width } = parseDimensions(lastAltPart)
+		if (width !== undefined || height !== undefined) {
+			return {
+				alt: firstAltPart,
+				height,
+				width,
+			}
+		}
+	}
+
+	return {
+		alt,
+		height: undefined,
+		width: undefined,
+	}
+}
+
+function parseDimensions(dimensions: string): {
+	height: number | undefined
+	width: number | undefined
+} {
+	// Ensure all characters in the string are number or 'x':
+	if (!/^[\dx]+$/.test(dimensions)) {
+		return { height: undefined, width: undefined }
+	}
+
+	// Try for a single number first
+	if (!dimensions.includes('x')) {
+		const widthOnly = Number.parseInt(dimensions, 10)
+
+		if (!Number.isNaN(widthOnly)) {
+			return { height: undefined, width: widthOnly }
+		}
+	}
+
+	// Check for an 'x' separator
+	const [width, height] = dimensions.split('x').map((dim) => Number.parseInt(dim, 10)) as [
+		number | undefined,
+		number | undefined,
+	]
+
+	// Have to pull these out due to error glitch
+	const widthIsNan = Number.isNaN(width)
+	const heightIsNan = Number.isNaN(height)
+
+	return {
+		height: heightIsNan || height === undefined ? undefined : height,
+		width: widthIsNan || width === undefined ? undefined : width,
+	}
 }
