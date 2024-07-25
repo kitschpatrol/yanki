@@ -14,7 +14,11 @@ import {
 	getDefaultFileAdapter,
 } from '../shared/types'
 import { resolveWithBasePath } from '../utilities/file'
-import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
+import {
+	getAnkiMediaFilenameExtension,
+	getSafeAnkiMediaFilename,
+	mediaAssetExists,
+} from '../utilities/media'
 import { cleanClassName } from '../utilities/string'
 import { fileUrlToPath, getSrcType } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
@@ -137,6 +141,7 @@ export async function mdastToHtml(
 		const originalCwd = path.process_cwd
 		path.setCWD(cwd)
 
+		// Images
 		visit(hastWithClass, 'element', (node, index, parent) => {
 			if (parent === undefined || index === undefined || node.tagName !== 'img') return CONTINUE
 
@@ -169,15 +174,33 @@ export async function mdastToHtml(
 			// The src will be URI-encoded at this point, which we don't want for local files
 			// Local file URLs must be converted into paths before decoding, and must be absolute
 			// already so they are not resolved
-			const absoluteSrcOrUrl =
-				srcType === 'remoteHttpUrl'
-					? node.properties.src
-					: srcType === 'localFilePath'
-						? resolveWithBasePath(decodeURIComponent(node.properties.src), { basePath, cwd }) // Todo relative to asset path?
-						: decodeURIComponent(fileUrlToPath(node.properties.src)) // Always absolute
+
+			let absoluteSrcOrUrl: string
+			try {
+				absoluteSrcOrUrl =
+					srcType === 'remoteHttpUrl'
+						? node.properties.src
+						: srcType === 'localFilePath'
+							? resolveWithBasePath(decodeURIComponent(node.properties.src), { basePath, cwd }) // Todo relative to asset path?
+							: decodeURIComponent(fileUrlToPath(node.properties.src)) // Always absolute
+			} catch (error) {
+				console.warn(`Error decoding src: ${node.properties.src}`, error)
+				return CONTINUE
+			}
 
 			// Run these after visit since visit can not be asynchronous
 			treeMutationPromises.push(async () => {
+				// Make sure the file exists, if it doesn't, we don't touch it... (or TODO replace with something legible?)
+
+				const exists = await mediaAssetExists(absoluteSrcOrUrl, fileAdapter, fetchAdapter)
+
+				if (!exists) {
+					console.warn(
+						`Could not find media asset: "${absoluteSrcOrUrl}" (Original src: "${String(node.properties.src)}"`,
+					)
+					return
+				}
+
 				// These handle url vs. file path internally..
 				const safeFilename = await getSafeAnkiMediaFilename(
 					absoluteSrcOrUrl,
