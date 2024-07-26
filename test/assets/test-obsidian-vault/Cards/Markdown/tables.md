@@ -18,9 +18,9 @@ Marie | Curie
 
 ## Embedding
 
-First column | Second column
--- | --
-[[Basic formatting syntax\|Markdown syntax]] | ![[test image.jpg\|200]]
+| First column   | Second column            |
+| -------------- | ------------------------ |
+| ![[test card]] | ![[test image.jpg\|200]] |
 
 ## Alignment
 

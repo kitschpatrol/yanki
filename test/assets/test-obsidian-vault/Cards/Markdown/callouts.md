@@ -11,7 +11,7 @@
 
 > [!info]
 > Here's a callout block.
-> It supports **Markdown**, [[Internal link|Wiki-links]], and [[Embed files|embeds]]!
+> It supports **Markdown**, [[test card|Wiki-links]], and embeds!
 > ![[test image.jpg]]
 
 ## Custom titles
