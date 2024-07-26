@@ -112,7 +112,7 @@
 
 ##### Only last segment is parsed
 
-![[test image.jpg|10|20x20|asfdasdf]]
+![[test image.jpg|10|20x20|stuff]]
 
 ![[test image.jpg|10|20|30x100]]
 

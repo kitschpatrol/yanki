@@ -33,7 +33,7 @@ describe('detect obsidian vault', () => {
 // 	// 	'utf8',
 // 	// )
 
-// 	const md = String.raw`[asd|adfasdf|asdfasdf|100x100](<test card>)`
+// 	const md = String.raw`[asd|stuff|more-stuff|100x100](<test card>)`
 // 	console.log(md)
 // 	const note = await getNoteFromMarkdown(md, {
 // 		basePath: './test/assets/test-obsidian-vault',
