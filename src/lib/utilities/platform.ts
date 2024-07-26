@@ -9,11 +9,16 @@ export const PLATFORM =
 			: // eslint-disable-next-line n/no-unsupported-features/node-builtins
 				/mac/i.test(navigator.userAgent)
 				? 'mac'
-				: 'other'
+				: // eslint-disable-next-line n/no-unsupported-features/node-builtins
+					/linux/i.test(navigator.userAgent) || /ubuntu/i.test(navigator.userAgent)
+					? 'linux'
+					: 'other'
 		: ENVIRONMENT === 'node'
 			? process.platform === 'win32'
 				? 'windows'
 				: process.platform === 'darwin'
 					? 'mac'
-					: 'other'
+					: process.platform === 'linux'
+						? 'linux'
+						: 'other'
 			: 'other'
