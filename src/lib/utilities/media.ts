@@ -5,16 +5,17 @@ import {
 	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
 } from '../shared/constants'
 import { type FetchAdapter, type FileAdapter } from '../shared/types'
-import { getFileContentHash } from './file'
+import { fileExists, getFileContentHash } from './file'
 import { getSlugifiedNamespace } from './namespace'
 import { truncateOnWordBoundary } from './string'
-import { getFileExtensionFromUrl, getUrlContentHash, isUrl } from './url'
+import { getFileExtensionFromUrl, getUrlContentHash, isUrl, urlExists } from './url'
 import slugify from '@sindresorhus/slugify'
 import path from 'path-browserify-esm'
 
 /**
  * @param pathOrUrl
  * @returns Extension without the `.`, possibly an extra string if no extension is found
+ * TODO check for how it handles query strings
  */
 export async function getAnkiMediaFilenameExtension(
 	pathOrUrl: string,
@@ -66,6 +67,18 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 		'...',
 		'-',
 	)
+}
+
+export async function mediaAssetExists(
+	absolutePathOrUrl: string,
+	fileAdapter: FileAdapter,
+	fetchAdapter: FetchAdapter,
+): Promise<boolean> {
+	if (isUrl(absolutePathOrUrl)) {
+		return urlExists(absolutePathOrUrl, fetchAdapter)
+	}
+
+	return fileExists(absolutePathOrUrl, fileAdapter)
 }
 
 // Anki truncates long file names... so we crush the complete path down to a hash

@@ -97,3 +97,21 @@ function trimLeadingIndentation(strings: TemplateStringsArray, ...values: unknow
 	const leadingSpaceRegex = new RegExp(`^${leadingSpace}`)
 	return lines.map((line) => line.replace(leadingSpaceRegex, '').trimEnd()).join('\n')
 }
+
+export function splitAtFirstMatch(text: string, regex: RegExp): [string, string | undefined] {
+	// Find the first match of the regex
+	const match = text.match(regex)
+
+	if (match?.index === undefined) {
+		return [text, undefined] // If no match is found, return the whole string and an empty string
+	}
+
+	// Get the position and length of the first match
+	const { index } = match
+
+	// Split the string into two parts
+	const beforeMatch = text.slice(0, index)
+	const afterMatch = text.slice(index)
+
+	return [beforeMatch, afterMatch]
+}

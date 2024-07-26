@@ -29,12 +29,14 @@ export type GetNoteFromMarkdownOptions = {
 	namespaceValidationAndSanitization: boolean
 } & Pick<
 	GlobalOptions,
+	| 'allFilePaths'
 	| 'basePath'
 	| 'cwd'
 	| 'fetchAdapter'
 	| 'fileAdapter'
 	| 'namespace'
 	| 'obsidianVault'
+	| 'resolveUrls' // For testing only
 	| 'syncMediaAssets'
 >
 
@@ -48,6 +50,7 @@ export async function getNoteFromMarkdown(
 	options?: Partial<GetNoteFromMarkdownOptions>,
 ): Promise<YankiNote> {
 	const {
+		allFilePaths,
 		basePath,
 		cwd,
 		fetchAdapter = getDefaultFetchAdapter(),
@@ -55,6 +58,7 @@ export async function getNoteFromMarkdown(
 		namespace,
 		namespaceValidationAndSanitization,
 		obsidianVault,
+		resolveUrls,
 		syncMediaAssets,
 	} = deepmerge(defaultGetNoteFromMarkdownOptions, options ?? {})
 
@@ -66,7 +70,11 @@ export async function getNoteFromMarkdown(
 	// parity between markdown files and notes at all costs, so we'll put
 	// in a placeholder if the front is empty.
 	let ast = await getAstFromMarkdown(markdown, {
+		allFilePaths,
+		basePath,
+		cwd,
 		obsidianVault,
+		resolveUrls,
 	})
 	const modelName = getYankiModelNameFromTree(ast)
 	const frontmatter = getFrontmatterFromTree(ast)
@@ -88,14 +96,13 @@ export async function getNoteFromMarkdown(
 			// Basic and reverse always needs both sides to have content.
 			// Basic can technically have no back , but it's confusing so we throw in the placeholder.
 			front = await mdastToHtml(firstPart, {
-				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
 					'front',
 					`model-${modelName}`,
 				],
-				cwd,
+
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
@@ -103,14 +110,13 @@ export async function getNoteFromMarkdown(
 				useEmptyPlaceholder: true,
 			})
 			back = await mdastToHtml(secondPart, {
-				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
 					'back',
 					`model-${modelName}`,
 				],
-				cwd,
+
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
@@ -127,14 +133,13 @@ export async function getNoteFromMarkdown(
 
 			// Cloze can't have empty front? But what does that even mean?
 			front = await mdastToHtml(firstPart, {
-				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
 					'front',
 					`model-${modelName}`,
 				],
-				cwd,
+
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
@@ -142,14 +147,13 @@ export async function getNoteFromMarkdown(
 				useEmptyPlaceholder: true,
 			})
 			back = await mdastToHtml(secondPart, {
-				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
 					'back',
 					`model-${modelName}`,
 				],
-				cwd,
+
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
@@ -175,14 +179,13 @@ export async function getNoteFromMarkdown(
 			const secondPartHast = u('root', u('paragraph', secondPart.children))
 
 			front = await mdastToHtml(firstPart, {
-				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
 					'front',
 					`model-${modelName}`,
 				],
-				cwd,
+
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
@@ -192,14 +195,13 @@ export async function getNoteFromMarkdown(
 
 			// HTML in the "blank" seems to parse correctly in Anki, but appears as plain text
 			back = await mdastToHtml(secondPartHast, {
-				basePath,
 				cssClassNames: [
 					CSS_DEFAULT_CLASS_NAME,
 					`namespace-${sanitizedNamespace}`,
 					'back',
 					`model-${modelName}`,
 				],
-				cwd,
+
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,

@@ -10,13 +10,19 @@ import { type FetchAdapter } from '../shared/types'
 import { getFileExtensionForMimeType } from './mime'
 import { getHash } from './string'
 
+// Detect probably wiki-style name links
+export function isNameUrl(text: string): boolean {
+	// Name links aren't absolute, aren't relative, and aren't URLs
+	return !text.startsWith('/') && !text.startsWith('./') && !text.startsWith('../') && !isUrl(text)
+}
+
 export function isUrl(text: string): boolean {
 	// Waiting for URL.canParse in node 19+...
 	// return URL.canParse(text)
 	// TODO this is confused by windows paths, e.g. `C:/Bla bla bla`... which is why there's an explicit protocol check.
 	try {
 		const { protocol } = new URL(text)
-		if (protocol === 'https:' || protocol === 'http:') {
+		if (protocol === 'https:' || protocol === 'http:' || protocol === 'obsidian:') {
 			return true
 		}
 
@@ -49,17 +55,34 @@ export function fileUrlToPath(text: string): string {
 
 export function getSrcType(
 	text: string,
-): 'localFilePath' | 'localFileUrl' | 'remoteHttpUrl' | 'unsupportedProtocolUrl' {
+):
+	| 'localFileName'
+	| 'localFilePath'
+	| 'localFileUrl'
+	| 'obsidianVaultUrl'
+	| 'remoteHttpUrl'
+	| 'unsupportedProtocolUrl' {
 	try {
 		const url = new URL(text)
 		if (url.protocol === 'file:') {
 			return 'localFileUrl'
 		}
 
+		if (url.protocol === 'obsidian:') {
+			return 'obsidianVaultUrl'
+		}
+
 		if (url.protocol === 'http:' || url.protocol === 'https:') {
 			return 'remoteHttpUrl'
 		}
 	} catch {
+		// If is doesn't have a separator a relative or absolute path... it's probably a name link,
+		// but we can't be sure that it's not a sloppy relative path, so the name resolution process will
+		// treat it accordingly if necessary
+		if (!text.includes('/')) {
+			return 'localFileName'
+		}
+
 		return 'localFilePath'
 	}
 
@@ -110,6 +133,16 @@ function convertKeysToLowercase(object: Record<string, string>): Record<string, 
 	}
 
 	return result
+}
+
+export async function urlExists(url: string, fetchAdapter: FetchAdapter): Promise<boolean> {
+	try {
+		const response = await fetchAdapter(url, { method: 'HEAD' })
+		// TODO other codes?
+		return response?.status === 200
+	} catch {
+		return false
+	}
 }
 
 export async function getFileExtensionFromUrl(

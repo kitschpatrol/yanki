@@ -26,6 +26,10 @@ export type FileAdapter = {
 
 // Options used in more than one place... diamond problem prevents a pure hierarchy
 export type GlobalOptions = {
+	/**
+	 * Used for wiki link resolution
+	 */
+	allFilePaths: string[]
 	ankiConnectOptions: YankiConnectOptions
 	/**
 	 * Automatically sync any changes to AnkiWeb after Yanki has finished syncing
@@ -52,11 +56,14 @@ export type GlobalOptions = {
 	namespace: string
 	/** Ensures that wiki-style links work correctly */
 	obsidianVault: string | undefined
+	/** Exposed for testing only */
+	resolveUrls: boolean
 	/** Sync image, video, and audio assets to Anki's media storage system */
 	syncMediaAssets: SyncMediaAssets
 }
 
 export const defaultGlobalOptions: GlobalOptions = {
+	allFilePaths: [],
 	ankiConnectOptions: defaultYankiConnectOptions,
 	ankiWeb: false,
 	basePath: undefined,
@@ -68,6 +75,7 @@ export const defaultGlobalOptions: GlobalOptions = {
 	maxFilenameLength: 60,
 	namespace: 'Yanki',
 	obsidianVault: undefined,
+	resolveUrls: true,
 	syncMediaAssets: 'local',
 }
 

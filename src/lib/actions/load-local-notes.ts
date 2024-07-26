@@ -13,7 +13,13 @@ import path from 'path-browserify-esm'
 
 export type LoadOptions = Pick<
 	GlobalOptions,
-	'basePath' | 'fetchAdapter' | 'fileAdapter' | 'namespace' | 'obsidianVault' | 'syncMediaAssets'
+	| 'allFilePaths'
+	| 'basePath'
+	| 'fetchAdapter'
+	| 'fileAdapter'
+	| 'namespace'
+	| 'obsidianVault'
+	| 'syncMediaAssets'
 >
 
 export const defaultLoadOptions: LoadOptions = {
@@ -32,6 +38,7 @@ export async function loadLocalNotes(
 	options: Partial<LoadOptions>,
 ): Promise<LocalNote[]> {
 	const {
+		allFilePaths,
 		basePath,
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
@@ -44,8 +51,8 @@ export async function loadLocalNotes(
 
 	allLocalFilePaths.sort((a, b) => a.localeCompare(b))
 
-	// Use file paths as deck names
-	// TODO pass base path?
+	// Use file paths as deck names, can do this before rename since names only
+	// affect note names not directory names
 	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths, { basePath })
 
 	const localNotes: LocalNote[] = []
@@ -54,6 +61,7 @@ export async function loadLocalNotes(
 		const markdown = await fileAdapter.readFile(filePath)
 
 		const note = await getNoteFromMarkdown(markdown, {
+			allFilePaths,
 			basePath,
 			cwd: path.dirname(filePath),
 			fetchAdapter,

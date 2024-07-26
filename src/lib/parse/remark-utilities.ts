@@ -5,7 +5,8 @@
 import type { Frontmatter } from '../model/frontmatter'
 import type { YankiModelName } from '../model/model'
 import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
-import remarkObsidianWikilink from './remark-obsidian-wikilink'
+import remarkResolveLinks from './remark-resolve-links'
+import remarkWikiLinks from './remark-wiki-links'
 import { deepmerge } from 'deepmerge-ts'
 import type { Emphasis, Node, Parent, PhrasingContent, Root, Text } from 'mdast'
 import remarkFlexibleMarkers from 'remark-flexible-markers'
@@ -21,7 +22,10 @@ import { parse as yamlParse } from 'yaml'
 
 // Processor shared across operations
 
-export type AstFromMarkdownOptions = Pick<GlobalOptions, 'obsidianVault'>
+export type AstFromMarkdownOptions = Pick<
+	GlobalOptions,
+	'allFilePaths' | 'basePath' | 'cwd' | 'obsidianVault' | 'resolveUrls'
+>
 
 export const defaultAstFromMarkdownOptions: AstFromMarkdownOptions = {
 	...defaultGlobalOptions,
@@ -31,15 +35,19 @@ export async function getAstFromMarkdown(
 	markdown: string,
 	options?: Partial<AstFromMarkdownOptions>,
 ): Promise<Root> {
-	const { obsidianVault } = deepmerge(defaultAstFromMarkdownOptions, options ?? {})
+	const { allFilePaths, basePath, cwd, obsidianVault, resolveUrls } = deepmerge(
+		defaultAstFromMarkdownOptions,
+		options ?? {},
+	)
 
 	// Not seeing huge improvements from reusing this...
 	// And there's the issue of passing the options
 	const processor = unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, [{ anywhere: false, marker: '-', type: 'yaml' }])
-		.use(remarkObsidianWikilink, { automaticAlias: true, obsidianVault })
 		.use(remarkGfm, { singleTilde: false })
+		.use(remarkWikiLinks, { automaticAlias: true, obsidianVault })
+		.use(remarkResolveLinks, { allFilePaths, basePath, cwd, enabled: resolveUrls, obsidianVault })
 		.use(remarkMath)
 		.use(
 			remarkGithubBetaBlockquoteAdmonitions,

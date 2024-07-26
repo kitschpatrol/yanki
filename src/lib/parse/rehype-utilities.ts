@@ -13,20 +13,19 @@ import {
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
 } from '../shared/types'
-import { resolveWithBasePath } from '../utilities/file'
+import { getBaseAndQueryParts } from '../utilities/file'
 import {
 	getAnkiMediaFilenameExtension,
 	getSafeAnkiMediaFilename,
 	mediaAssetExists,
 } from '../utilities/media'
 import { cleanClassName, emptyIsUndefined } from '../utilities/string'
-import { fileUrlToPath, getSrcType } from '../utilities/url'
+import { getSrcType } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
 import { deepmerge } from 'deepmerge-ts'
 import { type Element, type Root as HastRoot } from 'hast'
 import { toText } from 'hast-util-to-text'
 import type { Root as MdastRoot } from 'mdast'
-import path from 'path-browserify-esm'
 import rehypeMathjax from 'rehype-mathjax'
 import rehypeParse from 'rehype-parse'
 import rehypeRemoveComments from 'rehype-remove-comments'
@@ -65,10 +64,7 @@ export type MdastToHtmlOptions = Simplify<
 		cssClassNames?: string[]
 		/** Whether to use an empty placeholder if the output is empty */
 		useEmptyPlaceholder?: boolean
-	} & Pick<
-		GlobalOptions,
-		'basePath' | 'cwd' | 'fetchAdapter' | 'fileAdapter' | 'namespace' | 'syncMediaAssets'
-	>
+	} & Pick<GlobalOptions, 'fetchAdapter' | 'fileAdapter' | 'namespace' | 'syncMediaAssets'>
 >
 
 const defaultMdastToHtmlOptions: MdastToHtmlOptions = {
@@ -84,9 +80,7 @@ export async function mdastToHtml(
 	}
 
 	const {
-		basePath,
 		cssClassNames,
-		cwd,
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
 		namespace,
@@ -124,143 +118,163 @@ export async function mdastToHtml(
 	])
 
 	// Handle Media
-	// 1. Find image tags... which are also where we'll find audio/video sources via Obsidian
-	// 2. Convert any relative URLs to absolute URLs
-	// 3. Devise a "safe" filename for Anki to use, based on the original path
-	// 4. Detect if image or audio/video
-	// 5. If image, replace the src with a safe filename and embed the original
+	// 1. Find image tags... which are also where we'll find audio/video sources
+	//    via Obsidian. (All local URLs should already be absolute because of the
+	//    earlier `remark-resolve-links.ts` pass.)
+	// 2. Devise a "safe" filename for Anki to use, based on the original path
+	// 3. Detect if image or audio/video
+	// 4. If image, replace the src with a safe filename and embed the original
 	//    path in a data attribute, which is later processed by the functions in
 	//    anki-connect.ts.
-	// 6. If audio/video, replace the img element with a span with a data
+	// 5. If audio/video, replace the img element with a span with a data
 	//    attribute with the original path and Anki's markup for embedding
 	//    audio/video.
 
 	const treeMutationPromises: Array<() => Promise<void>> = []
 
-	if (syncMediaAssets !== 'off') {
-		const originalCwd = path.process_cwd
-		path.setCWD(cwd)
+	// All media embeds are initially image tags
+	visit(hastWithClass, 'element', (node, index, parent) => {
+		if (parent === undefined || index === undefined || node.tagName !== 'img') return CONTINUE
 
-		// Images
-		visit(hastWithClass, 'element', (node, index, parent) => {
-			if (parent === undefined || index === undefined || node.tagName !== 'img') return CONTINUE
+		// Ensure src is a string
+		if (typeof node.properties.src !== 'string' || node.properties?.src?.trim().length === 0) {
+			console.warn('Image has no src')
+			return CONTINUE
+		}
 
-			// Ensure src is a string
-			if (typeof node.properties.src !== 'string' || node.properties?.src?.trim().length === 0) {
-				console.warn('Image has no src')
+		// Ensure src is a reasonable looking local file path or remote URL
+		let absoluteSrcOrUrl: string | undefined
+		const srcType = getSrcType(node.properties.src)
+		switch (srcType) {
+			// All of these invalid image src types should have been converted already during MDAST generation
+			case 'unsupportedProtocolUrl':
+			case 'obsidianVaultUrl':
+			case 'localFileUrl':
+			case 'localFileName': {
+				console.warn(`Unsupported URL for media asset: "${node.properties.src}"`)
 				return CONTINUE
 			}
 
-			// Turn file URLs into paths before doing the URL check so they'll
-			// be routed the local asset logic (Anki can't load file URLs anyway)
-			const srcType = getSrcType(node.properties.src)
+			case 'remoteHttpUrl': {
+				absoluteSrcOrUrl = node.properties.src
+				// TODO, necessary?
+				// try {
+				// 	absoluteSrcOrUrl = decodeURI(node.properties.src) // Always absolute already
+				// } catch (error) {
+				// 	console.warn(`Error decoding src: ${node.properties.src}`, error)
+				// 	return CONTINUE
+				// }
 
-			if (srcType === 'unsupportedProtocolUrl') {
-				console.warn(`Unsupported URL protocol for media asset: "${node.properties.src}"`)
-				return CONTINUE
+				break
 			}
 
-			if (syncMediaAssets === 'local' && srcType === 'remoteHttpUrl') {
-				return CONTINUE
+			case 'localFilePath': {
+				// The src will be URI-encoded at this point, which we don't want for local files
+				// Local file URLs must be converted into paths before decoding, and must be absolute
+				// already so they are not resolved
+				try {
+					absoluteSrcOrUrl = decodeURI(node.properties.src) // Always absolute already
+				} catch (error) {
+					console.warn(`Error decoding src: "${node.properties.src}"`, error)
+					return CONTINUE
+				}
+
+				// Ignore any query parameters on local files
+				const [base] = getBaseAndQueryParts(absoluteSrcOrUrl)
+				absoluteSrcOrUrl = base
+
+				break
 			}
+		}
 
-			if (
-				syncMediaAssets === 'remote' &&
-				(srcType === 'localFileUrl' || srcType === 'localFilePath')
-			) {
-				return CONTINUE
-			}
+		// Run these after visit since visit can not be asynchronous
+		treeMutationPromises.push(async () => {
+			const extension = await getAnkiMediaFilenameExtension(absoluteSrcOrUrl, fetchAdapter)
 
-			// The src will be URI-encoded at this point, which we don't want for local files
-			// Local file URLs must be converted into paths before decoding, and must be absolute
-			// already so they are not resolved
+			// If Yanki should sync the asset, it will generate a new finalSrcURl and add a data property to
+			// the field so that the sync algorithms in anki-connect.ts can find it and sync it
+			let finalSrcUrl: string = absoluteSrcOrUrl
+			let yankiSyncMedia: boolean =
+				(extension !== undefined && srcType === 'localFilePath' && syncMediaAssets === 'local') ||
+				(srcType === 'remoteHttpUrl' && syncMediaAssets === 'remote') ||
+				syncMediaAssets === 'all'
 
-			let absoluteSrcOrUrl: string
-			try {
-				absoluteSrcOrUrl =
-					srcType === 'remoteHttpUrl'
-						? node.properties.src
-						: srcType === 'localFilePath'
-							? resolveWithBasePath(decodeURIComponent(node.properties.src), { basePath, cwd }) // Todo relative to asset path?
-							: decodeURIComponent(fileUrlToPath(node.properties.src)) // Always absolute
-			} catch (error) {
-				console.warn(`Error decoding src: ${node.properties.src}`, error)
-				return CONTINUE
-			}
-
-			// Run these after visit since visit can not be asynchronous
-			treeMutationPromises.push(async () => {
-				// Make sure the file exists, if it doesn't, we don't touch it... (or TODO replace with something legible?)
-
+			// Make sure the file exists if we're going to sync it
+			// If it doesn't, we will still wrap it but it can't be managed by Anki
+			if (yankiSyncMedia) {
 				const exists = await mediaAssetExists(absoluteSrcOrUrl, fileAdapter, fetchAdapter)
-
-				if (!exists) {
+				if (exists) {
+					// These handle url vs. file path internally...
+					finalSrcUrl = await getSafeAnkiMediaFilename(
+						absoluteSrcOrUrl,
+						namespace,
+						fileAdapter,
+						fetchAdapter,
+					)
+				} else {
 					console.warn(
 						`Could not find media asset: "${absoluteSrcOrUrl}" (Original src: "${String(node.properties.src)}"`,
 					)
-					return
+					yankiSyncMedia = false
 				}
+			}
 
-				// These handle url vs. file path internally..
-				const safeFilename = await getSafeAnkiMediaFilename(
-					absoluteSrcOrUrl,
-					namespace,
-					fileAdapter,
-					fetchAdapter,
+			if (extension === undefined) {
+				// Rare case of NOT wrapping the embed image, this will just yield a
+				// broken image
+
+				// TODO replace with a placeholder indicating that it's unsupported?
+				console.warn(`Missing or unsupported file extension for ${String(node.properties.src)}`)
+			} else if (
+				// Assume remote image assets without a valid extension are images...
+				// they will have 'unknown' as their extension if
+				// MEDIA_ALLOW_UNKNOWN_URL_EXTENSION is true
+				(['unknown', ...MEDIA_SUPPORTED_IMAGE_EXTENSIONS] as unknown as string[]).includes(
+					extension,
 				)
+			) {
+				// Image, update the img tag
+				// Width and height will be set later
+				node.properties.src = finalSrcUrl
+				node.properties.className = ['yanki-media', 'yanki-media-image']
+				node.properties['data-yanki-src-original'] = absoluteSrcOrUrl
+				node.properties['data-yanki-sync-media'] = yankiSyncMedia ? 'true' : 'false'
+			} else if (
+				(MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS as unknown as string[]).includes(extension)
+			) {
+				// Audio or video
 
-				const extension = await getAnkiMediaFilenameExtension(absoluteSrcOrUrl, fetchAdapter)
+				// Replace the current img node with a span
+				// containing the weirdo Anki media embedding syntax
 
-				if (extension === undefined) {
-					console.warn(`Could not determine extension for ${String(node.properties.src)}`)
-					return
-				}
-
-				// Assume remote image assets without a valid extension  are images... they will have 'unknown' as their extension if MEDIA_ALLOW_UNKNOWN_URL_EXTENSION is true
-				if (
-					(['unknown', ...MEDIA_SUPPORTED_IMAGE_EXTENSIONS] as unknown as string[]).includes(
-						extension,
-					)
-				) {
-					node.properties.src = safeFilename
-					node.properties.className = ['yanki-media', 'yanki-media-image']
-					node.properties['data-src-original'] = absoluteSrcOrUrl
-				} else if (
-					(MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS as unknown as string[]).includes(extension)
-				) {
-					// Replace the current node with a span
-					// containing the Anki media embedding syntax
-					// Using <audio> and <video> tags would be nicer, and <audio> kind of works on desktop,
-					// but this breaks on mobile, so we have to use the [sound:] syntax
-					parent.children.splice(
-						index,
-						1,
-						u(
-							'element',
-							{
-								properties: {
-									className: ['yanki-media', 'yanki-media-audio-video'],
-									'data-alt-text': node.properties.alt, // If available, why not
-									'data-filename': safeFilename,
-									'data-src-original': absoluteSrcOrUrl,
-								},
-								tagName: 'span',
+				// Using <audio> and <video> tags would be nicer, and <audio> kind of
+				// works on desktop, but this breaks on mobile, so we shall use the
+				// [sound:] syntax
+				parent.children.splice(
+					index,
+					1,
+					u(
+						'element',
+						{
+							properties: {
+								className: ['yanki-media', 'yanki-media-audio-video'],
+								'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
+								'data-yanki-src': finalSrcUrl,
+								'data-yanki-src-original': absoluteSrcOrUrl,
+								'data-yanki-sync-media': yankiSyncMedia ? 'true' : 'false',
 							},
-							[u('text', `[sound:${safeFilename}]`)],
-						),
-					)
-				} else {
-					console.warn(`Unsupported media format: ${extension} for ${String(node.properties.src)}`)
-				}
-			})
+							tagName: 'span',
+						},
+						[u('text', `[sound:${finalSrcUrl}]`)],
+					),
+				)
+			}
 		})
+	})
 
-		// Run the tree mutation promises
-		for (const mutationPromise of treeMutationPromises) {
-			await mutationPromise()
-		}
-
-		path.setCWD(originalCwd)
+	// Run the tree mutation promises over the <img> nodes
+	for (const mutationPromise of treeMutationPromises) {
+		await mutationPromise()
 	}
 
 	// Edge case... if a note ONLY has MathJax in the front field, Anki will think it's empty
@@ -357,9 +371,17 @@ export function extractMediaFromHtml(html: string): Media[] {
 	// Assumes media-related manipulations performed by
 	// mdastToHtml have already been done
 	visit(hast, 'element', (node) => {
-		if (node.tagName === 'img' || node.tagName === 'span') {
-			const filename = node.properties?.src ?? node.properties?.dataFilename
-			const originalSrc = node.properties?.dataSrcOriginal
+		if (
+			(node.tagName === 'img' || node.tagName === 'span') &&
+			node.properties?.dataYankiSyncMedia === 'true'
+		) {
+			const filename =
+				// <img>
+				node.properties?.src ??
+				// <span>>
+				node.properties?.dataYankiSrc
+
+			const originalSrc = node.properties?.dataYankiSrcOriginal
 			if (
 				filename !== undefined &&
 				originalSrc !== undefined &&
@@ -370,11 +392,12 @@ export function extractMediaFromHtml(html: string): Media[] {
 					filename,
 					originalSrc,
 				})
-			} else if (node.tagName === 'img' && node.properties?.src !== undefined) {
-				// Console.warn(`Ignoring image without decipherable source: ${String(node.properties.src)}`)
 			}
 		}
 	})
+
+	// Console.log('extractMedia----------------------------------')
+	// console.log(media)
 
 	return media
 }

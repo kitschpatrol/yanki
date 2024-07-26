@@ -137,6 +137,7 @@ export async function renameFiles(
 	options: Partial<RenameFilesOptions>,
 ): Promise<RenameFilesResult> {
 	const {
+		allFilePaths,
 		basePath,
 		dryRun,
 		fetchAdapter = getDefaultFetchAdapter(),
@@ -152,6 +153,7 @@ export async function renameFiles(
 	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
 
 	const notes = await loadLocalNotes(allLocalFilePaths, {
+		allFilePaths,
 		basePath,
 		fetchAdapter,
 		fileAdapter,
