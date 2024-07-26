@@ -1,6 +1,7 @@
 import { syncFiles } from '../src/lib'
 import { getDefaultFileAdapter } from '../src/lib/shared/types'
 import { getFileContentHash } from '../src/lib/utilities/file'
+import { mediaAssetExists } from '../src/lib/utilities/media'
 import { getFileExtensionFromUrl, getUrlContentHash } from '../src/lib/utilities/url'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stableResults } from './utilities/stable-sync-results'
@@ -108,6 +109,26 @@ const allRemoteMediaUrls = [
 	'https://storage.kitschpatrol.com/example-image-1',
 	'https://storage.kitschpatrol.com/example-image-2',
 ]
+
+it('correctly detects existence or non-existence of media files', async () => {
+	const fileAdapter = await getDefaultFileAdapter()
+
+	expect(await mediaAssetExists(allLocalMediaPaths[0], fileAdapter, fetchAdapter)).toBe(true)
+
+	expect(await mediaAssetExists(allRemoteMediaUrls[0], fileAdapter, fetchAdapter)).toBe(true)
+
+	expect(
+		await mediaAssetExists('./6C9CFA9A-5D1A-4B55-A404-64DBFA034B93.jpg', fileAdapter, fetchAdapter),
+	).toBe(false)
+
+	expect(
+		await mediaAssetExists(
+			'http://6C9CFA9A-5D1A-4B55-A404-64DBFA034B93.com/example.jpg',
+			fileAdapter,
+			fetchAdapter,
+		),
+	).toBe(false)
+})
 
 it('gets content type extension from url metadata', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
@@ -645,7 +666,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('adds media to anki when appropriate', { timeout: 60_000 }, async () => {
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -670,7 +691,7 @@ describeWithFileFixture(
 	(context) => {
 		// TODO insanely slow on Windows...
 		it('fetches and adds media urls to anki when appropriate', { timeout: 240_000 }, async () => {
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},

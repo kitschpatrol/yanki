@@ -36,21 +36,21 @@
 
 #### Name only
 
-![](yanki%video.mp4)
+![](yanki%20video.mp4)
 
 ![](<yanki video.mp4>)
 
 ![alt text](<yanki video.mp4>)
 
-![alt text](yanki%video.mp4)
+![alt text](yanki%20video.mp4)
 
 #### Relative
 
-![](../../Assets/yanki%video.mp4)
+![](../../Assets/yanki%20video.mp4)
 
 ![](<../../Assets/yanki video.mp4>)
 
-![alt text](../../Assets/yanki%video.mp4)
+![alt text](../../Assets/yanki%20video.mp4)
 
 ![alt text](<../../Assets/yanki video.mp4>)
 
@@ -58,20 +58,20 @@
 
 #### Bare
 
-![](Assets/yanki%video.mp4)
+![](Assets/yanki%20video.mp4)
 
 ![](<Assets/yanki video.mp4>)
 
-![alt text](Assets/yanki%video.mp4)
+![alt text](Assets/yanki%20video.mp4)
 
 ![alt text](<Assets/yanki video.mp4>)
 
 #### Leading slash
 
-![](/Assets/yanki%video.mp4)
+![](/Assets/yanki%20video.mp4)
 
 ![](</Assets/yanki video.mp4>)
 
-![alt text](/Assets/yanki%video.mp4)
+![alt text](/Assets/yanki%20video.mp4)
 
 ![alt text](</Assets/yanki video.mp4>)

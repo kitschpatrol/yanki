@@ -2,19 +2,31 @@
 
 ---
 
+
+
 ## Internal
 
 ### Wiki style
 
 #### Name only
 
+[[test image]]
+
 [[test card]]
+
+[[tEsT cArD]]
 
 [[test card.md]]
 
 [[test card|custom display text]]
 
 [[test card.md|custom display text]]
+
+[[test card.md|custom display text|multi|pipe]]
+
+[[test card.md|custom display text|multi|pipe]]
+
+[[yanki image.jpg]]
 
 #### Relative path
 
@@ -100,7 +112,7 @@
 
 [test card 2](../Group%202/test%20card.md)
 
-[test card 2](<../Group 2/test card.md>)\
+[test card 2](<../Group 2/test card.md>)
 
 #### Absolute path
 ##### Bare
@@ -119,7 +131,7 @@
 
 [test card 2](Cards/Group%202/test%20card.md)
 
-[test card 2](<Cards/Group 2/test card.md>)\
+[test card 2](<Cards/Group 2/test card.md>)
 
 ##### Leading slash
 

@@ -12,7 +12,7 @@
 > [!info]
 > Here's a callout block.
 > It supports **Markdown**, [[Internal link|Wiki-links]], and [[Embed files|embeds]]!
-> ![[Engelbart.jpg]]
+> ![[test image.jpg]]
 
 ## Custom titles
 

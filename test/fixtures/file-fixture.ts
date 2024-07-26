@@ -24,9 +24,11 @@ type FixtureOptions = {
 }
 
 type TestContext = {
+	allFiles: string[]
 	assetPath: string
-	files: string[]
+	markdownFiles: string[]
 	namespace: string
+	tempAssetPath: string
 	yankiConnect: YankiConnect
 }
 
@@ -37,29 +39,40 @@ export function describeWithFileFixture(
 ) {
 	describe(description, () => {
 		const context: TestContext = {
+			allFiles: [],
 			assetPath: '',
-			files: [],
+			markdownFiles: [],
 			namespace: `Yanki Test - ${getHash(description, 16)}`,
 			yankiConnect: new YankiConnect({ autoLaunch: true }),
 		}
-		let tempAssetPath: string
+
 		let initialCardCount: number
 		let originalCss: string
 
 		beforeAll(async () => {
 			// Setup logic before all tests
 			context.assetPath = assetPath
-			tempAssetPath = path.join(os.tmpdir(), Date.now().toString(), path.basename(assetPath))
+			context.tempAssetPath = path.join(
+				os.tmpdir(),
+				Date.now().toString(),
+				path.basename(assetPath),
+			)
+
+			// Copy the asset path to a temp directory
 			// eslint-disable-next-line n/no-unsupported-features/node-builtins
-			await fs.cp(context.assetPath, tempAssetPath, {
+			await fs.cp(context.assetPath, context.tempAssetPath, {
 				force: true,
 				preserveTimestamps: true,
 				recursive: true,
 			})
 
-			context.files = await globby(`${slash(tempAssetPath)}/**/*.md`)
+			context.markdownFiles = await globby(`${slash(context.tempAssetPath)}/**/*.md`, {
+				absolute: true,
+			})
+			context.allFiles = await globby(`${slash(context.tempAssetPath)}/**/*`, { absolute: true })
 
-			expect(context.files.length).toBeGreaterThan(0)
+			expect(context.markdownFiles.length).toBeGreaterThan(0)
+			expect(context.allFiles.length).toBeGreaterThan(0)
 
 			// Save CSS, so that we're always using the same stuff
 			await createModels(context.yankiConnect)
@@ -122,7 +135,7 @@ export function describeWithFileFixture(
 
 			// Clean up temp dir
 			if (cleanUpTempFiles) {
-				await fs.rm(tempAssetPath, { force: true, recursive: true })
+				await fs.rm(context.tempAssetPath, { force: true, recursive: true })
 			}
 		})
 	})

@@ -14,7 +14,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('lists notes', async () => {
-			await syncFiles(context.files, {
+			await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -31,7 +31,7 @@ describeWithFileFixture(
 				namespace: context.namespace,
 			})
 
-			expect(result.notes).toHaveLength(context.files.length)
+			expect(result.notes).toHaveLength(context.markdownFiles.length)
 			expect(result.namespace).toBe(context.namespace)
 
 			const formatted = formatListResult(result)

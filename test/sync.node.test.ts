@@ -20,7 +20,7 @@ describeWithFileFixture(
 	(context) => {
 		it('correctly infers Anki model types from markdown', async () => {
 			const results: Record<string, string> = {}
-			for (const filePath of context.files) {
+			for (const filePath of context.markdownFiles) {
 				const markdown = await fs.readFile(filePath, 'utf8')
 				const { modelName } = await getNoteFromMarkdown(markdown, {
 					namespace: context.namespace,
@@ -73,7 +73,7 @@ describeWithFileFixture(
 	(context) => {
 		it('correctly infers Anki model types from markdown with unexpected formatting', async () => {
 			const results: Record<string, string> = {}
-			for (const filePath of context.files) {
+			for (const filePath of context.markdownFiles) {
 				const markdown = await fs.readFile(filePath, 'utf8')
 				const { modelName } = await getNoteFromMarkdown(markdown, {
 					namespace: context.namespace,
@@ -108,7 +108,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('synchronizes notes to anki and has the correct deck name', async () => {
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -126,7 +126,7 @@ describeWithFileFixture(
 				expect(synced.note.noteId).toBeDefined()
 				expect(synced.note.noteId).toBeGreaterThan(0)
 
-				expect(context.files).toContain(synced.filePath)
+				expect(context.markdownFiles).toContain(synced.filePath)
 			}
 
 			expect(stableResults(results)).toMatchSnapshot()
@@ -181,7 +181,7 @@ describeWithFileFixture(
 		})
 
 		it('writes anki note IDs to the markdown files frontmatter', async () => {
-			for (const filePath of context.files) {
+			for (const filePath of context.markdownFiles) {
 				const markdown = await fs.readFile(filePath, 'utf8')
 
 				const note = await getNoteFromMarkdown(markdown, { namespace: context.namespace })
@@ -202,7 +202,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('preserves and merges unrelated surplus frontmatter', async () => {
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -213,7 +213,7 @@ describeWithFileFixture(
 			})
 			expect(stableResults(results)).toMatchSnapshot()
 
-			for (const filePath of context.files) {
+			for (const filePath of context.markdownFiles) {
 				const markdown = await fs.readFile(filePath, 'utf8')
 				const note = await getNoteFromMarkdown(markdown, { namespace: context.namespace })
 				expect(note.noteId).toBeDefined()
@@ -242,7 +242,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('makes the right decisions about deck naming with a file in the root', async () => {
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -291,7 +291,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('makes the right decisions about deck naming without a file in the root', async () => {
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -340,7 +340,7 @@ describeWithFileFixture(
 	(context) => {
 		it('updates the model if it changes without destroying the note', async () => {
 			// First sync
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -365,7 +365,7 @@ describeWithFileFixture(
 			await fs.writeFile(note.filePath!, updatedMarkdown)
 
 			// Second sync
-			const newModelResults = await syncFiles(context.files, {
+			const newModelResults = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -394,7 +394,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('handles fancy markdown', async () => {
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -420,9 +420,9 @@ describeWithFileFixture(
 	(context) => {
 		it('handles long frontmatter non-destructively', async () => {
 			// Saw some issues with frontmatter getting split into multiple lines after sync...
-			const initialLinesOfFrontmatter = await countLinesOfFrontmatter(context.files[0])
+			const initialLinesOfFrontmatter = await countLinesOfFrontmatter(context.markdownFiles[0])
 
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -452,7 +452,7 @@ describeWithFileFixture(
 	(context) => {
 		it('idempotent syncing', async () => {
 			// First sync should be all "created"
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -471,7 +471,7 @@ describeWithFileFixture(
 				]
 			`)
 
-			const secondSyncResults = await syncFiles(context.files, {
+			const secondSyncResults = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -505,7 +505,7 @@ describeWithFileFixture(
 	(context) => {
 		it('handles duplicate node ids for notes with different content gracefully', async () => {
 			// First, sync the file so it comes back with an id
-			const results = await syncFiles(context.files, {
+			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -519,7 +519,7 @@ describeWithFileFixture(
 			expect(stableResults(results)).toMatchSnapshot()
 
 			// Create a duplicate note with the same ID but different content
-			const filePathWithId = context.files[0]
+			const filePathWithId = context.markdownFiles[0]
 			const originalFileContent = await fs.readFile(filePathWithId, 'utf8')
 			const duplicateModifiedFileContent = originalFileContent.replace(
 				'Replace me',

@@ -8,7 +8,11 @@
 
 #### Name only
 
+![[yanki image.jpg]]
+
 ![[test image.jpg]]
+
+![[test image.jpeg]]
 
 ![[test image.jpg|alt text]]
 
@@ -100,6 +104,18 @@
 
 ![[/Cards/Group 2/test image.jpg|alt text|200x100]]
   
+#### Size edge cases
+
+##### Last size wins
+
+![[test image.jpg|10|20|30]]
+
+##### Only last segment is parsed
+
+![[test image.jpg|10|20x20|asfdasdf]]
+
+![[test image.jpg|10|20|30x100]]
+
 ### Markdown style
 
 #### Name only
@@ -222,6 +238,15 @@
 ![100x40](https://storage.kitschpatrol.com/example-image-1.jpeg)
 
 ![tiny|100x40](https://storage.kitschpatrol.com/example-image-1.jpeg)
-  
 
+#### Size edge cases
 
+##### Last size wins
+
+![10|20|30](https://storage.kitschpatrol.com/example-image-1.jpeg)
+
+##### Only last segment is parsed
+
+![10|20x20|alt stuff](https://storage.kitschpatrol.com/example-image-1.jpeg)
+
+![10|20|30x100](https://storage.kitschpatrol.com/example-image-1.jpeg)

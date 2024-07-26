@@ -14,6 +14,8 @@ Bla bla bla
 
 ### Name only
 
+[[test image]]
+
 ![[test image.jpg]]
 
 ### Local relative

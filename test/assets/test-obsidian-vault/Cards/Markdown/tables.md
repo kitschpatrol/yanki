@@ -20,7 +20,7 @@ Marie | Curie
 
 First column | Second column
 -- | --
-[[Basic formatting syntax\|Markdown syntax]] | ![[Engelbart.jpg\|200]]
+[[Basic formatting syntax\|Markdown syntax]] | ![[test image.jpg\|200]]
 
 ## Alignment
 

@@ -14,7 +14,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('cleans notes', async () => {
-			await syncFiles(context.files, {
+			await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -34,7 +34,7 @@ describeWithFileFixture(
 				namespace: context.namespace,
 			})
 
-			expect(dryRunResult.deletedNotes).toHaveLength(context.files.length)
+			expect(dryRunResult.deletedNotes).toHaveLength(context.markdownFiles.length)
 			expect(dryRunResult.dryRun).toBe(true)
 			expect(dryRunResult.namespace).toBe(context.namespace)
 
@@ -49,7 +49,7 @@ describeWithFileFixture(
 				},
 				namespace: context.namespace,
 			})
-			expect(ankiNotes.notes).toHaveLength(context.files.length)
+			expect(ankiNotes.notes).toHaveLength(context.markdownFiles.length)
 
 			// Real run
 			const runResult = await cleanNotes({
@@ -60,7 +60,7 @@ describeWithFileFixture(
 				namespace: context.namespace,
 			})
 
-			expect(runResult.deletedNotes).toHaveLength(context.files.length)
+			expect(runResult.deletedNotes).toHaveLength(context.markdownFiles.length)
 			expect(runResult.dryRun).toBe(false)
 			expect(runResult.namespace).toBe(context.namespace)
 

@@ -12,7 +12,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('should rename files', async () => {
-			const result = await renameFiles(context.files, {
+			const result = await renameFiles(context.markdownFiles, {
 				manageFilenames: 'response',
 			})
 
