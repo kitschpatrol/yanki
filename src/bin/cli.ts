@@ -117,9 +117,12 @@ await yargsInstance
 			log.verbose = verbose
 			const expandedDirectory = slash(untildify(directory))
 			const globPattern = recursive ? `${expandedDirectory}/**/*.md` : `${expandedDirectory}/*.md`
-			const paths = await globby(globPattern, { absolute: true })
+			const markdownFilePaths = await globby(globPattern, { absolute: true })
 
-			if (paths.length === 0) {
+			// Get a list of all files for name-only wikilink resolution
+			const allFilePaths = await globby(`${expandedDirectory}/**/*`, { absolute: true })
+
+			if (markdownFilePaths.length === 0) {
 				log.error(`No Markdown files found in "${expandedDirectory}".`)
 				process.exitCode = 1
 				return
@@ -131,7 +134,8 @@ await yargsInstance
 
 			const { host, port } = urlToHostAndPort(ankiConnect)
 
-			const result = await syncFiles(paths, {
+			const result = await syncFiles(markdownFilePaths, {
+				allFilePaths,
 				ankiConnectOptions: {
 					autoLaunch: ankiAutoLaunch,
 					host,

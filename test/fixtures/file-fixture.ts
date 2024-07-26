@@ -43,6 +43,7 @@ export function describeWithFileFixture(
 			assetPath: '',
 			markdownFiles: [],
 			namespace: `Yanki Test - ${getHash(description, 16)}`,
+			tempAssetPath: '',
 			yankiConnect: new YankiConnect({ autoLaunch: true }),
 		}
 

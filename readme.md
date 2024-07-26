@@ -235,6 +235,8 @@ Clozing a block element is not currently supported.
 
 The `yanki` CLI tool requires Node 18+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
 
+The tool has been tested on Windows, macOS, and Linux.
+
 #### Prerequisites:
 
 - The [Anki desktop app](https://apps.ankiweb.net)
@@ -562,6 +564,8 @@ The excellent [unified](https://unifiedjs.com) / [remark](https://remark.js.org)
 For type safety, access to Anki-Connect is managed through my wrapper library, [yanki-connect](https://github.com/kitschpatrol/yanki-connect).
 
 Behind the scenes, Yanki creates new note type models to match the four default Anki types. It keeps track of the notes it has ownership of via a hidden `YankiNamespace` field in each note.
+
+Linux testing was performed on a Debian 12 arm64 virtual machine. Anki does not officially support arm64 linux, but a [workaround](https://github.com/ankitects/anki/issues/2302#issuecomment-1374374155) was able to get Anki up and running.
 
 ### Other projects
 
