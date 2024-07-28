@@ -67,7 +67,7 @@ export const defaultGlobalOptions: GlobalOptions = {
 	ankiConnectOptions: defaultYankiConnectOptions,
 	ankiWeb: false,
 	basePath: undefined,
-	cwd: path.process_cwd,
+	cwd: path.posix.process_cwd,
 	dryRun: false,
 	fetchAdapter: undefined, // Must be passed in later, deepmerge will not work
 	fileAdapter: undefined, // Must be passed in later, deepmerge will not work

@@ -53,10 +53,10 @@ export function describeWithFileFixture(
 		beforeAll(async () => {
 			// Setup logic before all tests
 			context.assetPath = assetPath
-			context.tempAssetPath = path.join(
+			context.tempAssetPath = path.posix.join(
 				os.tmpdir(),
 				Date.now().toString(),
-				path.basename(assetPath),
+				path.posix.basename(assetPath),
 			)
 
 			// Copy the asset path to a temp directory

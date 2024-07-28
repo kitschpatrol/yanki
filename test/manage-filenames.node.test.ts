@@ -16,6 +16,7 @@ describeWithFileFixture(
 	(context) => {
 		it('uses the prompt as a filename', async () => {
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -56,12 +57,16 @@ describeWithFileFixture(
 			`)
 
 			// Do it again to check for stability
-			const tempPath = path.dirname(context.markdownFiles[0])
+			const tempPath = path.posix.dirname(context.markdownFiles[0])
 			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
+				absolute: true,
+			})
+			const newAllFileList = await globby(`${slash(tempPath)}/**/*`, {
 				absolute: true,
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
+				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -96,6 +101,7 @@ describeWithFileFixture(
 	(context) => {
 		it('uses the response as a filename', async () => {
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -136,12 +142,16 @@ describeWithFileFixture(
 			`)
 
 			// Do it again to check for stability
-			const tempPath = path.dirname(context.markdownFiles[0])
+			const tempPath = path.posix.dirname(context.markdownFiles[0])
 			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
+				absolute: true,
+			})
+			const newAllFileList = await globby(`${slash(tempPath)}/**/*`, {
 				absolute: true,
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
+				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -176,6 +186,7 @@ describeWithFileFixture(
 	(context) => {
 		it('does not touch the filename unless asked', async () => {
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -227,6 +238,7 @@ describeWithFileFixture(
 	(context) => {
 		it('uses the prompt as a filename across many note types', async () => {
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -277,12 +289,16 @@ describeWithFileFixture(
 			`)
 
 			// Do it again to check for stability
-			const tempPath = path.dirname(context.markdownFiles[0])
+			const tempPath = path.posix.dirname(context.markdownFiles[0])
 			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
+				absolute: true,
+			})
+			const newAllFileList = await globby(`${slash(tempPath)}/**/*`, {
 				absolute: true,
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
+				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -317,6 +333,7 @@ describeWithFileFixture(
 	(context) => {
 		it('uses the response as a filename across many note types', async () => {
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -367,12 +384,16 @@ describeWithFileFixture(
 			`)
 
 			// Do it again to check for stability
-			const tempPath = path.dirname(context.markdownFiles[0])
+			const tempPath = path.posix.dirname(context.markdownFiles[0])
 			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
+				absolute: true,
+			})
+			const newAllFileList = await globby(`${slash(tempPath)}/**/*`, {
 				absolute: true,
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
+				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},

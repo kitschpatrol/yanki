@@ -49,9 +49,9 @@ export async function renameNotes(
 			}
 
 			const newFilename = getSafeTitleForNote(note, manageFilenames, maxFilenameLength)
-			const newFilePath = path.join(
-				path.dirname(filePathOriginal),
-				`${newFilename}${path.extname(filePathOriginal)}`,
+			const newFilePath = path.posix.join(
+				path.posix.dirname(filePathOriginal),
+				`${newFilename}${path.posix.extname(filePathOriginal)}`,
 			)
 
 			const newUniqueFilePath = getUniqueFilePath(newFilePath, newFilePaths)

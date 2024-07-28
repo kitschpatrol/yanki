@@ -1,4 +1,19 @@
 {
+	"[gitignore]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[shellscript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"cSpell.enabled": true,
+	"cSpell.workspaceRootPath": ".",
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "explicit"
+	},
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"eslint.enable": true,
+	"eslint.validate": ["html", "javascript", "markdown", "typescript"],
 	"explorer.fileNesting.enabled": true,
 	"explorer.fileNesting.expand": false,
 	"explorer.fileNesting.patterns": {
@@ -6,22 +21,7 @@
 		"package.json": ".*.cjs, .*.js, .*.json, .*.mjs, .*.toml, .*.ts, .*.yaml, .*.yml, .*ignore, .*rc, *config.cjs, *config.js, *config.json, *config.mjs, *config.toml, *config.ts, *config.yaml, *config.yml, lerna.json, netlify.toml, package-lock.json, , pnpm*, turbo.json, vercel.json, workspace*, wrangler.toml, yarn.lock, yarn*, *workspace.cjs, *workspace.js, *workspace.json, *workspace.mjs, *workspace.toml, *workspace.ts, *workspace.yaml, *workspace.yml",
 		"readme.md": "authors*, backers*, changelog*, citation*, code_of_conduct*, codeowners*, contributing*, contributors*, copying*, credits*, governance*, history*, license*, maintainers*, release_notes*, security*, sponsors*"
 	},
-	"cSpell.enabled": true,
-	"cSpell.workspaceRootPath": ".",
-	"editor.codeActionsOnSave": {
-		"source.fixAll": "explicit"
-	},
-	"eslint.enable": true,
-	"eslint.validate": ["html", "javascript", "markdown", "typescript"],
-	"typescript.tsdk": "node_modules/typescript/lib",
-	"[gitignore]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[shellscript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"editor.formatOnSave": true,
+	"javascript.suggest.paths": false, // Because of christian-kohler.path-intellisense
 	"prettier.documentSelectors": [
 		"**/.eslintignore",
 		"**/.node-version",
@@ -30,5 +30,7 @@
 	],
 	"prettier.enable": true,
 	"stylelint.enable": true,
-	"stylelint.validate": ["css", "html"]
+	"stylelint.validate": ["css", "html"],
+	"typescript.suggest.paths": false, // Because of christian-kohler.path-intellisense
+	"typescript.tsdk": "node_modules/typescript/lib"
 }

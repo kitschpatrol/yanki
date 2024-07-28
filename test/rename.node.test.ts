@@ -16,7 +16,7 @@ describeWithFileFixture(
 				manageFilenames: 'response',
 			})
 
-			const fileNames = result.notes.map((r) => path.basename(r.filePath))
+			const fileNames = result.notes.map((r) => path.posix.basename(r.filePath))
 
 			expect(fileNames).toMatchInlineSnapshot(`
 				[

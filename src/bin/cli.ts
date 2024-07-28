@@ -257,7 +257,7 @@ await yargsInstance
 
 			let loadedCss: string | undefined
 			if (css !== undefined) {
-				if (path.extname(css) !== '.css') {
+				if (path.posix.extname(css) !== '.css') {
 					log.error('The provided CSS file must have a .css extension.')
 					process.exitCode = 1
 					return

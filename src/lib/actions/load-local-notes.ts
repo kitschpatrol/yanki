@@ -6,8 +6,8 @@ import {
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
 } from '../shared/types'
-import { resolveWithBasePath } from '../utilities/file'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
+import { resolveWithBasePath } from '../utilities/path'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 
@@ -63,7 +63,7 @@ export async function loadLocalNotes(
 		const note = await getNoteFromMarkdown(markdown, {
 			allFilePaths,
 			basePath,
-			cwd: path.dirname(filePath),
+			cwd: path.posix.dirname(filePath),
 			fetchAdapter,
 			fileAdapter,
 			namespace: sanitizedNamespace,
@@ -129,7 +129,8 @@ function getDeckNamesFromFilePaths(
 	const { basePath, cwd, mode } = deepmerge(defaultDeckNamesFromFilePathsOptions, options ?? {})
 
 	const filePathSegments = absoluteFilePaths.map((filePath) =>
-		path.dirname(resolveWithBasePath(filePath, { basePath, cwd })).split(path.sep),
+		// TODO resolution necessary?
+		path.posix.dirname(resolveWithBasePath(filePath, { basePath, cwd })).split(path.posix.sep),
 	)
 
 	// Trim to the shortest common path

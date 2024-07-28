@@ -13,12 +13,12 @@ import {
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
 } from '../shared/types'
-import { getBaseAndQueryParts } from '../utilities/file'
 import {
 	getAnkiMediaFilenameExtension,
 	getSafeAnkiMediaFilename,
 	mediaAssetExists,
 } from '../utilities/media'
+import { getBaseAndQueryParts } from '../utilities/path'
 import { cleanClassName, emptyIsUndefined } from '../utilities/string'
 import { getSrcType } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
@@ -223,8 +223,28 @@ export async function mdastToHtml(
 				// Rare case of NOT wrapping the embed image, this will just yield a
 				// broken image
 
-				// TODO replace with a placeholder indicating that it's unsupported?
 				console.warn(`Missing or unsupported file extension for ${String(node.properties.src)}`)
+
+				// Replace with a placeholder indicating that it's unsupported
+				parent.children.splice(
+					index,
+					1,
+					u(
+						'element',
+						{
+							properties: {
+								className: ['yanki-media', 'yanki-media-unsupported'],
+								'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
+								'data-yanki-media-src': absoluteSrcOrUrl,
+								'data-yanki-src': finalSrcUrl,
+								'data-yanki-src-original': node.properties.dataYankiSrcOriginal,
+								// 'data-yanki-media-sync': 'false', // Never syncs
+							},
+							tagName: 'span',
+						},
+						[u('text', `Unsupported media: ${String(node.properties.src)}`)],
+					),
+				)
 			} else if (
 				// Assume remote image assets without a valid extension are images...
 				// they will have 'unknown' as their extension if
@@ -237,8 +257,8 @@ export async function mdastToHtml(
 				// Width and height will be set later
 				node.properties.src = finalSrcUrl
 				node.properties.className = ['yanki-media', 'yanki-media-image']
-				node.properties['data-yanki-src-original'] = absoluteSrcOrUrl
-				node.properties['data-yanki-sync-media'] = yankiSyncMedia ? 'true' : 'false'
+				node.properties['data-yanki-media-src'] = absoluteSrcOrUrl
+				node.properties['data-yanki-media-sync'] = yankiSyncMedia ? 'true' : 'false'
 			} else if (
 				(MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS as unknown as string[]).includes(extension)
 			) {
@@ -259,9 +279,10 @@ export async function mdastToHtml(
 							properties: {
 								className: ['yanki-media', 'yanki-media-audio-video'],
 								'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
+								'data-yanki-media-src': absoluteSrcOrUrl,
+								'data-yanki-media-sync': yankiSyncMedia ? 'true' : 'false',
 								'data-yanki-src': finalSrcUrl,
-								'data-yanki-src-original': absoluteSrcOrUrl,
-								'data-yanki-sync-media': yankiSyncMedia ? 'true' : 'false',
+								'data-yanki-src-original': node.properties.dataYankiSrcOriginal,
 							},
 							tagName: 'span',
 						},
@@ -373,7 +394,7 @@ export function extractMediaFromHtml(html: string): Media[] {
 	visit(hast, 'element', (node) => {
 		if (
 			(node.tagName === 'img' || node.tagName === 'span') &&
-			node.properties?.dataYankiSyncMedia === 'true'
+			node.properties?.dataYankiMediaSync === 'true'
 		) {
 			const filename =
 				// <img>
@@ -381,7 +402,7 @@ export function extractMediaFromHtml(html: string): Media[] {
 				// <span>>
 				node.properties?.dataYankiSrc
 
-			const originalSrc = node.properties?.dataYankiSrcOriginal
+			const originalSrc = node.properties?.dataYankiMediaSrc
 			if (
 				filename !== undefined &&
 				originalSrc !== undefined &&

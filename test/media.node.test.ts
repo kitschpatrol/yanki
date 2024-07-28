@@ -465,7 +465,7 @@ it('gets content hash from file content', { timeout: 60_000 }, async () => {
 
 	for (const filePath of allLocalMediaPaths) {
 		const result = await getFileContentHash(filePath, await getDefaultFileAdapter(), 'content')
-		const key = path.basename(filePath)
+		const key = path.posix.basename(filePath)
 		results.push({ [key]: result ?? 'undefined' })
 	}
 
@@ -530,7 +530,7 @@ it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
 
 	for (const filePath of allLocalMediaPaths) {
 		const result = await getFileContentHash(filePath, await getDefaultFileAdapter(), 'metadata')
-		const key = path.basename(filePath)
+		const key = path.posix.basename(filePath)
 		results.push({ [key]: result ?? 'undefined' })
 	}
 
@@ -597,7 +597,7 @@ it('gets content hash from file name', { timeout: 60_000 }, async () => {
 
 	for (const filePath of allLocalMediaPaths) {
 		const result = await getFileContentHash(filePath, await getDefaultFileAdapter(), 'name')
-		const key = path.basename(filePath)
+		const key = path.posix.basename(filePath)
 		results.push({ [key]: result ?? 'undefined' })
 	}
 
@@ -667,6 +667,7 @@ describeWithFileFixture(
 	(context) => {
 		it('adds media to anki when appropriate', { timeout: 60_000 }, async () => {
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -692,6 +693,7 @@ describeWithFileFixture(
 		// TODO insanely slow on Windows...
 		it('fetches and adds media urls to anki when appropriate', { timeout: 240_000 }, async () => {
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},

@@ -1,5 +1,7 @@
 import { parseHTML } from 'linkedom'
 
+// Export function getLinksAndEmbeds
+
 /**
  * Test helper to get all attributes as an object for all instances of a
  * specific tag in an HTML fragments

@@ -23,7 +23,7 @@ export async function getAnkiMediaFilenameExtension(
 ): Promise<string | undefined> {
 	const extensionCandidate = isUrl(pathOrUrl)
 		? await getFileExtensionFromUrl(pathOrUrl, fetchAdapter)
-		: path.extname(pathOrUrl).slice(1)
+		: path.posix.extname(pathOrUrl).slice(1)
 
 	// Make sure it's supported, note 'unknown' special case for URLs
 	if (
@@ -48,11 +48,11 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 	if (isUrl(pathOrUrl)) {
 		const url = new URL(pathOrUrl)
 		// Also remove extension from URL if it's there, but it won't always be
-		legibleFilename = path.basename(url.pathname, path.extname(url.pathname))
+		legibleFilename = path.posix.basename(url.pathname, path.posix.extname(url.pathname))
 	} else {
 		// Must be a file path
 		const filePath = pathOrUrl
-		legibleFilename = path.basename(filePath, path.extname(filePath))
+		legibleFilename = path.posix.basename(filePath, path.posix.extname(filePath))
 	}
 
 	// Should never happen

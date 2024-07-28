@@ -9,6 +9,8 @@ import {
 import { type FetchAdapter } from '../shared/types'
 import { getFileExtensionForMimeType } from './mime'
 import { getHash } from './string'
+import path from 'path-browserify-esm'
+import slash from 'slash'
 
 // Detect probably wiki-style name links
 export function isNameUrl(text: string): boolean {
@@ -76,10 +78,15 @@ export function getSrcType(
 			return 'remoteHttpUrl'
 		}
 	} catch {
-		// If is doesn't have a separator a relative or absolute path... it's probably a name link,
-		// but we can't be sure that it's not a sloppy relative path, so the name resolution process will
-		// treat it accordingly if necessary
-		if (!text.includes('/')) {
+		// TODO absolute check works on windows?
+		const normalizedPath = path.posix.normalize(slash(text))
+
+		// Links that aren't relative or absolute are probably wiki-style name links
+		if (
+			!normalizedPath.startsWith('/') &&
+			!normalizedPath.startsWith('./') &&
+			!normalizedPath.startsWith('../')
+		) {
 			return 'localFileName'
 		}
 

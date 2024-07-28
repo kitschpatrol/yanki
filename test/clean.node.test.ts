@@ -15,6 +15,7 @@ describeWithFileFixture(
 	(context) => {
 		it('cleans notes', async () => {
 			await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},

@@ -25,7 +25,7 @@ describeWithFileFixture(
 				const { modelName } = await getNoteFromMarkdown(markdown, {
 					namespace: context.namespace,
 				})
-				results[path.basename(filePath)] = modelName
+				results[path.posix.basename(filePath)] = modelName
 			}
 
 			expect(sortKeys(results, { deep: true })).toMatchInlineSnapshot(`
@@ -78,7 +78,7 @@ describeWithFileFixture(
 				const { modelName } = await getNoteFromMarkdown(markdown, {
 					namespace: context.namespace,
 				})
-				results[path.basename(filePath)] = modelName
+				results[path.posix.basename(filePath)] = modelName
 			}
 
 			expect(sortKeys(results, { deep: true })).toMatchInlineSnapshot(`
@@ -133,7 +133,7 @@ describeWithFileFixture(
 
 			const deckNames = results.synced.map((syncInfo) => syncInfo.note.deckName)
 			for (const deckName of deckNames) {
-				expect(deckName).toBe(path.basename(context.assetPath))
+				expect(deckName).toBe(path.posix.basename(context.assetPath))
 			}
 
 			const syncFormatted = formatSyncFilesResult(results)
@@ -257,8 +257,8 @@ describeWithFileFixture(
 			for (const synced of results.synced) {
 				const cleanPath =
 					synced.filePath === undefined
-						? `(Note is in Anki, no file path.)`
-						: `/${path.basename(context.assetPath)}${synced.filePath.split(path.basename(context.assetPath), 2).pop() ?? ''}`
+						? `(Note is in Anki, no file path available.)`
+						: `/${path.posix.basename(context.assetPath)}${synced.filePath.split(path.posix.basename(context.assetPath), 2).pop() ?? ''}`
 				pathToDeckMap[cleanPath] = synced.note.deckName
 			}
 
@@ -306,8 +306,8 @@ describeWithFileFixture(
 			for (const synced of results.synced) {
 				const cleanPath =
 					synced.filePath === undefined
-						? `(Note is in Anki, no file path.)`
-						: `/${path.basename(context.assetPath)}${synced.filePath.split(path.basename(context.assetPath), 2).pop() ?? ''}`
+						? `(Note is in Anki, no file path available.)`
+						: `/${path.posix.basename(context.assetPath)}${synced.filePath.split(path.posix.basename(context.assetPath), 2).pop() ?? ''}`
 				pathToDeckMap[cleanPath] = synced.note.deckName
 			}
 
@@ -532,7 +532,7 @@ describeWithFileFixture(
 
 			// Sync again
 
-			const newFileList = await globby(`${slash(path.dirname(filePathWithId))}/*.md`)
+			const newFileList = await globby(`${path.posix.dirname(slash(filePathWithId))}/*.md`)
 
 			const resultsWithDuplicates = await syncFiles(newFileList, {
 				ankiConnectOptions: {
