@@ -33,8 +33,8 @@ it('detects absence of obsidian vault', async () => {
 it('correctly resolves obsidian wiki links', async () => {
 	const notesToTest = [
 		'./test/assets/test-obsidian-vault/Wiki Links/test card.md',
-		// './test/assets/test-obsidian-vault/Wiki Links/Nested/test card.md',
-		// './test/assets/test-obsidian-vault/Wiki Links/Nested/Nested/test card.md',
+		'./test/assets/test-obsidian-vault/Wiki Links/Nested/test card.md',
+		'./test/assets/test-obsidian-vault/Wiki Links/Nested/Nested/test card.md',
 	]
 
 	const allFilePaths = await globby('./test/assets/test-obsidian-vault/**/*', { absolute: true })

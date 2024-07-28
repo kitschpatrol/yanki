@@ -36,12 +36,6 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 		filePath.toLowerCase().endsWith(base.toLowerCase()),
 	)
 
-	if (name.startsWith('test image.jpg')) {
-		console.log('----------------TEST CARD------------------')
-		console.log(`name: ${name}`)
-		console.log(pathsToName)
-	}
-
 	if (pathsToName.length === 0) {
 		return undefined
 	}
@@ -51,11 +45,70 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 		return `${pathsToName[0]}${query ?? ''}`
 	}
 
+	// Fast path for markdown files
+	// if (base.includes('/') && base.endsWith('md')) {
+	// 	const exactPath = path.posix.join(cwd, `${base}`).toLowerCase()
+
+	// 	console.log('----------------- exactPath -----------------')
+	// 	console.log(base)
+	// 	console.log(exactPath)
+
+	// 	for (const filePath of pathsToName) {
+	// 		console.log('----------------- comp -----------------')
+	// 		console.log(filePath.toLowerCase())
+	// 		console.log(exactPath)
+
+	// 		if (filePath.toLowerCase() === exactPath) {
+	// 			return exactPath
+	// 		}
+	// 	}
+	// }
+
 	// Find whichever has the shortest path relative to the base
-	const relativePathsToBase = [...pathsToName].sort(
-		(a, b) => a.split(path.posix.sep).length - b.split(path.posix.sep).length,
-	)
-	return `${relativePathsToBase[0]}${query ?? ''}`
+	const sortedPaths = [...pathsToName].sort((a, b) => {
+		// Images prioritize child paths, as do any names with separators?
+		if (!base.endsWith('md') || base.includes(path.posix.sep)) {
+			// Then sort by whether the path contains the cwd
+			const aHasCwd = a.startsWith(cwd)
+			const bHasCwd = b.startsWith(cwd)
+
+			if (aHasCwd !== bHasCwd) {
+				return aHasCwd ? -1 : 1
+			}
+		}
+
+		// Sort by depth
+
+		const aDepth = a.split(path.posix.sep).length
+		const bDepth = b.split(path.posix.sep).length
+
+		if (aDepth !== bDepth) {
+			return aDepth - bDepth
+		}
+
+		// Markdown files prioritize depth
+		if (base.endsWith('md')) {
+			// Then sort by whether the path contains the cwd
+			const aHasCwd = a.startsWith(cwd)
+			const bHasCwd = b.startsWith(cwd)
+
+			if (aHasCwd !== bHasCwd) {
+				return aHasCwd ? -1 : 1
+			}
+		}
+
+		// Then sort by name alphabetically
+		return a.localeCompare(b)
+	})
+
+	if (name.startsWith('Nested/test card.md')) {
+		console.log('----------------TEST CARD------------------')
+		console.log(`name: ${name}`)
+		console.log(`cwd: ${cwd}`)
+		console.log(sortedPaths)
+	}
+
+	return `${sortedPaths[0]}${query ?? ''}`
 
 	// Fast path, perfect match
 	// for (const filePath of pathsToName) {

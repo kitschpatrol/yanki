@@ -14,6 +14,7 @@ _The correct Obsidian-resolved absolute path is in the alt text of each link or 
 [[Group 2/test card|/Cards/Group 2/test card.md]]
 [[Nested/Nested/test card.md|/Wiki Links/Nested/Nested/test card.md]]
 [[Nested/Nested/test card|/Wiki Links/Nested/Nested/test card.md]]
+TODO resolving these two is pretty sketchy
 [[Nested/test card.md|/Wiki Links/Nested/Nested/test card.md]]
 [[Nested/test card|/Wiki Links/Nested/Nested/test card.md]]
 [[test card.md|/test card.md]]
@@ -62,6 +63,7 @@ _The correct Obsidian-resolved absolute path is in the alt text of each link or 
 [[/test image|/test image.md]]
 [[/Wiki Links/Nested/test card.md|/Wiki Links/Nested/test card.md]]
 [[/Wiki Links/Nested/test card|/Wiki Links/Nested/test card.md]]
+[[/Wiki Links/Nested/Nested/test card|/Wiki Links/Nested/Nested/test card.md]]
 
 ## Asset links
 
