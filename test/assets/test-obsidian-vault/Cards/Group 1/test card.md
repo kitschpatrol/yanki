@@ -37,4 +37,3 @@ Bla bla bla
 ![[Cards/Group 2/test image.jpg]]
 
 ![[/Cards/Group 2/test image.jpg]]
-

@@ -2,8 +2,6 @@
 
 ---
 
-
-
 ## Internal
 
 ### Wiki style
@@ -115,6 +113,7 @@
 [test card 2](<../Group 2/test card.md>)
 
 #### Absolute path
+
 ##### Bare
 
 [test card 1](Cards/Group%201/test%20card)

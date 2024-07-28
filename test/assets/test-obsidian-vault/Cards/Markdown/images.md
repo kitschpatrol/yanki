@@ -224,7 +224,6 @@
 
 ![alt text|200x50](</Cards/Group 1/test image.jpg>)
 
-
 ## External
 
 ![](https://storage.kitschpatrol.com/example-image-1.jpeg)
@@ -238,6 +237,20 @@
 ![100x40](https://storage.kitschpatrol.com/example-image-1.jpeg)
 
 ![tiny|100x40](https://storage.kitschpatrol.com/example-image-1.jpeg)
+
+## External without extension
+
+![](https://storage.kitschpatrol.com/example-image-1)
+
+![tiny](https://storage.kitschpatrol.com/example-image-1)
+
+![100](https://storage.kitschpatrol.com/example-image-1)
+
+![tiny|100](https://storage.kitschpatrol.com/example-image-1)
+
+![100x40](https://storage.kitschpatrol.com/example-image-1)
+
+![tiny|100x40](https://storage.kitschpatrol.com/example-image-1)
 
 #### Size edge cases
 

@@ -1,1 +1,1 @@
-Name collision test
+wiki link name collision test

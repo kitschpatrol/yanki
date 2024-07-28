@@ -1,0 +1,1 @@
+Nested nested wiki link name collision test
