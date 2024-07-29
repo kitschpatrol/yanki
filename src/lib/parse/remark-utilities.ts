@@ -44,7 +44,7 @@ export async function getAstFromMarkdown(
 		.use(remarkParse)
 		.use(remarkFrontmatter, [{ anywhere: false, marker: '-', type: 'yaml' }])
 		.use(remarkGfm, { singleTilde: false })
-		.use(remarkWikiLinks, { automaticAlias: true, obsidianVault })
+		.use(remarkWikiLinks, { automaticAlias: true })
 		.use(remarkResolveLinks, { allFilePaths, basePath, cwd, enabled: resolveUrls, obsidianVault })
 		.use(remarkMath)
 		.use(
@@ -67,6 +67,7 @@ export async function getAstFromMarkdown(
 			// },
 			// }
 		)
+		// Highlights
 		.use(remarkFlexibleMarkers)
 
 	return processor.run(processor.parse(markdown))
