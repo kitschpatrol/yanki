@@ -119,7 +119,7 @@ await yargsInstance
 			const globPattern = recursive ? `${expandedDirectory}/**/*.md` : `${expandedDirectory}/*.md`
 			const markdownFilePaths = await globby(globPattern, { absolute: true })
 
-			// Get a list of all files for name-only wikilink resolution
+			// Get a list of all files for name-only wiki link resolution
 			const allFilePaths = await globby(`${expandedDirectory}/**/*`, { absolute: true })
 
 			if (markdownFilePaths.length === 0) {

@@ -866,7 +866,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
         "deckName": "test-fancy-markdown",
         "fields": {
           "Back": "",
-          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p><a href="https://ericmika.com">https://ericmika.com</a></p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p><a href="https://ericmika.com" data-yanki-src-original="https://ericmika.com">https://ericmika.com</a></p></div>",
           "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",
@@ -1004,8 +1004,8 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
       "note": {
         "deckName": "test-fancy-markdown",
         "fields": {
-          "Back": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f back model-yanki-basic-and-reversed-card"><p><img src="https://storage.kitschpatrol.com/example-image-2.jpeg" alt="tiny"></p></div>",
-          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic-and-reversed-card"><p><img src="https://storage.kitschpatrol.com/example-image-1.jpeg" alt="tiny"></p></div>",
+          "Back": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f back model-yanki-basic-and-reversed-card"><p><img src="https://storage.kitschpatrol.com/example-image-2.jpeg" alt="tiny" data-yanki-src-original="https://storage.kitschpatrol.com/example-image-2.jpeg" class="yanki-media yanki-media-image" data-yanki-media-src="https://storage.kitschpatrol.com/example-image-2.jpeg" data-yanki-media-sync="false"></p></div>",
+          "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic-and-reversed-card"><p><img src="https://storage.kitschpatrol.com/example-image-1.jpeg" alt="tiny" data-yanki-src-original="https://storage.kitschpatrol.com/example-image-1.jpeg" class="yanki-media yanki-media-image" data-yanki-media-src="https://storage.kitschpatrol.com/example-image-1.jpeg" data-yanki-media-sync="false"></p></div>",
           "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic (and reversed card)",
@@ -1574,11 +1574,11 @@ mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
         "fields": {
           "Back": "",
           "Front": "<div class="yanki namespace-yanki-test-4b7d855f1825e39f front model-yanki-basic"><p>Let's link to Obsidian:</p>
-<p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTackling%20TypeScript%20Book%20Notes.md">Tackling TypeScript Book Notes</a></p>
-<p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTypeScript%20Cheat%20Sheets%20Notes.md">TypeScript Cheat Sheets Notes</a></p>
-<p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTypeScript%20Cheat%20Sheets%20Notes.md">Technology/Languages/TypeScript/TypeScript Cheat Sheets Notes</a></p>
-<p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTypeScript%23Working%20with%20the%20AST.md">TypeScript</a></p>
-<p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FLanguages%2FTypeScript%2FTypeScript%23Working%20with%20the%20AST.md">Working with the AST</a></p></div>",
+<p><a href="/test-fancy-markdown/Technology/Languages/TypeScript/Tackling%20TypeScript%20Book%20Notes" data-yanki-src-original="Technology/Languages/TypeScript/Tackling%20TypeScript%20Book%20Notes">Tackling TypeScript Book Notes</a></p>
+<p><a href="/test-fancy-markdown/Technology/Languages/TypeScript/TypeScript%20Cheat%20Sheets%20Notes" data-yanki-src-original="Technology/Languages/TypeScript/TypeScript%20Cheat%20Sheets%20Notes">TypeScript Cheat Sheets Notes</a></p>
+<p><a href="/test-fancy-markdown/Technology/Languages/TypeScript/TypeScript%20Cheat%20Sheets%20Notes" data-yanki-src-original="Technology/Languages/TypeScript/TypeScript%20Cheat%20Sheets%20Notes">Technology/Languages/TypeScript/TypeScript Cheat Sheets Notes</a></p>
+<p><a href="/test-fancy-markdown/Technology/Languages/TypeScript/TypeScript" data-yanki-src-original="Technology/Languages/TypeScript/TypeScript#Working%20with%20the%20AST">TypeScript</a></p>
+<p><a href="/test-fancy-markdown/Technology/Languages/TypeScript/TypeScript" data-yanki-src-original="Technology/Languages/TypeScript/TypeScript#Working%20with%20the%20AST">Working with the AST</a></p></div>",
           "YankiNamespace": "Yanki Test - 4b7d855f1825e39f",
         },
         "modelName": "Yanki - Basic",

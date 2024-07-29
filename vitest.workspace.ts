@@ -28,6 +28,7 @@ export default defineWorkspace([
 		extends: './vite.config.ts',
 		test: {
 			browser: {
+				// Conflicts between VS Code extension and vitest CLI command...
 				api: {
 					port: 5180,
 					strictPort: true,

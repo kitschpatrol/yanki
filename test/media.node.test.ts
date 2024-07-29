@@ -256,8 +256,8 @@ it('gets content type extension from url name', { timeout: 60_000 }, async () =>
 		  "yanki.ogv: ogv",
 		  "yanki.swf: swf",
 		  "yanki.webm: webm",
-		  "example-image-1: unknown",
-		  "example-image-2: unknown",
+		  "example-image-1: undefined",
+		  "example-image-2: undefined",
 		]
 	`)
 })

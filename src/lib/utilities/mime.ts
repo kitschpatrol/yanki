@@ -41,9 +41,10 @@ export function getFileExtensionForMimeType(mimeType: string): string | undefine
 		'video/x-msvideo': 'avi',
 	}
 
-	if (!(mimeType in mimeToExtension)) {
-		console.log(`Unknown MIME type: ${mimeType}`)
-	}
+	// TMI
+	// if (!(mimeType in mimeToExtension)) {
+	// 	console.log(`Unknown MIME type: ${mimeType}`)
+	// }
 
 	return mimeToExtension[mimeType]
 }

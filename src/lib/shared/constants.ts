@@ -98,9 +98,9 @@ export const MEDIA_URL_CONTENT_TYPE_MODE: 'metadata' | 'name' = 'metadata'
  * lets a URL media asset sync to Anki, and then the browser can figure out how
  * to display at runtime. Trades some risk for unsupported assets being synced
  * for the seemingly more common case of asset URLs that don't include an
- * extension or have a valid content-type header.
+ * extension or have a valid content-type header. Otherwise, set to undefined.
  */
-export const MEDIA_ALLOW_UNKNOWN_URL_EXTENSION = true
+export const MEDIA_ALLOW_UNKNOWN_URL_EXTENSION = false
 
 /**
  * Anki enforces limits on media asset filenames. Older versions allowed up to 255, but it will be 120 moving forward.

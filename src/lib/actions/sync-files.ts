@@ -109,6 +109,7 @@ export async function syncFiles(
 	})
 
 	// TODO reconcile renamedLocalNotes with what was passed in `allFilePaths`
+	// Reload notes if necessary to reconcile any changes to intra-note link paths?
 
 	const allLocalNotes = renamedLocalNotes.map((note) => note.note)
 
@@ -119,7 +120,7 @@ export async function syncFiles(
 		namespace: sanitizedNamespace,
 	})
 
-	// Write IDs to the local files as necessary
+	// Write Anki note IDs to the local files as necessary
 	// Can't just get markdown from the note because there might be extra
 	// frontmatter from e.g. obsidian, which is not captured in the YankiNote type
 	// Cast it up to SyncedFile to get the filePaths

@@ -42,17 +42,3 @@ export function permute(...strings: Array<string | string[]>): string[] {
 	backtrack(0, [])
 	return results
 }
-
-const paths = permute(
-	[
-		'./test/assets/test-obsidian-vault/',
-		'.\\test\\assets\\test-obsidian-vault\\',
-		'../cwd/test/assets/test-obsidian-vault/',
-		'..\\cwd\\test\\assets\\test-obsidian-vault\\',
-	],
-	['test card', 'test%20card'],
-	['.md', ''],
-	['^34876', '#bla', '#bla#bla', '?foo=bar', '?foo=bar%20baz', ''],
-)
-
-console.log(paths.length)

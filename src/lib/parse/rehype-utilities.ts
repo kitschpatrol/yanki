@@ -1,6 +1,4 @@
-// Other syntax highlighting Rehype plugins:
-// https://github.com/Microflash/rehype-starry-night
-// https://github.com/rehypejs/rehype-highlight
+// Helpers for converting MDAST trees to HTML
 
 import {
 	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
@@ -30,15 +28,17 @@ import rehypeMathjax from 'rehype-mathjax'
 import rehypeParse from 'rehype-parse'
 import rehypeRemoveComments from 'rehype-remove-comments'
 import rehypeStringify from 'rehype-stringify'
+import remarkGfm from 'remark-gfm'
 import remarkRehype from 'remark-rehype'
 import { type Simplify } from 'type-fest'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
 import { CONTINUE, EXIT, visit } from 'unist-util-visit'
 
-// Significant performance improvement by reusing this
+// Significant performance improvement by reusing the processor
 const processor = unified()
-	// .use(remarkGfm) // Not needed?
+	// Not needed?
+	.use(remarkGfm)
 	// Don't allow dangerous HTML in the remark --> rehype step, else removing comments won't work
 	.use(remarkRehype)
 	.use(rehypeRemoveComments)
@@ -46,6 +46,9 @@ const processor = unified()
 	// Messes up obsidian links and we should trust ourselves (and probably our plugins, too)
 	// .use(rehypeSanitize)
 	// Super slow...
+	// Other syntax highlighting Rehype plugins:
+	// https://github.com/Microflash/rehype-starry-night
+	// https://github.com/rehypejs/rehype-highlight
 	.use(rehypeShiki, {
 		// See https://shiki.style/packages/rehype
 		defaultLanguage: 'plaintext',
@@ -55,8 +58,8 @@ const processor = unified()
 			light: 'github-light',
 		},
 	})
+	// .use(rehypeStringify, { allowDangerousCharacters: true, allowDangerousHtml: true })
 	.use(rehypeStringify)
-// .use(rehypeStringify, { allowDangerousCharacters: true, allowDangerousHtml: true })
 
 export type MdastToHtmlOptions = Simplify<
 	{
@@ -201,7 +204,7 @@ export async function mdastToHtml(
 
 			// Make sure the file exists if we're going to sync it
 			// If it doesn't, we will still wrap it but it can't be managed by Anki
-			if (yankiSyncMedia) {
+			if (yankiSyncMedia && extension !== undefined) {
 				const exists = await mediaAssetExists(absoluteSrcOrUrl, fileAdapter, fetchAdapter)
 				if (exists) {
 					// These handle url vs. file path internally...
@@ -220,31 +223,17 @@ export async function mdastToHtml(
 			}
 
 			if (extension === undefined) {
-				// Rare case of NOT wrapping the embed image, this will just yield a
-				// broken image
+				// Rare case of unresolvable extension, this will just yield a broken
+				// image, but note how it differs from the 'unknown' case below
 
-				console.warn(`Missing or unsupported file extension for ${String(node.properties.src)}`)
-
-				// Replace with a placeholder indicating that it's unsupported
-				parent.children.splice(
-					index,
-					1,
-					u(
-						'element',
-						{
-							properties: {
-								className: ['yanki-media', 'yanki-media-unsupported'],
-								'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
-								'data-yanki-media-src': absoluteSrcOrUrl,
-								'data-yanki-src': finalSrcUrl,
-								'data-yanki-src-original': node.properties.dataYankiSrcOriginal,
-								// 'data-yanki-media-sync': 'false', // Never syncs
-							},
-							tagName: 'span',
-						},
-						[u('text', `Unsupported media: ${String(node.properties.src)}`)],
-					),
+				console.warn(
+					`Missing or unsupported media asset file extension for "${String(node.properties.src)}"`,
 				)
+
+				node.properties.src = finalSrcUrl
+				node.properties.className = ['yanki-media', 'yanki-media-unsupported']
+				node.properties['data-yanki-media-src'] = absoluteSrcOrUrl
+				node.properties['data-yanki-media-sync'] = 'false'
 			} else if (
 				// Assume remote image assets without a valid extension are images...
 				// they will have 'unknown' as their extension if

@@ -1,7 +1,6 @@
-import { resolveFilePathOrUrl } from '../src/lib/utilities/resolve-file-path-or-url'
+import { resolveLink } from '../src/lib/utilities/resolve-link'
 import { css, hostAndPortToUrl, html, urlToHostAndPort } from '../src/lib/utilities/string'
 import { permute } from './utilities/permute'
-import { globby } from 'globby'
 import { expect, it } from 'vitest'
 
 it('converts from url to host and port and back', () => {
@@ -14,58 +13,9 @@ it('converts from url to host and port and back', () => {
 	expect(url).toBe('http://localhost:8765')
 })
 
-it('formats html without excessive white space', () => {
-	const content = 'Some text'
-	const multiLineHtml = html`
-		<div>
-			<p>${content}</p>
-		</div>
-		<p></p>
-	`
-
-	expect(multiLineHtml).toMatchInlineSnapshot(`
-		"<div>
-			<p>Some text</p>
-		</div>
-		<p></p>"
-	`)
-
-	const singleLineHtml = html`<p>${content}</p>`
-	expect(singleLineHtml).toMatchInlineSnapshot(`"<p>Some text</p>"`)
-})
-
-it('formats css without excessive white space', () => {
-	const content = 'arial'
-	const multiLineCss = css`
-		.card {
-			font-family: ${content};
-			font-size: 20px;
-			text-align: center;
-			color: black;
-			background-color: white;
-		}
-	`
-
-	expect(multiLineCss).toMatchInlineSnapshot(`
-		".card {
-			font-family: arial;
-			font-size: 20px;
-			text-align: center;
-			color: black;
-			background-color: white;
-		}"
-	`)
-
-	// Wrapping in css`` template function messes up subsequent syntax highlighting...
-	const singleLineCss = `
-		font-family: ${content};
-	`
-	expect(singleLineCss).toMatchInlineSnapshot(`"font-family: arial;"`)
-})
-
 it('resolves a relative file path', () => {
 	expect(
-		resolveFilePathOrUrl('./assets/test-obsidian-vault/test card.md', {
+		resolveLink('./assets/test-obsidian-vault/test card.md', {
 			cwd: '/base-path/cwd/',
 		}),
 	).toMatchInlineSnapshot(`"/base-path/cwd/assets/test-obsidian-vault/test card.md"`)
@@ -73,7 +23,7 @@ it('resolves a relative file path', () => {
 
 it('resolves a url-encoded relative file path', () => {
 	expect(
-		resolveFilePathOrUrl('./assets/test-obsidian-vault/test%20card.md', {
+		resolveLink('./assets/test-obsidian-vault/test%20card.md', {
 			cwd: '/base-path/cwd/',
 		}),
 	).toMatchInlineSnapshot(`"/base-path/cwd/assets/test-obsidian-vault/test card.md"`)
@@ -81,27 +31,42 @@ it('resolves a url-encoded relative file path', () => {
 
 it('resolves a relative file path with intermediate relative paths', () => {
 	expect(
-		resolveFilePathOrUrl('./assets/test-obsidian-vault/../test-obsidian-vault/test card.md', {
+		resolveLink('./assets/test-obsidian-vault/../test-obsidian-vault/test card.md', {
 			cwd: '/base-path/cwd/',
 		}),
 	).toMatchInlineSnapshot(`"/base-path/cwd/assets/test-obsidian-vault/test card.md"`)
 })
 
-it('resolves a relative file path without an extension', async () => {
+it('resolves a relative file path without an extension', () => {
+	// The allFilePaths option is hard-coded for the browser test, since globby
+	// has Node dependencies
 	expect(
-		resolveFilePathOrUrl('./assets/test-obsidian-vault/test card', {
-			allFilePaths: await globby('./test/assets/test-obsidian-vault/**/*', { absolute: true }),
+		resolveLink('./test/assets/test-obsidian-vault/test card', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/test card.md'],
 			cwd: '/base-path/cwd/',
 			defaultExtension: 'md',
 		}),
-	).toMatchInlineSnapshot(`"/base-path/cwd/assets/test-obsidian-vault/test card.md"`)
+	).toMatchInlineSnapshot(`"/base-path/cwd/test/assets/test-obsidian-vault/test card.md"`)
 })
 
-it('resolves relative file paths', async () => {
-	const allRelativeFilePaths = await globby('./test/assets/test-obsidian-vault/**/*')
-	const allFilePaths = allRelativeFilePaths.map((filePath) =>
-		filePath.replace('./', '/base-path/cwd/'),
-	)
+it('resolves relative file paths', () => {
+	// The allFilePaths option is hard-coded for the browser test, since globby
+	// has Node dependencies
+	const allFilePaths = [
+		'/base-path/cwd/test/assets/test-obsidian-vault/test card.md',
+		'/base-path/cwd/test/assets/test-obsidian-vault/Wiki Links/test card.md',
+		'/base-path/cwd/test/assets/test-obsidian-vault/Cards/Group 1/test card.md',
+		'/base-path/cwd/test/assets/test-obsidian-vault/Cards/Group 2/test card.md',
+		'/base-path/cwd/test/assets/test-obsidian-vault/Wiki Links/Nested/test card.md',
+		'/base-path/cwd/test/assets/test-obsidian-vault/Cards/Group 1/Sub Group/test card.md',
+		'/base-path/cwd/test/assets/test-obsidian-vault/Wiki Links/Nested/Nested/test card.md',
+	]
+
+	// Node approach
+	// const allRelativeFilePaths = await globby('./test/assets/test-obsidian-vault/**/*')
+	// const allFilePaths = allRelativeFilePaths.map((filePath) =>
+	// 	filePath.replace('./', '/base-path/cwd/'),
+	// )
 
 	const testPaths = permute(
 		[
@@ -116,7 +81,7 @@ it('resolves relative file paths', async () => {
 	)
 
 	const resolvedTestPaths = [...testPaths].map((testPath) =>
-		resolveFilePathOrUrl(testPath, {
+		resolveLink(testPath, {
 			allFilePaths,
 			cwd: '/base-path/cwd/',
 			defaultExtension: 'md',
@@ -148,3 +113,54 @@ function allCorrect(testPaths: string[], resolvedTestPaths: string[], test: stri
 
 	return allCorrect
 }
+
+it('formats html without excessive white space', () => {
+	const content = 'Some text'
+	const multiLineHtml = html`
+		<div>
+			<p>${content}</p>
+		</div>
+		<p></p>
+	`
+
+	expect(multiLineHtml).toMatchInlineSnapshot(`
+		"<div>
+			<p>Some text</p>
+		</div>
+		<p></p>"
+	`)
+
+	const singleLineHtml = html`<p>${content}</p>`
+	expect(singleLineHtml).toMatchInlineSnapshot(`"<p>Some text</p>"`)
+})
+
+// These go last since the css`` template function messes up subsequent syntax highlighting...
+
+it('formats css without excessive white space', () => {
+	const content = 'arial'
+	const multiLineCss = css`
+		.card {
+			font-family: ${content};
+			font-size: 20px;
+			text-align: center;
+			color: black;
+			background-color: white;
+		}
+	`
+
+	expect(multiLineCss).toMatchInlineSnapshot(`
+		".card {
+			font-family: arial;
+			font-size: 20px;
+			text-align: center;
+			color: black;
+			background-color: white;
+		}"
+	`)
+
+	// Wrapping in css`` template function messes up subsequent syntax highlighting...
+	const singleLineCss = css`
+		font-family: ${content};
+	`
+	expect(singleLineCss).toMatchInlineSnapshot(`"font-family: arial;"`)
+})

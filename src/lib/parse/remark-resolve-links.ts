@@ -1,4 +1,5 @@
-import { resolveFilePathOrUrl } from '../utilities/resolve-file-path-or-url'
+import { resolveLink } from '../utilities/resolve-link'
+import { isUrl } from '../utilities/url'
 import { type Root } from 'mdast'
 import { type Plugin } from 'unified'
 import { visit } from 'unist-util-visit'
@@ -27,7 +28,8 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				...node.data?.hProperties,
 				'data-yanki-src-original': node.url,
 			}
-			node.url = resolveFilePathOrUrl(node.url, {
+
+			const resolvedLink = resolveLink(node.url, {
 				allFilePaths,
 				basePath,
 				convertFilePathsToProtocol: obsidianVault === undefined ? 'none' : 'obsidian',
@@ -35,6 +37,9 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				defaultExtension: 'md',
 				obsidianVaultName: obsidianVault,
 			})
+
+			node.url = isUrl(resolvedLink) ? resolvedLink : encodeURI(resolvedLink)
+
 			// TMI
 			// node.data.hProperties['data-yanki-src-resolved'] = node.url
 		})
@@ -46,13 +51,17 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				...node.data?.hProperties,
 				'data-yanki-src-original': node.url,
 			}
-			node.url = resolveFilePathOrUrl(node.url, {
+
+			const resolvedLink = resolveLink(node.url, {
 				allFilePaths,
 				basePath,
 				cwd,
 				defaultExtension: undefined,
 				obsidianVaultName: undefined,
 			})
+
+			node.url = isUrl(resolvedLink) ? resolvedLink : encodeURI(resolvedLink)
+
 			// TMI
 			// Images will pick up a data-yanki-media-src if they're managed
 			// node.data.hProperties['data-yanki-src-resolved'] = node.url

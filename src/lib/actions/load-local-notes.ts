@@ -7,7 +7,6 @@ import {
 	getDefaultFileAdapter,
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
-import { resolveWithBasePath } from '../utilities/path'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 
@@ -53,7 +52,7 @@ export async function loadLocalNotes(
 
 	// Use file paths as deck names, can do this before rename since names only
 	// affect note names not directory names
-	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths, { basePath })
+	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths)
 
 	const localNotes: LocalNote[] = []
 
@@ -89,10 +88,9 @@ export async function loadLocalNotes(
 
 type DeckNamesFromFilePathsOptions = {
 	mode: 'common-parent' | 'common-root'
-} & Pick<GlobalOptions, 'basePath' | 'cwd'>
+}
 
 const defaultDeckNamesFromFilePathsOptions: DeckNamesFromFilePathsOptions = {
-	...defaultGlobalOptions,
 	mode: 'common-root',
 }
 
@@ -124,13 +122,12 @@ const defaultDeckNamesFromFilePathsOptions: DeckNamesFromFilePathsOptions = {
  */
 function getDeckNamesFromFilePaths(
 	absoluteFilePaths: string[],
-	options: Partial<DeckNamesFromFilePathsOptions>,
+	options?: Partial<DeckNamesFromFilePathsOptions>,
 ) {
-	const { basePath, cwd, mode } = deepmerge(defaultDeckNamesFromFilePathsOptions, options ?? {})
+	const { mode } = deepmerge(defaultDeckNamesFromFilePathsOptions, options ?? {})
 
 	const filePathSegments = absoluteFilePaths.map((filePath) =>
-		// TODO resolution necessary?
-		path.posix.dirname(resolveWithBasePath(filePath, { basePath, cwd })).split(path.posix.sep),
+		path.posix.dirname(filePath).split(path.posix.sep),
 	)
 
 	// Trim to the shortest common path

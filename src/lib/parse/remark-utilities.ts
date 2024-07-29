@@ -1,6 +1,4 @@
-/**
- * Helpers for working with the Markdown AST.
- */
+// Helpers for working with the Markdown AST
 
 import type { Frontmatter } from '../model/frontmatter'
 import type { YankiModelName } from '../model/model'

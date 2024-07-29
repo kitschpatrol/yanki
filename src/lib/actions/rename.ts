@@ -132,6 +132,13 @@ export const defaultRenameFilesOptions: RenameFilesOptions = {
 	...defaultGlobalOptions,
 }
 
+/**
+ * Currently used for testing and by `yanki-obsidian`.
+ *
+ * @param allLocalFilePaths
+ * @param options
+ * @returns
+ */
 export async function renameFiles(
 	allLocalFilePaths: string[],
 	options: Partial<RenameFilesOptions>,
