@@ -3,7 +3,13 @@
 // TODO move this into its own package?
 
 import * as pathExtras from './path'
-import { fileUrlToPath, getSrcType } from './url'
+import {
+	fileUrlToPath,
+	getSrcType,
+	safeDecodeURI,
+	safeDecodeURIComponent,
+	safeParseUrl,
+} from './url'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 import slash from 'slash'
@@ -99,12 +105,8 @@ export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLink
 		console.warn(`convertFilePathsToProtocol is 'obsidian', but no obsidianVaultName provided`)
 	}
 
-	let decodedUrl: string | undefined
-
-	try {
-		decodedUrl = decodeURI(filePathOrUrl)
-	} catch (error) {
-		console.warn(`Error decoding src: ${filePathOrUrl}`, error)
+	const decodedUrl = safeDecodeURI(filePathOrUrl)
+	if (decodedUrl === undefined) {
 		return filePathOrUrl
 	}
 
@@ -351,7 +353,7 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
  * @returns True if the file path is present in the list of all file paths.
  */
 function pathExistsInAllFiles(filePath: string, allFilePaths: string[]): boolean {
-	const [base] = pathExtras.getBaseAndQueryParts(filePath)
+	const base = pathExtras.getBase(filePath)
 
 	// Obsidian is not case sensitive
 	return allFilePaths.some((file) => file.toLowerCase().endsWith(base.toLowerCase()))
@@ -373,10 +375,8 @@ export function parseObsidianVaultLink(url: string):
 	  }
 	| undefined {
 	// Parse the URL
-	let urlObject: URL
-	try {
-		urlObject = new URL(url)
-	} catch {
+	const urlObject = safeParseUrl(url)
+	if (urlObject === undefined) {
 		return undefined
 	}
 
@@ -395,8 +395,12 @@ export function parseObsidianVaultLink(url: string):
 	}
 
 	// Decode
-	const decodedVault = decodeURIComponent(vault)
-	const decodedFilePath = decodeURIComponent(file)
+	const decodedVault = safeDecodeURIComponent(vault)
+	const decodedFilePath = safeDecodeURIComponent(file)
+
+	if (decodedVault === undefined || decodedFilePath === undefined) {
+		return undefined
+	}
 
 	// Return the decoded file path
 	return {

@@ -5,7 +5,6 @@ import { formatSetStyleResult, setStyle } from '../lib/actions/style'
 import { formatSyncFilesResult, syncFiles } from '../lib/actions/sync-files'
 import { defaultGlobalOptions } from '../lib/shared/types'
 import log from '../lib/utilities/log'
-import { urlToHostAndPort } from '../lib/utilities/string'
 import {
 	ankiAutoLaunchOption,
 	ankiConnectOption,
@@ -15,6 +14,7 @@ import {
 	namespaceOption,
 	verboseOption,
 } from './options'
+import { urlToHostAndPortValidated } from './utilities/validation'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -132,7 +132,7 @@ await yargsInstance
 				log.warn('Ignoring `max-filename-length` option because `manage-filenames` is not enabled.')
 			}
 
-			const { host, port } = urlToHostAndPort(ankiConnect)
+			const { host, port } = urlToHostAndPortValidated(ankiConnect)
 
 			const result = await syncFiles(markdownFilePaths, {
 				allFilePaths,
@@ -173,7 +173,7 @@ await yargsInstance
 				.options(ankiAutoLaunchOption)
 				.option(jsonOption('Output the list of notes as JSON to stdout.')),
 		async ({ ankiAutoLaunch, ankiConnect, json, namespace }) => {
-			const { host, port } = urlToHostAndPort(ankiConnect)
+			const { host, port } = urlToHostAndPortValidated(ankiConnect)
 
 			const result = await listNotes({
 				ankiConnectOptions: {
@@ -211,7 +211,7 @@ await yargsInstance
 				.option(jsonOption('Output the list of deleted notes as JSON to stdout.'))
 				.option(verboseOption),
 		async ({ ankiAutoLaunch, ankiConnect, ankiWeb, dryRun, json, namespace, verbose }) => {
-			const { host, port } = urlToHostAndPort(ankiConnect)
+			const { host, port } = urlToHostAndPortValidated(ankiConnect)
 
 			const result = await cleanNotes({
 				ankiConnectOptions: {
@@ -253,7 +253,7 @@ await yargsInstance
 				.option(jsonOption('Output the list of updated note types / models as JSON to stdout.'))
 				.option(verboseOption),
 		async ({ ankiAutoLaunch, ankiConnect, ankiWeb, css, dryRun, json, verbose }) => {
-			const { host, port } = urlToHostAndPort(ankiConnect)
+			const { host, port } = urlToHostAndPortValidated(ankiConnect)
 
 			let loadedCss: string | undefined
 			if (css !== undefined) {

@@ -42,19 +42,6 @@ export function truncateOnWordBoundary(
 	return `${words.join(wordBoundary).slice(0, maxLengthSafe)}${truncationString}`
 }
 
-export function urlToHostAndPort(url: string): { host: string; port: number } {
-	const urlObject = new URL(url)
-
-	return {
-		host: `${urlObject.protocol}//${urlObject.hostname}`,
-		port: Number.parseInt(urlObject.port, 10),
-	}
-}
-
-export function hostAndPortToUrl(host: string, port: number): string {
-	return `${host}:${port}`
-}
-
 export function cleanClassName(className: string): string {
 	return className
 		.toLowerCase()

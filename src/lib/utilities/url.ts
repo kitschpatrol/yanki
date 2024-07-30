@@ -18,45 +18,66 @@ export function isNameUrl(text: string): boolean {
 	return !text.startsWith('/') && !text.startsWith('./') && !text.startsWith('../') && !isUrl(text)
 }
 
-export function isUrl(text: string): boolean {
-	// Waiting for URL.canParse in node 19+...
-	// return URL.canParse(text)
-	// TODO this is confused by windows paths, e.g. `C:/Bla bla bla`... which is why there's an explicit protocol check.
+export function safeDecodeURI(text: string): string | undefined {
 	try {
-		const { protocol } = new URL(text)
-		if (protocol === 'https:' || protocol === 'http:' || protocol === 'obsidian:') {
-			return true
-		}
-
-		return false
-	} catch {
-		return false
+		return decodeURI(text)
+	} catch (error) {
+		console.warn(`Error decoding URI text: "${text}"`, error)
+		return undefined
 	}
+}
+
+export function safeDecodeURIComponent(text: string): string | undefined {
+	try {
+		return decodeURIComponent(text)
+	} catch (error) {
+		console.warn(`Error decoding URI component text: "${text}"`, error)
+		return undefined
+	}
+}
+
+/**
+ * @param text
+ * @returns URL object if parsable, undefined if not (likely a file path)
+ */
+export function safeParseUrl(text: string): URL | undefined {
+	// Waiting for non-throwing URL.canParse in node 19+...
+	// return URL.canParse(text)
+	try {
+		const url = new URL(text)
+
+		// Windows file paths can yield protocols like `C:\Bla bla bla` will yield a
+		// "protocol" of `c:`... which is theoretically a valid, URL, but almost
+		// definitely one we want to treat as a file path instead
+		const driveLetterPattern = /^[A-Za-z]:/
+		return driveLetterPattern.test(url.protocol) ? undefined : url
+	} catch {
+		return undefined
+	}
+}
+
+export function isUrl(text: string): boolean {
+	return safeParseUrl(text) !== undefined
 }
 
 /**
  * Helper to "filter" file URLs into path strings so they're treated
  * correctly in mdastToHtml
  * TODO need stuff from node's implementation, fileURLToPath?
- * @param text
+ * @param url
  * @returns
  */
-
-export function fileUrlToPath(text: string): string {
-	try {
-		const url = new URL(text)
-		if (url.protocol === 'file:') {
-			return url.pathname
-		}
-
-		return text
-	} catch {
-		return text
+export function fileUrlToPath(url: string): string {
+	const parsedUrl = safeParseUrl(url)
+	if (parsedUrl?.protocol === 'file:') {
+		return parsedUrl.pathname
 	}
+
+	return url
 }
 
 export function getSrcType(
-	text: string,
+	filePathOrUrl: string,
 ):
 	| 'localFileName'
 	| 'localFilePath'
@@ -64,22 +85,11 @@ export function getSrcType(
 	| 'obsidianVaultUrl'
 	| 'remoteHttpUrl'
 	| 'unsupportedProtocolUrl' {
-	try {
-		const url = new URL(text)
-		if (url.protocol === 'file:') {
-			return 'localFileUrl'
-		}
+	const url = safeParseUrl(filePathOrUrl)
 
-		if (url.protocol === 'obsidian:') {
-			return 'obsidianVaultUrl'
-		}
-
-		if (url.protocol === 'http:' || url.protocol === 'https:') {
-			return 'remoteHttpUrl'
-		}
-	} catch {
-		// TODO absolute check works on windows?
-		const normalizedPath = path.posix.normalize(slash(text))
+	if (url === undefined) {
+		// Probably a file path
+		const normalizedPath = path.posix.normalize(slash(filePathOrUrl))
 
 		// Links that aren't relative or absolute are probably wiki-style name links
 		if (
@@ -93,10 +103,20 @@ export function getSrcType(
 		return 'localFilePath'
 	}
 
-	// TODO windows issue...
-	// Treat other protocols like c: as local paths
-	// TODO actually return unsupportedProtocolUrl
-	return 'localFilePath'
+	// Probably a url
+	if (url.protocol === 'file:') {
+		return 'localFileUrl'
+	}
+
+	if (url.protocol === 'obsidian:') {
+		return 'obsidianVaultUrl'
+	}
+
+	if (url.protocol === 'http:' || url.protocol === 'https:') {
+		return 'remoteHttpUrl'
+	}
+
+	return 'unsupportedProtocolUrl'
 }
 
 /**
@@ -182,14 +202,19 @@ export async function getFileExtensionFromUrl(
 
 		case 'name': {
 			let extensionInUrl: string | undefined
-			const urlObject = new URL(url)
+			const parsedUrl = safeParseUrl(url)
 
-			const pathnameParts = urlObject.pathname.split('.')
+			if (parsedUrl === undefined) {
+				console.warn(`Could not parse URL: ${url}`)
+				return undefined
+			}
+
+			const pathnameParts = parsedUrl.pathname.split('.')
 			if (pathnameParts.length > 1) {
 				extensionInUrl = pathnameParts.at(-1)
 			} else {
 				// Look in the query string if we must...
-				const searchParts = urlObject.search.split('.')
+				const searchParts = parsedUrl.search.split('.')
 				extensionInUrl = searchParts.at(-1)
 			}
 
@@ -268,4 +293,18 @@ export async function getUrlContentHash(
 			return getHash(url, 16)
 		}
 	}
+}
+
+export function urlToHostAndPort(url: string): { host: string; port: number } | undefined {
+	const parsedUrl = safeParseUrl(url)
+	return parsedUrl === undefined
+		? undefined
+		: {
+				host: `${parsedUrl.protocol}//${parsedUrl.hostname}`,
+				port: Number.parseInt(parsedUrl.port, 10),
+			}
+}
+
+export function hostAndPortToUrl(host: string, port: number): string {
+	return `${host}:${port}`
 }

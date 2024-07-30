@@ -8,7 +8,7 @@ import { type FetchAdapter, type FileAdapter } from '../shared/types'
 import { fileExists, getFileContentHash } from './file'
 import { getSlugifiedNamespace } from './namespace'
 import { truncateOnWordBoundary } from './string'
-import { getFileExtensionFromUrl, getUrlContentHash, isUrl, urlExists } from './url'
+import { getFileExtensionFromUrl, getUrlContentHash, isUrl, safeParseUrl, urlExists } from './url'
 import slugify from '@sindresorhus/slugify'
 import path from 'path-browserify-esm'
 
@@ -45,14 +45,19 @@ export async function getAnkiMediaFilenameExtension(
 function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 	let legibleFilename: string | undefined
 
-	if (isUrl(pathOrUrl)) {
-		const url = new URL(pathOrUrl)
-		// Also remove extension from URL if it's there, but it won't always be
-		legibleFilename = path.posix.basename(url.pathname, path.posix.extname(url.pathname))
-	} else {
+	const parsedUrl = safeParseUrl(pathOrUrl)
+
+	if (parsedUrl === undefined) {
 		// Must be a file path
 		const filePath = pathOrUrl
 		legibleFilename = path.posix.basename(filePath, path.posix.extname(filePath))
+	} else {
+		// Must be a url
+		// Also remove extension from URL if it's there, but it won't always be
+		legibleFilename = path.posix.basename(
+			parsedUrl.pathname,
+			path.posix.extname(parsedUrl.pathname),
+		)
 	}
 
 	// Should never happen

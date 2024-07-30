@@ -2,7 +2,7 @@ import { syncFiles } from '../src/lib'
 import { getDefaultFileAdapter } from '../src/lib/shared/types'
 import { getFileContentHash } from '../src/lib/utilities/file'
 import { mediaAssetExists } from '../src/lib/utilities/media'
-import { getFileExtensionFromUrl, getUrlContentHash } from '../src/lib/utilities/url'
+import { getFileExtensionFromUrl, getUrlContentHash, safeParseUrl } from '../src/lib/utilities/url'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stableResults } from './utilities/stable-sync-results'
 import path from 'node:path'
@@ -134,7 +134,12 @@ it('gets content type extension from url metadata', { timeout: 60_000 }, async (
 	const results: Array<Record<string, string>> = []
 	for (const url of allRemoteMediaUrls) {
 		const result = await getFileExtensionFromUrl(url, fetchAdapter, 'metadata')
-		const { pathname } = new URL(url)
+		const parsedUrl = safeParseUrl(url)
+		if (parsedUrl === undefined) {
+			throw new Error(`Could not parse URL: ${url}`)
+		}
+
+		const { pathname } = parsedUrl
 		const key = pathname.split('/').at(-1) ?? 'undefined'
 		results.push({ [key]: result ?? 'undefined' })
 	}
@@ -200,7 +205,12 @@ it('gets content type extension from url name', { timeout: 60_000 }, async () =>
 	const results: Array<Record<string, string>> = []
 	for (const url of allRemoteMediaUrls) {
 		const result = await getFileExtensionFromUrl(url, fetchAdapter, 'name')
-		const { pathname } = new URL(url)
+		const parsedUrl = safeParseUrl(url)
+		if (parsedUrl === undefined) {
+			throw new Error(`Could not parse URL: ${url}`)
+		}
+
+		const { pathname } = parsedUrl
 		const key = pathname.split('/').at(-1) ?? 'undefined'
 		results.push({ [key]: result ?? 'undefined' })
 	}
@@ -266,7 +276,12 @@ it('gets content hash from url content', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
 	for (const url of allRemoteMediaUrls) {
 		const result = await getUrlContentHash(url, fetchAdapter, 'content')
-		const { pathname } = new URL(url)
+		const parsedUrl = safeParseUrl(url)
+		if (parsedUrl === undefined) {
+			throw new Error(`Could not parse URL: ${url}`)
+		}
+
+		const { pathname } = parsedUrl
 		const key = pathname.split('/').at(-1) ?? 'undefined'
 		results.push({ [key]: result ?? 'undefined' })
 	}
@@ -332,7 +347,12 @@ it('gets content hash from url metadata', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
 	for (const url of allRemoteMediaUrls) {
 		const result = await getUrlContentHash(url, fetchAdapter, 'metadata')
-		const { pathname } = new URL(url)
+		const parsedUrl = safeParseUrl(url)
+		if (parsedUrl === undefined) {
+			throw new Error(`Could not parse URL: ${url}`)
+		}
+
+		const { pathname } = parsedUrl
 		const key = pathname.split('/').at(-1) ?? 'undefined'
 		results.push({ [key]: result ?? 'undefined' })
 	}
@@ -398,7 +418,12 @@ it('gets content hash from url name', { timeout: 60_000 }, async () => {
 	const results: Array<Record<string, string>> = []
 	for (const url of allRemoteMediaUrls) {
 		const result = await getUrlContentHash(url, fetchAdapter, 'name')
-		const { pathname } = new URL(url)
+		const parsedUrl = safeParseUrl(url)
+		if (parsedUrl === undefined) {
+			throw new Error(`Could not parse URL: ${url}`)
+		}
+
+		const { pathname } = parsedUrl
 		const key = pathname.split('/').at(-1) ?? 'undefined'
 		results.push({ [key]: result ?? 'undefined' })
 	}

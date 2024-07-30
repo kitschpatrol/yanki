@@ -16,9 +16,9 @@ import {
 	getSafeAnkiMediaFilename,
 	mediaAssetExists,
 } from '../utilities/media'
-import { getBaseAndQueryParts } from '../utilities/path'
+import { getBase } from '../utilities/path'
 import { cleanClassName, emptyIsUndefined } from '../utilities/string'
-import { getSrcType } from '../utilities/url'
+import { getSrcType, safeDecodeURI } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
 import { deepmerge } from 'deepmerge-ts'
 import { type Element, type Root as HastRoot } from 'hast'
@@ -104,8 +104,8 @@ export async function mdastToHtml(
 		return checkResult
 	}
 
-	// Add a wrapper div with a specific class to the HTML
-	// This is useful for styling the HTML output
+	// Add a wrapper div with a specific class to the HTML, this is hypothetically
+	// useful for styling the output via CSS
 	const nonEmptyHast = isEmpty ? NOTE_DEFAULT_EMPTY_HAST : hast
 	const hastWithClass: HastRoot = u('root', [
 		u(
@@ -160,14 +160,6 @@ export async function mdastToHtml(
 
 			case 'remoteHttpUrl': {
 				absoluteSrcOrUrl = node.properties.src
-				// TODO, necessary?
-				// try {
-				// 	absoluteSrcOrUrl = decodeURI(node.properties.src) // Always absolute already
-				// } catch (error) {
-				// 	console.warn(`Error decoding src: ${node.properties.src}`, error)
-				// 	return CONTINUE
-				// }
-
 				break
 			}
 
@@ -175,16 +167,13 @@ export async function mdastToHtml(
 				// The src will be URI-encoded at this point, which we don't want for local files
 				// Local file URLs must be converted into paths before decoding, and must be absolute
 				// already so they are not resolved
-				try {
-					absoluteSrcOrUrl = decodeURI(node.properties.src) // Always absolute already
-				} catch (error) {
-					console.warn(`Error decoding src: "${node.properties.src}"`, error)
+				absoluteSrcOrUrl = safeDecodeURI(node.properties.src)
+				if (absoluteSrcOrUrl === undefined) {
 					return CONTINUE
 				}
 
 				// Ignore any query parameters on local files
-				const [base] = getBaseAndQueryParts(absoluteSrcOrUrl)
-				absoluteSrcOrUrl = base
+				absoluteSrcOrUrl = getBase(absoluteSrcOrUrl)
 
 				break
 			}
@@ -207,7 +196,7 @@ export async function mdastToHtml(
 			if (yankiSyncMedia && extension !== undefined) {
 				const exists = await mediaAssetExists(absoluteSrcOrUrl, fileAdapter, fetchAdapter)
 				if (exists) {
-					// These handle url vs. file path internally...
+					// These handle url vs. file path internally... and also hash the asset
 					finalSrcUrl = await getSafeAnkiMediaFilename(
 						absoluteSrcOrUrl,
 						namespace,

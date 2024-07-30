@@ -42,4 +42,4 @@ export {
 	getNoteFromMarkdown,
 } from './parse/parse'
 export { type FetchAdapter, type FileAdapter } from './shared/types'
-export { hostAndPortToUrl, urlToHostAndPort } from './utilities/string'
+export { hostAndPortToUrl, urlToHostAndPort } from './utilities/url'

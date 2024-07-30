@@ -2,6 +2,7 @@ import { detectVault } from '../src/bin/utilities/obsidian'
 import { getNoteFromMarkdown, syncFiles } from '../src/lib/index'
 import { getBase, stripBasePath } from '../src/lib/utilities/path'
 import { parseObsidianVaultLink } from '../src/lib/utilities/resolve-link'
+import { safeDecodeURI } from '../src/lib/utilities/url'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stableResults } from './utilities/stable-sync-results'
 import { globby } from 'globby'
@@ -155,7 +156,8 @@ function checkWikiLinkResolution(html: string, basePath: string): void {
 		// Type assertion to specify element.dataset is a DOMStringMap
 		const dataset = element.dataset as DOMStringMap
 
-		const originalSrc = decodeURI(dataset.yankiSrcOriginal ?? '')
+		const originalSrc = safeDecodeURI(dataset.yankiSrcOriginal ?? '')
+
 		const resolvedSrc =
 			dataset.yankiMediaSrc ?? element.getAttribute('href') ?? element.getAttribute('src') ?? ''
 		const expectedSrc = element.getAttribute('alt') ?? element.innerHTML
@@ -169,7 +171,7 @@ function checkWikiLinkResolution(html: string, basePath: string): void {
 		const resolvedSrcPathFromVaultLink =
 			parseObsidianVaultLink(resolvedSrc)?.linkPath ?? resolvedSrc
 
-		const resolvedSrcClean = decodeURI(
+		const resolvedSrcClean = safeDecodeURI(
 			path.posix
 				.normalize(getBase(stripBasePath(resolvedSrcPathFromVaultLink, basePath)))
 				.toLowerCase()
