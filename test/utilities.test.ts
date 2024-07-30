@@ -111,7 +111,7 @@ it('resolves a relative file path without an extension', () => {
 		resolveLink('./test/assets/test-obsidian-vault/test card', {
 			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/test card.md'],
 			cwd: '/base-path/cwd/',
-			defaultExtension: 'md',
+			type: 'link',
 		}),
 	).toMatchInlineSnapshot(`"/base-path/cwd/test/assets/test-obsidian-vault/test card.md"`)
 })
@@ -151,7 +151,7 @@ it('resolves relative file paths', () => {
 		resolveLink(testPath, {
 			allFilePaths,
 			cwd: '/base-path/cwd/',
-			defaultExtension: 'md',
+			type: 'link',
 		}),
 	)
 

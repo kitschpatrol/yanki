@@ -34,8 +34,8 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				basePath,
 				convertFilePathsToProtocol: obsidianVault === undefined ? 'none' : 'obsidian',
 				cwd,
-				defaultExtension: 'md',
 				obsidianVaultName: obsidianVault,
+				type: 'link',
 			})
 
 			node.url = isUrl(resolvedLink) ? resolvedLink : encodeURI(resolvedLink)
@@ -56,8 +56,8 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				allFilePaths,
 				basePath,
 				cwd,
-				defaultExtension: undefined,
 				obsidianVaultName: undefined,
+				type: 'embed',
 			})
 
 			node.url = isUrl(resolvedLink) ? resolvedLink : encodeURI(resolvedLink)

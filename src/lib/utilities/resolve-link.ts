@@ -14,6 +14,12 @@ import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 import slash from 'slash'
 
+export type ResolveLinkType =
+	// Via a `![[link]]` or `![alt](link)` syntax
+	| 'embed'
+	// Via a `[[link]]` or `[text](link)` syntax
+	| 'link'
+
 export type ResolveLinkOptions = {
 	/**
 	 * Array of all absolute file paths to consider when resolving wiki-style named links.
@@ -42,13 +48,14 @@ export type ResolveLinkOptions = {
 	 */
 	cwd: string
 	/**
-	 * A file extension, without the leading `.` to add to file paths to assist in resolving wiki style named links.
-	 */
-	defaultExtension: string | undefined
-	/**
 	 * Name of Obsidian vault, used in Obsidian protocol URL creation.
 	 */
 	obsidianVaultName: string | undefined
+	/**
+	 * Whether we're dealing with a link (to be `<a>`-tagged) or an embed (to be `<img>`-tagged).
+	 * Affects how the resolved path is treated.
+	 */
+	type: ResolveLinkType
 }
 
 export const defaultResolveLinkOptions = {
@@ -57,8 +64,6 @@ export const defaultResolveLinkOptions = {
 	// barePathsAreRelativeTo: 'cwd',
 	basePath: undefined,
 	convertFilePathsToProtocol: 'none',
-	cwd: undefined,
-	defaultExtension: undefined,
 	obsidianVaultName: undefined,
 }
 
@@ -91,29 +96,16 @@ export const defaultResolveLinkOptions = {
  */
 export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLinkOptions>): string {
 	// Defaults
-	const {
-		allFilePaths,
-		basePath,
-		convertFilePathsToProtocol,
-		cwd,
-		defaultExtension,
-		obsidianVaultName,
-	} = deepmerge(defaultResolveLinkOptions, options ?? {}) as ResolveLinkOptions
+	const { allFilePaths, basePath, convertFilePathsToProtocol, cwd, obsidianVaultName, type } =
+		deepmerge(defaultResolveLinkOptions, options ?? {}) as ResolveLinkOptions
 
 	// Option validation...
 	if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName === undefined) {
 		console.warn(`convertFilePathsToProtocol is 'obsidian', but no obsidianVaultName provided`)
 	}
 
-	const decodedUrl = safeDecodeURI(filePathOrUrl)
-	if (decodedUrl === undefined) {
-		return filePathOrUrl
-	}
-
+	const decodedUrl = safeDecodeURI(filePathOrUrl) ?? filePathOrUrl
 	const sourceType = getSrcType(decodedUrl)
-
-	// Temp debug
-	// console.log(`sourceType: ${sourceType}`)
 
 	switch (sourceType) {
 		case 'obsidianVaultUrl': {
@@ -140,8 +132,8 @@ export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLink
 					basePath,
 					convertFilePathsToProtocol,
 					cwd,
-					defaultExtension,
 					obsidianVaultName,
+					type,
 				})
 			}
 
@@ -156,12 +148,12 @@ export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLink
 				cwd,
 			})
 
-			// Images won't have a default extension, so fileProbably exists will likely be false, and that's fine
-			// since we'll fall through to normal absolute link resolution
+			// Embeds don't have a default extension, so fileProbablyExists will
+			// likely be false if they're extension-less (which, technically, they
+			// can't be...), and that's fine since we'll fall through to normal
+			// absolute link resolution
 			const resolvedUrlWithDefaultExtension =
-				defaultExtension === undefined
-					? resolvedUrl
-					: pathExtras.addExtensionIfMissing(resolvedUrl, defaultExtension)
+				type === 'embed' ? resolvedUrl : pathExtras.addExtensionIfMissing(resolvedUrl, 'md')
 
 			const fileProbablyExists = pathExistsInAllFiles(
 				resolvedUrlWithDefaultExtension,
@@ -181,18 +173,12 @@ export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLink
 				return pathExtras.getBase(resolvedUrlWithDefaultExtension)
 			}
 
-			// TMI, will be reported later if unsupported
-			// console.warn(
-			// 	`File not found in allFilePaths: "${resolvedUrl}", resolving as a normal absolute link. (Default extension: "${defaultExtension}".)`,
-			// )
 			return pathExtras.getBase(resolvedUrl)
 		}
 
 		case 'localFileName': {
 			let resolvedUrl = slash(
-				defaultExtension === undefined
-					? decodedUrl
-					: pathExtras.addExtensionIfMissing(decodedUrl, defaultExtension),
+				type === 'embed' ? decodedUrl : pathExtras.addExtensionIfMissing(decodedUrl, 'md'),
 			)
 
 			// Fall back to base path resolution if there's no path
@@ -214,8 +200,8 @@ export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLink
 					basePath,
 					convertFilePathsToProtocol,
 					cwd,
-					defaultExtension,
 					obsidianVaultName,
+					type,
 				})
 			}
 
@@ -273,7 +259,9 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 
 	// Sort the paths to name to find the best match
 	const sortedPaths = [...pathsToName].sort((a, b) => {
-		// Images prioritize child paths, as do any names with separators?
+		// TODO pass type / mode instead instead of inferring resolution strategy
+		// from name extension? Images prioritize child paths, as do any names with
+		// separators?
 		if (!base.endsWith('.md') || base.includes(path.posix.sep)) {
 			// Then sort by whether the path contains the cwd
 			const aHasCwd = a.startsWith(cwd)
