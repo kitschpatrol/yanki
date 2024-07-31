@@ -3,8 +3,8 @@
 // Obsidian global settings:
 // https://help.obsidian.md/Files+and+folders/How+Obsidian+stores+data#Global+settings
 
+import { normalize } from '../../lib/utilities/path'
 import { PLATFORM } from '../../lib/utilities/platform'
-import convertPath from '@stdlib/utils-convert-path'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import untildify from 'untildify'
@@ -18,15 +18,15 @@ export type ObsidianVault = {
 function getObsidianGlobalSettingsDirectory(): string {
 	switch (PLATFORM) {
 		case 'mac': {
-			return untildify('~/Library/Application Support/obsidian')
+			return normalize(untildify('~/Library/Application Support/obsidian'))
 		}
 
 		case 'windows': {
-			return convertPath(`${process.env.APPDATA}\\Obsidian`, 'mixed')
+			return normalize(`${process.env.APPDATA}\\Obsidian`)
 		}
 
 		case 'linux': {
-			return path.posix.join(untildify(process.env.XDG_CONFIG_HOME ?? '~/.config'), 'Obsidian')
+			return normalize(path.join(untildify(process.env.XDG_CONFIG_HOME ?? '~/.config'), 'Obsidian'))
 		}
 
 		case 'other': {
@@ -36,12 +36,7 @@ function getObsidianGlobalSettingsDirectory(): string {
 }
 
 async function getObsidianVaults(): Promise<ObsidianVault[]> {
-	const obsidianConfigFilePath = path.posix.join(
-		getObsidianGlobalSettingsDirectory(),
-		'obsidian.json',
-	)
-
-	console.log(`obsidianConfigFilePath: ${obsidianConfigFilePath}`)
+	const obsidianConfigFilePath = path.join(getObsidianGlobalSettingsDirectory(), 'obsidian.json')
 
 	// Check if path exists
 	try {
@@ -61,7 +56,7 @@ async function getObsidianVaults(): Promise<ObsidianVault[]> {
 	return Object.entries(obsidianConfig.vaults).map(([id, { path: directory }]) => ({
 		directory,
 		id,
-		name: path.posix.basename(directory),
+		name: path.basename(directory),
 	}))
 }
 
@@ -72,23 +67,21 @@ async function getObsidianVaults(): Promise<ObsidianVault[]> {
 export async function detectVault(fileOrDirectoryPath: string): Promise<ObsidianVault | undefined> {
 	const obsidianVaults = await getObsidianVaults()
 
-	console.log(`obsidianVaults: ${String(obsidianVaults)}`)
-
 	if (obsidianVaults.length === 0) {
 		return undefined
 	}
 
-	const normalizedPath = path.posix.resolve(path.posix.normalize(untildify(fileOrDirectoryPath)))
+	const normalizedPath = path.resolve(normalize(untildify(fileOrDirectoryPath)))
 
 	// Check if directory
 	const stats = await fs.stat(normalizedPath)
 
 	const normalizedDirectoryPath = stats.isDirectory()
 		? normalizedPath
-		: path.posix.dirname(normalizedPath)
+		: path.dirname(normalizedPath)
 
 	for (const vault of obsidianVaults) {
-		const vaultDirectory = path.posix.resolve(path.posix.normalize(vault.directory))
+		const vaultDirectory = path.resolve(normalize(vault.directory))
 		if (normalizedDirectoryPath.startsWith(vaultDirectory)) {
 			return vault
 		}

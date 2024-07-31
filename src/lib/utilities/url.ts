@@ -8,9 +8,8 @@ import {
 } from '../shared/constants'
 import { type FetchAdapter } from '../shared/types'
 import { getFileExtensionForMimeType } from './mime'
+import { isAbsolute, isRelative, normalize } from './path'
 import { getHash } from './string'
-import convertPath from '@stdlib/utils-convert-path'
-import path from 'path-browserify-esm'
 
 // Detect probably wiki-style name links
 export function isNameUrl(text: string): boolean {
@@ -105,18 +104,15 @@ export function getSrcType(
 
 	if (url === undefined) {
 		// Probably a file path
-		const normalizedPath = path.posix.normalize(convertPath(filePathOrUrl, 'posix'))
+		const normalizedPath = normalize(filePathOrUrl)
 
-		// Links that aren't relative or absolute are probably wiki-style name links
-		if (
-			!normalizedPath.startsWith('/') &&
-			!normalizedPath.startsWith('./') &&
-			!normalizedPath.startsWith('../')
-		) {
-			return 'localFileName'
+		// Links that are relative or absolute probably aren't wiki-style name links
+		// TODO vet this with the normalized paths
+		if (isAbsolute(normalizedPath) || !isRelative(normalizedPath)) {
+			return 'localFilePath'
 		}
 
-		return 'localFilePath'
+		return 'localFileName'
 	}
 
 	// Probably a url

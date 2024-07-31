@@ -62,7 +62,7 @@ export async function loadLocalNotes(
 		const note = await getNoteFromMarkdown(markdown, {
 			allFilePaths,
 			basePath,
-			cwd: path.posix.dirname(filePath),
+			cwd: path.dirname(filePath),
 			fetchAdapter,
 			fileAdapter,
 			namespace: sanitizedNamespace,
@@ -127,7 +127,7 @@ function getDeckNamesFromFilePaths(
 	const { mode } = deepmerge(defaultDeckNamesFromFilePathsOptions, options ?? {})
 
 	const filePathSegments = absoluteFilePaths.map((filePath) =>
-		path.posix.dirname(filePath).split(path.posix.sep),
+		path.dirname(filePath).split(path.sep),
 	)
 
 	// Trim to the shortest common path

@@ -11,6 +11,7 @@ import {
 	getUniqueFilePath,
 } from '../utilities/filenames'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
+import { normalize } from '../utilities/path'
 import { type LoadOptions, type LocalNote, loadLocalNotes } from './load-local-notes'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
@@ -49,9 +50,9 @@ export async function renameNotes(
 			}
 
 			const newFilename = getSafeTitleForNote(note, manageFilenames, maxFilenameLength)
-			const newFilePath = path.posix.join(
-				path.posix.dirname(filePathOriginal),
-				`${newFilename}${path.posix.extname(filePathOriginal)}`,
+			const newFilePath = path.join(
+				path.dirname(filePathOriginal),
+				`${newFilename}${path.extname(filePathOriginal)}`,
 			)
 
 			const newUniqueFilePath = getUniqueFilePath(newFilePath, newFilePaths)
@@ -144,27 +145,32 @@ export async function renameFiles(
 	options: Partial<RenameFilesOptions>,
 ): Promise<RenameFilesResult> {
 	const {
-		allFilePaths,
-		basePath,
+		allFilePaths: allFilePathsRaw, // To be normalized
+		basePath: basePathRaw, // To be normalized
 		dryRun,
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
 		manageFilenames,
 		maxFilenameLength,
-		namespace,
+		namespace: namespaceRaw, // To be validated and sanitized
 		obsidianVault,
 		syncMediaAssets,
 	} = deepmerge(defaultRenameFilesOptions, options ?? {})
 
-	// Technically redundant with validation in loadLocalNotes...
-	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
+	// Path normalization
+	const allLocalFilePathsNormalized = allLocalFilePaths.map((file) => normalize(file))
+	const basePath = basePathRaw === undefined ? undefined : normalize(basePathRaw)
+	const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
 
-	const notes = await loadLocalNotes(allLocalFilePaths, {
+	// Technically redundant with validation in loadLocalNotes...
+	const namespace = validateAndSanitizeNamespace(namespaceRaw)
+
+	const notes = await loadLocalNotes(allLocalFilePathsNormalized, {
 		allFilePaths,
 		basePath,
 		fetchAdapter,
 		fileAdapter,
-		namespace: sanitizedNamespace,
+		namespace,
 		obsidianVault,
 		syncMediaAssets,
 	})

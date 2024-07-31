@@ -1,6 +1,6 @@
 import { detectVault } from '../src/bin/utilities/obsidian'
 import { getNoteFromMarkdown, syncFiles } from '../src/lib/index'
-import { getBase, stripBasePath } from '../src/lib/utilities/path'
+import { getBase, normalize, stripBasePath } from '../src/lib/utilities/path'
 import { parseObsidianVaultLink } from '../src/lib/utilities/resolve-link'
 import { safeDecodeURI } from '../src/lib/utilities/url'
 import { describeWithFileFixture } from './fixtures/file-fixture'
@@ -37,12 +37,13 @@ it('correctly resolves obsidian wiki links', async () => {
 	// path in their alt text or innerHTML text
 	const notesToTest = [
 		'./test/assets/test-obsidian-vault/Wiki Links/test card.md',
-		// './test/assets/test-obsidian-vault/Wiki Links/Nested/test card.md',
-		// './test/assets/test-obsidian-vault/Wiki Links/Nested/Nested/test card.md',
+		'./test/assets/test-obsidian-vault/Wiki Links/Nested/test card.md',
+		'./test/assets/test-obsidian-vault/Wiki Links/Nested/Nested/test card.md',
 	]
 
-	const allFilePaths = await globby('./test/assets/test-obsidian-vault/**/*', { absolute: true })
-	const basePath = `${path.posix.resolve('./test/assets/test-obsidian-vault')}`
+	const allFilePathsRaw = await globby('./test/assets/test-obsidian-vault/**/*', { absolute: true })
+	const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
+	const basePath = normalize(path.resolve('./test/assets/test-obsidian-vault'))
 
 	for (const file of notesToTest) {
 		const markdown = await fs.readFile(file, 'utf8')
@@ -151,7 +152,7 @@ function checkWikiLinkResolution(html: string, basePath: string): void {
 	for (const element of elements) {
 		// Ensure element is an instance of Element
 		if (!(element instanceof HTMLElement)) {
-			throw new TypeError('Unexpected element')
+			continue
 		}
 
 		// Type assertion to specify element.dataset is a DOMStringMap

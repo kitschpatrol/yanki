@@ -9,7 +9,6 @@ import {
 	safeDecodeURIComponent,
 	safeParseUrl,
 } from './url'
-import convertPath from '@stdlib/utils-convert-path'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 
@@ -104,6 +103,7 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 	}
 
 	const decodedUrl = safeDecodeURI(filePathOrUrl) ?? filePathOrUrl
+
 	const sourceType = getSrcType(decodedUrl)
 
 	switch (sourceType) {
@@ -120,7 +120,7 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 		case 'localFileUrl': {
 			// Convert file:// url to path (file:// paths are already always absolute)
 			// Anki can't open them
-			const resolvedUrl = convertPath(fileUrlToPath(filePathOrUrl), 'mixed')
+			const resolvedUrl = pathExtras.normalize(fileUrlToPath(filePathOrUrl))
 
 			// Run it through again as a localFilePath
 
@@ -142,7 +142,7 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 
 		case 'localFilePath': {
 			// Make it absolute
-			const resolvedUrl = pathExtras.resolveWithBasePath(convertPath(decodedUrl, 'mixed'), {
+			const resolvedUrl = pathExtras.resolveWithBasePath(pathExtras.normalize(decodedUrl), {
 				basePath,
 				cwd,
 			})
@@ -188,7 +188,7 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 		}
 
 		case 'localFileName': {
-			let resolvedUrl = convertPath(pathExtras.addExtensionIfMissing(decodedUrl, 'md'), 'mixed')
+			let resolvedUrl = pathExtras.addExtensionIfMissing(pathExtras.normalize(decodedUrl), 'md')
 
 			// Fall back to base path resolution if there's no path
 			const resolvedNameLink = resolveNameLink(resolvedUrl, cwd, allFilePaths ?? [])
@@ -271,7 +271,7 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 		// TODO pass type / mode instead instead of inferring resolution strategy
 		// from name extension? Images prioritize child paths, as do any names with
 		// separators?
-		if (!base.endsWith('.md') || base.includes(path.posix.sep)) {
+		if (!base.endsWith('.md') || base.includes(path.sep)) {
 			// Then sort by whether the path contains the cwd
 			const aHasCwd = a.startsWith(cwd)
 			const bHasCwd = b.startsWith(cwd)
@@ -282,8 +282,8 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 		}
 
 		// Sort by depth
-		const aDepth = a.split(path.posix.sep).length
-		const bDepth = b.split(path.posix.sep).length
+		const aDepth = a.split(path.sep).length
+		const bDepth = b.split(path.sep).length
 
 		if (aDepth !== bDepth) {
 			return aDepth - bDepth
@@ -308,16 +308,16 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 
 	// Fast path, perfect match
 	// for (const filePath of pathsToName) {
-	// 	if (filePath.toLowerCase() === path.posix.join(cwd, `${base}`).toLowerCase()) {
-	// 		return path.posix.join(cwd, name)
+	// 	if (filePath.toLowerCase() === path.join(cwd, `${base}`).toLowerCase()) {
+	// 		return path.join(cwd, name)
 	// 	}
 	// }
 
 	// Not needed?
-	// const storedCwd = path.posix.process_cwd
-	// path.posix.setCWD(cwd)
-	// const relativePathsToName = pathsToName.map((filePath) => path.posix.relative(cwd, filePath))
-	// path.posix.setCWD(storedCwd)
+	// const storedCwd = path.process_cwd
+	// path.setCWD(cwd)
+	// const relativePathsToName = pathsToName.map((filePath) => path.relative(cwd, filePath))
+	// path.setCWD(storedCwd)
 	//
 	// relativePathsToName.sort((a, b) => {
 	// 	// Prefer fewest number of up-traversals
@@ -339,7 +339,7 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 	// 	return 0 // A.localeCompare(b)
 	// })
 	//
-	// return path.posix.join(cwd, `${relativePathsToName[0]}${query ?? ''}`)
+	// return path.join(cwd, `${relativePathsToName[0]}${query ?? ''}`)
 }
 
 /**

@@ -24,7 +24,7 @@ export async function getAnkiMediaFilenameExtension(
 ): Promise<MediaSupportedExtension | undefined> {
 	const extensionCandidate = isUrl(pathOrUrl)
 		? await getFileExtensionFromUrl(pathOrUrl, fetchAdapter)
-		: path.posix.extname(pathOrUrl).slice(1)
+		: path.extname(pathOrUrl).slice(1)
 
 	// Make sure it's supported, returns undefined if not
 	if (
@@ -45,14 +45,11 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 	if (parsedUrl === undefined) {
 		// Must be a file path
 		const filePath = pathOrUrl
-		legibleFilename = path.posix.basename(filePath, path.posix.extname(filePath))
+		legibleFilename = path.basename(filePath, path.extname(filePath))
 	} else {
 		// Must be a url
 		// Also remove extension from URL if it's there, but it won't always be
-		legibleFilename = path.posix.basename(
-			parsedUrl.pathname,
-			path.posix.extname(parsedUrl.pathname),
-		)
+		legibleFilename = path.basename(parsedUrl.pathname, path.extname(parsedUrl.pathname))
 	}
 
 	// Should never happen

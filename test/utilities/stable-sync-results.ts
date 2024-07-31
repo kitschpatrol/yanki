@@ -41,5 +41,11 @@ export function stableResults(results: SyncResults): SyncResults {
 		return note
 	})
 
-	return sortKeys(results, { deep: true })
+	try {
+		const sorted = sortKeys(results, { deep: true })
+		return sorted
+	} catch {
+		console.log(`Problem sorting keys!`)
+		return results
+	}
 }

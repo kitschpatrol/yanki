@@ -6,6 +6,7 @@ import {
 	getDefaultFileAdapter,
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
+import { normalize } from '../utilities/path'
 import { capitalize } from '../utilities/string'
 import { loadLocalNotes } from './load-local-notes'
 import { renameNotes } from './rename'
@@ -74,29 +75,34 @@ export async function syncFiles(
 	const startTime = performance.now()
 
 	const {
-		allFilePaths,
+		allFilePaths: allFilePathsRaw, // To be normalized
 		ankiConnectOptions,
 		ankiWeb,
-		basePath,
+		basePath: basePathRaw, // To be normalized
 		dryRun,
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
 		manageFilenames,
 		maxFilenameLength,
-		namespace,
+		namespace: namespaceRaw, // To be validated and sanitized
 		obsidianVault,
 		syncMediaAssets,
 	} = deepmerge(defaultSyncFilesOptions, options ?? {}) as SyncFilesOptions
 
-	// Technically redundant with validation in loadLocalNotes...
-	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
+	// Path normalization
+	const allLocalFilePathsNormalized = allLocalFilePaths.map((file) => normalize(file))
+	const basePath = basePathRaw === undefined ? undefined : normalize(basePathRaw)
+	const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
 
-	const localNotes = await loadLocalNotes(allLocalFilePaths, {
+	// Technically redundant with validation in loadLocalNotes...
+	const namespace = validateAndSanitizeNamespace(namespaceRaw)
+
+	const localNotes = await loadLocalNotes(allLocalFilePathsNormalized, {
 		allFilePaths,
 		basePath,
 		fetchAdapter,
 		fileAdapter,
-		namespace: sanitizedNamespace,
+		namespace,
 		obsidianVault,
 		syncMediaAssets,
 	})
@@ -117,7 +123,7 @@ export async function syncFiles(
 		ankiConnectOptions,
 		ankiWeb,
 		dryRun,
-		namespace: sanitizedNamespace,
+		namespace,
 	})
 
 	// Write Anki note IDs to the local files as necessary
@@ -166,7 +172,7 @@ export async function syncFiles(
 		deletedMedia,
 		dryRun,
 		duration: performance.now() - startTime,
-		namespace: sanitizedNamespace,
+		namespace,
 		synced: syncedAndSorted,
 	}
 }

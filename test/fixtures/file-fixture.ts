@@ -8,8 +8,8 @@ import { cleanNotes } from '../../src/lib'
 import { yankiModelNames } from '../../src/lib/model/model'
 import { CSS_DEFAULT_STYLE } from '../../src/lib/shared/constants'
 import { createModels, getModelStyle, updateModelStyle } from '../../src/lib/utilities/anki-connect'
+import { normalize } from '../../src/lib/utilities/path'
 import { getHash } from '../../src/lib/utilities/string'
-import convertPath from '@stdlib/utils-convert-path'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
@@ -67,18 +67,16 @@ export function describeWithFileFixture(
 				recursive: true,
 			})
 
-			const markdownFilesRaw = await globby(
-				`${convertPath(context.tempAssetPath, 'mixed')}/**/*.md`,
-				{
-					absolute: true,
-				},
-			)
-			context.markdownFiles = markdownFilesRaw.map((file) => convertPath(file, 'mixed'))
-
-			const allFilesRaw = await globby(`${convertPath(context.tempAssetPath, 'mixed')}/**/*`, {
+			// Sync files and rename files will do path normalization internally,
+			// so we don't do it here for better and more representative test path hygiene
+			context.markdownFiles = await globby(`${normalize(context.tempAssetPath)}/**/*.md`, {
 				absolute: true,
 			})
-			context.allFiles = allFilesRaw.map((file) => convertPath(file, 'mixed'))
+
+			// Same as above
+			context.allFiles = await globby(`${normalize(context.tempAssetPath)}/**/*`, {
+				absolute: true,
+			})
 
 			expect(context.markdownFiles.length).toBeGreaterThan(0)
 			expect(context.allFiles.length).toBeGreaterThan(0)

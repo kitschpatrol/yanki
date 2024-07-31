@@ -1,9 +1,9 @@
 import { syncFiles } from '../src/lib'
+import * as pathExtras from '../src/lib/utilities/path'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { cleanUpTempPath } from './utilities/stable-sync-results'
 import { globby } from 'globby'
-import path from 'node:path'
-import slash from 'slash'
+import path from 'path-browserify-esm'
 import { expect, it } from 'vitest'
 
 describeWithFileFixture(
@@ -58,10 +58,10 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
+			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
 				absolute: true,
 			})
-			const newAllFileList = await globby(`${slash(tempPath)}/**/*`, {
+			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
 				absolute: true,
 			})
 
@@ -143,10 +143,10 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
+			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
 				absolute: true,
 			})
-			const newAllFileList = await globby(`${slash(tempPath)}/**/*`, {
+			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
 				absolute: true,
 			})
 
@@ -290,10 +290,10 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
+			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
 				absolute: true,
 			})
-			const newAllFileList = await globby(`${slash(tempPath)}/**/*`, {
+			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
 				absolute: true,
 			})
 
@@ -385,10 +385,10 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${slash(tempPath)}/**/*.md`, {
+			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
 				absolute: true,
 			})
-			const newAllFileList = await globby(`${slash(tempPath)}/**/*`, {
+			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
 				absolute: true,
 			})
 

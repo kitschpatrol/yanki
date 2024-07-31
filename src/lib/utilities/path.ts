@@ -1,8 +1,63 @@
 import { splitAtFirstMatch } from './string'
+import isAbsolutePath from '@stdlib/assert-is-absolute-path'
+import isRelativePath from '@stdlib/assert-is-relative-path'
 import path from 'path-browserify-esm'
+import slash from 'slash'
 
 function stripLeadingSlash(filePath: string): string {
 	return filePath.startsWith('/') ? filePath.slice(1) : filePath
+}
+
+/**
+ * The browserify polyfill doesn't implement win32 absolute path detection...
+ * @param filePath Normalized path
+ * @returns
+ */
+export function isRelative(filePath: string): boolean {
+	return isRelativePath(filePath)
+}
+
+/**
+ * The browserify polyfill doesn't implement win32 absolute path detection...
+ * @param filePath Normalized path
+ * @returns
+ */
+export function isAbsolute(filePath: string): boolean {
+	return isAbsolutePath(filePath)
+}
+
+const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/
+
+// Unused
+// const RE_WINDOWS_UNC_PATH = /^\\\\[^\\]+\\[^\\]+/
+
+/**
+ * Converts all paths to cross-platform 'mixed' style with forward slashes.
+ * Warns on unsupported Windows extended length paths.
+ * @param filePath
+ * @returns normalized path
+ */
+export function normalize(filePath: string): string {
+	if (RE_WINDOWS_EXTENDED_LENGTH_PATH.test(filePath)) {
+		console.warn(`Unsupported extended length path detected: ${filePath}`)
+		return filePath
+	}
+
+	// If (RE_WINDOWS_UNC_PATH.test(filePath)) {
+	// 	console.warn(`Unsupported UNC path detected: ${filePath}`)
+	// 	return path.normalize(filePath)
+	// }
+
+	const basicPath = slash(filePath)
+	const normalizedPath = path.normalize(basicPath)
+
+	// Tricky cases where we still want leading './' to distinguish between relative and "named"" paths,
+	// otherwise it's stripped by normalization
+	if (basicPath.startsWith('./')) {
+		return `./${normalizedPath}`
+	}
+
+	return normalizedPath
 }
 
 /**
@@ -12,8 +67,10 @@ function stripLeadingSlash(filePath: string): string {
  * Technically not strictly idempotent, in cases where the base path and absolute path
  * already match but should be combined.
  *
- * @param filePath
- * @param options
+ * All paths must be normalized and in 'mixed' style.
+ *
+ * @param filePath Normalized path
+ * @param options Normalized base and cwd
  * @returns
  */
 export function resolveWithBasePath(
@@ -21,13 +78,11 @@ export function resolveWithBasePath(
 	options: { basePath?: string; cwd: string },
 ): string {
 	// Prep options
-	const basePath =
-		options.basePath === undefined ? undefined : path.posix.normalize(options.basePath)
-	const cwd = path.posix.normalize(options.cwd)
+	const { basePath, cwd } = options
 
 	// Validation
 	if (basePath !== undefined) {
-		if (!path.posix.isAbsolute(basePath)) {
+		if (!isAbsolute(basePath)) {
 			console.warn(`Base path "${basePath}" is not absolute`)
 		}
 
@@ -36,13 +91,13 @@ export function resolveWithBasePath(
 		}
 	}
 
-	if (!path.posix.isAbsolute(cwd)) {
+	if (!isAbsolute(cwd)) {
 		console.warn(`CWD "${cwd}" is not absolute`)
 	}
 
-	const originalCwd = path.posix.process_cwd
-	path.posix.setCWD(cwd)
-	let newPath = path.posix.normalize(filePath)
+	const originalCwd = path.process_cwd
+	path.setCWD(cwd)
+	let newPath = filePath
 	// Debug
 	// console.log('----------------------------------')
 	// console.log(`newPath:  ${newPath}`)
@@ -51,17 +106,17 @@ export function resolveWithBasePath(
 
 	// If the path is already absolute, we check if we need to add a base path
 	// Base path obviates the CWD
-	if (path.posix.isAbsolute(newPath)) {
+	if (isAbsolute(newPath)) {
 		newPath =
 			basePath !== undefined && !newPath.startsWith(basePath)
-				? path.posix.resolve(basePath, stripLeadingSlash(newPath))
+				? path.resolve(basePath, stripLeadingSlash(newPath))
 				: newPath
 	} else {
 		// CWD beats base path for relative paths...
-		newPath = path.posix.resolve(cwd, newPath)
+		newPath = path.resolve(cwd, newPath)
 	}
 
-	path.posix.setCWD(originalCwd)
+	path.setCWD(originalCwd)
 	return newPath
 }
 
@@ -73,10 +128,10 @@ export function resolveWithBasePath(
  */
 export function resolveWithCwd(filePath: string, cwd: string): string {
 	if (filePath.startsWith('cwd')) {
-		return path.posix.normalize(filePath)
+		return path.normalize(filePath)
 	}
 
-	return path.posix.normalize(path.posix.join(cwd, filePath))
+	return path.normalize(path.join(cwd, filePath))
 }
 
 export function stripBasePath(filePath: string, basePath: string): string {
@@ -101,7 +156,7 @@ export function hasExtension(filePath: string): boolean {
 }
 
 export function getExtension(filePath: string): string {
-	return path.posix.extname(getBase(filePath))
+	return path.extname(getBase(filePath))
 }
 
 export function addExtensionIfMissing(filePath: string, extension: string): string {

@@ -5,6 +5,7 @@ import { formatSetStyleResult, setStyle } from '../lib/actions/style'
 import { formatSyncFilesResult, syncFiles } from '../lib/actions/sync-files'
 import { defaultGlobalOptions } from '../lib/shared/types'
 import log from '../lib/utilities/log'
+import { normalize } from '../lib/utilities/path'
 import {
 	ankiAutoLaunchOption,
 	ankiConnectOption,
@@ -15,7 +16,6 @@ import {
 	verboseOption,
 } from './options'
 import { urlToHostAndPortValidated } from './utilities/validation'
-import convertPath from '@stdlib/utils-convert-path'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -115,12 +115,14 @@ await yargsInstance
 			verbose,
 		}) => {
 			log.verbose = verbose
-			const expandedDirectory = convertPath(untildify(directory), 'mixed')
+			const expandedDirectory = normalize(untildify(directory))
 			const globPattern = recursive ? `${expandedDirectory}/**/*.md` : `${expandedDirectory}/*.md`
-			const markdownFilePaths = await globby(globPattern, { absolute: true })
+			const markdownFilePathsRaw = await globby(globPattern, { absolute: true })
+			const markdownFilePaths = markdownFilePathsRaw.map((path) => normalize(path))
 
 			// Get a list of all files for name-only wiki link resolution
-			const allFilePaths = await globby(`${expandedDirectory}/**/*`, { absolute: true })
+			const allFilePathsRaw = await globby(`${expandedDirectory}/**/*`, { absolute: true })
+			const allFilePaths = allFilePathsRaw.map((path) => normalize(path))
 
 			if (markdownFilePaths.length === 0) {
 				log.error(`No Markdown files found in "${directory}".`)
@@ -257,7 +259,7 @@ await yargsInstance
 
 			let loadedCss: string | undefined
 			if (css !== undefined) {
-				if (path.posix.extname(css) !== '.css') {
+				if (path.extname(css) !== '.css') {
 					log.error('The provided CSS file must have a .css extension.')
 					process.exitCode = 1
 					return

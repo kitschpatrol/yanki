@@ -148,24 +148,24 @@ function stripFilenameIncrement(filename: string): string {
 	// Don't mistake '... (1)' suffixes for extensions
 	// TODO make this less precarious
 	const validExtension =
-		filename.endsWith('.') || filename.endsWith(')') ? undefined : path.posix.extname(filename)
+		filename.endsWith('.') || filename.endsWith(')') ? undefined : path.extname(filename)
 
 	const strippedBaseNameWithoutExtension = path
 		.basename(filename, validExtension)
 		.replace(/\s\(\d+\)$/, '')
-	return path.posix.join(
-		path.posix.dirname(filename),
+	return path.join(
+		path.dirname(filename),
 		`${strippedBaseNameWithoutExtension}${validExtension ?? ''}`,
 	)
 }
 
 function appendFilenameIncrement(filename: string, value: number): string {
-	const extension = path.posix.extname(filename)
-	const baseNameWithoutExtension = path.posix.basename(filename, extension)
+	const extension = path.extname(filename)
+	const baseNameWithoutExtension = path.basename(filename, extension)
 
 	const baseNameWithIncrement = `${stripFilenameIncrement(baseNameWithoutExtension)} (${value})`
 
-	return path.posix.join(path.posix.dirname(filename), `${baseNameWithIncrement}${extension}`)
+	return path.join(path.dirname(filename), `${baseNameWithIncrement}${extension}`)
 }
 
 export function getTemporarilyUniqueFilePath(filePath: string): string {
