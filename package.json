@@ -69,7 +69,6 @@
 		"globby": "^14.0.2",
 		"rehype-mathjax": "^6.0.0",
 		"rehype-parse": "^9.0.0",
-		"slash": "^5.1.0",
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
@@ -77,6 +76,7 @@
 		"@shikijs/rehype": "^1.12.0",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^2.2.1",
+		"@stdlib/utils-convert-path": "^0.2.2",
 		"@vitest/browser": "^2.0.4",
 		"@vitest/coverage-istanbul": "^2.0.4",
 		"bumpp": "^9.4.1",

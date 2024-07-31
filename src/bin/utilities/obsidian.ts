@@ -4,9 +4,9 @@
 // https://help.obsidian.md/Files+and+folders/How+Obsidian+stores+data#Global+settings
 
 import { PLATFORM } from '../../lib/utilities/platform'
+import convertPath from '@stdlib/utils-convert-path'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import slash from 'slash'
 import untildify from 'untildify'
 
 export type ObsidianVault = {
@@ -22,7 +22,7 @@ function getObsidianGlobalSettingsDirectory(): string {
 		}
 
 		case 'windows': {
-			return slash(`${process.env.APPDATA}\\Obsidian`)
+			return convertPath(`${process.env.APPDATA}\\Obsidian`, 'mixed')
 		}
 
 		case 'linux': {
@@ -40,6 +40,8 @@ async function getObsidianVaults(): Promise<ObsidianVault[]> {
 		getObsidianGlobalSettingsDirectory(),
 		'obsidian.json',
 	)
+
+	console.log(`obsidianConfigFilePath: ${obsidianConfigFilePath}`)
 
 	// Check if path exists
 	try {
@@ -69,6 +71,8 @@ async function getObsidianVaults(): Promise<ObsidianVault[]> {
  */
 export async function detectVault(fileOrDirectoryPath: string): Promise<ObsidianVault | undefined> {
 	const obsidianVaults = await getObsidianVaults()
+
+	console.log(`obsidianVaults: ${String(obsidianVaults)}`)
 
 	if (obsidianVaults.length === 0) {
 		return undefined

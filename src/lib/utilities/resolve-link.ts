@@ -9,9 +9,9 @@ import {
 	safeDecodeURIComponent,
 	safeParseUrl,
 } from './url'
+import convertPath from '@stdlib/utils-convert-path'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
-import slash from 'slash'
 
 export type ResolveLinkType =
 	// Via a `![[link]]` or `![alt](link)` syntax
@@ -120,7 +120,7 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 		case 'localFileUrl': {
 			// Convert file:// url to path (file:// paths are already always absolute)
 			// Anki can't open them
-			const resolvedUrl = slash(fileUrlToPath(filePathOrUrl))
+			const resolvedUrl = convertPath(fileUrlToPath(filePathOrUrl), 'mixed')
 
 			// Run it through again as a localFilePath
 
@@ -142,7 +142,7 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 
 		case 'localFilePath': {
 			// Make it absolute
-			const resolvedUrl = pathExtras.resolveWithBasePath(slash(decodedUrl), {
+			const resolvedUrl = pathExtras.resolveWithBasePath(convertPath(decodedUrl, 'mixed'), {
 				basePath,
 				cwd,
 			})
@@ -188,7 +188,7 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 		}
 
 		case 'localFileName': {
-			let resolvedUrl = slash(pathExtras.addExtensionIfMissing(decodedUrl, 'md'))
+			let resolvedUrl = convertPath(pathExtras.addExtensionIfMissing(decodedUrl, 'md'), 'mixed')
 
 			// Fall back to base path resolution if there's no path
 			const resolvedNameLink = resolveNameLink(resolvedUrl, cwd, allFilePaths ?? [])

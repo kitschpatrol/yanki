@@ -57,6 +57,9 @@ importers:
       '@sindresorhus/slugify':
         specifier: ^2.2.1
         version: 2.2.1
+      '@stdlib/utils-convert-path':
+        specifier: ^0.2.2
+        version: 0.2.2
       '@vitest/browser':
         specifier: ^2.0.4
         version: 2.0.4(playwright@1.45.3)(typescript@5.5.4)(vitest@2.0.4)
@@ -1203,6 +1206,156 @@ packages:
   '@sindresorhus/transliterate@1.6.0':
     resolution: {integrity: sha512-doH1gimEu3A46VX6aVxpHTeHrytJAG6HgdxntYnCFiIFHEM/ZGpG8KiZGBChchjQmG0XFIBL552kBTjVcMZXwQ==}
     engines: {node: '>=12'}
+
+  '@stdlib/assert-has-own-property@0.2.2':
+    resolution: {integrity: sha512-m5rV4Z2/iNkwx2vRsNheM6sQZMzc8rQQOo90LieICXovXZy8wA5jNld4kRKjMNcRt/TjrNP7i2Rhh8hruRDlHg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-has-symbol-support@0.2.2':
+    resolution: {integrity: sha512-vCsGGmDZz5dikGgdF26rIL0y0nHvH7qaVf89HLLTybceuZijAqFSJEqcB3Gpl5uaeueLNAWExHi2EkoUVqKHGg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-has-tostringtag-support@0.2.2':
+    resolution: {integrity: sha512-bSHGqku11VH0swPEzO4Y2Dr+lTYEtjSWjamwqCTC8udOiOIOHKoxuU4uaMGKJjVfXG1L+XefLHqzuO5azxdRaA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-is-array@0.2.2':
+    resolution: {integrity: sha512-aJyTX2U3JqAGCATgaAX9ygvDHc97GCIKkIhiZm/AZaLoFHPtMA1atQ4bKcefEC8Um9eefryxTHfFPfSr9CoNQQ==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-is-boolean@0.2.2':
+    resolution: {integrity: sha512-3KFLRTYZpX6u95baZ6PubBvjehJs2xBU6+zrenR0jx8KToUYCnJPxqqj7JXRhSD+cOURmcjj9rocVaG9Nz18Pg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-is-buffer@0.2.2':
+    resolution: {integrity: sha512-4/WMFTEcDYlVbRhxY8Wlqag4S70QCnn6WmQ4wmfiLW92kqQHsLvTNvdt/qqh/SDyDV31R/cpd3QPsVN534dNEA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-is-function@0.2.2':
+    resolution: {integrity: sha512-whY69DUYWljCJ79Cvygp7VzWGOtGTsh3SQhzNuGt+ut6EsOW+8nwiRkyBXYKf/MOF+NRn15pxg8cJEoeRgsPcA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-is-object-like@0.2.2':
+    resolution: {integrity: sha512-MjQBpHdEebbJwLlxh/BKNH8IEHqY0YlcCMRKOQU0UOlILSJg0vG+GL4fDDqtx9FSXxcTqC+w3keHx8kAKvQhzg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-is-regexp@0.2.2':
+    resolution: {integrity: sha512-2JtiUtRJxPaVXL7dkWoV3n5jouI65DwYDXsDXg3xo23TXlTNGgU/HhKO4FWC1Yqju7YMZi0hcZSW6E9v8ISqeQ==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-is-string@0.2.2':
+    resolution: {integrity: sha512-SOkFg4Hq443hkadM4tzcwTHWvTyKP9ULOZ8MSnnqmU0nBX1zLVFLFGY8jnF6Cary0dL0V7QQBCfuxqKFM6u2PQ==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/assert-tools-array-function@0.2.2':
+    resolution: {integrity: sha512-FYeT7X9x0C8Nh+MN6IJUDz+7i7yB6mio2/SDlrvyepjyPSU/cfHfwW0GEOnQhxZ+keLZC/YqDD930WjRODwMdA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/boolean-ctor@0.2.2':
+    resolution: {integrity: sha512-qIkHzmfxDvGzQ3XI9R7sZG97QSaWG5TvWVlrvcysOGT1cs6HtQgnf4D//SRzZ52VLm8oICP+6OKtd8Hpm6G7Ww==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/error-tools-fmtprodmsg@0.2.2':
+    resolution: {integrity: sha512-2IliQfTes4WV5odPidZFGD5eYDswZrPXob7oOu95Q69ERqImo8WzSwnG2EDbHPyOyYCewuMfM5Ha6Ggf+u944Q==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/regexp-extended-length-path@0.2.2':
+    resolution: {integrity: sha512-z3jqauEsaxpsQU3rj1A1QnOgu17pyW5kt+Az8QkoTk7wqNE8HhPikI6k4o7XBHV689rSFWZCl4c4W+7JAiNObQ==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/regexp-function-name@0.2.2':
+    resolution: {integrity: sha512-0z/KRsgHJJ3UQkmBeLH+Nin0hXIeA+Fw1T+mnG2V5CHnTA6FKlpxJxWrvwLEsRX7mR/DNtDp06zGyzMFE/4kig==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/string-base-format-interpolate@0.2.2':
+    resolution: {integrity: sha512-i9nU9rAB2+o/RR66TS9iQ8x+YzeUDL1SGiAo6GY3hP6Umz5Dx9Qp/v8T69gWVsb4a1YSclz5+YeCWaFgwvPjKA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/string-base-format-tokenize@0.2.2':
+    resolution: {integrity: sha512-kXq2015i+LJjqth5dN+hYnvJXBSzRm8w0ABWB5tYAsIuQTpQK+mSo2muM8JBEFEnqUHAwpUsu2qNTK/9o8lsJg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/string-base-lowercase@0.4.0':
+    resolution: {integrity: sha512-IH35Z5e4T+S3b3SfYY39mUhrD2qvJVp4VS7Rn3+jgj4+C3syocuAPsJ8C4OQXWGfblX/N9ymizbpFBCiVvMW8w==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/string-base-replace@0.2.2':
+    resolution: {integrity: sha512-Y4jZwRV4Uertw7AlA/lwaYl1HjTefSriN5+ztRcQQyDYmoVN3gzoVKLJ123HPiggZ89vROfC+sk/6AKvly+0CA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/string-format@0.2.2':
+    resolution: {integrity: sha512-GUa50uxgMAtoItsxTbMmwkyhIwrCxCrsjzk3nAbLnt/1Kt1EWOWMwsALqZdD6K4V/xSJ4ns6PZur3W6w+vKk9g==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/string-replace@0.2.2':
+    resolution: {integrity: sha512-czNS5IU7sBuHjac45Y3VWUTsUoi82yc8JsMZrOMcjgSrEuDrVmA6sNJg7HC1DuSpdPjm/v9uUk102s1gIfk3Nw==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/symbol-ctor@0.2.2':
+    resolution: {integrity: sha512-XsmiTfHnTb9jSPf2SoK3O0wrNOXMxqzukvDvtzVur1XBKfim9+seaAS4akmV1H3+AroAXQWVtde885e1B6jz1w==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/utils-constructor-name@0.2.2':
+    resolution: {integrity: sha512-TBtO3MKDAf05ij5ajmyBCbpKKt0Lfahn5tu18gqds4PkFltgcw5tVZfSHY5DZ2HySJQ2GMMYjPW2Kbg6yPCSVg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/utils-convert-path@0.2.2':
+    resolution: {integrity: sha512-8nNuAgt23Np9NssjShUrPK42c6gRTweGuoQw+yTpTfBR9VQv8WFyt048n8gRGUlAHizrdMNpEY9VAb7IBzpVYw==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/utils-define-nonenumerable-read-only-property@0.2.2':
+    resolution: {integrity: sha512-V3mpAesJemLYDKG376CsmoczWPE/4LKsp8xBvUxCt5CLNAx3J/1W39iZQyA5q6nY1RStGinGn1/dYZwa8ig0Uw==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/utils-define-property@0.2.4':
+    resolution: {integrity: sha512-XlMdz7xwuw/sqXc9LbsV8XunCzZXjbZPC+OAdf4t4PBw4ZRwGzlTI6WED+f4PYR5Tp9F1cHgLPyMYCIBfA2zRg==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/utils-escape-regexp-string@0.2.2':
+    resolution: {integrity: sha512-areCibzgpmvm6pGKBg+mXkSDJW4NxtS5jcAT7RtunGMdAYhA/I5whISMPaeJkIT2XhjjFkjKBaIs5pF6aPr4fQ==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/utils-global@0.2.2':
+    resolution: {integrity: sha512-A4E8VFHn+1bpfJ4PA8H2b62CMQpjv2A+H3QDEBrouLFWne0wrx0TNq8vH6VYHxx9ZRxhgWQjfHiSAxtUJobrbQ==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/utils-native-class@0.2.2':
+    resolution: {integrity: sha512-cSn/FozbEpfR/FlJAoceQtZ8yUJFhZ8RFkbEsxW/7+H4o09yln3lBS0HSfUJISYNtpTNN/2/Fup88vmvwspvwA==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
+
+  '@stdlib/utils-type-of@0.2.2':
+    resolution: {integrity: sha512-RLGFxPNgY9AtVVrFGdKO6Y3pOd/Ov2WA4O2/czZN/AbgYzbPdoF0KkfvHRIney6k+TtvoyYB8YqZXJ4G88f9BQ==}
+    engines: {node: '>=0.10.0', npm: '>2.7.0'}
+    os: [aix, darwin, freebsd, linux, macos, openbsd, sunos, win32, windows]
 
   '@taplo/core@0.1.1':
     resolution: {integrity: sha512-BG/zLGf5wiNXGEVPvUAAX/4ilB3PwDUY2o0MV0y47mZbDZ9ad9UK/cIQsILat3bqbPJsALVbU6k3cskNZ3vAQg==}
@@ -6477,6 +6630,139 @@ snapshots:
   '@sindresorhus/transliterate@1.6.0':
     dependencies:
       escape-string-regexp: 5.0.0
+
+  '@stdlib/assert-has-own-property@0.2.2': {}
+
+  '@stdlib/assert-has-symbol-support@0.2.2': {}
+
+  '@stdlib/assert-has-tostringtag-support@0.2.2':
+    dependencies:
+      '@stdlib/assert-has-symbol-support': 0.2.2
+
+  '@stdlib/assert-is-array@0.2.2':
+    dependencies:
+      '@stdlib/utils-native-class': 0.2.2
+
+  '@stdlib/assert-is-boolean@0.2.2':
+    dependencies:
+      '@stdlib/assert-has-tostringtag-support': 0.2.2
+      '@stdlib/boolean-ctor': 0.2.2
+      '@stdlib/utils-define-nonenumerable-read-only-property': 0.2.2
+      '@stdlib/utils-native-class': 0.2.2
+
+  '@stdlib/assert-is-buffer@0.2.2':
+    dependencies:
+      '@stdlib/assert-is-object-like': 0.2.2
+
+  '@stdlib/assert-is-function@0.2.2':
+    dependencies:
+      '@stdlib/utils-type-of': 0.2.2
+
+  '@stdlib/assert-is-object-like@0.2.2':
+    dependencies:
+      '@stdlib/assert-tools-array-function': 0.2.2
+      '@stdlib/utils-define-nonenumerable-read-only-property': 0.2.2
+
+  '@stdlib/assert-is-regexp@0.2.2':
+    dependencies:
+      '@stdlib/assert-has-tostringtag-support': 0.2.2
+      '@stdlib/utils-native-class': 0.2.2
+
+  '@stdlib/assert-is-string@0.2.2':
+    dependencies:
+      '@stdlib/assert-has-tostringtag-support': 0.2.2
+      '@stdlib/utils-define-nonenumerable-read-only-property': 0.2.2
+      '@stdlib/utils-native-class': 0.2.2
+
+  '@stdlib/assert-tools-array-function@0.2.2':
+    dependencies:
+      '@stdlib/assert-is-array': 0.2.2
+      '@stdlib/error-tools-fmtprodmsg': 0.2.2
+      '@stdlib/string-format': 0.2.2
+
+  '@stdlib/boolean-ctor@0.2.2': {}
+
+  '@stdlib/error-tools-fmtprodmsg@0.2.2': {}
+
+  '@stdlib/regexp-extended-length-path@0.2.2':
+    dependencies:
+      '@stdlib/utils-define-nonenumerable-read-only-property': 0.2.2
+
+  '@stdlib/regexp-function-name@0.2.2':
+    dependencies:
+      '@stdlib/utils-define-nonenumerable-read-only-property': 0.2.2
+
+  '@stdlib/string-base-format-interpolate@0.2.2': {}
+
+  '@stdlib/string-base-format-tokenize@0.2.2': {}
+
+  '@stdlib/string-base-lowercase@0.4.0': {}
+
+  '@stdlib/string-base-replace@0.2.2': {}
+
+  '@stdlib/string-format@0.2.2':
+    dependencies:
+      '@stdlib/string-base-format-interpolate': 0.2.2
+      '@stdlib/string-base-format-tokenize': 0.2.2
+
+  '@stdlib/string-replace@0.2.2':
+    dependencies:
+      '@stdlib/assert-is-function': 0.2.2
+      '@stdlib/assert-is-regexp': 0.2.2
+      '@stdlib/assert-is-string': 0.2.2
+      '@stdlib/error-tools-fmtprodmsg': 0.2.2
+      '@stdlib/string-base-replace': 0.2.2
+      '@stdlib/string-format': 0.2.2
+      '@stdlib/utils-escape-regexp-string': 0.2.2
+
+  '@stdlib/symbol-ctor@0.2.2': {}
+
+  '@stdlib/utils-constructor-name@0.2.2':
+    dependencies:
+      '@stdlib/assert-is-buffer': 0.2.2
+      '@stdlib/regexp-function-name': 0.2.2
+      '@stdlib/utils-native-class': 0.2.2
+
+  '@stdlib/utils-convert-path@0.2.2':
+    dependencies:
+      '@stdlib/assert-is-string': 0.2.2
+      '@stdlib/error-tools-fmtprodmsg': 0.2.2
+      '@stdlib/regexp-extended-length-path': 0.2.2
+      '@stdlib/string-base-lowercase': 0.4.0
+      '@stdlib/string-format': 0.2.2
+      '@stdlib/string-replace': 0.2.2
+
+  '@stdlib/utils-define-nonenumerable-read-only-property@0.2.2':
+    dependencies:
+      '@stdlib/utils-define-property': 0.2.4
+
+  '@stdlib/utils-define-property@0.2.4':
+    dependencies:
+      '@stdlib/error-tools-fmtprodmsg': 0.2.2
+      '@stdlib/string-format': 0.2.2
+
+  '@stdlib/utils-escape-regexp-string@0.2.2':
+    dependencies:
+      '@stdlib/assert-is-string': 0.2.2
+      '@stdlib/error-tools-fmtprodmsg': 0.2.2
+      '@stdlib/string-format': 0.2.2
+
+  '@stdlib/utils-global@0.2.2':
+    dependencies:
+      '@stdlib/assert-is-boolean': 0.2.2
+      '@stdlib/error-tools-fmtprodmsg': 0.2.2
+      '@stdlib/string-format': 0.2.2
+
+  '@stdlib/utils-native-class@0.2.2':
+    dependencies:
+      '@stdlib/assert-has-own-property': 0.2.2
+      '@stdlib/assert-has-tostringtag-support': 0.2.2
+      '@stdlib/symbol-ctor': 0.2.2
+
+  '@stdlib/utils-type-of@0.2.2':
+    dependencies:
+      '@stdlib/utils-constructor-name': 0.2.2
+      '@stdlib/utils-global': 0.2.2
 
   '@taplo/core@0.1.1': {}
 

@@ -15,10 +15,10 @@ import {
 	verboseOption,
 } from './options'
 import { urlToHostAndPortValidated } from './utilities/validation'
+import convertPath from '@stdlib/utils-convert-path'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import slash from 'slash'
 import untildify from 'untildify'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -115,7 +115,7 @@ await yargsInstance
 			verbose,
 		}) => {
 			log.verbose = verbose
-			const expandedDirectory = slash(untildify(directory))
+			const expandedDirectory = convertPath(untildify(directory), 'mixed')
 			const globPattern = recursive ? `${expandedDirectory}/**/*.md` : `${expandedDirectory}/*.md`
 			const markdownFilePaths = await globby(globPattern, { absolute: true })
 
@@ -123,7 +123,7 @@ await yargsInstance
 			const allFilePaths = await globby(`${expandedDirectory}/**/*`, { absolute: true })
 
 			if (markdownFilePaths.length === 0) {
-				log.error(`No Markdown files found in "${expandedDirectory}".`)
+				log.error(`No Markdown files found in "${directory}".`)
 				process.exitCode = 1
 				return
 			}

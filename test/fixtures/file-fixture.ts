@@ -9,11 +9,11 @@ import { yankiModelNames } from '../../src/lib/model/model'
 import { CSS_DEFAULT_STYLE } from '../../src/lib/shared/constants'
 import { createModels, getModelStyle, updateModelStyle } from '../../src/lib/utilities/anki-connect'
 import { getHash } from '../../src/lib/utilities/string'
+import convertPath from '@stdlib/utils-convert-path'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'path-browserify-esm'
-import slash from 'slash'
 import { afterAll, beforeAll, describe, expect } from 'vitest'
 import { YankiConnect } from 'yanki-connect'
 
@@ -67,10 +67,18 @@ export function describeWithFileFixture(
 				recursive: true,
 			})
 
-			context.markdownFiles = await globby(`${slash(context.tempAssetPath)}/**/*.md`, {
+			const markdownFilesRaw = await globby(
+				`${convertPath(context.tempAssetPath, 'mixed')}/**/*.md`,
+				{
+					absolute: true,
+				},
+			)
+			context.markdownFiles = markdownFilesRaw.map((file) => convertPath(file, 'mixed'))
+
+			const allFilesRaw = await globby(`${convertPath(context.tempAssetPath, 'mixed')}/**/*`, {
 				absolute: true,
 			})
-			context.allFiles = await globby(`${slash(context.tempAssetPath)}/**/*`, { absolute: true })
+			context.allFiles = allFilesRaw.map((file) => convertPath(file, 'mixed'))
 
 			expect(context.markdownFiles.length).toBeGreaterThan(0)
 			expect(context.allFiles.length).toBeGreaterThan(0)

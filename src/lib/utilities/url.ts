@@ -9,8 +9,8 @@ import {
 import { type FetchAdapter } from '../shared/types'
 import { getFileExtensionForMimeType } from './mime'
 import { getHash } from './string'
+import convertPath from '@stdlib/utils-convert-path'
 import path from 'path-browserify-esm'
-import slash from 'slash'
 
 // Detect probably wiki-style name links
 export function isNameUrl(text: string): boolean {
@@ -105,7 +105,7 @@ export function getSrcType(
 
 	if (url === undefined) {
 		// Probably a file path
-		const normalizedPath = path.posix.normalize(slash(filePathOrUrl))
+		const normalizedPath = path.posix.normalize(convertPath(filePathOrUrl, 'posix'))
 
 		// Links that aren't relative or absolute are probably wiki-style name links
 		if (
