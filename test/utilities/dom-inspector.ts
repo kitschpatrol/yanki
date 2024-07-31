@@ -35,3 +35,8 @@ export function getAnkiMediaTags(htmlFragment: string): string[] {
 	const matches = htmlFragment.match(/\[sound:[^\]]+]/gi)
 	return matches ?? []
 }
+
+export function stripAnkiMediaTag(text: string): string {
+	const match = /^\[sound:(.*)]$/.exec(text)
+	return match ? match[1] : text
+}

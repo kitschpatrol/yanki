@@ -1,8 +1,8 @@
 import {
 	MEDIA_FILENAME_MAX_LENGTH,
 	MEDIA_INCLUDE_LEGIBLE_FILENAME,
-	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
-	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
+	MEDIA_SUPPORTED_EXTENSIONS,
+	type MediaSupportedExtension,
 } from '../shared/constants'
 import { type FetchAdapter, type FileAdapter } from '../shared/types'
 import { fileExists, getFileContentHash } from './file'
@@ -16,30 +16,25 @@ import path from 'path-browserify-esm'
  * @param pathOrUrl
  * @returns Extension without the `.`, possibly an extra string if no extension is found
  * TODO check for how it handles query strings
+ * TODO clean up type casting
  */
 export async function getAnkiMediaFilenameExtension(
 	pathOrUrl: string,
 	fetchAdapter: FetchAdapter | undefined,
-): Promise<string | undefined> {
+): Promise<MediaSupportedExtension | undefined> {
 	const extensionCandidate = isUrl(pathOrUrl)
 		? await getFileExtensionFromUrl(pathOrUrl, fetchAdapter)
 		: path.posix.extname(pathOrUrl).slice(1)
 
-	// Make sure it's supported, note 'unknown' special case for URLs
+	// Make sure it's supported, returns undefined if not
 	if (
 		extensionCandidate === undefined ||
-		!(
-			[
-				'unknown',
-				...MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
-				...MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
-			] as string[]
-		).includes(extensionCandidate)
+		!MEDIA_SUPPORTED_EXTENSIONS.includes(extensionCandidate as MediaSupportedExtension)
 	) {
 		return undefined
 	}
 
-	return extensionCandidate
+	return extensionCandidate as MediaSupportedExtension
 }
 
 function getLegibleFilename(pathOrUrl: string, maxLength: number): string {

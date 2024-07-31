@@ -94,15 +94,6 @@ export const MEDIA_INCLUDE_LEGIBLE_FILENAME = false
 export const MEDIA_URL_CONTENT_TYPE_MODE: 'metadata' | 'name' = 'metadata'
 
 /**
- * Set the extension to `unknown` if the URL extension can't be determined...
- * lets a URL media asset sync to Anki, and then the browser can figure out how
- * to display at runtime. Trades some risk for unsupported assets being synced
- * for the seemingly more common case of asset URLs that don't include an
- * extension or have a valid content-type header. Otherwise, set to undefined.
- */
-export const MEDIA_ALLOW_UNKNOWN_URL_EXTENSION = false
-
-/**
  * Anki enforces limits on media asset filenames. Older versions allowed up to 255, but it will be 120 moving forward.
  * https://github.com/ankitects/anki/blob/e41c4573d789afe8b020fab5d9d1eede50c3fa3d/rslib/src/sync/media/mod.rs#L20
  */
@@ -136,9 +127,11 @@ export const MEDIA_SUPPORTED_IMAGE_EXTENSIONS = [
 /**
  * Supported audio / video extensions for Anki media assets.
  *
- * Note that while officially "supported", some of these are not universally compatible across Anki platforms.
+ * Note that while officially "supported", some of these are not universally
+ * compatible across Anki platforms.
  *
- * Via https://github.com/ankitects/anki/blob/e41c4573d789afe8b020fab5d9d1eede50c3fa3d/qt/aqt/editor.py#L63-L85
+ * Via
+ * https://github.com/ankitects/anki/blob/e41c4573d789afe8b020fab5d9d1eede50c3fa3d/qt/aqt/editor.py#L63-L85
  */
 export const MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS = [
 	'3gp',
@@ -163,3 +156,18 @@ export const MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS = [
 	'wav',
 	'webm',
 ] as const
+
+/**
+ * Anki seems happy to open PDF files and download markdown files that have been
+ * added to the assets folder...
+ * https://help.obsidian.md/Files+and+folders/Accepted+file+formats
+ */
+export const MEDIA_SUPPORTED_FILE_EXTENSIONS = ['md', 'pdf'] as const
+
+export const MEDIA_SUPPORTED_EXTENSIONS = [
+	...MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
+	...MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
+	...MEDIA_SUPPORTED_FILE_EXTENSIONS,
+]
+
+export type MediaSupportedExtension = (typeof MEDIA_SUPPORTED_EXTENSIONS)[number]

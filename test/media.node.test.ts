@@ -33,6 +33,8 @@ const allLocalMediaPaths = [
 	'./test/assets/test-media/audio/yanki.swf',
 	'./test/assets/test-media/audio/yanki.wav',
 	'./test/assets/test-media/audio/yanki.webm',
+	'./test/assets/test-media/file/yanki.md',
+	'./test/assets/test-media/file/yanki.pdf',
 	'./test/assets/test-media/image/yanki.avif',
 	'./test/assets/test-media/image/yanki.gif',
 	'./test/assets/test-media/image/yanki.ico',
@@ -55,9 +57,9 @@ const allLocalMediaPaths = [
 	'./test/assets/test-media/video/yanki.ogv',
 	'./test/assets/test-media/video/yanki.swf',
 	'./test/assets/test-media/video/yanki.webm',
-	'./test/assets/test-media/weird-filenames/i.have.many.dots.jpg',
 	'./test/assets/test-media/weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg',
 	'./test/assets/test-media/weird-filenames/i have so many spaces.jpg',
+	'./test/assets/test-media/weird-filenames/i.have.many.dots.jpg',
 ]
 
 const allRemoteMediaUrls = [
@@ -84,6 +86,8 @@ const allRemoteMediaUrls = [
 	'https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.swf?raw=true',
 	'https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.wav?raw=true',
 	'https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.webm?raw=true',
+	'https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/file/yanki.md?raw=true',
+	'https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/file/yanki.pdf?raw=true',
 	'https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.avif?raw=true',
 	'https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.gif?raw=true',
 	'https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.ico?raw=true',
@@ -181,6 +185,8 @@ it('gets content type extension from url metadata', { timeout: 60_000 }, async (
 		  "yanki.png: png",
 		  "yanki.svg: svg",
 		  "yanki.tif: tif",
+		  "yanki.md: md",
+		  "yanki.pdf: pdf",
 		  "yanki.tiff: tif",
 		  "yanki.webp: webp",
 		  "yanki.3gp: 3gp",
@@ -244,6 +250,8 @@ it('gets content type extension from url name', { timeout: 60_000 }, async () =>
 		  "yanki.swf: swf",
 		  "yanki.wav: wav",
 		  "yanki.webm: webm",
+		  "yanki.md: md",
+		  "yanki.pdf: pdf",
 		  "yanki.avif: avif",
 		  "yanki.gif: gif",
 		  "yanki.ico: ico",
@@ -457,6 +465,8 @@ it('gets content hash from url name', { timeout: 60_000 }, async () => {
 		  "yanki.swf: 40876830998760c0",
 		  "yanki.wav: 34ea10922ffd2bae",
 		  "yanki.webm: 02d5e22784e0895f",
+		  "yanki.md: 148c4ae4c3497a41",
+		  "yanki.pdf: 9c55aeda871fa688",
 		  "yanki.avif: 130c73a3a8b07487",
 		  "yanki.gif: d44e03ee20ca83cf",
 		  "yanki.ico: a51724cf949fb64e",
@@ -521,6 +531,8 @@ it('gets content hash from file content', { timeout: 60_000 }, async () => {
 		  "yanki.swf: 2f4a7a6a9e7364fb",
 		  "yanki.wav: 1c643b9e7bd7829e",
 		  "yanki.webm: 30dad8fffde9b2af",
+		  "yanki.md: 535914bcf4b86718",
+		  "yanki.pdf: a73f88d2bb06f68c",
 		  "yanki.avif: 13dd44beaa1aaaeb",
 		  "yanki.gif: 2fd4962fc749d790",
 		  "yanki.ico: 00d3a18bbad0fe99",
@@ -543,9 +555,9 @@ it('gets content hash from file content', { timeout: 60_000 }, async () => {
 		  "yanki.ogv: d75b1b60a458d1e4",
 		  "yanki.swf: 7ea99adc8ba79bec",
 		  "yanki.webm: 967e6b2dc20b54b3",
-		  "i.have.many.dots.jpg: 2d66184d2677c1a5",
 		  "i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg: 2d66184d2677c1a5",
 		  "i have so many spaces.jpg: 2d66184d2677c1a5",
+		  "i.have.many.dots.jpg: 2d66184d2677c1a5",
 		]
 	`)
 })
@@ -588,6 +600,8 @@ it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
 		  "yanki.swf: XXXXXXXXXXXXXXXX",
 		  "yanki.wav: XXXXXXXXXXXXXXXX",
 		  "yanki.webm: XXXXXXXXXXXXXXXX",
+		  "yanki.md: XXXXXXXXXXXXXXXX",
+		  "yanki.pdf: XXXXXXXXXXXXXXXX",
 		  "yanki.avif: XXXXXXXXXXXXXXXX",
 		  "yanki.gif: XXXXXXXXXXXXXXXX",
 		  "yanki.ico: XXXXXXXXXXXXXXXX",
@@ -610,9 +624,9 @@ it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
 		  "yanki.ogv: XXXXXXXXXXXXXXXX",
 		  "yanki.swf: XXXXXXXXXXXXXXXX",
 		  "yanki.webm: XXXXXXXXXXXXXXXX",
-		  "i.have.many.dots.jpg: XXXXXXXXXXXXXXXX",
 		  "i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg: XXXXXXXXXXXXXXXX",
 		  "i have so many spaces.jpg: XXXXXXXXXXXXXXXX",
+		  "i.have.many.dots.jpg: XXXXXXXXXXXXXXXX",
 		]
 	`)
 })
@@ -653,6 +667,8 @@ it('gets content hash from file name', { timeout: 60_000 }, async () => {
 		  "yanki.swf: 5218bfb2913cab3e",
 		  "yanki.wav: 76a173b2a676ff04",
 		  "yanki.webm: e7265d90c7443cab",
+		  "yanki.md: ef0315138f72ff3d",
+		  "yanki.pdf: f38fcc3cf590030a",
 		  "yanki.avif: cac1c03fba9e53cb",
 		  "yanki.gif: a0f100a5fbed16c7",
 		  "yanki.ico: 1bc735a641f2833c",
@@ -675,22 +691,22 @@ it('gets content hash from file name', { timeout: 60_000 }, async () => {
 		  "yanki.ogv: edfb765608df257b",
 		  "yanki.swf: 9b54ba566b16f007",
 		  "yanki.webm: ff1d08f6bf61a0f0",
-		  "i.have.many.dots.jpg: 2f79041faf4149c1",
 		  "i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg: 3f8c69e608e64c11",
 		  "i have so many spaces.jpg: 5bac4245655d4ba4",
+		  "i.have.many.dots.jpg: 2f79041faf4149c1",
 		]
 	`)
 })
 
 describeWithFileFixture(
-	'media',
+	'local media',
 	{
 		assetPath: './test/assets/test-media/',
 		cleanUpAnki: true,
 		cleanUpTempFiles: true,
 	},
 	(context) => {
-		it('adds media to anki when appropriate', { timeout: 60_000 }, async () => {
+		it('adds local media files to anki when appropriate', { timeout: 60_000 }, async () => {
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
@@ -730,5 +746,35 @@ describeWithFileFixture(
 
 			expect(stableResults(results)).toMatchSnapshot()
 		})
+	},
+)
+
+describeWithFileFixture(
+	'all media',
+	{
+		assetPath: './test/assets/test-media-remote/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		// TODO insanely slow on Windows...
+		it(
+			'fetches and adds local media files and remote urls to anki when appropriate',
+			{ timeout: 240_000 },
+			async () => {
+				const results = await syncFiles(context.markdownFiles, {
+					allFilePaths: context.allFiles,
+					ankiConnectOptions: {
+						autoLaunch: true,
+					},
+					ankiWeb: false,
+					dryRun: false,
+					namespace: context.namespace,
+					syncMediaAssets: 'all',
+				})
+
+				expect(stableResults(results)).toMatchSnapshot()
+			},
+		)
 	},
 )

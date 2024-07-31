@@ -1,10 +1,9 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
 import {
-	MEDIA_ALLOW_UNKNOWN_URL_EXTENSION,
 	MEDIA_DEFAULT_HASH_MODE_URL,
-	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
-	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
+	MEDIA_SUPPORTED_EXTENSIONS,
 	MEDIA_URL_CONTENT_TYPE_MODE,
+	type MediaSupportedExtension,
 } from '../shared/constants'
 import { type FetchAdapter } from '../shared/types'
 import { getFileExtensionForMimeType } from './mime'
@@ -176,8 +175,7 @@ export async function getFileExtensionFromUrl(
 	url: string,
 	fetchAdapter: FetchAdapter | undefined,
 	mode = MEDIA_URL_CONTENT_TYPE_MODE,
-	allowUnknown = MEDIA_ALLOW_UNKNOWN_URL_EXTENSION,
-): Promise<string | undefined> {
+): Promise<MediaSupportedExtension | undefined> {
 	switch (mode) {
 		case 'metadata': {
 			if (fetchAdapter === undefined) {
@@ -206,11 +204,6 @@ export async function getFileExtensionFromUrl(
 
 			if (parsedUrl === undefined) {
 				console.warn(`Could not parse URL: ${url}`)
-
-				if (allowUnknown) {
-					return 'unknown'
-				}
-
 				return undefined
 			}
 
@@ -223,19 +216,9 @@ export async function getFileExtensionFromUrl(
 				extensionInUrl = searchParts.at(-1)
 			}
 
-			if (
-				(
-					[
-						...MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
-						...MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
-					] as unknown as string[]
-				).includes(extensionInUrl ?? '')
-			) {
-				return extensionInUrl
-			}
-
-			if (allowUnknown) {
-				return 'unknown'
+			// TODO get rid of type cast
+			if (MEDIA_SUPPORTED_EXTENSIONS.includes((extensionInUrl ?? '') as MediaSupportedExtension)) {
+				return extensionInUrl as MediaSupportedExtension
 			}
 
 			return undefined

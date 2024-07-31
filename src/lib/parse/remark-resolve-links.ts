@@ -55,8 +55,9 @@ const plugin: Plugin<[Options], Root> = function (options) {
 			const resolvedLink = resolveLink(node.url, {
 				allFilePaths,
 				basePath,
+				convertFilePathsToProtocol: obsidianVault === undefined ? 'none' : 'obsidian',
 				cwd,
-				obsidianVaultName: undefined,
+				obsidianVaultName: obsidianVault,
 				type: 'embed',
 			})
 

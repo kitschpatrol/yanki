@@ -25,7 +25,8 @@
 	"ignoreRegExpList": [
 		// TODO get this from SharedConfig
 		"/\\$\\$.*?\\$\\$/g", // Ignore display MathJax $$...$$
-		"/\\$[^$\\n]*\\$/g" // Ignore inline MathJax $...$
+		"/\\$[^$\\n]*\\$/g", // Ignore inline MathJax $...$
+		"\"obsidian://.*?\"" // Ignore Obsidian URIs
 	],
 	"words": [
 		"Anki",

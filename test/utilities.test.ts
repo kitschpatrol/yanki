@@ -84,6 +84,7 @@ it('resolves a relative file path', () => {
 	expect(
 		resolveLink('./assets/test-obsidian-vault/test card.md', {
 			cwd: '/base-path/cwd/',
+			type: 'link',
 		}),
 	).toMatchInlineSnapshot(`"/base-path/cwd/assets/test-obsidian-vault/test card.md"`)
 })
@@ -92,14 +93,89 @@ it('resolves a url-encoded relative file path', () => {
 	expect(
 		resolveLink('./assets/test-obsidian-vault/test%20card.md', {
 			cwd: '/base-path/cwd/',
+			type: 'link',
 		}),
 	).toMatchInlineSnapshot(`"/base-path/cwd/assets/test-obsidian-vault/test card.md"`)
+})
+
+it('resolves a named file link', () => {
+	expect(
+		resolveLink('test pdf.pdf', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/Assets/test pdf.pdf'],
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/cwd/',
+			obsidianVaultName: 'test-obsidian-vault',
+			type: 'link',
+		}),
+	).toMatchInlineSnapshot(
+		`"obsidian://open?vault=test-obsidian-vault&file=%2Fbase-path%2Fcwd%2Ftest%2Fassets%2Ftest-obsidian-vault%2FAssets%2Ftest%20pdf.pdf"`,
+	)
+})
+
+it('resolves a named file embed', () => {
+	expect(
+		resolveLink('test card', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/test card.md'],
+			cwd: '/base-path/cwd/',
+			type: 'embed',
+		}),
+	).toMatchInlineSnapshot(`"/base-path/cwd/test/assets/test-obsidian-vault/test card.md"`)
+
+	expect(
+		resolveLink('test card', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/test card.md'],
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/cwd/',
+			obsidianVaultName: 'test-obsidian-vault',
+			type: 'embed',
+		}),
+	).toMatchInlineSnapshot(
+		`"obsidian://open?vault=test-obsidian-vault&file=%2Fbase-path%2Fcwd%2Ftest%2Fassets%2Ftest-obsidian-vault%2Ftest%20card.md"`,
+	)
+
+	expect(
+		resolveLink('test pdf.pdf', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/Assets/test pdf.pdf'],
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/cwd/',
+			obsidianVaultName: 'test-obsidian-vault',
+			type: 'embed',
+		}),
+	).toMatchInlineSnapshot(
+		`"obsidian://open?vault=test-obsidian-vault&file=%2Fbase-path%2Fcwd%2Ftest%2Fassets%2Ftest-obsidian-vault%2FAssets%2Ftest%20pdf.pdf"`,
+	)
+
+	expect(
+		resolveLink('test card', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/test card.md'],
+			convertFilePathsToProtocol: 'file',
+			cwd: '/base-path/cwd/',
+			type: 'embed',
+		}),
+	).toMatchInlineSnapshot(`"file:///base-path/cwd/test/assets/test-obsidian-vault/test card.md"`)
+
+	expect(
+		resolveLink('test%20card', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/test card.md'],
+			cwd: '/base-path/cwd/',
+			type: 'embed',
+		}),
+	).toMatchInlineSnapshot(`"/base-path/cwd/test/assets/test-obsidian-vault/test card.md"`)
+
+	expect(
+		resolveLink('test%20card.md', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/test card.md'],
+			cwd: '/base-path/cwd/',
+			type: 'embed',
+		}),
+	).toMatchInlineSnapshot(`"/base-path/cwd/test/assets/test-obsidian-vault/test card.md"`)
 })
 
 it('resolves a relative file path with intermediate relative paths', () => {
 	expect(
 		resolveLink('./assets/test-obsidian-vault/../test-obsidian-vault/test card.md', {
 			cwd: '/base-path/cwd/',
+			type: 'link',
 		}),
 	).toMatchInlineSnapshot(`"/base-path/cwd/assets/test-obsidian-vault/test card.md"`)
 })

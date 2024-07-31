@@ -2,6 +2,7 @@
 
 import {
 	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
+	MEDIA_SUPPORTED_FILE_EXTENSIONS,
 	MEDIA_SUPPORTED_IMAGE_EXTENSIONS,
 	NOTE_DEFAULT_EMPTY_HAST,
 } from '../shared/constants'
@@ -12,9 +13,9 @@ import {
 	getDefaultFileAdapter,
 } from '../shared/types'
 import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
-import { getBase } from '../utilities/path'
+import { getBase, getQuery } from '../utilities/path'
 import { cleanClassName, emptyIsUndefined } from '../utilities/string'
-import { getSrcType, safeDecodeURI } from '../utilities/url'
+import { getSrcType, isUrl, safeDecodeURI } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
 import { deepmerge } from 'deepmerge-ts'
 import { type Element, type Root as HastRoot } from 'hast'
@@ -147,11 +148,17 @@ export async function mdastToHtml(
 		switch (srcType) {
 			// All of these invalid image src types should have been converted already during MDAST generation
 			case 'unsupportedProtocolUrl':
-			case 'obsidianVaultUrl':
-			case 'localFileUrl':
 			case 'localFileName': {
-				console.warn(`Unsupported URL for media asset: "${node.properties.src}"`)
-				return CONTINUE
+				console.warn(`Unsupported URL for media asset, treating as link: "${node.properties.src}"`)
+				absolutePathOrUrl = node.properties.src
+				break
+			}
+
+			// Embeds to markdown notes or PDFs become links
+			case 'obsidianVaultUrl':
+			case 'localFileUrl': {
+				absolutePathOrUrl = node.properties.src
+				break
 			}
 
 			case 'remoteHttpUrl': {
@@ -183,16 +190,25 @@ export async function mdastToHtml(
 			// images...)
 			const extension = await getAnkiMediaFilenameExtension(absolutePathOrUrl, fetchAdapter)
 
+			// If unsupported, we shouldn't sync it or generate a safe hashed filename
+			const supportedMedia =
+				extension !== undefined &&
+				srcType !== 'unsupportedProtocolUrl' &&
+				srcType !== 'localFileName' &&
+				srcType !== 'obsidianVaultUrl' &&
+				srcType !== 'localFileUrl'
+
 			// Never sync if extension can't be resolved...
 			const yankiSyncMedia: boolean =
 				((srcType === 'localFilePath' && syncMediaAssets === 'local') ||
 					(srcType === 'remoteHttpUrl' && syncMediaAssets === 'remote') ||
 					syncMediaAssets === 'all') &&
-				extension !== undefined
+				supportedMedia
 
 			// If we're trying to manage the asset, try to hash it and get a safe
 			// filename for subsequent storage in the anki media system (otherwise undefined)
-			// This also does an existence check
+			// This also does an existence check. This is expensive, so we only do it
+			// if we must.
 			const ankiMediaFilename = yankiSyncMedia
 				? await getSafeAnkiMediaFilename(
 						absolutePathOrUrl,
@@ -209,8 +225,19 @@ export async function mdastToHtml(
 			const syncEnabled: string =
 				yankiSyncMedia && ankiMediaFilename !== undefined ? 'true' : 'false'
 
-			if (extension === undefined) {
-				// Unsupported, add a placeholder
+			if (
+				!supportedMedia ||
+				(MEDIA_SUPPORTED_FILE_EXTENSIONS as unknown as string[]).includes(extension)
+			) {
+				// Unsupported extensions, or PDF / Markdown file "embeds"
+
+				// Links are a special case, where we DO potentially want queries on
+				// local files
+
+				const finalSourceWithQuery = isUrl(finalSrc)
+					? finalSrc
+					: `${finalSrc}${getQuery(String(node.properties['data-yanki-src-original']))}`
+
 				parent.children.splice(
 					index,
 					1,
@@ -218,29 +245,34 @@ export async function mdastToHtml(
 						'element',
 						{
 							properties: {
-								className: ['yanki-media', 'yanki-media-unsupported'],
+								className: [
+									'yanki-media',
+									`yanki-media-${supportedMedia ? 'file' : 'unsupported'}`,
+								],
 								'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
-								'data-yanki-media-src': absolutePathOrUrl,
-								'data-yanki-media-sync': syncEnabled, // Always false
-								'data-yanki-src': finalSrc,
-								'data-yanki-src-original': node.properties['data-yanki-src-original'],
+								'data-yanki-media-src': absolutePathOrUrl, // Where Anki should grab the media
+								'data-yanki-media-sync': syncEnabled, // Can theoretically be true if PDF or MD file
+								'data-yanki-src': finalSrc, // What anki should call the media
+								'data-yanki-src-original': node.properties['data-yanki-src-original'], // Pre-resolved URL, useful for debugging wiki links
 							},
 							tagName: 'span',
 						},
 						[
 							u(
-								'text',
-								`Unsupported media: "${String(node.properties['data-yanki-src-original'])}"`,
+								'element',
+								{
+									properties: {
+										href: finalSourceWithQuery,
+									},
+									tagName: 'a',
+								},
+								[u('text', String(node.properties['data-yanki-src-original']))],
 							),
 						],
 					),
 				)
-			} else if (
-				(['unsupported', ...MEDIA_SUPPORTED_IMAGE_EXTENSIONS] as unknown as string[]).includes(
-					extension,
-				)
-			) {
-				// Image (or unsupported media type, which we treat as an image)
+			} else if ((MEDIA_SUPPORTED_IMAGE_EXTENSIONS as unknown as string[]).includes(extension)) {
+				// Image
 				//
 				// Width and height will be set later
 				node.properties.src = finalSrc
@@ -383,15 +415,16 @@ export function extractMediaFromHtml(html: string): Media[] {
 	visit(hast, 'element', (node) => {
 		if (
 			(node.tagName === 'img' || node.tagName === 'span') &&
-			node.properties['data-yanki-media-sync'] === 'true'
+			// This has to be camel case...
+			node.properties?.dataYankiMediaSync === 'true'
 		) {
 			const filename =
 				// <img>
 				node.properties?.src ??
 				// <span>>
-				node.properties['data-yanki-src']
+				node.properties?.dataYankiSrc
 
-			const originalSrc = node.properties['data-yanki-media-src']
+			const originalSrc = node.properties?.dataYankiMediaSrc
 			if (
 				filename !== undefined &&
 				originalSrc !== undefined &&
@@ -405,9 +438,6 @@ export function extractMediaFromHtml(html: string): Media[] {
 			}
 		}
 	})
-
-	// Console.log('extractMedia----------------------------------')
-	// console.log(media)
 
 	return media
 }

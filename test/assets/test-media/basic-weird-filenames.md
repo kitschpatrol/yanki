@@ -22,12 +22,12 @@ Image path does not have to be encoded for compatibility with Obsidian
 
 ### Spaces
 
-!\[\[./weird-filenames/i have so many spaces.jpg|Yanki test image]]
+![[./weird-filenames/i have so many spaces.jpg|Yanki test image]]
 
 ### Dots
 
-!\[\[./weird-filenames/i.have.many.dots.jpg|Yanki test image]]
+![[./weird-filenames/i.have.many.dots.jpg|Yanki test image]]
 
 ### Long
 
-!\[\[./weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg|Yanki test image]]
+![[./weird-filenames/i am an obscenely long filename of tremendous length that will have to be truncated in a thoughtful way to preserve as much semantic value as possible.jpg|Yanki test image]]

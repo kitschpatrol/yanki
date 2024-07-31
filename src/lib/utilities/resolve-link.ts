@@ -1,5 +1,4 @@
 /* eslint-disable complexity */
-
 // TODO move this into its own package?
 
 import * as pathExtras from './path'
@@ -24,7 +23,7 @@ export type ResolveLinkOptions = {
 	/**
 	 * Array of all absolute file paths to consider when resolving wiki-style named links.
 	 */
-	allFilePaths: string[] | undefined
+	allFilePaths?: string[] | undefined
 	/**
 	 * How to treat file paths without a leading `/`, `./`, or `../`
 	 * Useful in Obsidian vaults where bare paths can be relative to the vault root
@@ -36,12 +35,12 @@ export type ResolveLinkOptions = {
 	 * Useful in Obsidian vaults where "/" is the root of the vault, not the root of the filesystem.
 	 * Must be an absolute directory path.
 	 */
-	basePath: string | undefined
+	basePath?: string | undefined
 	/**
 	 * Turns a file path into a URL with a specific protocol.
 	 * Useful for converting markdown links to Obsidian vault links.
 	 */
-	convertFilePathsToProtocol: 'none' | 'obsidian'
+	convertFilePathsToProtocol?: 'file' | 'none' | 'obsidian'
 	/**
 	 * Current working directory, used to resolve relative paths. Set to the
 	 * absolute path of the file being processed.
@@ -50,7 +49,7 @@ export type ResolveLinkOptions = {
 	/**
 	 * Name of Obsidian vault, used in Obsidian protocol URL creation.
 	 */
-	obsidianVaultName: string | undefined
+	obsidianVaultName?: string | undefined
 	/**
 	 * Whether we're dealing with a link (to be `<a>`-tagged) or an embed (to be `<img>`-tagged).
 	 * Affects how the resolved path is treated.
@@ -58,7 +57,7 @@ export type ResolveLinkOptions = {
 	type: ResolveLinkType
 }
 
-export const defaultResolveLinkOptions = {
+export const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
 	allFilePaths: [],
 	// TODO consider...
 	// barePathsAreRelativeTo: 'cwd',
@@ -94,7 +93,7 @@ export const defaultResolveLinkOptions = {
  * - HTTP protocol URL
  * - Obsidian protocol vault URL (Optionally, this will include file query parameters)
  */
-export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLinkOptions>): string {
+export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions): string {
 	// Defaults
 	const { allFilePaths, basePath, convertFilePathsToProtocol, cwd, obsidianVaultName, type } =
 		deepmerge(defaultResolveLinkOptions, options ?? {}) as ResolveLinkOptions
@@ -148,12 +147,8 @@ export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLink
 				cwd,
 			})
 
-			// Embeds don't have a default extension, so fileProbablyExists will
-			// likely be false if they're extension-less (which, technically, they
-			// can't be...), and that's fine since we'll fall through to normal
-			// absolute link resolution
-			const resolvedUrlWithDefaultExtension =
-				type === 'embed' ? resolvedUrl : pathExtras.addExtensionIfMissing(resolvedUrl, 'md')
+			// Always try a .md extension if it's missing... in Obsidian, ![[these links]] and ![](<these links>) without an extension are always to an MD file
+			const resolvedUrlWithDefaultExtension = pathExtras.addExtensionIfMissing(resolvedUrl, 'md')
 
 			const fileProbablyExists = pathExistsInAllFiles(
 				resolvedUrlWithDefaultExtension,
@@ -162,12 +157,28 @@ export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLink
 
 			if (fileProbablyExists) {
 				// Perform obsidian vault link protocol conversion if requested
-				if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName !== undefined) {
-					return createObsidianVaultLink(
-						resolvedUrlWithDefaultExtension,
-						basePath ?? '',
-						obsidianVaultName,
-					)
+				// For links, anything that exists should become an obsidian link
+				// For embeds, only markdown files should become obsidian links
+				if (
+					convertFilePathsToProtocol !== 'none' &&
+					(type === 'link' ||
+						(type === 'embed' &&
+							// https://help.obsidian.md/Files+and+folders/Accepted+file+formats
+							['.md', '.pdf'].includes(pathExtras.getExtension(resolvedUrlWithDefaultExtension))))
+				) {
+					if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName !== undefined) {
+						return createObsidianVaultLink(
+							resolvedUrlWithDefaultExtension,
+							basePath ?? '',
+							obsidianVaultName,
+						)
+					}
+
+					// This doesn't work in the Anki desktop application or the AnkiWeb browser version...
+					// Not really worth it
+					if (convertFilePathsToProtocol === 'file') {
+						return createFileLink(resolvedUrlWithDefaultExtension)
+					}
 				}
 
 				return pathExtras.getBase(resolvedUrlWithDefaultExtension)
@@ -177,9 +188,7 @@ export function resolveLink(filePathOrUrl: string, options?: Partial<ResolveLink
 		}
 
 		case 'localFileName': {
-			let resolvedUrl = slash(
-				type === 'embed' ? decodedUrl : pathExtras.addExtensionIfMissing(decodedUrl, 'md'),
-			)
+			let resolvedUrl = slash(pathExtras.addExtensionIfMissing(decodedUrl, 'md'))
 
 			// Fall back to base path resolution if there's no path
 			const resolvedNameLink = resolveNameLink(resolvedUrl, cwd, allFilePaths ?? [])
@@ -345,6 +354,10 @@ function pathExistsInAllFiles(filePath: string, allFilePaths: string[]): boolean
 
 	// Obsidian is not case sensitive
 	return allFilePaths.some((file) => file.toLowerCase().endsWith(base.toLowerCase()))
+}
+
+export function createFileLink(absolutePath: string): string {
+	return `file://${absolutePath}`
 }
 
 export function createObsidianVaultLink(

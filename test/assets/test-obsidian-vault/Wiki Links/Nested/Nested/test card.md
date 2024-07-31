@@ -170,9 +170,9 @@ _Resolving the next link was sketchy..._
 
 [[/yanki image.jpg|/yanki image.jpg]]
 
-[[Assets/yanki audio.mp3|/Assets/yanki audio.mp3]]
+[[/Assets/yanki audio.mp3|/Assets/yanki audio.mp3]]
 
-[[Assets/yanki video.mp4|/Assets/yanki video.mp4]]
+[[/Assets/yanki video.mp4|/Assets/yanki video.mp4]]
 
 ## Asset embeds
 
@@ -228,6 +228,6 @@ _Resolving the next link was sketchy..._
 
 ![[/yanki image.jpg|/yanki image.jpg]]
 
-![[Assets/yanki audio.mp3|/Assets/yanki audio.mp3]]
+![[/Assets/yanki audio.mp3|/Assets/yanki audio.mp3]]
 
-![[Assets/yanki video.mp4|/Assets/yanki video.mp4]]
+![[/Assets/yanki video.mp4|/Assets/yanki video.mp4]]

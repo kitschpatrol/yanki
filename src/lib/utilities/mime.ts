@@ -1,13 +1,16 @@
+import { type MediaSupportedExtension } from '../shared/constants'
+
 /**
  * Only supports MIMEs for valid Anki media types.
  * @param mimeType
  * @returns
  */
-export function getFileExtensionForMimeType(mimeType: string): string | undefined {
+export function getFileExtensionForMimeType(mimeType: string): MediaSupportedExtension | undefined {
 	// TODO vet these
-	const mimeToExtension: Record<string, string> = {
+	const mimeToExtension: Record<string, MediaSupportedExtension> = {
 		'application/octet-stream': 'mp4', // Hmm
 		'application/ogg': 'ogx',
+		'application/pdf': 'pdf',
 		'application/x-shockwave-flash': 'swf',
 		'audio/aac': 'aac',
 		'audio/flac': 'flac',
@@ -27,6 +30,7 @@ export function getFileExtensionForMimeType(mimeType: string): string | undefine
 		'image/vnd.microsoft.icon': 'ico',
 		'image/webp': 'webp',
 		'image/x-icon': 'ico',
+		'text/markdown': 'md',
 		'video/3gpp': '3gp',
 		'video/flv': 'flv',
 		'video/matroska': 'mkv',
@@ -46,5 +50,11 @@ export function getFileExtensionForMimeType(mimeType: string): string | undefine
 	// 	console.log(`Unknown MIME type: ${mimeType}`)
 	// }
 
-	return mimeToExtension[mimeType]
+	const result = mimeToExtension[mimeType]
+
+	if (result === undefined) {
+		return undefined
+	}
+
+	return result
 }
