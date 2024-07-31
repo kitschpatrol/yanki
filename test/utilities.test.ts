@@ -44,6 +44,8 @@ it('detects URLs correctly', () => {
 	expect(isUrl('/some/file.txt')).toBeFalsy()
 	expect(isUrl('./some/directory')).toBeFalsy()
 	expect(isUrl('//some/directory')).toBeFalsy()
+	expect(isUrl('file:///c/bla bla bla.txt')).toBeTruthy()
+	expect(isUrl('file://c/bla bla bla.txt')).toBeTruthy()
 
 	// Windows paths
 	expect(isUrl(String.raw`C:\Bla bla bla`)).toBeFalsy()
@@ -51,6 +53,9 @@ it('detects URLs correctly', () => {
 	expect(isUrl(String.raw`C:\\Bla bla bla\\some file.txt`)).toBeFalsy()
 	expect(isUrl(String.raw`d:\Bla bla bla`)).toBeFalsy()
 	expect(isUrl(String.raw`z:\Bla bla bla`)).toBeFalsy()
+	expect(isUrl(String.raw`z:/Bla bla bla`)).toBeFalsy()
+	expect(isUrl(String.raw`/z:/Bla bla bla`)).toBeFalsy()
+	expect(isUrl(String.raw`/z/Bla bla bla`)).toBeFalsy()
 	expect(isUrl(String.raw`\\?\Volume{abc123-abc123-abc123}\\`)).toBeFalsy()
 	expect(isUrl(String.raw`\\Server\Share\folder`)).toBeFalsy()
 	expect(isUrl(slash(String.raw`C:\Bla bla bla`))).toBeFalsy()

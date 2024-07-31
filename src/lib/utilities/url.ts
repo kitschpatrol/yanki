@@ -1,4 +1,5 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
+
 import {
 	MEDIA_DEFAULT_HASH_MODE_URL,
 	MEDIA_SUPPORTED_EXTENSIONS,
@@ -45,11 +46,27 @@ export function safeParseUrl(text: string): URL | undefined {
 	try {
 		const url = new URL(text)
 
+		// If a file url is detected, but wasn't explicitly passed via a protocol, then
+		// treat it as a file path and not a URL
+		const driveLetterPattern = /^[a-z]:/i
+		const filePrefixPattern = /^file:/i
+		if (
+			(filePrefixPattern.test(url.protocol) || driveLetterPattern.test(url.protocol)) &&
+			!filePrefixPattern.test(text)
+		) {
+			return undefined
+		}
+
+		return url
+
+		// More notes:
 		// Windows file paths can yield protocols like `C:\Bla bla bla` will yield a
 		// "protocol" of `c:`... which is theoretically a valid, URL, but almost
 		// definitely one we want to treat as a file path instead
-		const driveLetterPattern = /^[A-Za-z]:/
-		return driveLetterPattern.test(url.protocol) ? undefined : url
+		// Plus there are cross platform differences, on Windows file: is
+		// prepended as the protocol for URLs that would have protocol c: on macOS.
+		// To ensure that explicitly passed `file://` URLs are not wrongly treated as
+		// file paths, we have to check the text input as well to infer intent.
 	} catch {
 		return undefined
 	}
