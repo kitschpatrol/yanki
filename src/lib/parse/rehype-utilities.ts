@@ -11,11 +11,7 @@ import {
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
 } from '../shared/types'
-import {
-	getAnkiMediaFilenameExtension,
-	getSafeAnkiMediaFilename,
-	mediaAssetExists,
-} from '../utilities/media'
+import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
 import { getBase } from '../utilities/path'
 import { cleanClassName, emptyIsUndefined } from '../utilities/string'
 import { getSrcType, safeDecodeURI } from '../utilities/url'
@@ -135,7 +131,7 @@ export async function mdastToHtml(
 
 	const treeMutationPromises: Array<() => Promise<void>> = []
 
-	// All media embeds are initially image tags
+	// All media embeds are initially in <img> tags
 	visit(hastWithClass, 'element', (node, index, parent) => {
 		if (parent === undefined || index === undefined || node.tagName !== 'img') return CONTINUE
 
@@ -146,7 +142,7 @@ export async function mdastToHtml(
 		}
 
 		// Ensure src is a reasonable looking local file path or remote URL
-		let absoluteSrcOrUrl: string | undefined
+		let absolutePathOrUrl: string | undefined
 		const srcType = getSrcType(node.properties.src)
 		switch (srcType) {
 			// All of these invalid image src types should have been converted already during MDAST generation
@@ -159,7 +155,7 @@ export async function mdastToHtml(
 			}
 
 			case 'remoteHttpUrl': {
-				absoluteSrcOrUrl = node.properties.src
+				absolutePathOrUrl = node.properties.src
 				break
 			}
 
@@ -167,13 +163,13 @@ export async function mdastToHtml(
 				// The src will be URI-encoded at this point, which we don't want for local files
 				// Local file URLs must be converted into paths before decoding, and must be absolute
 				// already so they are not resolved
-				absoluteSrcOrUrl = safeDecodeURI(node.properties.src)
-				if (absoluteSrcOrUrl === undefined) {
+				absolutePathOrUrl = safeDecodeURI(node.properties.src)
+				if (absolutePathOrUrl === undefined) {
 					return CONTINUE
 				}
 
 				// Ignore any query parameters on local files
-				absoluteSrcOrUrl = getBase(absoluteSrcOrUrl)
+				absolutePathOrUrl = getBase(absolutePathOrUrl)
 
 				break
 			}
@@ -181,73 +177,88 @@ export async function mdastToHtml(
 
 		// Run these after visit since visit can not be asynchronous
 		treeMutationPromises.push(async () => {
-			const extension = await getAnkiMediaFilenameExtension(absoluteSrcOrUrl, fetchAdapter)
+			// No matter what, we need to know the asset's extension to decide if it's
+			// going in an <img> or a <span>[sound:...]</span> element (TODO due to
+			// fetch lookups, this has performance implications for remoteHttpUrl
+			// images...)
+			const extension = await getAnkiMediaFilenameExtension(absolutePathOrUrl, fetchAdapter)
 
-			// If Yanki should sync the asset, it will generate a new finalSrcURl and add a data property to
-			// the field so that the sync algorithms in anki-connect.ts can find it and sync it
-			let finalSrcUrl: string = absoluteSrcOrUrl
-			let yankiSyncMedia: boolean =
-				(extension !== undefined && srcType === 'localFilePath' && syncMediaAssets === 'local') ||
-				(srcType === 'remoteHttpUrl' && syncMediaAssets === 'remote') ||
-				syncMediaAssets === 'all'
+			// Never sync if extension can't be resolved...
+			const yankiSyncMedia: boolean =
+				((srcType === 'localFilePath' && syncMediaAssets === 'local') ||
+					(srcType === 'remoteHttpUrl' && syncMediaAssets === 'remote') ||
+					syncMediaAssets === 'all') &&
+				extension !== undefined
 
-			// Make sure the file exists if we're going to sync it
-			// If it doesn't, we will still wrap it but it can't be managed by Anki
-			if (yankiSyncMedia && extension !== undefined) {
-				const exists = await mediaAssetExists(absoluteSrcOrUrl, fileAdapter, fetchAdapter)
-				if (exists) {
-					// These handle url vs. file path internally... and also hash the asset
-					finalSrcUrl = await getSafeAnkiMediaFilename(
-						absoluteSrcOrUrl,
+			// If we're trying to manage the asset, try to hash it and get a safe
+			// filename for subsequent storage in the anki media system (otherwise undefined)
+			// This also does an existence check
+			const ankiMediaFilename = yankiSyncMedia
+				? await getSafeAnkiMediaFilename(
+						absolutePathOrUrl,
 						namespace,
+						extension,
 						fileAdapter,
 						fetchAdapter,
 					)
-				} else {
-					console.warn(
-						`Could not find media asset: "${absoluteSrcOrUrl}" (Original src: "${String(node.properties.src)}"`,
-					)
-					yankiSyncMedia = false
-				}
-			}
+				: undefined
+
+			const finalSrc = ankiMediaFilename ?? absolutePathOrUrl
+
+			// Never sync assets we can't infer the type of...
+			const syncEnabled: string =
+				yankiSyncMedia && ankiMediaFilename !== undefined ? 'true' : 'false'
 
 			if (extension === undefined) {
-				// Rare case of unresolvable extension, this will just yield a broken
-				// image, but note how it differs from the 'unknown' case below
-
-				console.warn(
-					`Missing or unsupported media asset file extension for "${String(node.properties.src)}"`,
+				// Unsupported, add a placeholder
+				parent.children.splice(
+					index,
+					1,
+					u(
+						'element',
+						{
+							properties: {
+								className: ['yanki-media', 'yanki-media-unsupported'],
+								'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
+								'data-yanki-media-src': absolutePathOrUrl,
+								'data-yanki-media-sync': syncEnabled, // Always false
+								'data-yanki-src': finalSrc,
+								'data-yanki-src-original': node.properties['data-yanki-src-original'],
+							},
+							tagName: 'span',
+						},
+						[
+							u(
+								'text',
+								`Unsupported media: "${String(node.properties['data-yanki-src-original'])}"`,
+							),
+						],
+					),
 				)
-
-				node.properties.src = finalSrcUrl
-				node.properties.className = ['yanki-media', 'yanki-media-unsupported']
-				node.properties['data-yanki-media-src'] = absoluteSrcOrUrl
-				node.properties['data-yanki-media-sync'] = 'false'
 			} else if (
-				// Assume remote image assets without a valid extension are images...
-				// they will have 'unknown' as their extension if
-				// MEDIA_ALLOW_UNKNOWN_URL_EXTENSION is true
-				(['unknown', ...MEDIA_SUPPORTED_IMAGE_EXTENSIONS] as unknown as string[]).includes(
+				(['unsupported', ...MEDIA_SUPPORTED_IMAGE_EXTENSIONS] as unknown as string[]).includes(
 					extension,
 				)
 			) {
-				// Image, update the img tag
+				// Image (or unsupported media type, which we treat as an image)
+				//
 				// Width and height will be set later
-				node.properties.src = finalSrcUrl
+				node.properties.src = finalSrc
 				node.properties.className = ['yanki-media', 'yanki-media-image']
-				node.properties['data-yanki-media-src'] = absoluteSrcOrUrl
-				node.properties['data-yanki-media-sync'] = yankiSyncMedia ? 'true' : 'false'
+				node.properties['data-yanki-media-src'] = absolutePathOrUrl
+				node.properties['data-yanki-media-sync'] = syncEnabled
 			} else if (
 				(MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS as unknown as string[]).includes(extension)
 			) {
 				// Audio or video
-
-				// Replace the current img node with a span
-				// containing the weirdo Anki media embedding syntax
-
+				//
+				// Replace the current img node with a span containing the weirdo Anki
+				// media embedding syntax
+				//
 				// Using <audio> and <video> tags would be nicer, and <audio> kind of
 				// works on desktop, but this breaks on mobile, so we shall use the
 				// [sound:] syntax
+
 				parent.children.splice(
 					index,
 					1,
@@ -257,14 +268,14 @@ export async function mdastToHtml(
 							properties: {
 								className: ['yanki-media', 'yanki-media-audio-video'],
 								'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
-								'data-yanki-media-src': absoluteSrcOrUrl,
-								'data-yanki-media-sync': yankiSyncMedia ? 'true' : 'false',
-								'data-yanki-src': finalSrcUrl,
-								'data-yanki-src-original': node.properties.dataYankiSrcOriginal,
+								'data-yanki-media-src': absolutePathOrUrl,
+								'data-yanki-media-sync': syncEnabled,
+								'data-yanki-src': finalSrc,
+								'data-yanki-src-original': node.properties['data-yanki-src-original'],
 							},
 							tagName: 'span',
 						},
-						[u('text', `[sound:${finalSrcUrl}]`)],
+						[u('text', `[sound:${finalSrc}]`)],
 					),
 				)
 			}
@@ -372,15 +383,15 @@ export function extractMediaFromHtml(html: string): Media[] {
 	visit(hast, 'element', (node) => {
 		if (
 			(node.tagName === 'img' || node.tagName === 'span') &&
-			node.properties?.dataYankiMediaSync === 'true'
+			node.properties['data-yanki-media-sync'] === 'true'
 		) {
 			const filename =
 				// <img>
 				node.properties?.src ??
 				// <span>>
-				node.properties?.dataYankiSrc
+				node.properties['data-yanki-src']
 
-			const originalSrc = node.properties?.dataYankiMediaSrc
+			const originalSrc = node.properties['data-yanki-media-src']
 			if (
 				filename !== undefined &&
 				originalSrc !== undefined &&

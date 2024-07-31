@@ -91,14 +91,19 @@ export async function mediaAssetExists(
 export async function getSafeAnkiMediaFilename(
 	absolutePathOrUrl: string,
 	namespace: string,
+	fileExtension: string | undefined,
 	fileAdapter: FileAdapter,
 	fetchAdapter: FetchAdapter,
-): Promise<string> {
+): Promise<string | undefined> {
 	// Can be a bit more than max namespace length, since it's always prefixed with `yanki-media-`
+	const exists = await mediaAssetExists(absolutePathOrUrl, fileAdapter, fetchAdapter)
+	if (!exists) {
+		return undefined
+	}
+
 	const safeNamespace = getSlugifiedNamespace(namespace)
 	const assetHash = await getContentHash(absolutePathOrUrl, fileAdapter, fetchAdapter)
-	const rawFileExtension = await getAnkiMediaFilenameExtension(absolutePathOrUrl, fetchAdapter)
-	const fileExtension = rawFileExtension === undefined ? '' : `.${rawFileExtension}`
+	const resolvedFileExtension = fileExtension === undefined ? '' : `.${fileExtension}`
 
 	let safeFilename: string | undefined
 
@@ -106,13 +111,13 @@ export async function getSafeAnkiMediaFilename(
 		// Make the legible filename as long as possible, add in the dash widths, dot is included in the extension
 		const legibleFilenameLength =
 			MEDIA_FILENAME_MAX_LENGTH -
-			(safeNamespace.length + 1 + assetHash.length + 1 + fileExtension.length)
+			(safeNamespace.length + 1 + assetHash.length + 1 + resolvedFileExtension.length)
 
 		const legibleFilename = getLegibleFilename(absolutePathOrUrl, legibleFilenameLength)
 		// 40 + 1 + 16 + 1 + ? + 1 + 8
-		safeFilename = `${safeNamespace}-${assetHash}-${legibleFilename}${fileExtension}`
+		safeFilename = `${safeNamespace}-${assetHash}-${legibleFilename}${resolvedFileExtension}`
 	} else {
-		safeFilename = `${safeNamespace}-${assetHash}${fileExtension}`
+		safeFilename = `${safeNamespace}-${assetHash}${resolvedFileExtension}`
 	}
 
 	// Should never happen

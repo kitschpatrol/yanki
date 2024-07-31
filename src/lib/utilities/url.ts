@@ -206,6 +206,11 @@ export async function getFileExtensionFromUrl(
 
 			if (parsedUrl === undefined) {
 				console.warn(`Could not parse URL: ${url}`)
+
+				if (allowUnknown) {
+					return 'unknown'
+				}
+
 				return undefined
 			}
 
