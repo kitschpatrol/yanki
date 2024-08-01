@@ -1,6 +1,6 @@
 import { type syncFiles } from '../../src/lib'
+import { normalize } from '../../src/lib/utilities/path'
 import os from 'node:os'
-import slash from 'slash'
 import sortKeys from 'sort-keys'
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
@@ -18,11 +18,11 @@ export function cleanUpTempPath(filePath: string | undefined): string | undefine
 		return undefined
 	}
 
-	return filePath.replaceAll(slash(os.tmpdir()), '/').replaceAll(/\/\d{13}\//g, '')
+	return filePath.replaceAll(normalize(os.tmpdir()), '/').replaceAll(/\/\d{13}\//g, '')
 }
 
 function cleanUpHashes(text: string): string {
-	return text.replaceAll(/-[\da-f]{16}-/g, '-HASH-')
+	return text.replaceAll(/-[\da-f]{16}/g, '-HASH')
 }
 
 export function stableNoteIds(text: string): string {

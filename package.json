@@ -77,8 +77,6 @@
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^2.2.1",
 		"@stdlib/assert-is-absolute-path": "^0.2.2",
-		"@stdlib/assert-is-relative-path": "^0.2.2",
-		"@stdlib/utils-convert-path": "^0.2.2",
 		"@vitest/browser": "^2.0.5",
 		"@vitest/coverage-istanbul": "^2.0.5",
 		"bumpp": "^9.4.1",

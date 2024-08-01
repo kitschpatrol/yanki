@@ -8,7 +8,7 @@ import {
 } from '../shared/constants'
 import { type FetchAdapter } from '../shared/types'
 import { getFileExtensionForMimeType } from './mime'
-import { isAbsolute, isRelative, normalize } from './path'
+import { isAbsolute, normalize } from './path'
 import { getHash } from './string'
 
 // Detect probably wiki-style name links

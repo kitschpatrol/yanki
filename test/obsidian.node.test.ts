@@ -47,15 +47,13 @@ it('correctly resolves obsidian wiki links', async () => {
 	const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
 	const basePath = normalize(path.resolve('./test/assets/test-obsidian-vault'))
 
-	console.log(notesToTest)
-
 	for (const file of notesToTest) {
 		const markdown = await fs.readFile(file, 'utf8')
 
 		const noteResolved = await getNoteFromMarkdown(markdown, {
 			allFilePaths,
 			basePath,
-			cwd: path.posix.dirname(path.posix.resolve(file)),
+			cwd: normalize(path.dirname(file)),
 			namespace: 'test',
 			obsidianVault: 'test-obsidian-vault',
 			syncMediaAssets: 'off',
@@ -96,7 +94,7 @@ describeWithFileFixture(
 					result.filePathOriginal?.endsWith('test card.md')
 				) {
 					const html = `${result.note.fields.Front}${result.note.fields.Back}`
-					checkWikiLinkResolution(html, context.tempAssetPath)
+					checkWikiLinkResolution(html, normalize(context.tempAssetPath))
 				}
 			}
 
@@ -139,7 +137,7 @@ describeWithFileFixture(
 					// Debug
 					// console.log(`Checking: ${result.filePathOriginal} which is now ${result.filePath}`)
 					const html = `${result.note.fields.Front}${result.note.fields.Back}`
-					checkWikiLinkResolution(html, context.tempAssetPath)
+					checkWikiLinkResolution(html, normalize(context.tempAssetPath))
 				}
 			}
 
@@ -170,6 +168,7 @@ function checkWikiLinkResolution(html: string, basePath: string): void {
 
 		// Clean up for comparison, handling Obsidian vault links if present
 		const srcPathFromVaultLink = parseObsidianVaultLink(expectedSrc)?.linkPath ?? expectedSrc
+
 		const expectedSrcClean = path.posix.normalize(
 			getBase(stripBasePath(stripAnkiMediaTag(srcPathFromVaultLink), basePath)).toLowerCase(),
 		)
@@ -182,6 +181,7 @@ function checkWikiLinkResolution(html: string, basePath: string): void {
 				.normalize(getBase(stripBasePath(resolvedSrcPathFromVaultLink, basePath)))
 				.toLowerCase()
 				.replace('test/assets/test-obsidian-vault', '')
+				.replace('c:/users/mika/code/yanki/', '')
 				.replace('/users/mika/code/yanki/', ''),
 		)
 

@@ -1,6 +1,5 @@
 import { splitAtFirstMatch } from './string'
 import isAbsolutePath from '@stdlib/assert-is-absolute-path'
-import isRelativePath from '@stdlib/assert-is-relative-path'
 import path from 'path-browserify-esm'
 import slash from 'slash'
 
@@ -8,15 +7,6 @@ import slash from 'slash'
 // function stripLeadingSlash(filePath: string): string {
 // 	return filePath.startsWith('/') ? filePath.slice(1) : filePath
 // }
-
-/**
- * The browserify polyfill doesn't implement win32 absolute path detection...
- * @param filePath Normalized path
- * @returns
- */
-export function isRelative(filePath: string): boolean {
-	return isRelativePath.posix(filePath) || isRelativePath.win32(filePath)
-}
 
 /**
  * The browserify polyfill doesn't implement win32 absolute path detection...
