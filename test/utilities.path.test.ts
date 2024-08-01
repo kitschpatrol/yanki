@@ -1,7 +1,6 @@
 import {
 	getBaseAndQueryParts,
 	isAbsolute,
-	isRelative,
 	normalize,
 	resolveWithBasePath,
 } from '../src/lib/utilities/path'
@@ -77,51 +76,6 @@ it('detects absolute paths', () => {
 		  "\\\\?\\Volume{abc123-abc123-abc123}\\\\ --> absolute",
 		  "/Server/Share/folder --> absolute",
 		  "C:/Bla bla bla#some#stuff --> absolute",
-		  "/Bla bla bla#stuff --> absolute",
-		  "Bla bla bla#stuff --> relative",
-		  "./Bla bla bla#stuff --> relative",
-		  "../Bla bla bla^block --> relative",
-		  "./Bla bla bla?query=yes --> relative",
-		  "/path/Bla bla bla#stuff --> absolute",
-		  "/Bla bla bla#stuff --> absolute",
-		  "./more/Bla bla bla.config.yes#stuff --> relative",
-		  "../Bla bla bla.txt^block --> relative",
-		  "./Bla bla bla?query=yes --> relative",
-		]
-	`)
-})
-
-it('detects relative paths', () => {
-	const results = testPathsNormalized.map(
-		(path) => `${path} --> ${isRelative(path) ? 'relative' : 'absolute'}`,
-	)
-
-	expect(results).toMatchInlineSnapshot(`
-		[
-		  "C:/Bla bla bla --> relative",
-		  "/Bla bla bla --> absolute",
-		  "../Bla bla bla --> relative",
-		  "./Bla bla bla --> relative",
-		  "Bla bla bla --> relative",
-		  "C:/something/something/**/*.md --> relative",
-		  "C:/something/something/**/*.md --> relative",
-		  "C:/something/something/**/*.md --> relative",
-		  "C:/something/something/**/*.md --> relative",
-		  "C:/something/something/**/*.md --> relative",
-		  "../yes --> relative",
-		  "C:/Bla bla bla --> relative",
-		  "C:/Bla bla bla --> relative",
-		  "C:/Bla bla bla/some file.txt --> relative",
-		  "d:/Bla bla bla --> relative",
-		  "z:/Bla bla bla --> relative",
-		  "C:/Bla bla bla --> relative",
-		  "C:/Bla bla bla --> relative",
-		  "C:/Bla bla bla/some file.txt --> relative",
-		  "d:/Bla bla bla --> relative",
-		  "z:/Bla bla bla --> relative",
-		  "\\\\?\\Volume{abc123-abc123-abc123}\\\\ --> relative",
-		  "/Server/Share/folder --> absolute",
-		  "C:/Bla bla bla#some#stuff --> relative",
 		  "/Bla bla bla#stuff --> absolute",
 		  "Bla bla bla#stuff --> relative",
 		  "./Bla bla bla#stuff --> relative",
