@@ -35,15 +35,19 @@ it('detects absence of obsidian vault', async () => {
 it('correctly resolves obsidian wiki links', async () => {
 	// Notes have been specially prepared with the correct Obsidian-resolved link
 	// path in their alt text or innerHTML text
-	const notesToTest = [
+	const notesToTestRaw = [
 		'./test/assets/test-obsidian-vault/Wiki Links/test card.md',
 		'./test/assets/test-obsidian-vault/Wiki Links/Nested/test card.md',
 		'./test/assets/test-obsidian-vault/Wiki Links/Nested/Nested/test card.md',
 	]
 
+	const notesToTest = notesToTestRaw.map((file) => normalize(path.resolve(file)))
+
 	const allFilePathsRaw = await globby('./test/assets/test-obsidian-vault/**/*', { absolute: true })
 	const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
 	const basePath = normalize(path.resolve('./test/assets/test-obsidian-vault'))
+
+	console.log(notesToTest)
 
 	for (const file of notesToTest) {
 		const markdown = await fs.readFile(file, 'utf8')

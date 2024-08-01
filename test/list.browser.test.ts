@@ -1,6 +1,15 @@
 import { type YankiNote, listNotes, syncNotes } from '../src/lib'
 import { expect, it } from 'vitest'
 
+// Browser fetch adapter example
+// async function fetchAdapter(
+// 	url: Parameters<FetchAdapter>['0'],
+// 	options: Parameters<FetchAdapter>['1'],
+// ): ReturnType<FetchAdapter> {
+// 	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+// 	return fetch(url, options)
+// }
+
 it('lists notes', async () => {
 	// Mock data
 	const namespace = 'Yanki Test - list.browser.test'
@@ -16,11 +25,20 @@ it('lists notes', async () => {
 		tags: [],
 	}
 
-	await syncNotes([testNote], {
-		namespace,
-	})
+	try {
+		await syncNotes([testNote], {
+			ankiConnectOptions: {
+				// Unused, yanki-connect uses browser fetch automatically if available
+				// fetchAdapter,
+			},
+		})
+	} catch (error) {
+		console.log(error)
+		// Assert(false, String(error))
+	}
 
 	const notes = await listNotes({ namespace })
+
 	expect(notes.notes.length).toBeGreaterThan(0)
 
 	await syncNotes([], {

@@ -4,9 +4,10 @@ import isRelativePath from '@stdlib/assert-is-relative-path'
 import path from 'path-browserify-esm'
 import slash from 'slash'
 
-function stripLeadingSlash(filePath: string): string {
-	return filePath.startsWith('/') ? filePath.slice(1) : filePath
-}
+// Unused...
+// function stripLeadingSlash(filePath: string): string {
+// 	return filePath.startsWith('/') ? filePath.slice(1) : filePath
+// }
 
 /**
  * The browserify polyfill doesn't implement win32 absolute path detection...
@@ -14,7 +15,7 @@ function stripLeadingSlash(filePath: string): string {
  * @returns
  */
 export function isRelative(filePath: string): boolean {
-	return isRelativePath(filePath)
+	return isRelativePath.posix(filePath) || isRelativePath.win32(filePath)
 }
 
 /**
@@ -23,7 +24,7 @@ export function isRelative(filePath: string): boolean {
  * @returns
  */
 export function isAbsolute(filePath: string): boolean {
-	return isAbsolutePath(filePath)
+	return isAbsolutePath.posix(filePath) || isAbsolutePath.win32(filePath)
 }
 
 const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/
@@ -62,23 +63,30 @@ export function normalize(filePath: string): string {
 
 /**
  * Special handling for `/absolute-path.md` style links in Obsidian
- * and static site generators, where absolute paths are relative to a base path.
+ * and static site generators, where absolute paths are relative to a base path
+ * instead of the volume root.
  *
- * Technically not strictly idempotent, in cases where the base path and absolute path
- * already match but should be combined.
+
  *
- * All paths must be normalized and in 'mixed' style.
+ * Paths starting with Windows drive letters, while technically absolute, are _not_ prepended with the base:
+ * - If no base path is provided, paths are resolved relative to the the provided CWD.
+ * - If paths are relative, the base paths are ignored and the CWD is used.
  *
- * @param filePath Normalized path
- * @param options Normalized base and cwd
- * @returns
+ * All path values are normalized and in 'mixed' platform style.
  */
 export function resolveWithBasePath(
 	filePath: string,
-	options: { basePath?: string; cwd: string },
+	options: {
+		/** Relative, absolute, or drive-letter absolute path. Normalized and in the 'mixed' platform style. */
+		basePath?: string | undefined
+		/** Whether to keep prepend the base if the file path already starts with it. Useful for pseudo-idempotence, but will get it wrong in some edge cases with duplicative path segments. Defaults to false. */
+		compoundBase?: boolean | undefined
+		/** Relative to the volume root. Normalized and in the 'mixed' platform style. */
+		cwd: string
+	},
 ): string {
 	// Prep options
-	const { basePath, cwd } = options
+	const { basePath, compoundBase = false, cwd } = options
 
 	// Validation
 	if (basePath !== undefined) {
@@ -95,29 +103,23 @@ export function resolveWithBasePath(
 		console.warn(`CWD "${cwd}" is not absolute`)
 	}
 
-	const originalCwd = path.process_cwd
-	path.setCWD(cwd)
-	let newPath = filePath
-	// Debug
-	// console.log('----------------------------------')
-	// console.log(`newPath:  ${newPath}`)
-	// console.log(`basePath: ${basePath}`)
-	// console.log(`cwd:      ${cwd}`)
+	// Absolute
+	if (isAbsolute(filePath)) {
+		// Path is absolute by drive letter on Windows, or there's not base path to prepend
+		if (
+			basePath === undefined ||
+			/^[A-Za-z]:/.test(filePath) ||
+			(!compoundBase && filePath.startsWith(basePath))
+		) {
+			return filePath
+		}
 
-	// If the path is already absolute, we check if we need to add a base path
-	// Base path obviates the CWD
-	if (isAbsolute(newPath)) {
-		newPath =
-			basePath !== undefined && !newPath.startsWith(basePath)
-				? path.resolve(basePath, stripLeadingSlash(newPath))
-				: newPath
-	} else {
-		// CWD beats base path for relative paths...
-		newPath = path.resolve(cwd, newPath)
+		// Resolve over base
+		return path.join(basePath, filePath)
 	}
 
-	path.setCWD(originalCwd)
-	return newPath
+	// Relative
+	return path.join(cwd, filePath)
 }
 
 /**
@@ -128,10 +130,10 @@ export function resolveWithBasePath(
  */
 export function resolveWithCwd(filePath: string, cwd: string): string {
 	if (filePath.startsWith('cwd')) {
-		return path.normalize(filePath)
+		return filePath
 	}
 
-	return path.normalize(path.join(cwd, filePath))
+	return path.join(cwd, filePath)
 }
 
 export function stripBasePath(filePath: string, basePath: string): string {
@@ -140,7 +142,10 @@ export function stripBasePath(filePath: string, basePath: string): string {
 }
 
 export function getBaseAndQueryParts(filePath: string): [string, string | undefined] {
-	return splitAtFirstMatch(filePath, /[#?^]/)
+	const directoryPath = path.dirname(filePath)
+	const fileName = path.basename(filePath)
+	const [base, query] = splitAtFirstMatch(fileName, /[#?^]/)
+	return [path.join(directoryPath, base), query]
 }
 
 export function getBase(filePath: string): string {
