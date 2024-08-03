@@ -21,6 +21,7 @@ import { deepmerge } from 'deepmerge-ts'
 import { type Element, type Root as HastRoot } from 'hast'
 import { toText } from 'hast-util-to-text'
 import type { Root as MdastRoot } from 'mdast'
+import rehypeFormat from 'rehype-format'
 import rehypeMathjax from 'rehype-mathjax'
 import rehypeParse from 'rehype-parse'
 import rehypeRemoveComments from 'rehype-remove-comments'
@@ -56,6 +57,7 @@ const processor = unified()
 		},
 	})
 	// .use(rehypeStringify, { allowDangerousCharacters: true, allowDangerousHtml: true })
+	.use(rehypeFormat)
 	.use(rehypeStringify)
 
 export type MdastToHtmlOptions = Simplify<

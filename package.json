@@ -93,6 +93,7 @@
 		"playwright": "^1.45.3",
 		"plur": "^5.1.0",
 		"pretty-ms": "^9.1.0",
+		"rehype-format": "^5.0.0",
 		"rehype-remove-comments": "^6.0.0",
 		"rehype-stringify": "^10.0.0",
 		"remark": "^15.0.1",

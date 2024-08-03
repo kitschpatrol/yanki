@@ -36,8 +36,12 @@ it('syncs notes', async () => {
 		{
 		  "deckName": "",
 		  "fields": {
-		    "Back": "<div class="yanki namespace-yanki-sync-browser-test back model-yanki-basic"><p>The back!</p></div>",
-		    "Front": "<div class="yanki namespace-yanki-sync-browser-test front model-yanki-basic"><p><strong>The Cauchy-Schwarz Inequality</strong></p></div>",
+		    "Back": "<div class="yanki namespace-yanki-sync-browser-test back model-yanki-basic">
+		<p>The back!</p>
+		</div>",
+		    "Front": "<div class="yanki namespace-yanki-sync-browser-test front model-yanki-basic">
+		<p><strong>The Cauchy-Schwarz Inequality</strong></p>
+		</div>",
 		    "YankiNamespace": "yanki.sync.browser.test",
 		  },
 		  "modelName": "Yanki - Basic",
@@ -66,8 +70,12 @@ it('syncs notes', async () => {
 		      "note": {
 		        "deckName": "Yanki",
 		        "fields": {
-		          "Back": "<div class="yanki namespace-yanki-sync-browser-test back model-yanki-basic"><p>The back!</p></div>",
-		          "Front": "<div class="yanki namespace-yanki-sync-browser-test front model-yanki-basic"><p><strong>The Cauchy-Schwarz Inequality</strong></p></div>",
+		          "Back": "<div class="yanki namespace-yanki-sync-browser-test back model-yanki-basic">
+		<p>The back!</p>
+		</div>",
+		          "Front": "<div class="yanki namespace-yanki-sync-browser-test front model-yanki-basic">
+		<p><strong>The Cauchy-Schwarz Inequality</strong></p>
+		</div>",
 		          "YankiNamespace": "yanki.sync.browser.test",
 		        },
 		        "modelName": "Yanki - Basic",
