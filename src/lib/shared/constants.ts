@@ -56,25 +56,23 @@ export const NOTE_DEFAULT_EMPTY_TEXT = '(Empty)'
  * HTML element to use to present `NOTE_DEFAULT_EMPTY_TEXT`.
  * TODO consider hidden span?
  */
-export const NOTE_DEFAULT_EMPTY_HAST = u('root', [
-	u(
-		'element',
-		{
-			properties: {},
-			tagName: 'p',
-		},
-		[
-			u(
-				'element',
-				{
-					properties: {},
-					tagName: 'em',
-				},
-				[u('text', NOTE_DEFAULT_EMPTY_TEXT)],
-			),
-		],
-	),
-])
+export const NOTE_DEFAULT_EMPTY_HAST = u(
+	'element',
+	{
+		properties: {},
+		tagName: 'p',
+	},
+	[
+		u(
+			'element',
+			{
+				properties: {},
+				tagName: 'em',
+			},
+			[u('text', NOTE_DEFAULT_EMPTY_TEXT)],
+		),
+	],
+)
 
 /**
  * How / where to get a hash to determine if media assets have changes.

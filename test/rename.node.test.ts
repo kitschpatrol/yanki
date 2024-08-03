@@ -47,6 +47,8 @@ describeWithFileFixture(
 				  "This looks a lot like a cloze or two here's a hint.md",
 				  "Untitled (1).md",
 				  "Untitled (2).md",
+				  "Untitled (3).md",
+				  "Untitled (4).md",
 				]
 			`)
 		})

@@ -128,7 +128,7 @@ Yanki tags the notes it's in charge of with a hidden field, so it will never tou
 
 An extended palette of markdown syntax is available out of the box:
 
-- [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-throughs~~`, `- [x] task lists`, and autolinks.
+- Most [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-throughs~~`, `- [x] task lists`. (Autolinks are not currently supported).
 - Syntax highlighting via [Shiki](https://shiki.style).
 - GitHub-style [Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
 - [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md)
@@ -581,6 +581,8 @@ Linux testing was performed on a Debian 12 arm64 virtual machine. Anki does not 
 Areas of improvement before a 1.0.0 release:
 
 Possible features on the horizon:
+
+- [ ] Restore support for GitHub-flavored Markdown style autolinks. (Unfortunately they're currently in conflict with the WikiLink implementation.)
 
 - [ ] Sync and store Anki's review statistics to the Markdown file's frontmatter.
 

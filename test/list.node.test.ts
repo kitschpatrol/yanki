@@ -38,7 +38,9 @@ describeWithFileFixture(
 			const formatted = formatListResult(result)
 
 			expect(sortMultiline(stableNoteIds(formatted))).toMatchInlineSnapshot(`
-				"Note ID XXXXXXXXXXXXX (Empty)
+				"Note ID XXXXXXXXXXXXX 
+				Note ID XXXXXXXXXXXXX 
+				Note ID XXXXXXXXXXXXX (Empty)
 				Note ID XXXXXXXXXXXXX (Empty)
 				Note ID XXXXXXXXXXXXX (Empty)
 				Note ID XXXXXXXXXXXXX (Empty)

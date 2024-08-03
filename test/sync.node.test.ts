@@ -45,6 +45,8 @@ describeWithFileFixture(
 				  "basic-with-empty-frontmatter.md": "Yanki - Basic",
 				  "basic-with-front-and-cloze-like-back.md": "Yanki - Basic",
 				  "basic-with-front-and-no-back.md": "Yanki - Basic",
+				  "basic-with-front-image-markdown-embedand-no-back.md": "Yanki - Basic",
+				  "basic-with-front-image-wiki-embed-and-no-back copy.md": "Yanki - Basic",
 				  "basic-with-type-in-the-answer-like-back-and-no-front.md": "Yanki - Basic",
 				  "basic-with-type-in-the-answer-like-front-and-no-back.md": "Yanki - Basic",
 				  "basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md": "Yanki - Basic",
@@ -138,16 +140,16 @@ describeWithFileFixture(
 
 			const syncFormatted = formatSyncFilesResult(results)
 			expect(stablePrettyMs(syncFormatted)).toMatchInlineSnapshot(
-				`"Successfully synced 27 notes to Anki in XXX."`,
+				`"Successfully synced 29 notes to Anki in XXX."`,
 			)
 
 			// Verbose report
 			const runFormattedVerbose = formatSyncFilesResult(results, true)
 			expect(stablePrettyMs(stableNoteIds(runFormattedVerbose))).toMatchInlineSnapshot(`
-				"Successfully synced 27 notes to Anki in XXX.
+				"Successfully synced 29 notes to Anki in XXX.
 
 				Sync Summary:
-				  Created: 27
+				  Created: 29
 
 				Sync Details:
 				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card-with-no-back.md
@@ -165,6 +167,8 @@ describeWithFileFixture(
 				  Note ID 0 Created /test-minimal-notes/basic-with-empty-frontmatter.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-front-and-cloze-like-back.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-front-and-no-back.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-front-image-markdown-embedand-no-back.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back copy.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md

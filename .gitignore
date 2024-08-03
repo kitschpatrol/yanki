@@ -20,3 +20,4 @@ vendor/
 
 # Customizations
 /test/assets/test-obsidian-vault/.obsidian/workspace.json
+/src/test.ts

@@ -18,15 +18,14 @@ import { cleanClassName, emptyIsUndefined } from '../utilities/string'
 import { getSrcType, isUrl, safeDecodeURI } from '../utilities/url'
 import rehypeShiki from '@shikijs/rehype'
 import { deepmerge } from 'deepmerge-ts'
-import { type Element, type Root as HastRoot } from 'hast'
+import { type Element, type ElementContent, type Root as HastRoot } from 'hast'
 import { toText } from 'hast-util-to-text'
 import type { Root as MdastRoot } from 'mdast'
 import rehypeFormat from 'rehype-format'
 import rehypeMathjax from 'rehype-mathjax'
 import rehypeParse from 'rehype-parse'
-import rehypeRemoveComments from 'rehype-remove-comments'
+import rehypeRaw from 'rehype-raw'
 import rehypeStringify from 'rehype-stringify'
-import remarkGfm from 'remark-gfm'
 import remarkRehype from 'remark-rehype'
 import { type Simplify } from 'type-fest'
 import { unified } from 'unified'
@@ -36,10 +35,14 @@ import { CONTINUE, EXIT, visit } from 'unist-util-visit'
 // Significant performance improvement by reusing the processor
 const processor = unified()
 	// Not needed?
-	.use(remarkGfm)
-	// Don't allow dangerous HTML in the remark --> rehype step, else removing comments won't work
-	.use(remarkRehype)
-	.use(rehypeRemoveComments)
+	.use(remarkRehype, { allowDangerousHtml: true })
+	// Re-parses any raw HTML in the Markdown into the HAST tree,
+	// otherwise it ends up as text in raw-typed nodes. This allows
+	// things like manual <img> tags to be managed as Anki assets, and protects
+	// inline style tags from removal.
+	.use(rehypeRaw)
+	//  Not needed?
+	// .use(rehypeRemoveComments)
 	.use(rehypeMathjax)
 	// Messes up obsidian links and we should trust ourselves (and probably our plugins, too)
 	// .use(rehypeSanitize)
@@ -92,30 +95,18 @@ export async function mdastToHtml(
 
 	const hast = await processor.run(mdast)
 
-	// Check for emptiness
-	// TODO optimize this to avoid a second stringify...
-	// would need to inspect the hast tree directly
-	// to see if it matches the placeholder
-	const checkResult = processor.stringify(hast).trim()
-	const isEmpty = checkResult.length === 0
-
-	if (cssClassNames === undefined || (isEmpty && !useEmptyPlaceholder)) {
-		return addBoilerplateComment(checkResult)
-	}
-
 	// Add a wrapper div with a specific class to the HTML, this is hypothetically
 	// useful for styling the output via CSS
-	const nonEmptyHast = isEmpty ? NOTE_DEFAULT_EMPTY_HAST : hast
 	const hastWithClass: HastRoot = u('root', [
 		u(
 			'element',
 			{
 				properties: {
-					className: cssClassNames.map((name) => cleanClassName(name)),
+					className: cssClassNames?.map((name) => cleanClassName(name)),
 				},
 				tagName: 'div',
 			},
-			nonEmptyHast.children as Element[], // TODO: Fix this type error
+			hast.children as Element[], // TODO: Fix this type error
 		),
 	])
 
@@ -238,7 +229,7 @@ export async function mdastToHtml(
 
 				const finalSourceWithQuery = isUrl(finalSrc)
 					? finalSrc
-					: `${finalSrc}${getQuery(String(node.properties['data-yanki-src-original']))}`
+					: `${finalSrc}${getQuery(String(node.properties.dataYankiSrcOriginal))}`
 
 				parent.children.splice(
 					index,
@@ -255,7 +246,7 @@ export async function mdastToHtml(
 								'data-yanki-media-src': absolutePathOrUrl, // Where Anki should grab the media
 								'data-yanki-media-sync': syncEnabled, // Can theoretically be true if PDF or MD file
 								'data-yanki-src': finalSrc, // What anki should call the media
-								'data-yanki-src-original': node.properties['data-yanki-src-original'], // Pre-resolved URL, useful for debugging wiki links
+								'data-yanki-src-original': node.properties.dataYankiSrcOriginal, // Pre-resolved URL, useful for debugging wiki links
 							},
 							tagName: 'span',
 						},
@@ -268,7 +259,7 @@ export async function mdastToHtml(
 									},
 									tagName: 'a',
 								},
-								[u('text', String(node.properties['data-yanki-src-original']))],
+								[u('text', String(node.properties.dataYankiSrcOriginal))],
 							),
 						],
 					),
@@ -279,8 +270,8 @@ export async function mdastToHtml(
 				// Width and height will be set later
 				node.properties.src = finalSrc
 				node.properties.className = ['yanki-media', 'yanki-media-image']
-				node.properties['data-yanki-media-src'] = absolutePathOrUrl
-				node.properties['data-yanki-media-sync'] = syncEnabled
+				node.properties.dataYankiMediaSrc = absolutePathOrUrl
+				node.properties.dataYankiMediaSync = syncEnabled
 			} else if (
 				(MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS as unknown as string[]).includes(extension)
 			) {
@@ -305,7 +296,7 @@ export async function mdastToHtml(
 								'data-yanki-media-src': absolutePathOrUrl,
 								'data-yanki-media-sync': syncEnabled,
 								'data-yanki-src': finalSrc,
-								'data-yanki-src-original': node.properties['data-yanki-src-original'],
+								'data-yanki-src-original': node.properties.dataYankiSrcOriginal,
 							},
 							tagName: 'span',
 						},
@@ -381,26 +372,39 @@ export async function mdastToHtml(
 		}
 	})
 
-	const htmlWithClass = processor.stringify(hastWithClass)
+	// Check for emptiness...
+	const isEmpty = isVisuallyEmpty(hastWithClass)
 
-	// Add comment, we do this manually here because rehype-format does not add a
-	// line break after the comments
-	const htmlWithClassAndComment = addBoilerplateComment(htmlWithClass)
+	// Return early if empty
+	if (isEmpty && !useEmptyPlaceholder) {
+		return ''
+	}
 
-	return htmlWithClassAndComment.trim()
-}
+	const nonEmptyHast = isEmpty
+		? addFirstChildToFirstDiv(hastWithClass, NOTE_DEFAULT_EMPTY_HAST)
+		: hastWithClass
 
-function addBoilerplateComment(html: string): string {
-	const boilerplate = `This HTML was generated by Yanki, a Markdown to Anki converter. Do not edit directly.`
+	const html = processor.stringify(nonEmptyHast)
 
-	return `<!-- ${boilerplate} -->\n${html}`
+	// Add comment, we do this manually here instead of in an AST because
+	// rehype-format does not add a line break after the comments
+	return addBoilerplateComment(html).trim()
 }
 
 const htmlProcessor = unified().use(rehypeParse, { fragment: true })
 
+function addBoilerplateComment(html: string): string {
+	const boilerplate = `This HTML was generated by Yanki, a Markdown to Anki converter. Do not edit directly.`
+	return `<!-- ${boilerplate} -->\n${html}`
+}
+
+function hastToPlainText(hast: HastRoot): string {
+	return toText(hast)
+}
+
 function htmlToPlainText(html: string): string {
 	const hast = htmlProcessor.parse(html)
-	return toText(hast)
+	return hastToPlainText(hast)
 }
 
 export function getFirstLineOfHtmlAsPlainText(html: string): string {
@@ -514,4 +518,72 @@ function parseDimensions(dimensions: string): {
 		height: heightIsNan || height === undefined ? undefined : height,
 		width: widthIsNan || width === undefined ? undefined : width,
 	}
+}
+
+/**
+ * Determine if a HAST tree is visually empty.
+ * @param {Node} tree - The HAST tree to check.
+ * @returns {boolean} - True if the tree is visually empty, otherwise false.
+ */
+function isVisuallyEmpty(tree: HastRoot): boolean {
+	let hasVisualContent = false
+
+	visit(tree, (node) => {
+		if (hasVisualContent) return // Early exit if visual content is found
+
+		if (node.type === 'element') {
+			const element = node
+			const { tagName } = element
+
+			// Check for visually meaningful tags
+			// TODO vet that Anki agrees these are all 'real' non-empty content
+			const visuallyMeaningfulTags = [
+				'img',
+				'video',
+				'audio',
+				'iframe',
+				'object',
+				'embed',
+				'canvas',
+				'svg',
+				'picture',
+			]
+			if (visuallyMeaningfulTags.includes(tagName)) {
+				hasVisualContent = true
+				return EXIT
+			}
+
+			// Check if the element has text content
+			const textContent = toText(element).trim()
+			if (textContent) {
+				hasVisualContent = true
+				return EXIT
+			}
+		}
+
+		if (node.type === 'text' && node.value !== undefined && node.value.trim() !== '') {
+			hasVisualContent = true
+			return EXIT
+		}
+	})
+
+	return !hasVisualContent
+}
+
+/**
+ * Add a first child to the first div element in a HAST tree.
+ * Intended for use with the "div-wrapped" HAST tree generated early in `mdastToHtml`.
+ * @param tree - The HAST tree to modify in place.
+ * @param newChild - The new child node to add.
+ * @returns - The modified-in-place HAST tree.
+ */
+function addFirstChildToFirstDiv(tree: HastRoot, newChild: ElementContent): HastRoot {
+	visit(tree, 'element', (node: Element) => {
+		if (node.tagName === 'div') {
+			node.children.unshift(newChild)
+			return EXIT
+		}
+	})
+
+	return tree
 }

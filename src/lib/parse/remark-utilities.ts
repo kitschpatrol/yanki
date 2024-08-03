@@ -9,7 +9,7 @@ import { deepmerge } from 'deepmerge-ts'
 import type { Emphasis, Node, Parent, PhrasingContent, Root, Text } from 'mdast'
 import remarkFlexibleMarkers from 'remark-flexible-markers'
 import remarkFrontmatter from 'remark-frontmatter'
-import remarkGfm from 'remark-gfm'
+import remarkGfmNoAutolink from 'remark-gfm-no-autolink'
 import remarkGithubBetaBlockquoteAdmonitions from 'remark-github-beta-blockquote-admonitions'
 import remarkMath from 'remark-math'
 import remarkParse from 'remark-parse'
@@ -43,8 +43,13 @@ export async function getAstFromMarkdown(
 	const processor = unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, [{ anywhere: false, marker: '-', type: 'yaml' }])
-		.use(remarkGfm, { singleTilde: false })
 		.use(remarkWikiLinks, { automaticAlias: true })
+		//  Autolinks in the regular remark-gfm plugin conflict with the
+		//  remark-wiki-links plugin  because the latter operates after parsing, and
+		//  autolinks have already been converted at that point. A better long-term
+		//  solution will to rewrite the wiki-links plugin in micromark to handle
+		//  parsing, and then sequence it before remark-gfm.
+		.use(remarkGfmNoAutolink, { singleTilde: false })
 		.use(remarkResolveLinks, { allFilePaths, basePath, cwd, enabled: resolveUrls, obsidianVault })
 		.use(remarkMath)
 		.use(
