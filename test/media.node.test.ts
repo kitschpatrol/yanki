@@ -114,7 +114,7 @@ const allRemoteMediaUrls = [
 	'https://storage.kitschpatrol.com/example-image-2',
 ]
 
-it('correctly detects existence or non-existence of media files', async () => {
+it('correctly detects existence or non-existence of media files', { timeout: 60_000 }, async () => {
 	const fileAdapter = await getDefaultFileAdapter()
 
 	expect(await mediaAssetExists(allLocalMediaPaths[0], fileAdapter, fetchAdapter)).toBe(true)
