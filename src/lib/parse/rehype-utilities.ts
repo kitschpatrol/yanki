@@ -16,13 +16,13 @@ import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../util
 import { getBase, getQuery } from '../utilities/path'
 import { cleanClassName, emptyIsUndefined } from '../utilities/string'
 import { getSrcType, isUrl, safeDecodeURI } from '../utilities/url'
+import rehypeMathjaxAnki from './rehype-mathjax-anki'
 import rehypeShiki from '@shikijs/rehype'
 import { deepmerge } from 'deepmerge-ts'
 import { type Element, type ElementContent, type Root as HastRoot } from 'hast'
 import { toText } from 'hast-util-to-text'
 import type { Root as MdastRoot } from 'mdast'
 import rehypeFormat from 'rehype-format'
-import rehypeMathjax from 'rehype-mathjax'
 import rehypeParse from 'rehype-parse'
 import rehypeRaw from 'rehype-raw'
 import rehypeStringify from 'rehype-stringify'
@@ -41,9 +41,9 @@ const processor = unified()
 	// things like manual <img> tags to be managed as Anki assets, and protects
 	// inline style tags from removal.
 	.use(rehypeRaw)
+	.use(rehypeMathjaxAnki)
 	//  Not needed?
 	// .use(rehypeRemoveComments)
-	.use(rehypeMathjax)
 	// Messes up obsidian links and we should trust ourselves (and probably our plugins, too)
 	// .use(rehypeSanitize)
 	// Super slow...
@@ -311,33 +311,6 @@ export async function mdastToHtml(
 	for (const mutationPromise of treeMutationPromises) {
 		await mutationPromise()
 	}
-
-	// Edge case... if a note ONLY has MathJax in the front field, Anki will think it's empty
-	// (Anki-connect error message: "cannot create note because it is empty")
-	// So we have to add a hidden content field to convince Anki otherwise...
-	visit(hastWithClass, 'element', (node, _, parent) => {
-		if (parent === undefined) return CONTINUE
-
-		if (node.tagName === 'mjx-container') {
-			const index = parent.children.indexOf(node)
-			parent.children.splice(
-				index + 1,
-				0,
-				u(
-					'element',
-					{
-						properties: {
-							style: 'display: none;',
-						},
-						tagName: 'span',
-					},
-					[u('text', 'Not empty')],
-				),
-			)
-			// One is enough
-			return EXIT
-		}
-	})
 
 	// Extract image size metadata from alt text
 	// This is an Obsidian feature...

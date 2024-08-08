@@ -1,4 +1,4 @@
-My code block has nice syntax highlighting.
+My code block has no syntax highlighting.
 
 ```
 export function emptyIsUndefined(text: string | undefined): string | undefined {
