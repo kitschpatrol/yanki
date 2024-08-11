@@ -45,8 +45,8 @@ describeWithFileFixture(
 				  "basic-with-empty-frontmatter.md": "Yanki - Basic",
 				  "basic-with-front-and-cloze-like-back.md": "Yanki - Basic",
 				  "basic-with-front-and-no-back.md": "Yanki - Basic",
-				  "basic-with-front-image-markdown-embedand-no-back.md": "Yanki - Basic",
-				  "basic-with-front-image-wiki-embed-and-no-back copy.md": "Yanki - Basic",
+				  "basic-with-front-image-markdown-embed-and-no-back.md": "Yanki - Basic",
+				  "basic-with-front-image-wiki-embed-and-no-back.md": "Yanki - Basic",
 				  "basic-with-type-in-the-answer-like-back-and-no-front.md": "Yanki - Basic",
 				  "basic-with-type-in-the-answer-like-front-and-no-back.md": "Yanki - Basic",
 				  "basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md": "Yanki - Basic",
@@ -167,8 +167,8 @@ describeWithFileFixture(
 				  Note ID 0 Created /test-minimal-notes/basic-with-empty-frontmatter.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-front-and-cloze-like-back.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-front-and-no-back.md
-				  Note ID 0 Created /test-minimal-notes/basic-with-front-image-markdown-embedand-no-back.md
-				  Note ID 0 Created /test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back copy.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-front-image-markdown-embed-and-no-back.md
+				  Note ID 0 Created /test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md
 				  Note ID 0 Created /test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md

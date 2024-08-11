@@ -320,8 +320,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "/test-minimal-notes/basic-with-front-image-markdown-embedand-no-back.md",
-      "filePathOriginal": "/test-minimal-notes/basic-with-front-image-markdown-embedand-no-back.md",
+      "filePath": "/test-minimal-notes/basic-with-front-image-markdown-embed-and-no-back.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-front-image-markdown-embed-and-no-back.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {
@@ -341,8 +341,8 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
     },
     {
       "action": "created",
-      "filePath": "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back copy.md",
-      "filePathOriginal": "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back copy.md",
+      "filePath": "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md",
+      "filePathOriginal": "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md",
       "note": {
         "deckName": "test-minimal-notes",
         "fields": {

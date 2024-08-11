@@ -284,8 +284,8 @@ describeWithFileFixture(
 				  "/test-minimal-notes/cloze.md" => "/test-minimal-notes/This card has a (4).md",
 				  "/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md" => "/test-minimal-notes/This looks a lot like a cloze but it's a basic answer.md",
 				  "/test-minimal-notes/basic-with-empty-everything.md" => "/test-minimal-notes/Untitled (1).md",
-				  "/test-minimal-notes/basic-with-front-image-markdown-embedand-no-back.md" => "/test-minimal-notes/Untitled (2).md",
-				  "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back copy.md" => "/test-minimal-notes/Untitled (3).md",
+				  "/test-minimal-notes/basic-with-front-image-markdown-embed-and-no-back.md" => "/test-minimal-notes/Untitled (2).md",
+				  "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md" => "/test-minimal-notes/Untitled (3).md",
 				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/Untitled (4).md",
 				}
 			`)
@@ -381,8 +381,8 @@ describeWithFileFixture(
 				  "/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md" => "/test-minimal-notes/This looks a lot like a cloze but it's a basic answer.md",
 				  "/test-minimal-notes/basic-with-front-and-cloze-like-back.md" => "/test-minimal-notes/This looks a lot like a cloze or two here's a hint.md",
 				  "/test-minimal-notes/basic-with-empty-everything.md" => "/test-minimal-notes/Untitled (1).md",
-				  "/test-minimal-notes/basic-with-front-image-markdown-embedand-no-back.md" => "/test-minimal-notes/Untitled (2).md",
-				  "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back copy.md" => "/test-minimal-notes/Untitled (3).md",
+				  "/test-minimal-notes/basic-with-front-image-markdown-embed-and-no-back.md" => "/test-minimal-notes/Untitled (2).md",
+				  "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md" => "/test-minimal-notes/Untitled (3).md",
 				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/Untitled (4).md",
 				}
 			`)
