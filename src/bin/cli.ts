@@ -26,16 +26,18 @@ import { hideBin } from 'yargs/helpers'
 // Helper for nice errors in the most common case where Anki is not running
 // Must be constant function expression to help TS infer that it exits
 const ankiNotRunningErrorHandler = (error: unknown) => {
-	const { code } = (error as { cause: { code: string } } & Error).cause
-
-	if (code === 'ECONNREFUSED') {
-		log.error('Failed to connect to Anki. Make sure Anki is running and AnkiConnect is installed.')
-		process.exitCode = 1
-		// eslint-disable-next-line unicorn/no-process-exit
-		process.exit()
-	}
-
 	if (error instanceof Error) {
+		const { code } = error.cause as { code?: string }
+
+		if (code === 'ECONNREFUSED') {
+			log.error(
+				'Failed to connect to Anki. Make sure Anki is running and AnkiConnect is installed.',
+			)
+			process.exitCode = 1
+			// eslint-disable-next-line unicorn/no-process-exit
+			process.exit()
+		}
+
 		throw error
 	}
 
