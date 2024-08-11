@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineWorkspace } from 'vitest/config'
 
 export default defineWorkspace([
@@ -50,7 +51,7 @@ export default defineWorkspace([
 			exclude: ['test/**/*.browser.test.ts'],
 			include: ['test/**/*.test.ts'],
 			name: 'node',
-			root: path.resolve(import.meta.dirname),
+			root: path.resolve(path.dirname(fileURLToPath(import.meta.url))),
 		},
 	},
 ])
