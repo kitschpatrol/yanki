@@ -41,19 +41,23 @@ const plugin: Plugin<unknown[], Root> = function () {
 				// Anki's documentation calls for \[ and \] for block math, \( and \)
 				// for inline math, but this seems to be replaced in the Anki editor by
 				// the `<anki-mathjax block="true">` and <anki-mathjax> custom elements,
-				// respectively.
+				// respectively, which seems weird and might threaten note stability across syncs?
+				//
+				// Tried adding `remark-math` tags directly, but this was not compatible with Anki Mobile.
 				//
 				// Note that `remark-math` only considers an equation to be a block if
 				// it contains line breaks, it does not distinguish between `$` and
 				// `$$`. (TODO fix this?)
-				node.tagName = 'anki-mathjax'
-				node.properties =
-					node.properties.className.includes('math-display') || fenced
-						? {
-								block: 'true',
-							}
-						: {}
+
+				const isBlock = node.properties.className.includes('math-display') || fenced
 				fenced = false
+
+				node.tagName = isBlock ? 'div' : 'span'
+				node.children = [
+					{ type: 'text', value: isBlock ? String.raw`\[` : String.raw`\(` },
+					...node.children,
+					{ type: 'text', value: isBlock ? String.raw`\]` : String.raw`\)` },
+				]
 			}
 		})
 	}
