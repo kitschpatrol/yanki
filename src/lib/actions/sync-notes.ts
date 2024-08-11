@@ -11,7 +11,6 @@ import {
 	requestPermission,
 	syncToAnkiWeb,
 	updateNote,
-	updateNoteModel,
 } from '../utilities/anki-connect'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { deepmerge } from 'deepmerge-ts'
@@ -160,26 +159,18 @@ export async function syncNotes(
 					noteId: newNoteId,
 				},
 			})
-		} else if (localNote.modelName === remoteNote.modelName) {
-			// Update remote notes if they differ
-			const wasUpdated = await updateNote(client, localNote, remoteNote, dryRun)
-
-			synced.push({
-				action: wasUpdated ? 'updated' : 'unchanged',
-				note: localNote,
-			})
 		} else {
-			// Model change, need to update
-			// In previous versions, this was handled by deleting the note and recreating it,
-			// but updateNoteModel seems to work and preserves activity data
+			// Update remote notes if they differ
+			// TODO can this ever happen?
 			if (remoteNote.noteId === undefined) {
 				throw new Error('Remote note ID is undefined')
 			}
 
-			await updateNoteModel(client, localNote, dryRun)
+			// Also handles model updates
+			const wasUpdated = await updateNote(client, localNote, remoteNote, dryRun)
 
 			synced.push({
-				action: 'updated',
+				action: wasUpdated ? 'updated' : 'unchanged',
 				note: localNote,
 			})
 		}

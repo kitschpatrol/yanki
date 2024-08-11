@@ -15,20 +15,6 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 	await client.note.deleteNotes({ notes: noteIds })
 }
 
-export async function updateNoteModel(client: YankiConnect, note: YankiNote, dryRun = false) {
-	if (note.noteId === undefined) {
-		throw new Error('Note ID is undefined')
-	}
-
-	if (dryRun) {
-		return
-	}
-
-	await client.note.updateNoteModel({
-		note: { ...note, id: note.noteId, tags: note.tags ?? [] },
-	})
-}
-
 export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun = false) {
 	if (note.noteId === undefined) {
 		throw new Error('Note ID is undefined')
@@ -157,12 +143,39 @@ export async function updateNote(
 
 	if (
 		!areTagsEqual(localNote.tags ?? [], remoteNote.tags ?? []) ||
-		!areFieldsEqual(localNote.fields, remoteNote.fields)
+		!areFieldsEqual(localNote.fields, remoteNote.fields) ||
+		localNote.modelName !== remoteNote.modelName
 	) {
 		if (!dryRun) {
-			await client.note.updateNote({
-				note: { ...localNote, id: localNote.noteId },
-			})
+			// The updateNoteModel command will update:
+			// - fields
+			// - tags
+			// - assigned model
+			await client.note
+				.updateNoteModel({
+					note: { ...localNote, id: localNote.noteId, tags: localNote.tags ?? [] },
+				})
+				.catch(async (error) => {
+					if (error instanceof Error) {
+						if (error.message === `Model '${localNote.modelName}' not found`) {
+							// Create the model and try again
+							const model = yankiModels.find((model) => model.modelName === localNote.modelName)
+							if (model === undefined) {
+								throw new Error(`Model not found: ${localNote.modelName}`)
+							}
+
+							await client.model.createModel(model)
+
+							return updateNote(client, localNote, remoteNote, dryRun)
+						}
+
+						// TODO What about missing decks?
+						// updateNoteModel does not throw deck exceptions...
+						throw error
+					} else {
+						throw new TypeError('Unknown error')
+					}
+				})
 
 			// Also update media if relevant
 			if (!areMediaElementsEqual(localNote.fields, remoteNote.fields)) {

@@ -27,7 +27,8 @@ import { hideBin } from 'yargs/helpers'
 // Must be constant function expression to help TS infer that it exits
 const ankiNotRunningErrorHandler = (error: unknown) => {
 	if (error instanceof Error) {
-		const { code } = error.cause as { code?: string }
+		// Destructuring here can throws runtime errors if code is undefined...
+		const code = (error.cause as { code?: string })?.code
 
 		if (code === 'ECONNREFUSED') {
 			log.error(
