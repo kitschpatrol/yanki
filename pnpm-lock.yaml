@@ -84,9 +84,15 @@ importers:
       linkedom:
         specifier: ^0.18.4
         version: 0.18.4
-      mdast-util-find-and-replace:
-        specifier: ^3.0.1
-        version: 3.0.1
+      mdast-util-from-markdown:
+        specifier: ^2.0.1
+        version: 2.0.1
+      micromark-util-sanitize-uri:
+        specifier: ^2.0.0
+        version: 2.0.0
+      micromark-util-types:
+        specifier: ^2.0.0
+        version: 2.0.0
       nanoid:
         specifier: ^5.0.7
         version: 5.0.7
@@ -123,9 +129,9 @@ importers:
       remark-frontmatter:
         specifier: ^5.0.0
         version: 5.0.0
-      remark-gfm-no-autolink:
-        specifier: ^2.0.0
-        version: 2.0.0
+      remark-gfm:
+        specifier: ^4.0.0
+        version: 4.0.0
       remark-github-beta-blockquote-admonitions:
         specifier: ^3.1.1
         version: 3.1.1
@@ -4342,9 +4348,6 @@ packages:
 
   remark-frontmatter@5.0.0:
     resolution: {integrity: sha512-XTFYvNASMe5iPN0719nPrdItC9aU0ssC4v14mH1BCi1u0n1gAocqcujWUrByftZTbLhRtiKRyjYTSIOcr69UVQ==}
-
-  remark-gfm-no-autolink@2.0.0:
-    resolution: {integrity: sha512-I28y0wfMayPRkotFrjaxQVfqZRFgjqFE49ty1P6TduYlvMLuJE6mmYmz7ETXW/WcTwbKdNKSnQR8ktj/uAWpKg==}
 
   remark-gfm@4.0.0:
     resolution: {integrity: sha512-U92vJgBPkbw4Zfu/IiW2oTZLSL3Zpv+uI7My2eq8JxKgqraFdU8YUGicEJCEgSbeaG+QDFqIcwwfMTOEelPxuA==}
@@ -10453,20 +10456,6 @@ snapshots:
       mdast-util-frontmatter: 2.0.1
       micromark-extension-frontmatter: 2.0.0
       unified: 11.0.5
-    transitivePeerDependencies:
-      - supports-color
-
-  remark-gfm-no-autolink@2.0.0:
-    dependencies:
-      mdast-util-gfm-footnote: 2.0.0
-      mdast-util-gfm-strikethrough: 2.0.0
-      mdast-util-gfm-table: 2.0.0
-      mdast-util-gfm-task-list-item: 2.0.0
-      micromark-extension-gfm-footnote: 2.1.0
-      micromark-extension-gfm-strikethrough: 2.1.0
-      micromark-extension-gfm-table: 2.1.0
-      micromark-extension-gfm-task-list-item: 2.1.0
-      micromark-util-combine-extensions: 2.0.0
     transitivePeerDependencies:
       - supports-color
 

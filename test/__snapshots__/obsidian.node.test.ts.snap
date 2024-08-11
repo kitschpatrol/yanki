@@ -1314,7 +1314,7 @@ exports[`obsidian vault sync > correctly syncs an entire obsidian vault 1`] = `
 <h2>External</h2>
 <p><a href="https://github.com/kitschpatrol/yanki" data-yanki-src-original="https://github.com/kitschpatrol/yanki">custom display text</a></p>
 <p><a href="https://github.com/kitschpatrol/yanki" data-yanki-src-original="https://github.com/kitschpatrol/yanki">https://github.com/kitschpatrol/yanki</a></p>
-<p>https://github.com/kitschpatrol/yanki</p>
+<p><a href="https://github.com/kitschpatrol/yanki" data-yanki-src-original="https://github.com/kitschpatrol/yanki">https://github.com/kitschpatrol/yanki</a></p>
 <h2>Vault</h2>
 <p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FObsidian%2FPlugin%20Development" data-yanki-src-original="obsidian://open?vault=Vault&#x26;file=Technology%2FObsidian%2FPlugin%20Development">My Note</a></p>
 <p><a href="obsidian://open?vault=Vault&#x26;file=Technology/Obsidian/Plugin%20Development" data-yanki-src-original="obsidian://open?vault=Vault&#x26;file=Technology/Obsidian/Plugin Development">My Note</a></p>
@@ -1604,7 +1604,7 @@ exports[`obsidian vault sync > correctly syncs an entire obsidian vault 1`] = `
         <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-src-original="test%20card"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md">test%20card</a></span>
       </td>
       <td>
-        <img src="yanki-media-yanki-test-HASH-HASH.jpg" data-yanki-src-original="test%20image.jpg" class="yanki-media yanki-media-image" data-yanki-media-src="/test-obsidian-vault/Assets/test image.jpg" data-yanki-media-sync="true" width="200">
+        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-src-original="test%20image.jpg%7C200"><a href="/test-obsidian-vault/Cards/Markdown/test image.jpg|200">test%20image.jpg%7C200</a></span>
       </td>
     </tr>
   </tbody>
@@ -3726,7 +3726,7 @@ exports[`obsidian vault wiki link stability > correctly syncs an entire obsidian
 <h2>External</h2>
 <p><a href="https://github.com/kitschpatrol/yanki" data-yanki-src-original="https://github.com/kitschpatrol/yanki">custom display text</a></p>
 <p><a href="https://github.com/kitschpatrol/yanki" data-yanki-src-original="https://github.com/kitschpatrol/yanki">https://github.com/kitschpatrol/yanki</a></p>
-<p>https://github.com/kitschpatrol/yanki</p>
+<p><a href="https://github.com/kitschpatrol/yanki" data-yanki-src-original="https://github.com/kitschpatrol/yanki">https://github.com/kitschpatrol/yanki</a></p>
 <h2>Vault</h2>
 <p><a href="obsidian://open?vault=Vault&#x26;file=Technology%2FObsidian%2FPlugin%20Development" data-yanki-src-original="obsidian://open?vault=Vault&#x26;file=Technology%2FObsidian%2FPlugin%20Development">My Note</a></p>
 <p><a href="obsidian://open?vault=Vault&#x26;file=Technology/Obsidian/Plugin%20Development" data-yanki-src-original="obsidian://open?vault=Vault&#x26;file=Technology/Obsidian/Plugin Development">My Note</a></p>
@@ -3985,7 +3985,7 @@ exports[`obsidian vault wiki link stability > correctly syncs an entire obsidian
         <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-src-original="test%20card"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md">test%20card</a></span>
       </td>
       <td>
-        <img src="/test-obsidian-vault/Assets/test image.jpg" data-yanki-src-original="test%20image.jpg" class="yanki-media yanki-media-image" data-yanki-media-src="/test-obsidian-vault/Assets/test image.jpg" data-yanki-media-sync="false" width="200">
+        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-src-original="test%20image.jpg%7C200"><a href="/test-obsidian-vault/Cards/Markdown/test image.jpg|200">test%20image.jpg%7C200</a></span>
       </td>
     </tr>
   </tbody>

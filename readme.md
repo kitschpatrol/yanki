@@ -129,7 +129,7 @@ Yanki tags the notes it's in charge of with a hidden field, so it will never tou
 
 An extended palette of markdown syntax is available out of the box:
 
-- Most [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-throughs~~`, `- [x] task lists`. (Autolinks are not currently supported.)
+- Most [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-throughs~~`, `- [x] task lists`, and autolinks.
 - Syntax highlighting via [Shiki](https://shiki.style).
 - GitHub-style [Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
 - [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md)
@@ -206,7 +206,7 @@ Jazz isn't dead
 _It just smells funny_
 ```
 
-***
+---
 
 ### Cloze
 
@@ -579,7 +579,6 @@ Linux testing was performed on a Debian 12 arm64 virtual machine. Anki does not 
 
 ## Known issues
 
-- [ ] GitHub-flavored Markdown style autolinks are not detected. (They're currently in conflict with the way WikiLinks are processed. I have to move that implementation from a Remark transformer plugin to a Micromark parser.)
 - [ ] Intra-note links _do not update_ after automatic renaming, e.g. via the `--manage-filenames` flag, potentially resulting in broken links.
 
 ## The future
