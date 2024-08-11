@@ -6,7 +6,7 @@ import sortKeys from 'sort-keys'
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
 
 export function stablePrettyMs(text: string): string {
-	return text.replaceAll(/\s\d+[ms]+/g, ' XXX')
+	return text.replaceAll(/\s[\d.]+[ms]+/g, ' XXX')
 }
 
 export function sortMultiline(text: string): string {
