@@ -61,6 +61,17 @@ export function emptyIsUndefined(text: string | undefined): string | undefined {
 /**
  * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
  */
+export function markdown(strings: TemplateStringsArray, ...values: unknown[]): string {
+	return trimLeadingIndentation(strings, ...values)
+}
+
+export function md(strings: TemplateStringsArray, ...values: unknown[]): string {
+	return trimLeadingIndentation(strings, ...values)
+}
+
+/**
+ * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ */
 export function html(strings: TemplateStringsArray, ...values: unknown[]): string {
 	return trimLeadingIndentation(strings, ...values)
 }
