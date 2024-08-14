@@ -228,7 +228,37 @@ Multiple clozes are supported, which will create additional cards. You can add a
 Additional revelations on the back of the card.
 ```
 
-Clozing a block element is not currently supported.
+By default, clozes are numbered incrementally if there are more than one on a card, for example the Markdown:
+
+```md
+~~All~~ will be ~~revealed _here's a hint_~~.
+```
+
+Is turned into the following Anki syntax behind the scenes:
+
+```text
+{{c1::All}} will be {{c2::revealed::<em>here's a hint</em>}}
+```
+
+In rare cases, you might want to take control over cloze numbering — perhaps you want to reveal multiple clozes simultaneously on a single card, or group certain clozes together on a particularly cloze-heavy note.
+
+To support this, Yanki offers some optional extra syntax. A leading one- or two-digit a number at the front of your clozed content will be interpreted as the cloze number:
+
+For example:
+
+```md
+~~1 All~~ will be ~~1 revealed _here's a hint_~~.
+```
+
+Becomes the following Anki syntax.
+
+```text
+{{c1::All}} will be {{c1::revealed::<em>here's a hint</em>}}
+```
+
+The difference is subtle, but note the matching `{{c1`s. This markup yields a single card where both `All` and `revealed` are revealed simultaneously.
+
+_Note: While you can encloze images, math equations, and other inline-styled syntax, clozing over multiple lines or block elements is not currently supported._
 
 ## Getting started
 

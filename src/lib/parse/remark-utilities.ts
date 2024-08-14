@@ -98,13 +98,70 @@ export function deleteFirstNodeOfType(tree: Root, nodeType: string): Root {
 	return tree
 }
 
+/**
+ * Trims all leading spaces from the first text node and all trailing spaces from
+ * the last text node in an array of phrasing content nodes.
+ *
+ * This is useful in cases where surrounding white space in text nodes is not
+ * necessary and should be removed to clean up the content.
+ *
+ * @param {PhrasingContent[]} nodes - An array of phrasing content nodes.
+ * @returns {PhrasingContent[]} The modified array of nodes with leading and trailing spaces trimmed.
+ */
+function trimLeadingAndTrailingSpaces(nodes: PhrasingContent[]): PhrasingContent[] {
+	// Trim leading spaces from the first text node
+	const firstNode = nodes.at(0)
+	if (firstNode?.type === 'text') {
+		firstNode.value = firstNode.value.trimStart()
+		if (firstNode.value === '') {
+			nodes.shift() // Remove the first node if it's empty after trimming
+		}
+	}
+
+	// Trim trailing spaces from the last text node
+	const lastNode = nodes.at(-1)
+	if (lastNode?.type === 'text') {
+		lastNode.value = lastNode.value.trimEnd()
+		if (lastNode.value === '') {
+			nodes.pop() // Remove the last node if it's empty after trimming
+		}
+	}
+
+	return nodes
+}
+
 // For Cloze notes
 export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 	let clozeIndex = 1
 
 	visit(ast, 'delete', (node, index, parent) => {
-		if (parent === undefined || index === undefined || !('children' in node)) {
+		if (
+			parent === undefined ||
+			index === undefined ||
+			!('children' in node) ||
+			node.children.length === 0
+		) {
 			return CONTINUE
+		}
+
+		// If the first node is a text node with a number in it, we treat it as the
+		// cloze number
+		if (node.children.length > 0 && isText(node.children[0])) {
+			// Detect a bunch of number variations at the start of the cloze
+			const result = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/g.exec(node.children[0].value)
+
+			if (result !== null) {
+				const possibleClozeIndex = Number.parseInt(result.at(1) ?? '', 10)
+
+				if (!Number.isNaN(possibleClozeIndex)) {
+					// Cloze index comes from the first node
+					clozeIndex = possibleClozeIndex
+					// Any leftovers become part of the cloze
+
+					node.children[0].value =
+						(result.at(2)?.trim().length ?? 0) > 0 ? (result.at(2) ?? '') : ''
+				}
+			}
 		}
 
 		// If the last node is an emphasis node, we treat it as a hint
@@ -113,12 +170,16 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 			node.children.length > 1 && lastNode?.type === 'emphasis'
 				? [
 						u('text', `{{c${clozeIndex}::`),
-						...node.children.slice(0, -1),
+						...trimLeadingAndTrailingSpaces(node.children.slice(0, -1)),
 						u('text', '::'),
-						...node.children.slice(-1),
+						...trimLeadingAndTrailingSpaces(node.children.slice(-1)),
 						u('text', '}}'),
 					]
-				: [u('text', `{{c${clozeIndex}::`), ...node.children, u('text', '}}')]
+				: [
+						u('text', `{{c${clozeIndex}::`),
+						...trimLeadingAndTrailingSpaces(node.children),
+						u('text', '}}'),
+					]
 
 		// Add the cloze markup around the kids
 		parent.children.splice(index, 1, ...clozeNodes)

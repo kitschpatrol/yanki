@@ -1,0 +1,2125 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`detects cloze hints in markdown 1`] = `
+[
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}} {{c2::cloze content::<em>hint</em>}}</p>",
+    "original": "~~cloze content _hint_~~ ~~cloze content *hint*~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<em>cloze content</em>::<em>hint</em>}}</p>",
+    "original": "~~_cloze content_        _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<em>cloze content</em>::<em><strong>hint</strong></em>}}</p>",
+    "original": "~~_cloze content_ _**hint**_~~",
+    "type": "Yanki - Cloze",
+  },
+]
+`;
+
+exports[`detects cloze hints in markdown 2`] = `
+[
+  {
+    "front": "<p>{{c1::<em>cloze content</em>}}</p>",
+    "original": "~~_cloze content_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<em>cloze content</em> <em>not hint</em> not a hint}}</p>",
+    "original": "~~_cloze content_ _not hint_ not a hint~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<em>cloze content</em> <strong><em>hint</em></strong>}}</p>",
+    "original": "~~_cloze content_ **_hint_**~~",
+    "type": "Yanki - Cloze",
+  },
+]
+`;
+
+exports[`detects multiple cloze deletions in markdown 1`] = `
+[
+  {
+    "front": "<p>{{c1::cloze content}} {{c2::cloze content}}</p>",
+    "original": "~~cloze content~~ ~~cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>Some stuff before, then {{c1::cloze content}} and more {{c2::cloze content}} and then some stuff after.</p>",
+    "original": "Some stuff before, then ~~cloze content~~ and more ~~cloze content~~ and then some stuff after.",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>Some stuff before, then {{c1::cloze content}}</p>
+<p>and more {{c2::cloze content}} and then some stuff after.</p>",
+    "original": "Some stuff before, then ~~cloze content~~
+
+and more ~~cloze content~~ and then some stuff after.",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "back": "<p>Extra</p>",
+    "front": "<p>Some stuff before, then {{c1::cloze content}}</p>
+<p>and more {{c2::cloze content}} and then some stuff after.</p>",
+    "original": "Some stuff before, then ~~cloze content~~
+
+and more ~~cloze content~~ and then some stuff after.
+
+---
+
+Extra",
+    "type": "Yanki - Cloze",
+  },
+]
+`;
+
+exports[`detects single cloze deletions in markdown 1`] = `
+[
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": " ~~cloze content~~ ",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<em>cloze content</em>}}</p>",
+    "original": "~~_cloze content_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<span class="language-math math-inline">\\(\\sigma\\)</span>}}</p>",
+    "original": "~~$$ \\sigma $$~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<a href="https://example.com" data-yanki-src-original="https://example.com">Link</a>}}</p>",
+    "original": "~~[Link](https://example.com)~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::
+  <img src="https://storage.kitschpatrol.com/example-image-1" alt="Tiny" data-yanki-src-original="https://storage.kitschpatrol.com/example-image-1" class="yanki-media yanki-media-image" data-yanki-media-src="https://storage.kitschpatrol.com/example-image-1" data-yanki-media-sync="false">}}
+</p>",
+    "original": "~~![Tiny](https://storage.kitschpatrol.com/example-image-1)~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>Some stuff before, then {{c1::cloze content}}</p>",
+    "original": "Some stuff before, then ~~cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>Some stuff before, then {{c1::cloze content}} and then some stuff after.</p>",
+    "original": "Some stuff before, then ~~cloze content~~ and then some stuff after.",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>Some stuff before, then {{c1::cloze content}} and then some stuff after.</p>",
+    "original": "Some stuff before, then ~~cloze content~~ and then some stuff after.",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "back": "<p>Extra</p>",
+    "front": "<h1>Heading</h1>
+<p>Some stuff before, then {{c1::cloze content}} and then some stuff after.</p>",
+    "original": "# Heading
+
+Some stuff before, then ~~cloze content~~ and then some stuff after.
+
+---
+
+Extra",
+    "type": "Yanki - Cloze",
+  },
+]
+`;
+
+exports[`detects single cloze deletions in markdown 2`] = `
+[
+  {
+    "front": "<p>~~ cloze content ~~</p>",
+    "original": "~~ cloze content ~~",
+    "type": "Yanki - Basic",
+  },
+  {
+    "front": "<p>~~cloze content ~~</p>",
+    "original": "~~cloze content ~~",
+    "type": "Yanki - Basic",
+  },
+  {
+    "front": "<p>~~This is a</p>
+<p>multiline cloze deletion~~</p>",
+    "original": "~~This is a 
+
+ multiline cloze deletion~~",
+    "type": "Yanki - Basic",
+  },
+]
+`;
+
+exports[`treats leading digits as cloze numbers 1`] = `
+[
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~(0) cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~(0) cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(0) **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~(0) **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~(0)cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~(0)cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(0)**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~(0)**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~(0)  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~(0)  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(0)  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~(0)  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~(0) 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content}}</p>",
+    "original": "~~(0) 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(0) 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>}}</p>",
+    "original": "~~(0) 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~(0)3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content}}</p>",
+    "original": "~~(0)3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(0)3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>}}</p>",
+    "original": "~~(0)3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~(0))cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)cloze content}}</p>",
+    "original": "~~(0))cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(0))**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)<strong>cloze content</strong>}}</p>",
+    "original": "~~(0))**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~(0)|cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|cloze content}}</p>",
+    "original": "~~(0)|cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(0)|**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|<strong>cloze content</strong>}}</p>",
+    "original": "~~(0)|**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~(0).cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.cloze content}}</p>",
+    "original": "~~(0).cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(0).**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.<strong>cloze content</strong>}}</p>",
+    "original": "~~(0).**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~(1) cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~(1) cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(1) **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~(1) **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~(1)cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~(1)cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(1)**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~(1)**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~(1)  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~(1)  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(1)  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~(1)  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~(1) 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content}}</p>",
+    "original": "~~(1) 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(1) 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>}}</p>",
+    "original": "~~(1) 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~(1)3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content}}</p>",
+    "original": "~~(1)3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(1)3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>}}</p>",
+    "original": "~~(1)3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~(1))cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)cloze content}}</p>",
+    "original": "~~(1))cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(1))**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)<strong>cloze content</strong>}}</p>",
+    "original": "~~(1))**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~(1)|cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|cloze content}}</p>",
+    "original": "~~(1)|cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(1)|**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|<strong>cloze content</strong>}}</p>",
+    "original": "~~(1)|**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~(1).cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.cloze content}}</p>",
+    "original": "~~(1).cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(1).**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.<strong>cloze content</strong>}}</p>",
+    "original": "~~(1).**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~(42) cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~(42) cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(42) **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~(42) **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~(42)cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~(42)cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(42)**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~(42)**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~(42)  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~(42)  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(42)  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~(42)  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~(42) 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content}}</p>",
+    "original": "~~(42) 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(42) 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>}}</p>",
+    "original": "~~(42) 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~(42)3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content}}</p>",
+    "original": "~~(42)3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(42)3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>}}</p>",
+    "original": "~~(42)3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~(42))cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)cloze content}}</p>",
+    "original": "~~(42))cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(42))**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)<strong>cloze content</strong>}}</p>",
+    "original": "~~(42))**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~(42)|cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|cloze content}}</p>",
+    "original": "~~(42)|cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(42)|**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|<strong>cloze content</strong>}}</p>",
+    "original": "~~(42)|**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~(42).cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.cloze content}}</p>",
+    "original": "~~(42).cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~(42).**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.<strong>cloze content</strong>}}</p>",
+    "original": "~~(42).**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~0  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~0  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~0  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~0 cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~0 cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0 **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~0 **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~0   cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~0   cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0   **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~0   **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~0  3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content}}</p>",
+    "original": "~~0  3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0  3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>}}</p>",
+    "original": "~~0  3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~0 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content}}</p>",
+    "original": "~~0 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>}}</p>",
+    "original": "~~0 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~0 )cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)cloze content}}</p>",
+    "original": "~~0 )cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0 )**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)<strong>cloze content</strong>}}</p>",
+    "original": "~~0 )**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~0 |cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|cloze content}}</p>",
+    "original": "~~0 |cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0 |**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|<strong>cloze content</strong>}}</p>",
+    "original": "~~0 |**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~0 .cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.cloze content}}</p>",
+    "original": "~~0 .cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0 .**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.<strong>cloze content</strong>}}</p>",
+    "original": "~~0 .**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~1  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~1  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~1  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~1 cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~1 cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1 **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~1 **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~1   cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~1   cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1   **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~1   **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~1  3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content}}</p>",
+    "original": "~~1  3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1  3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>}}</p>",
+    "original": "~~1  3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~1 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content}}</p>",
+    "original": "~~1 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>}}</p>",
+    "original": "~~1 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~1 )cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)cloze content}}</p>",
+    "original": "~~1 )cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1 )**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)<strong>cloze content</strong>}}</p>",
+    "original": "~~1 )**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~1 |cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|cloze content}}</p>",
+    "original": "~~1 |cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1 |**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|<strong>cloze content</strong>}}</p>",
+    "original": "~~1 |**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~1 .cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.cloze content}}</p>",
+    "original": "~~1 .cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1 .**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.<strong>cloze content</strong>}}</p>",
+    "original": "~~1 .**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~42  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~42  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~42  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~42 cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~42 cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42 **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~42 **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~42   cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~42   cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42   **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~42   **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~42  3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content}}</p>",
+    "original": "~~42  3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42  3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>}}</p>",
+    "original": "~~42  3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~42 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content}}</p>",
+    "original": "~~42 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>}}</p>",
+    "original": "~~42 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~42 )cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)cloze content}}</p>",
+    "original": "~~42 )cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42 )**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)<strong>cloze content</strong>}}</p>",
+    "original": "~~42 )**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~42 |cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|cloze content}}</p>",
+    "original": "~~42 |cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42 |**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|<strong>cloze content</strong>}}</p>",
+    "original": "~~42 |**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~42 .cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.cloze content}}</p>",
+    "original": "~~42 .cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42 .**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.<strong>cloze content</strong>}}</p>",
+    "original": "~~42 .**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~0| cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~0| cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0| **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~0| **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~0|cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~0|cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0|**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~0|**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~0|  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~0|  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0|  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~0|  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~0| 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content}}</p>",
+    "original": "~~0| 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0| 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>}}</p>",
+    "original": "~~0| 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~0|3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content}}</p>",
+    "original": "~~0|3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0|3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>}}</p>",
+    "original": "~~0|3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~0|)cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)cloze content}}</p>",
+    "original": "~~0|)cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0|)**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)<strong>cloze content</strong>}}</p>",
+    "original": "~~0|)**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~0||cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|cloze content}}</p>",
+    "original": "~~0||cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0||**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|<strong>cloze content</strong>}}</p>",
+    "original": "~~0||**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~0|.cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.cloze content}}</p>",
+    "original": "~~0|.cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0|.**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.<strong>cloze content</strong>}}</p>",
+    "original": "~~0|.**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~1| cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~1| cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1| **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~1| **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~1|cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~1|cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1|**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~1|**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~1|  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~1|  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1|  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~1|  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~1| 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content}}</p>",
+    "original": "~~1| 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1| 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>}}</p>",
+    "original": "~~1| 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~1|3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content}}</p>",
+    "original": "~~1|3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1|3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>}}</p>",
+    "original": "~~1|3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~1|)cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)cloze content}}</p>",
+    "original": "~~1|)cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1|)**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)<strong>cloze content</strong>}}</p>",
+    "original": "~~1|)**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~1||cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|cloze content}}</p>",
+    "original": "~~1||cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1||**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|<strong>cloze content</strong>}}</p>",
+    "original": "~~1||**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~1|.cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.cloze content}}</p>",
+    "original": "~~1|.cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1|.**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.<strong>cloze content</strong>}}</p>",
+    "original": "~~1|.**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~42| cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~42| cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42| **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~42| **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~42|cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~42|cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42|**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~42|**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~42|  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~42|  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42|  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~42|  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~42| 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content}}</p>",
+    "original": "~~42| 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42| 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>}}</p>",
+    "original": "~~42| 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~42|3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content}}</p>",
+    "original": "~~42|3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42|3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>}}</p>",
+    "original": "~~42|3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~42|)cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)cloze content}}</p>",
+    "original": "~~42|)cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42|)**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)<strong>cloze content</strong>}}</p>",
+    "original": "~~42|)**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~42||cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|cloze content}}</p>",
+    "original": "~~42||cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42||**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|<strong>cloze content</strong>}}</p>",
+    "original": "~~42||**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~42|.cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.cloze content}}</p>",
+    "original": "~~42|.cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42|.**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.<strong>cloze content</strong>}}</p>",
+    "original": "~~42|.**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~0. cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~0. cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0. **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~0. **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~0.cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~0.cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0.**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~0.**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content::<em>hint</em>}}</p>",
+    "original": "~~0.  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::cloze content}}</p>",
+    "original": "~~0.  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0.  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::<strong>cloze content</strong>}}</p>",
+    "original": "~~0.  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~0. 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content}}</p>",
+    "original": "~~0. 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0. 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>}}</p>",
+    "original": "~~0. 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~0.3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3cloze content}}</p>",
+    "original": "~~0.3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0.3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::3<strong>cloze content</strong>}}</p>",
+    "original": "~~0.3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~0.)cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)cloze content}}</p>",
+    "original": "~~0.)cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0.)**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::)<strong>cloze content</strong>}}</p>",
+    "original": "~~0.)**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~0.|cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|cloze content}}</p>",
+    "original": "~~0.|cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0.|**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::|<strong>cloze content</strong>}}</p>",
+    "original": "~~0.|**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~0..cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.cloze content}}</p>",
+    "original": "~~0..cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~0..**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c0::.<strong>cloze content</strong>}}</p>",
+    "original": "~~0..**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~1. cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~1. cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1. **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~1. **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~1.cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~1.cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1.**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~1.**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content::<em>hint</em>}}</p>",
+    "original": "~~1.  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::cloze content}}</p>",
+    "original": "~~1.  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1.  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>cloze content</strong>}}</p>",
+    "original": "~~1.  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~1. 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content}}</p>",
+    "original": "~~1. 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1. 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>}}</p>",
+    "original": "~~1. 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~1.3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3cloze content}}</p>",
+    "original": "~~1.3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1.3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::3<strong>cloze content</strong>}}</p>",
+    "original": "~~1.3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~1.)cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)cloze content}}</p>",
+    "original": "~~1.)cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1.)**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::)<strong>cloze content</strong>}}</p>",
+    "original": "~~1.)**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~1.|cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|cloze content}}</p>",
+    "original": "~~1.|cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1.|**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::|<strong>cloze content</strong>}}</p>",
+    "original": "~~1.|**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~1..cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.cloze content}}</p>",
+    "original": "~~1..cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~1..**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::.<strong>cloze content</strong>}}</p>",
+    "original": "~~1..**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~42. cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~42. cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42. **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~42. **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~42.cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~42.cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42.**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~42.**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content::<em>hint</em>}}</p>",
+    "original": "~~42.  cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::cloze content}}</p>",
+    "original": "~~42.  cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42.  **cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::<strong>cloze content</strong>}}</p>",
+    "original": "~~42.  **cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~42. 3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content}}</p>",
+    "original": "~~42. 3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42. 3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>}}</p>",
+    "original": "~~42. 3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content::<em>hint</em>}}</p>",
+    "original": "~~42.3cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3cloze content}}</p>",
+    "original": "~~42.3cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42.3**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::3<strong>cloze content</strong>}}</p>",
+    "original": "~~42.3**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)cloze content::<em>hint</em>}}</p>",
+    "original": "~~42.)cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)cloze content}}</p>",
+    "original": "~~42.)cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42.)**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::)<strong>cloze content</strong>}}</p>",
+    "original": "~~42.)**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|cloze content::<em>hint</em>}}</p>",
+    "original": "~~42.|cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|cloze content}}</p>",
+    "original": "~~42.|cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42.|**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::|<strong>cloze content</strong>}}</p>",
+    "original": "~~42.|**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.cloze content::<em>hint</em>}}</p>",
+    "original": "~~42..cloze content _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.cloze content}}</p>",
+    "original": "~~42..cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.<strong>cloze content</strong>::<em>hint</em>}}</p>",
+    "original": "~~42..**cloze content** _hint_~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c42::.<strong>cloze content</strong>}}</p>",
+    "original": "~~42..**cloze content**~~",
+    "type": "Yanki - Cloze",
+  },
+]
+`;
+
+exports[`treats leading digits as cloze numbers 2`] = `
+[
+  {
+    "front": "<p>{{c1::<strong>1</strong> cloze content}}</p>",
+    "original": "~~**1** cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::<strong>1 cloze</strong> content}}</p>",
+    "original": "~~**1 cloze** content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::1cloze content}}</p>",
+    "original": "~~1cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::-1 cloze content}}</p>",
+    "original": "~~-1 cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+  {
+    "front": "<p>{{c1::-1.4 cloze content}}</p>",
+    "original": "~~-1.4 cloze content~~",
+    "type": "Yanki - Cloze",
+  },
+]
+`;
