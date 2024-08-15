@@ -22,6 +22,7 @@ import {
 	splitTreeAtThematicBreak,
 } from './remark-utilities'
 import { deepmerge } from 'deepmerge-ts'
+import { type Root } from 'mdast'
 import { u } from 'unist-builder'
 
 export type GetNoteFromMarkdownOptions = {
@@ -67,7 +68,7 @@ export async function getNoteFromMarkdown(
 		: namespace
 
 	// Anki won't create notes at all if the front field is blank, but we want
-	// parity between markdown files and notes at all costs, so we'll put
+	// parity between Markdown files and notes at all costs, so we'll put
 	// in a placeholder if the front is empty.
 	let ast = await getAstFromMarkdown(markdown, {
 		allFilePaths,
@@ -84,11 +85,25 @@ export async function getNoteFromMarkdown(
 
 	let front = ''
 	let back = ''
+	let extra: string | undefined
 
 	switch (modelName) {
 		case 'Yanki - Basic':
-		case 'Yanki - Basic (and reversed card)': {
-			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
+		case 'Yanki - Basic (and reversed card with extra)': {
+			let [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
+			let extraPart: Root | undefined
+
+			// Check for extra in basic and reverse...
+			if (
+				secondPart !== undefined &&
+				modelName === 'Yanki - Basic (and reversed card with extra)'
+			) {
+				// Must be defined even if content is non-existent
+				extra = ''
+				const [newSecondPart, newExtraPart] = splitTreeAtThematicBreak(secondPart)
+				secondPart = newSecondPart
+				extraPart = newExtraPart
+			}
 
 			// Anki won't create notes if the front field is blank, but we want parity between markdown files and notes at all costs,
 			// so we'll put in a placeholder if the front is empty. It's hard to know if the output is really empty without rendering, due to invisible elements.
@@ -102,7 +117,6 @@ export async function getNoteFromMarkdown(
 					'front',
 					`model-${modelName}`,
 				],
-
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
@@ -116,13 +130,28 @@ export async function getNoteFromMarkdown(
 					'back',
 					`model-${modelName}`,
 				],
-
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
 			})
+
+			if (extraPart !== undefined) {
+				extra = await mdastToHtml(extraPart, {
+					cssClassNames: [
+						CSS_DEFAULT_CLASS_NAME,
+						`namespace-${sanitizedNamespace}`,
+						'extra',
+						`model-${modelName}`,
+					],
+					fetchAdapter,
+					fileAdapter,
+					namespace: sanitizedNamespace,
+					syncMediaAssets,
+					useEmptyPlaceholder: false,
+				})
+			}
 
 			break
 		}
@@ -215,9 +244,10 @@ export async function getNoteFromMarkdown(
 	const note: YankiNote = {
 		// Disable the frontmatter deck name feature, just seems messy
 		// deckName: frontmatter.deckName ?? '',
-		deckName: '', // Set later based on file path if undefined
+		deckName: '', // Set later based on file path
 		fields: {
 			Back: back,
+			...(extra !== undefined && { Extra: extra }),
 			Front: front,
 			YankiNamespace: sanitizedNamespace,
 		},

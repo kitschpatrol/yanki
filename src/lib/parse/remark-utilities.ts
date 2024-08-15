@@ -269,6 +269,7 @@ export function splitTreeAtThematicBreak(tree: Root): [Root, Root | undefined] {
 	return [firstPart, secondPart]
 }
 
+// TODO return an object parsed into fields of MDAST instead?
 // Precedence: basic-type-in-the-answer > cloze > basic-and-reversed > basic If
 // and of the sub-indicators are in the markdown, then the higher-precedence
 // type wins If nothing matches, then we just get a basic note with all the
@@ -298,15 +299,23 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 	}
 
 	// If we didn't find a signs of cloze or type in the answer, it must be a
-	// basic card
+	// basic card or a basic + reverse or a basic + reverse + extra
+	// TODO next major: Don't traverse the tree, just look at the first level?
 	let lastNode: Node | undefined
-	visit(ast, 'thematicBreak', (node, index, parent) => {
+	visit(ast, (node, index, parent) => {
 		if (parent === null || index === null) return CONTINUE
 
-		probableType =
-			lastNode?.type === 'thematicBreak' && node.type === 'thematicBreak'
-				? `Yanki - Basic (and reversed card)`
-				: `Yanki - Basic`
+		if (node.type === 'thematicBreak') {
+			// First thematic break means it could be basic
+			if (probableType === undefined) {
+				probableType = 'Yanki - Basic'
+			}
+			// Two thematic breaks in a row means  basic and reversed
+			else if (probableType === 'Yanki - Basic' && lastNode?.type === 'thematicBreak') {
+				probableType = 'Yanki - Basic (and reversed card with extra)'
+				return EXIT
+			}
+		}
 
 		lastNode = node
 	})

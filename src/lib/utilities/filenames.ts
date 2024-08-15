@@ -23,7 +23,7 @@ export function getSafeTitleForNote(
 
 	switch (note.modelName) {
 		case 'Yanki - Basic':
-		case 'Yanki - Basic (and reversed card)':
+		case 'Yanki - Basic (and reversed card with extra)':
 		case 'Yanki - Basic (type in the answer)': {
 			const cleanFront = emptyIsUndefined(
 				getSafeFilename(note.fields.Front) // Truncated later!

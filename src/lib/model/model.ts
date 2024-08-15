@@ -17,22 +17,6 @@ export const yankiModels = [
 		modelName: 'Yanki - Basic',
 	},
 	{
-		cardTemplates: [
-			{
-				Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}',
-				Front: '{{Front}}',
-				YankiNamespace: '{{YankiNamespace}}',
-			},
-			{
-				Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Front}}',
-				Front: '{{Back}}',
-				YankiNamespace: '{{YankiNamespace}}',
-			},
-		],
-		inOrderFields: ['Front', 'Back', 'YankiNamespace'],
-		modelName: 'Yanki - Basic (and reversed card)',
-	},
-	{
 		// Changing the template structure slightly from the Anki defaults for
 		// simplicity (instead of Text and Back Extra, we just have Back and Front)
 		cardTemplates: [
@@ -56,6 +40,22 @@ export const yankiModels = [
 		],
 		inOrderFields: ['Front', 'Back', 'YankiNamespace'],
 		modelName: 'Yanki - Basic (type in the answer)',
+	},
+	{
+		cardTemplates: [
+			{
+				Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}{{#Extra}}\n\n<hr>\n\n{{Extra}}{{/Extra}}',
+				Front: '{{Front}}',
+				YankiNamespace: '{{YankiNamespace}}',
+			},
+			{
+				Back: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Front}}{{#Extra}}\n\n<hr>\n\n{{Extra}}{{/Extra}}',
+				Front: '{{Back}}',
+				YankiNamespace: '{{YankiNamespace}}',
+			},
+		],
+		inOrderFields: ['Front', 'Back', 'Extra', 'YankiNamespace'],
+		modelName: 'Yanki - Basic (and reversed card with extra)',
 	},
 ] as const satisfies YankiModel[]
 

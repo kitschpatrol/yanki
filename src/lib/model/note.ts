@@ -5,7 +5,13 @@ import { type YankiParamsForAction } from 'yanki-connect'
 export type YankiNote = Simplify<
 	{
 		cards?: number[]
-		fields: { Back: string; Front: string; YankiNamespace: string }
+		fields: {
+			Back: string
+			// Currently onl Yanki - Basic (and reversed card with extra) has this field
+			Extra?: string
+			Front: string
+			YankiNamespace: string
+		}
 		modelName: YankiModelName
 		noteId: number | undefined
 	} & Omit<YankiParamsForAction<'addNote'>['note'], 'fields' | 'modelName' | 'options'>

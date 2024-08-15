@@ -30,9 +30,10 @@ describeWithFileFixture(
 
 			expect(sortKeys(results, { deep: true })).toMatchInlineSnapshot(`
 				{
-				  "basic-and-reversed-card-with-no-back.md": "Yanki - Basic (and reversed card)",
-				  "basic-and-reversed-card-with-no-front.md": "Yanki - Basic (and reversed card)",
-				  "basic-and-reversed-card.md": "Yanki - Basic (and reversed card)",
+				  "basic-and-reversed-card-with-extra.md": "Yanki - Basic (and reversed card with extra)",
+				  "basic-and-reversed-card-with-no-back.md": "Yanki - Basic (and reversed card with extra)",
+				  "basic-and-reversed-card-with-no-front.md": "Yanki - Basic (and reversed card with extra)",
+				  "basic-and-reversed-card.md": "Yanki - Basic (and reversed card with extra)",
 				  "basic-type-in-the-answer-with-empty-frontmatter.md": "Yanki - Basic (type in the answer)",
 				  "basic-type-in-the-answer-with-frontmatter.md": "Yanki - Basic (type in the answer)",
 				  "basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md": "Yanki - Basic (type in the answer)",
@@ -85,12 +86,12 @@ describeWithFileFixture(
 
 			expect(sortKeys(results, { deep: true })).toMatchInlineSnapshot(`
 				{
-				  "basic-and-reversed-card-with-alternate-thematic-breaks.md": "Yanki - Basic (and reversed card)",
-				  "basic-and-reversed-card-with-confusing-setext-headline.md": "Yanki - Basic (and reversed card)",
-				  "basic-and-reversed-card-with-empty-front-and-frontmatter.md": "Yanki - Basic (and reversed card)",
-				  "basic-and-reversed-card-with-extra-thematic-break-dashes.md": "Yanki - Basic (and reversed card)",
-				  "basic-and-reversed-card-with-tight-spacing-and-frontmatter.md": "Yanki - Basic (and reversed card)",
-				  "basic-and-reversed-card-with-tight-spacing.md": "Yanki - Basic (and reversed card)",
+				  "basic-and-reversed-card-with-alternate-thematic-breaks.md": "Yanki - Basic (and reversed card with extra)",
+				  "basic-and-reversed-card-with-confusing-setext-headline.md": "Yanki - Basic (and reversed card with extra)",
+				  "basic-and-reversed-card-with-empty-front-and-frontmatter.md": "Yanki - Basic (and reversed card with extra)",
+				  "basic-and-reversed-card-with-extra-thematic-break-dashes.md": "Yanki - Basic (and reversed card with extra)",
+				  "basic-and-reversed-card-with-tight-spacing-and-frontmatter.md": "Yanki - Basic (and reversed card with extra)",
+				  "basic-and-reversed-card-with-tight-spacing.md": "Yanki - Basic (and reversed card with extra)",
 				  "basic-with-confusing-setext-headline.md": "Yanki - Basic",
 				  "basic-with-empty-front-and-frontmatter.md": "Yanki - Basic",
 				  "basic-with-tight-spacing-and-frontmatter.md": "Yanki - Basic",
@@ -140,18 +141,19 @@ describeWithFileFixture(
 
 			const syncFormatted = formatSyncFilesResult(results)
 			expect(stablePrettyMs(syncFormatted)).toMatchInlineSnapshot(
-				`"Successfully synced 29 notes to Anki in XXX."`,
+				`"Successfully synced 30 notes to Anki in XXX."`,
 			)
 
 			// Verbose report
 			const runFormattedVerbose = formatSyncFilesResult(results, true)
 			expect(stablePrettyMs(stableNoteIds(runFormattedVerbose))).toMatchInlineSnapshot(`
-				"Successfully synced 29 notes to Anki in XXX.
+				"Successfully synced 30 notes to Anki in XXX.
 
 				Sync Summary:
-				  Created: 29
+				  Created: 30
 
 				Sync Details:
+				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card-with-extra.md
 				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card-with-no-back.md
 				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card-with-no-front.md
 				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card.md
@@ -384,7 +386,7 @@ describeWithFileFixture(
 
 			expect(newNote.note.noteId).toEqual(note.note.noteId)
 			expect(newNote.action).toEqual('updated')
-			expect(newNote.note.modelName).toEqual('Yanki - Basic (and reversed card)')
+			expect(newNote.note.modelName).toEqual('Yanki - Basic (and reversed card with extra)')
 		})
 	},
 )

@@ -52,6 +52,7 @@ describeWithFileFixture(
 				Note ID XXXXXXXXXXXXX I look a lot like the thing you need to type...
 				Note ID XXXXXXXXXXXXX I'm a question to which there is no answer.
 				Note ID XXXXXXXXXXXXX I'm question which is sometimes the answer
+				Note ID XXXXXXXXXXXXX I'm question which is sometimes the answer
 				Note ID XXXXXXXXXXXXX I'm the front of the card
 				Note ID XXXXXXXXXXXXX I'm the front of the card
 				Note ID XXXXXXXXXXXXX I'm the prompt

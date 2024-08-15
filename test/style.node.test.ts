@@ -58,15 +58,15 @@ describeWithFileFixture(
 				  },
 				  {
 				    "action": "updated",
-				    "name": "Yanki - Basic (and reversed card)",
-				  },
-				  {
-				    "action": "updated",
 				    "name": "Yanki - Cloze",
 				  },
 				  {
 				    "action": "updated",
 				    "name": "Yanki - Basic (type in the answer)",
+				  },
+				  {
+				    "action": "updated",
+				    "name": "Yanki - Basic (and reversed card with extra)",
 				  },
 				]
 			`)
@@ -82,9 +82,9 @@ describeWithFileFixture(
 
 				Updated models:
 				  Yanki - Basic
-				  Yanki - Basic (and reversed card)
 				  Yanki - Cloze
-				  Yanki - Basic (type in the answer)"
+				  Yanki - Basic (type in the answer)
+				  Yanki - Basic (and reversed card with extra)"
 			`)
 
 			const newStyle = await getStyle({
