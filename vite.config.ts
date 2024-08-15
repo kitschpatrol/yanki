@@ -10,16 +10,17 @@ export default defineConfig({
 			include: ['src/**/*.ts'],
 			provider: 'istanbul',
 		},
+		// Total note counts that will cause assertions to fail.
+		maxConcurrency: 1,
 		// Disable concurrent test execution across files
 		// Yanki's tests count total file counts, irrespective of namespace, before
 		// and after each test to ensure the integrity of pre-existing Anki notes.
 		// Running tests concurrently across files can create race conditions in
-		// total note counts that will cause assertions to fail.
-		maxConcurrency: 1,
 		poolOptions: {
 			forks: {
 				singleFork: true,
 			},
 		},
+		// RestoreMocks: true,
 	},
 })

@@ -6,7 +6,8 @@ import {
 	safeDecodeURIComponent,
 	urlToHostAndPort,
 } from '../src/lib/utilities/url'
-import { expect, it } from 'vitest'
+import stripAnsi from 'strip-ansi'
+import { expect, it, vi } from 'vitest'
 
 it('converts from url to host and port and back', () => {
 	const hostAndPort = urlToHostAndPort('http://localhost:8765')
@@ -24,6 +25,9 @@ it('converts from url to host and port and back', () => {
 })
 
 it('detects URLs correctly', () => {
+	// Unsupported Windows paths will throw warnings
+	const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+
 	expect(isUrl('http://example.com')).toBeTruthy()
 	expect(isUrl('https://example.com')).toBeTruthy()
 	expect(
@@ -60,11 +64,18 @@ it('detects URLs correctly', () => {
 	expect(isUrl(normalize(String.raw`C:\\Bla bla bla\\some file.txt`))).toBeFalsy()
 	expect(isUrl(normalize(String.raw`d:\Bla bla bla`))).toBeFalsy()
 	expect(isUrl(normalize(String.raw`z:\Bla bla bla`))).toBeFalsy()
-	expect(isUrl(normalize(String.raw`\\?\Volume{abc123-abc123-abc123}\\`))).toBeFalsy()
+	expect(isUrl(normalize(String.raw`\\?\Volume{abc123-abc123-abc123}\\`))).toBeFalsy() // This throws a warning
 	expect(isUrl(normalize(String.raw`\\Server\Share\folder`))).toBeFalsy()
+
+	expect(stripAnsi(String(spyWarn.mock.calls))).toMatchInlineSnapshot(
+		`"Unsupported extended length path detected: \\\\?\\Volume{abc123-abc123-abc123}\\\\"`,
+	)
+	spyWarn.mockRestore()
 })
 
 it('treats URI decoding errors as undefined values', () => {
+	const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+
 	expect(safeDecodeURI('https://example.com/Yes%20Please')).toMatch(
 		'https://example.com/Yes Please',
 	)
@@ -80,4 +91,7 @@ it('treats URI decoding errors as undefined values', () => {
 
 	expect(safeDecodeURI('https://example.com/%E0%A4%A')).toBeUndefined()
 	expect(safeDecodeURIComponent('https://example.com/%E0%A4%A')).toBeUndefined()
+
+	expect(stripAnsi(String(spyWarn.mock.calls))).toMatchInlineSnapshot(`"Error decoding URI text: "https://example.com/%E0%A4%A",URIError: URI malformed,Error decoding URI component text: "https://example.com/%E0%A4%A",URIError: URI malformed"`)
+	spyWarn.mockRestore()
 })
