@@ -401,10 +401,12 @@ describeWithFileFixture(
 	(context) => {
 		it('handles fancy markdown', async () => {
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
 				ankiWeb: false,
+				basePath: context.tempAssetPath,
 				dryRun: false,
 				namespace: context.namespace,
 				obsidianVault: 'Vault',

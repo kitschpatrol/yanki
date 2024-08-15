@@ -184,6 +184,22 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 				return pathExtras.getBase(resolvedUrlWithDefaultExtension)
 			}
 
+			// TODO good idea?
+			// Some kind of "assume exists" flag?
+			// Linked file was not found, but give up and treat relative links as
+			// obsidian vault links if the context suggests it
+			// if (
+			// 	type === 'link' &&
+			// 	convertFilePathsToProtocol === 'obsidian' &&
+			// 	obsidianVaultName !== undefined
+			// ) {
+			// 	return createObsidianVaultLink(
+			// 		resolvedUrlWithDefaultExtension,
+			// 		basePath ?? '',
+			// 		obsidianVaultName,
+			// 	)
+			// }
+
 			return pathExtras.getBase(resolvedUrl)
 		}
 
