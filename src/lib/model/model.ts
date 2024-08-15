@@ -62,3 +62,7 @@ export const yankiModels = [
 export type YankiModelName = (typeof yankiModels)[number]['modelName']
 
 export const yankiModelNames: YankiModelName[] = yankiModels.map((model) => model.modelName)
+
+// Deprecated / replaced
+// Important for validation...
+export const legacyYankiModelNames = ['Yanki - Basic (and reversed card)']

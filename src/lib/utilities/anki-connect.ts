@@ -1,4 +1,9 @@
-import { type YankiModelName, yankiModelNames, yankiModels } from '../model/model'
+import {
+	type YankiModelName,
+	legacyYankiModelNames,
+	yankiModelNames,
+	yankiModels,
+} from '../model/model'
 import { type YankiNote } from '../model/note'
 import { type Media, extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
@@ -214,10 +219,17 @@ function areFieldsEqual(
 	remoteFields: Record<string, string>,
 ): boolean {
 	// Limit to front and back keys at the moment
-	const keys = ['Front', 'Back']
+	const keys = ['Front', 'Back', 'Extra']
 
 	for (const key of keys) {
-		if (localFields[key] !== remoteFields[key]) {
+		// Both fields have the key (e.g. Extra)
+		if (key in localFields && key in remoteFields) {
+			if (localFields[key] !== remoteFields[key]) {
+				return false
+			}
+		}
+		// Only one fields has the key
+		else if (key in localFields || key in remoteFields) {
 			return false
 		}
 	}
@@ -351,21 +363,21 @@ export async function getRemoteNotesById(
 			throw new Error(`Multiple decks found for note ${ankiNote.noteId}`)
 		}
 
-		if (!yankiModelNames.includes(ankiNote.modelName as YankiModelName)) {
+		if (
+			![...legacyYankiModelNames, ...yankiModelNames].includes(ankiNote.modelName as YankiModelName)
+		) {
 			// Alternately, check if the model name is in the list of models and recreate by setting to undefined?
 			throw new Error(`Unknown model name ${ankiNote.modelName} for note ${ankiNote.noteId}`)
 		}
 
 		// Picture, sound, etc. fields are never provided
-
 		yankiNotes.push({
 			cards: ankiNote.cards,
 			deckName: [...deckSet][0],
 			fields: {
 				Back: ankiNote.fields.Back.value ?? '',
-
+				...(ankiNote.fields.Extra !== undefined && { Extra: ankiNote.fields.Extra.value ?? '' }),
 				Front: ankiNote.fields.Front.value ?? '',
-
 				YankiNamespace: ankiNote.fields.YankiNamespace.value ?? '',
 			},
 			modelName: ankiNote.modelName as YankiModelName, // Checked above
