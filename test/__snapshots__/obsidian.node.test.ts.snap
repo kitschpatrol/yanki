@@ -729,6 +729,13 @@ exports[`obsidian vault sync > correctly syncs an entire obsidian vault 1`] = `
 <p>
   <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day" data-yanki-src-original="blocks#%5Equote-of-the-day"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day">blocks#^quote-of-the-day</a></span>
 </p>
+<h2>Missing blocks</h2>
+<p>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/nonexistent" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/nonexistent" data-yanki-src-original="nonexistent#%5E9f813a"><a href="/test-obsidian-vault/Cards/Markdown/nonexistent#%5E9f813a">nonexistent#^9f813a</a></span>
+</p>
+<p>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/nonexistent" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/nonexistent" data-yanki-src-original="nonexistent#%5Equote-of-the-day"><a href="/test-obsidian-vault/Cards/Markdown/nonexistent#%5Equote-of-the-day">nonexistent#^quote-of-the-day</a></span>
+</p>
 <h2>Search results</h2>
 <pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span>embed OR search</span></span></code></pre>
 <h2>YouTube</h2>
@@ -3124,6 +3131,13 @@ exports[`obsidian vault wiki link stability > correctly syncs an entire obsidian
 </p>
 <p>
   <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day" data-yanki-src-original="blocks#%5Equote-of-the-day"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day">blocks#^quote-of-the-day</a></span>
+</p>
+<h2>Missing blocks</h2>
+<p>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/nonexistent" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/nonexistent" data-yanki-src-original="nonexistent#%5E9f813a"><a href="/test-obsidian-vault/Cards/Markdown/nonexistent#%5E9f813a">nonexistent#^9f813a</a></span>
+</p>
+<p>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/nonexistent" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/nonexistent" data-yanki-src-original="nonexistent#%5Equote-of-the-day"><a href="/test-obsidian-vault/Cards/Markdown/nonexistent#%5Equote-of-the-day">nonexistent#^quote-of-the-day</a></span>
 </p>
 <h2>Search results</h2>
 <pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span>embed OR search</span></span></code></pre>

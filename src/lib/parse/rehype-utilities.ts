@@ -176,12 +176,18 @@ export async function mdastToHtml(
 		}
 
 		// Run these after visit since visit can not be asynchronous
+		// eslint-disable-next-line complexity
 		treeMutationPromises.push(async () => {
 			// No matter what, we need to know the asset's extension to decide if it's
 			// going in an <img> or a <span>[sound:...]</span> element (TODO due to
 			// fetch lookups, this has performance implications for remoteHttpUrl
 			// images...)
-			const extension = await getAnkiMediaFilenameExtension(absolutePathOrUrl, fetchAdapter)
+			// Don't use fetch adapter on obsidian links... only look at URL content
+			// to get the extension. Fixes https://github.com/kitschpatrol/yanki-obsidian/issues/11
+			const extension = await getAnkiMediaFilenameExtension(
+				absolutePathOrUrl,
+				srcType === 'obsidianVaultUrl' ? undefined : fetchAdapter,
+			)
 
 			// If unsupported, we shouldn't sync it or generate a safe hashed filename
 			const supportedMedia =

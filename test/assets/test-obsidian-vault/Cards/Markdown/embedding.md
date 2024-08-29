@@ -30,6 +30,12 @@
 
 ![[blocks#^quote-of-the-day]]
 
+## Missing blocks
+
+![[nonexistent#^9f813a]]
+
+![[nonexistent#^quote-of-the-day]]
+
 ## Search results
 
 ```query

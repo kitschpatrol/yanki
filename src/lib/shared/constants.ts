@@ -84,7 +84,7 @@ export const MEDIA_DEFAULT_HASH_MODE_URL: MediaHashMode = 'metadata'
 export const MEDIA_INCLUDE_LEGIBLE_FILENAME = false
 
 /**
- * How to infer the asset type behind a URL.
+ * How to first attempt to infer the asset type behind a URL.
  *
  * - `metadata`: Fetch the head and hope for a `Content-Type` header.
  * - `name`: Infer the extension from the URL alone, won't work if there's nothing extension-like in the `pathname`.
