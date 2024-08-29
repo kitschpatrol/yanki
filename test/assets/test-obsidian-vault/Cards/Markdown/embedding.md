@@ -28,6 +28,8 @@
 
 ![[blocks#^9f813a]]
 
+![[blocks#^quote-of-the-day]]
+
 ## Search results
 
 ```query

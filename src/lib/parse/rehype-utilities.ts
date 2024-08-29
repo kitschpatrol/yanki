@@ -259,7 +259,7 @@ export async function mdastToHtml(
 									},
 									tagName: 'a',
 								},
-								[u('text', String(node.properties.dataYankiSrcOriginal))],
+								[u('text', decodeURI(String(node.properties.dataYankiSrcOriginal)))],
 							),
 						],
 					),

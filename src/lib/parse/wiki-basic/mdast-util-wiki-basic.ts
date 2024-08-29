@@ -76,7 +76,7 @@ export function wikiBasicFromMarkdown(): Extension {
 			{
 				type: 'text',
 				value:
-					// Obsidian strips backslashes and pipes from link aliases, so we will to
+					// Obsidian strips backslashes and pipes from link aliases, so we will too
 					emptyIsUndefined((label ?? '').replaceAll('\\', '').replaceAll('|', '')) ??
 					url.split('#').pop() ??
 					url.split('/').pop() ??

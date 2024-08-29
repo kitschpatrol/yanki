@@ -706,15 +706,15 @@ exports[`obsidian vault sync > correctly syncs an entire obsidian vault 1`] = `
 <h2>PDF (Unsupported)</h2>
 <h3>Basic</h3>
 <p>
-  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf" data-yanki-src-original="test%20pdf.pdf"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf">test%20pdf.pdf</a></span>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf" data-yanki-src-original="test%20pdf.pdf"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf">test pdf.pdf</a></span>
 </p>
 <h3>Page</h3>
 <p>
-  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2" data-yanki-src-original="test%20pdf.pdf#page=2"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2">test%20pdf.pdf#page=2</a></span>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2" data-yanki-src-original="test%20pdf.pdf#page=2"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2">test pdf.pdf#page=2</a></span>
 </p>
 <h3>Size</h3>
 <p>
-  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200" data-yanki-src-original="test%20pdf.pdf#height=200"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200">test%20pdf.pdf#height=200</a></span>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200" data-yanki-src-original="test%20pdf.pdf#height=200"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200">test pdf.pdf#height=200</a></span>
 </p>
 <h2>Iframe</h2>
 <iframe src="https://example.com"></iframe>
@@ -724,7 +724,10 @@ exports[`obsidian vault sync > correctly syncs an entire obsidian vault 1`] = `
 </p>
 <h2>Blocks</h2>
 <p>
-  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a" data-yanki-src-original="blocks#%5E9f813a"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a">blocks#%5E9f813a</a></span>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a" data-yanki-src-original="blocks#%5E9f813a"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a">blocks#^9f813a</a></span>
+</p>
+<p>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day" data-yanki-src-original="blocks#%5Equote-of-the-day"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day">blocks#^quote-of-the-day</a></span>
 </p>
 <h2>Search results</h2>
 <pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span>embed OR search</span></span></code></pre>
@@ -1583,10 +1586,10 @@ exports[`obsidian vault sync > correctly syncs an entire obsidian vault 1`] = `
   <tbody>
     <tr>
       <td>
-        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-src-original="test%20card"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md">test%20card</a></span>
+        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-src-original="test%20card"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md">test card</a></span>
       </td>
       <td>
-        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-src-original="test%20image.jpg%7C200"><a href="/test-obsidian-vault/Cards/Markdown/test image.jpg|200">test%20image.jpg%7C200</a></span>
+        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-src-original="test%20image.jpg%7C200"><a href="/test-obsidian-vault/Cards/Markdown/test image.jpg|200">test image.jpg|200</a></span>
       </td>
     </tr>
   </tbody>
@@ -3099,15 +3102,15 @@ exports[`obsidian vault wiki link stability > correctly syncs an entire obsidian
 <h2>PDF (Unsupported)</h2>
 <h3>Basic</h3>
 <p>
-  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf" data-yanki-src-original="test%20pdf.pdf"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf">test%20pdf.pdf</a></span>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf" data-yanki-src-original="test%20pdf.pdf"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf">test pdf.pdf</a></span>
 </p>
 <h3>Page</h3>
 <p>
-  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2" data-yanki-src-original="test%20pdf.pdf#page=2"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2">test%20pdf.pdf#page=2</a></span>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2" data-yanki-src-original="test%20pdf.pdf#page=2"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23page%3D2">test pdf.pdf#page=2</a></span>
 </p>
 <h3>Size</h3>
 <p>
-  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200" data-yanki-src-original="test%20pdf.pdf#height=200"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200">test%20pdf.pdf#height=200</a></span>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200" data-yanki-src-original="test%20pdf.pdf#height=200"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FAssets%2Ftest%20pdf.pdf%23height%3D200">test pdf.pdf#height=200</a></span>
 </p>
 <h2>Iframe</h2>
 <iframe src="https://example.com"></iframe>
@@ -3117,7 +3120,10 @@ exports[`obsidian vault wiki link stability > correctly syncs an entire obsidian
 </p>
 <h2>Blocks</h2>
 <p>
-  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a" data-yanki-src-original="blocks#%5E9f813a"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a">blocks#%5E9f813a</a></span>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a" data-yanki-src-original="blocks#%5E9f813a"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5E9f813a">blocks#^9f813a</a></span>
+</p>
+<p>
+  <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day" data-yanki-src-original="blocks#%5Equote-of-the-day"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2FCards%2FMarkdown%2Fblocks.md%23%5Equote-of-the-day">blocks#^quote-of-the-day</a></span>
 </p>
 <h2>Search results</h2>
 <pre class="shiki shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span>embed OR search</span></span></code></pre>
@@ -3946,10 +3952,10 @@ exports[`obsidian vault wiki link stability > correctly syncs an entire obsidian
   <tbody>
     <tr>
       <td>
-        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-src-original="test%20card"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md">test%20card</a></span>
+        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-media-sync="false" data-yanki-src="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md" data-yanki-src-original="test%20card"><a href="obsidian://open?vault=test-obsidian-vault&#x26;file=%2Ftest%20card.md">test card</a></span>
       </td>
       <td>
-        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-src-original="test%20image.jpg%7C200"><a href="/test-obsidian-vault/Cards/Markdown/test image.jpg|200">test%20image.jpg%7C200</a></span>
+        <span class="yanki-media yanki-media-unsupported" data-yanki-media-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-media-sync="false" data-yanki-src="/test-obsidian-vault/Cards/Markdown/test image.jpg|200" data-yanki-src-original="test%20image.jpg%7C200"><a href="/test-obsidian-vault/Cards/Markdown/test image.jpg|200">test image.jpg|200</a></span>
       </td>
     </tr>
   </tbody>

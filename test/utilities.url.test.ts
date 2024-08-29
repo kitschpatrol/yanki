@@ -92,6 +92,8 @@ it('treats URI decoding errors as undefined values', () => {
 	expect(safeDecodeURI('https://example.com/%E0%A4%A')).toBeUndefined()
 	expect(safeDecodeURIComponent('https://example.com/%E0%A4%A')).toBeUndefined()
 
-	expect(stripAnsi(String(spyWarn.mock.calls))).toMatchInlineSnapshot(`"Error decoding URI text: "https://example.com/%E0%A4%A",URIError: URI malformed,Error decoding URI component text: "https://example.com/%E0%A4%A",URIError: URI malformed"`)
+	expect(stripAnsi(String(spyWarn.mock.calls))).toMatchInlineSnapshot(
+		`"Error decoding URI text: "https://example.com/%E0%A4%A",URIError: URI malformed,Error decoding URI component text: "https://example.com/%E0%A4%A",URIError: URI malformed"`,
+	)
 	spyWarn.mockRestore()
 })
