@@ -58,6 +58,9 @@ export type GlobalOptions = {
 	obsidianVault: string | undefined
 	/** Exposed for testing only */
 	resolveUrls: boolean
+	/** Whether to treat single newlines in Markdown as line breaks in the
+	 * resulting HTML (Obsidian has an application-level setting for this) */
+	strictLineBreaks: boolean
 	/** Sync image, video, and audio assets to Anki's media storage system */
 	syncMediaAssets: SyncMediaAssets
 }
@@ -76,6 +79,7 @@ export const defaultGlobalOptions: GlobalOptions = {
 	namespace: 'Yanki',
 	obsidianVault: undefined,
 	resolveUrls: true,
+	strictLineBreaks: true, // Matches Markdown spec
 	syncMediaAssets: 'local',
 }
 

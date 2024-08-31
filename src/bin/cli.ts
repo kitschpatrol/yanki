@@ -13,6 +13,7 @@ import {
 	dryRun,
 	jsonOption,
 	namespaceOption,
+	strictLineBreaks,
 	verboseOption,
 } from './options'
 import { urlToHostAndPortValidated } from './utilities/validation'
@@ -100,6 +101,7 @@ await yargsInstance
 						"Sync image, video, and audio assets to Anki's media storage system. Clean up is managed automatically. The `all` argument will save both local and remote assets to Anki, while `local` will only save local assets, `remote` will only save remote assets, and `off` will not save any assets.",
 					type: 'string',
 				})
+				.option(strictLineBreaks)
 				.option(jsonOption('Output the sync report as JSON.'))
 				.option(verboseOption),
 		async ({

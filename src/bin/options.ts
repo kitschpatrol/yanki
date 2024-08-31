@@ -68,3 +68,15 @@ export function namespaceOption(describe: string) {
 		},
 	} as const satisfies Record<string, Options>
 }
+
+// This option is currently only references once in the `sync` command, but I'm
+// putting it here in anticipation of a future "rename" command, which will
+// reuse it. Kind of a clunky name, but matches an application-wide setting in Obsidian.
+export const strictLineBreaks = {
+	'strict-line-breaks': {
+		alias: 'b',
+		default: defaultGlobalOptions.strictLineBreaks,
+		describe: 'Set to false to treat single newlines in Markdown as line breaks.',
+		type: 'boolean',
+	},
+} as const satisfies Record<string, Options>

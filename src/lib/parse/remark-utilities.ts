@@ -18,8 +18,6 @@ import { u } from 'unist-builder'
 import { CONTINUE, EXIT, SKIP, visit } from 'unist-util-visit'
 import { parse as yamlParse } from 'yaml'
 
-// Processor shared across operations
-
 export type AstFromMarkdownOptions = Pick<
 	GlobalOptions,
 	'allFilePaths' | 'basePath' | 'cwd' | 'obsidianVault' | 'resolveUrls'

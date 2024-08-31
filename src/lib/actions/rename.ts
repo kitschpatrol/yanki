@@ -19,7 +19,12 @@ import { type Simplify } from 'type-fest'
 
 export type RenameNotesOptions = Pick<
 	GlobalOptions,
-	'dryRun' | 'fileAdapter' | 'manageFilenames' | 'maxFilenameLength'
+	| 'dryRun'
+	| 'fileAdapter'
+	| 'manageFilenames'
+	| 'maxFilenameLength'
+	/** Included because this can technically change the content of the "first line" of a card */
+	| 'strictLineBreaks'
 >
 
 export const defaultRenameNotesOptions: RenameNotesOptions = {
@@ -154,6 +159,7 @@ export async function renameFiles(
 		maxFilenameLength,
 		namespace: namespaceRaw, // To be validated and sanitized
 		obsidianVault,
+		strictLineBreaks,
 		syncMediaAssets,
 	} = deepmerge(defaultRenameFilesOptions, options ?? {})
 
@@ -172,6 +178,7 @@ export async function renameFiles(
 		fileAdapter,
 		namespace,
 		obsidianVault,
+		strictLineBreaks,
 		syncMediaAssets,
 	})
 

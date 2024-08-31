@@ -38,6 +38,7 @@ export type GetNoteFromMarkdownOptions = {
 	| 'namespace'
 	| 'obsidianVault'
 	| 'resolveUrls' // For testing only
+	| 'strictLineBreaks'
 	| 'syncMediaAssets'
 >
 
@@ -60,6 +61,7 @@ export async function getNoteFromMarkdown(
 		namespaceValidationAndSanitization,
 		obsidianVault,
 		resolveUrls,
+		strictLineBreaks,
 		syncMediaAssets,
 	} = deepmerge(defaultGetNoteFromMarkdownOptions, options ?? {})
 
@@ -120,6 +122,7 @@ export async function getNoteFromMarkdown(
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
+				strictLineBreaks,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
 			})
@@ -133,6 +136,7 @@ export async function getNoteFromMarkdown(
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
+				strictLineBreaks,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
 			})
@@ -148,6 +152,7 @@ export async function getNoteFromMarkdown(
 					fetchAdapter,
 					fileAdapter,
 					namespace: sanitizedNamespace,
+					strictLineBreaks,
 					syncMediaAssets,
 					useEmptyPlaceholder: false,
 				})
@@ -172,6 +177,7 @@ export async function getNoteFromMarkdown(
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
+				strictLineBreaks,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
 			})
@@ -186,6 +192,7 @@ export async function getNoteFromMarkdown(
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
+				strictLineBreaks,
 				syncMediaAssets,
 				useEmptyPlaceholder: false,
 			})
@@ -218,6 +225,7 @@ export async function getNoteFromMarkdown(
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
+				strictLineBreaks,
 				syncMediaAssets,
 				useEmptyPlaceholder: true,
 			})
@@ -234,6 +242,7 @@ export async function getNoteFromMarkdown(
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
+				strictLineBreaks,
 				syncMediaAssets,
 				useEmptyPlaceholder: false,
 			})

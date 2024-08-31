@@ -17,6 +17,7 @@ import { getBase, getQuery } from '../utilities/path'
 import { cleanClassName, emptyIsUndefined } from '../utilities/string'
 import { getSrcType, isUrl, safeDecodeURI } from '../utilities/url'
 import rehypeMathjaxAnki from './rehype-mathjax-anki'
+import remarkConditionalBreaks from './remark-conditional-breaks'
 import rehypeShiki from '@shikijs/rehype'
 import { deepmerge } from 'deepmerge-ts'
 import { type Element, type ElementContent, type Root as HastRoot } from 'hast'
@@ -34,6 +35,7 @@ import { CONTINUE, EXIT, visit } from 'unist-util-visit'
 
 // Significant performance improvement by reusing the processor
 const processor = unified()
+	.use(remarkConditionalBreaks)
 	// Not needed?
 	.use(remarkRehype, { allowDangerousHtml: true })
 	// Re-parses any raw HTML in the Markdown into the HAST tree,
@@ -69,7 +71,10 @@ export type MdastToHtmlOptions = Simplify<
 		cssClassNames?: string[]
 		/** Whether to use an empty placeholder if the output is empty */
 		useEmptyPlaceholder?: boolean
-	} & Pick<GlobalOptions, 'fetchAdapter' | 'fileAdapter' | 'namespace' | 'syncMediaAssets'>
+	} & Pick<
+		GlobalOptions,
+		'fetchAdapter' | 'fileAdapter' | 'namespace' | 'strictLineBreaks' | 'syncMediaAssets'
+	>
 >
 
 const defaultMdastToHtmlOptions: MdastToHtmlOptions = {
@@ -89,11 +94,15 @@ export async function mdastToHtml(
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
 		namespace,
+		strictLineBreaks,
 		syncMediaAssets,
 		useEmptyPlaceholder,
 	} = deepmerge(defaultMdastToHtmlOptions, options ?? {})
 
-	const hast = await processor.run(mdast)
+	// Pass breaks setting through to the processor via file data...
+	// saves us from recreating the processor in case the setting changes per-file
+	// (though it basically never should)
+	const hast = await processor.run(mdast, { data: { strictLineBreaks } })
 
 	// Add a wrapper div with a specific class to the HTML, this is hypothetically
 	// useful for styling the output via CSS

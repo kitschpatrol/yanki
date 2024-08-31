@@ -33,6 +33,7 @@ export type SyncFilesOptions = Simplify<
 		| 'maxFilenameLength'
 		| 'namespace'
 		| 'obsidianVault'
+		| 'strictLineBreaks'
 		| 'syncMediaAssets'
 	> &
 		SyncNotesOptions
@@ -86,6 +87,7 @@ export async function syncFiles(
 		maxFilenameLength,
 		namespace: namespaceRaw, // To be validated and sanitized
 		obsidianVault,
+		strictLineBreaks,
 		syncMediaAssets,
 	} = deepmerge(defaultSyncFilesOptions, options ?? {}) as SyncFilesOptions
 
@@ -104,6 +106,7 @@ export async function syncFiles(
 		fileAdapter,
 		namespace,
 		obsidianVault,
+		strictLineBreaks,
 		syncMediaAssets,
 	})
 

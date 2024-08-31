@@ -18,6 +18,7 @@ export type LoadOptions = Pick<
 	| 'fileAdapter'
 	| 'namespace'
 	| 'obsidianVault'
+	| 'strictLineBreaks'
 	| 'syncMediaAssets'
 >
 
@@ -43,6 +44,7 @@ export async function loadLocalNotes(
 		fileAdapter = await getDefaultFileAdapter(),
 		namespace,
 		obsidianVault,
+		strictLineBreaks,
 		syncMediaAssets,
 	} = deepmerge(defaultLoadOptions, options ?? {})
 
@@ -68,6 +70,7 @@ export async function loadLocalNotes(
 			namespace: sanitizedNamespace,
 			namespaceValidationAndSanitization: false, // Optimization
 			obsidianVault,
+			strictLineBreaks,
 			syncMediaAssets,
 		})
 
