@@ -36,7 +36,7 @@ export async function closeAnki(): Promise<void> {
 export async function loadTestProfile(client: YankiConnect) {
 	// Use test profile
 	const loadProfileResult = await client.miscellaneous.loadProfile({
-		name: 'yanki-automated-tests',
+		name: 'yanki-tests',
 	})
 
 	if (!loadProfileResult) {

@@ -36,8 +36,14 @@ export function stableResults(results: SyncResults): SyncResults {
 		note.filePath = cleanUpTempPath(note.filePath)
 		note.filePathOriginal = cleanUpTempPath(note.filePathOriginal)
 		note.note.noteId = 0
+
+		if (note.note.cards !== undefined) {
+			note.note.cards = note.note.cards.map(() => 0)
+		}
+
 		note.note.fields.Front = cleanUpHashes(cleanUpTempPath(note.note.fields.Front) ?? '')
 		note.note.fields.Back = cleanUpHashes(cleanUpTempPath(note.note.fields.Back) ?? '')
+
 		return note
 	})
 

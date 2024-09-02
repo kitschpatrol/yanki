@@ -1,5 +1,6 @@
 import { formatSyncFilesResult, getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter } from '../src/lib/model/frontmatter'
+import { getUnicodeCodePoints } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { countLinesOfFrontmatter } from './utilities/frontmatter-counter'
 import { stableNoteIds, stablePrettyMs, stableResults } from './utilities/stable-sync-results'
@@ -572,19 +573,12 @@ describeWithFileFixture(
 describeWithFileFixture(
 	'unicode deck names and invalid note ids',
 	{
-		assetPath: './test/assets/test-deck-pruning/vault',
+		assetPath: './test/assets/test-deck-pruning',
 		cleanUpAnki: true,
 		cleanUpTempFiles: true,
 	},
 	(context) => {
 		it('syncs as expected', { timeout: 60_000 }, async () => {
-			// Import package
-			const importPackageResult = await context.yankiConnect.miscellaneous.importPackage({
-				path: path.resolve('./test/assets/test-deck-pruning/Anki.apkg'),
-			})
-
-			expect(importPackageResult).toBe(true)
-
 			// Sync
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
@@ -592,12 +586,34 @@ describeWithFileFixture(
 				},
 				ankiWeb: false,
 				dryRun: false,
-				namespace: 'Yanki Obsidian - Vault ID 37dd13103ee93756',
+				namespace: context.namespace,
 				obsidianVault: 'Vault',
 				syncMediaAssets: 'off',
 			})
 
 			expect(stableResults(results)).toMatchSnapshot()
+
+			// Change all the note IDs to be invalid
+			for (const filePath of context.markdownFiles) {
+				const markdown = await fs.readFile(filePath, 'utf8')
+				const updatedMarkdown = markdown.replace(/noteId: \d+/, 'noteId: 0')
+				await fs.writeFile(filePath, updatedMarkdown)
+			}
+
+			// Sync 2
+			const files = await globby(`${context.tempAssetPath}/**/*.md`)
+			const results2 = await syncFiles(files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results2)).toMatchSnapshot()
 		})
 	},
 )
@@ -610,7 +626,7 @@ describeWithFileFixture(
 	'unicode deck contents',
 	{
 		assetPath: './test/assets/test-unicode',
-		cleanUpAnki: false,
+		cleanUpAnki: true,
 		cleanUpTempFiles: true,
 	},
 	(context) => {
@@ -622,10 +638,82 @@ describeWithFileFixture(
 				},
 				ankiWeb: false,
 				dryRun: false,
+				manageFilenames: 'prompt',
 				namespace: context.namespace,
 				obsidianVault: 'Vault',
 				syncMediaAssets: 'off',
 			})
+
+			expect(
+				results.synced.map(
+					(synced) =>
+						`${path.basename(synced.filePathOriginal ?? '')} --> ${path.basename(synced.filePath ?? '')}`,
+				),
+			).toMatchInlineSnapshot(`
+				[
+				  "zoe-double.md --> Zoé (1).md",
+				  "zoé-double.md --> Zoé (2).md",
+				  "zoe-single.md --> Zoé (3).md",
+				  "zoé-single.md --> Zoé (4).md",
+				]
+			`)
+
+			expect(
+				results.synced.map(
+					(synced) =>
+						`${String(getUnicodeCodePoints(path.basename(synced.filePathOriginal ?? '', '.md')))} --> ${String(getUnicodeCodePoints(path.basename(synced.filePath ?? '', '.md')))}`,
+				),
+			).toMatchInlineSnapshot(`
+				[
+				  "7a,6f,65,2d,64,6f,75,62,6c,65 --> 5a,6f,e9,20,28,31,29",
+				  "7a,6f,65,301,2d,64,6f,75,62,6c,65 --> 5a,6f,e9,20,28,32,29",
+				  "7a,6f,65,2d,73,69,6e,67,6c,65 --> 5a,6f,e9,20,28,33,29",
+				  "7a,6f,e9,2d,73,69,6e,67,6c,65 --> 5a,6f,e9,20,28,34,29",
+				]
+			`)
+
+			expect(stableResults(results)).toMatchSnapshot()
+
+			const files = await globby(`${context.tempAssetPath}/**/*.md`)
+			const results2 = await syncFiles(files, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'prompt',
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(
+				results2.synced.map(
+					(synced) =>
+						`${path.basename(synced.filePathOriginal ?? '')} --> ${path.basename(synced.filePath ?? '')}`,
+				),
+			).toMatchInlineSnapshot(`
+				[
+				  "Zoé (1).md --> Zoé (1).md",
+				  "Zoé (2).md --> Zoé (2).md",
+				  "Zoé (3).md --> Zoé (3).md",
+				  "Zoé (4).md --> Zoé (4).md",
+				]
+			`)
+
+			expect(
+				results.synced.map(
+					(synced) =>
+						`${String(getUnicodeCodePoints(path.basename(synced.filePathOriginal ?? '', '.md')))} --> ${String(getUnicodeCodePoints(path.basename(synced.filePath ?? '', '.md')))}`,
+				),
+			).toMatchInlineSnapshot(`
+				[
+				  "7a,6f,65,2d,64,6f,75,62,6c,65 --> 5a,6f,e9,20,28,31,29",
+				  "7a,6f,65,301,2d,64,6f,75,62,6c,65 --> 5a,6f,e9,20,28,32,29",
+				  "7a,6f,65,2d,73,69,6e,67,6c,65 --> 5a,6f,e9,20,28,33,29",
+				  "7a,6f,e9,2d,73,69,6e,67,6c,65 --> 5a,6f,e9,20,28,34,29",
+				]
+			`)
 
 			expect(stableResults(results)).toMatchSnapshot()
 		})

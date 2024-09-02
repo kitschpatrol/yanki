@@ -113,3 +113,7 @@ export function splitAtFirstMatch(text: string, regex: RegExp): [string, string 
 
 	return [beforeMatch, afterMatch]
 }
+
+export function getUnicodeCodePoints(text: string): string[] {
+	return [...text].map((char) => char.codePointAt(0)!.toString(16))
+}
