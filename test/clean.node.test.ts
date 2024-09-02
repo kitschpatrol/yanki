@@ -91,17 +91,17 @@ describeWithFileFixture(
 				  deep-contiguous::within
 				  deep-contiguous::within::within
 				  deep-contiguous::within::within::within
+				  deep-island
+				  deep-island::within
+				  deep-island::within::within
 				  deep-island::within::within::within
+				  deep-non-contiguous
+				  deep-non-contiguous::within
 				  deep-non-contiguous::within::within
+				  sibling-folders
 				  sibling-folders::brother
 				  sibling-folders::sister
-				  solo-note
-				  deep-island::within::within
-				  deep-island::within
-				  deep-island
-				  deep-non-contiguous::within
-				  deep-non-contiguous
-				  sibling-folders"
+				  solo-note"
 			`)
 
 			const postCleanAnkiNotes = await listNotes({

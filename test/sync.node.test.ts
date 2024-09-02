@@ -513,6 +513,7 @@ describeWithFileFixture(
 	(context) => {
 		it('handles duplicate node ids for notes with different content gracefully', async () => {
 			// First, sync the file so it comes back with an id
+
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
@@ -555,6 +556,48 @@ describeWithFileFixture(
 
 			// TODO revisit these results
 			console.log(resultsWithDuplicates)
+		})
+	},
+)
+
+/**
+ * Related to:
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/14
+ * Thank you to @BrianRonin for the test files.
+ *
+ * Initially, there was an issue with decks being pruned despite containing
+ * notes, due to unusual responses from the Anki-Connect deck stats method. this
+ * was preventing notes from being created in a single pass.
+ */
+describeWithFileFixture(
+	'unicode deck names and invalid note ids',
+	{
+		assetPath: './test/assets/test-deck-pruning/vault',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('syncs as expected', { timeout: 60_000 }, async () => {
+			// Import package
+			const importPackageResult = await context.yankiConnect.miscellaneous.importPackage({
+				path: path.resolve('./test/assets/test-deck-pruning/Anki.apkg'),
+			})
+
+			expect(importPackageResult).toBe(true)
+
+			// Sync
+			const results = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: 'Yanki Obsidian - Vault ID 37dd13103ee93756',
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
 		})
 	},
 )

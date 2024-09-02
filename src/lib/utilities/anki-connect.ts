@@ -425,28 +425,43 @@ export async function deleteOrphanedDecks(
 		}
 	}
 
-	const deckDeletionCandidates = [
-		...new Set([...orphanedDeckNames, ...orphanedParentDeckNames]),
-	] as string[]
+	const deckDeletionCandidates = (
+		[...new Set([...orphanedDeckNames, ...orphanedParentDeckNames])] as string[]
+	).sort() // Critical!
 
 	// Ensure all decks are actually empty
 	const deckStats = await client.deck.getDeckStats({ decks: deckDeletionCandidates })
+
 	const decksToDelete = Object.values(deckStats).reduce<string[]>((acc, deckStat, index) => {
 		const deckPath = deckDeletionCandidates[index]
+		const altTotalInDeck = deckStat.new_count + deckStat.learn_count + deckStat.review_count
 
 		if (dryRun) {
 			// Get number of original cards in the deck, vs the number of cards in the deck now...
 			// TODO test this
 			const originalCount = originalNotes.filter((note) => note.deckName === deckPath).length
+
+			// Total_in_deck can not be trusted!
+			// e.g.
+			// {
+			// 	'1725255113627': {
+			// 		deck_id: 1725255113627,
+			// 		name: 'Matemática',
+			// 		new_count: 3,
+			// 		learn_count: 0,
+			// 		review_count: 0,
+			// 		total_in_deck: 0
+			// 	},
 			const activeCount = activeNotes.filter((note) => note.deckName === deckPath).length
+
 			if (
-				deckStat.total_in_deck === originalCount &&
+				!(deckStat.total_in_deck !== originalCount || altTotalInDeck !== originalCount) &&
 				activeCount === 0 &&
 				!acc.includes(deckPath)
 			) {
 				acc.push(deckPath)
 			}
-		} else if (deckStat.total_in_deck === 0 && !acc.includes(deckPath)) {
+		} else if (!(deckStat.total_in_deck !== 0 || altTotalInDeck !== 0) && !acc.includes(deckPath)) {
 			acc.push(deckPath)
 		}
 
