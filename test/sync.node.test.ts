@@ -1,5 +1,6 @@
 import { formatSyncFilesResult, getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter } from '../src/lib/model/frontmatter'
+import * as pathExtras from '../src/lib/utilities/path'
 import { getUnicodeCodePoints } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { countLinesOfFrontmatter } from './utilities/frontmatter-counter'
@@ -633,6 +634,7 @@ describeWithFileFixture(
 		it('creates notes with unicode as expected', { timeout: 60_000 }, async () => {
 			// Sync
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -645,37 +647,41 @@ describeWithFileFixture(
 			})
 
 			expect(
-				results.synced.map(
-					(synced) =>
-						`${path.basename(synced.filePathOriginal ?? '')} --> ${path.basename(synced.filePath ?? '')}`,
-				),
+				results.synced.map((synced) => path.basename(synced.filePath ?? '')),
 			).toMatchInlineSnapshot(`
 				[
-				  "zoe-double.md --> Zoé (1).md",
-				  "zoé-double.md --> Zoé (2).md",
-				  "zoe-single.md --> Zoé (3).md",
-				  "zoé-single.md --> Zoé (4).md",
+				  "Zoé (1).md",
+				  "Zoé (2).md",
+				  "Zoé (3).md",
+				  "Zoé (4).md",
 				]
 			`)
 
 			expect(
-				results.synced.map(
-					(synced) =>
-						`${String(getUnicodeCodePoints(path.basename(synced.filePathOriginal ?? '', '.md')))} --> ${String(getUnicodeCodePoints(path.basename(synced.filePath ?? '', '.md')))}`,
+				results.synced.map((synced) =>
+					String(getUnicodeCodePoints(path.basename(synced.filePath ?? '', '.md'))),
 				),
 			).toMatchInlineSnapshot(`
 				[
-				  "7a,6f,65,2d,64,6f,75,62,6c,65 --> 5a,6f,e9,20,28,31,29",
-				  "7a,6f,65,301,2d,64,6f,75,62,6c,65 --> 5a,6f,e9,20,28,32,29",
-				  "7a,6f,65,2d,73,69,6e,67,6c,65 --> 5a,6f,e9,20,28,33,29",
-				  "7a,6f,e9,2d,73,69,6e,67,6c,65 --> 5a,6f,e9,20,28,34,29",
+				  "5a,6f,e9,20,28,31,29",
+				  "5a,6f,e9,20,28,32,29",
+				  "5a,6f,e9,20,28,33,29",
+				  "5a,6f,e9,20,28,34,29",
 				]
 			`)
 
 			expect(stableResults(results)).toMatchSnapshot()
 
-			const files = await globby(`${context.tempAssetPath}/**/*.md`)
-			const results2 = await syncFiles(files, {
+			// Do it again to check for stability
+			const tempPath = path.posix.dirname(context.markdownFiles[0])
+			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+				absolute: true,
+			})
+			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+				absolute: true,
+			})
+			const results2 = await syncFiles(newFileList, {
+				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -688,30 +694,26 @@ describeWithFileFixture(
 			})
 
 			expect(
-				results2.synced.map(
-					(synced) =>
-						`${path.basename(synced.filePathOriginal ?? '')} --> ${path.basename(synced.filePath ?? '')}`,
-				),
+				results2.synced.map((synced) => path.basename(synced.filePath ?? '')),
 			).toMatchInlineSnapshot(`
 				[
-				  "Zoé (1).md --> Zoé (1).md",
-				  "Zoé (2).md --> Zoé (2).md",
-				  "Zoé (3).md --> Zoé (3).md",
-				  "Zoé (4).md --> Zoé (4).md",
+				  "Zoé (1).md",
+				  "Zoé (2).md",
+				  "Zoé (3).md",
+				  "Zoé (4).md",
 				]
 			`)
 
 			expect(
-				results.synced.map(
-					(synced) =>
-						`${String(getUnicodeCodePoints(path.basename(synced.filePathOriginal ?? '', '.md')))} --> ${String(getUnicodeCodePoints(path.basename(synced.filePath ?? '', '.md')))}`,
+				results.synced.map((synced) =>
+					String(getUnicodeCodePoints(path.basename(synced.filePath ?? '', '.md'))),
 				),
 			).toMatchInlineSnapshot(`
 				[
-				  "7a,6f,65,2d,64,6f,75,62,6c,65 --> 5a,6f,e9,20,28,31,29",
-				  "7a,6f,65,301,2d,64,6f,75,62,6c,65 --> 5a,6f,e9,20,28,32,29",
-				  "7a,6f,65,2d,73,69,6e,67,6c,65 --> 5a,6f,e9,20,28,33,29",
-				  "7a,6f,e9,2d,73,69,6e,67,6c,65 --> 5a,6f,e9,20,28,34,29",
+				  "5a,6f,e9,20,28,31,29",
+				  "5a,6f,e9,20,28,32,29",
+				  "5a,6f,e9,20,28,33,29",
+				  "5a,6f,e9,20,28,34,29",
 				]
 			`)
 
