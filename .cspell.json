@@ -29,6 +29,7 @@
 		"\"obsidian://.*?\"" // Ignore Obsidian URIs
 	],
 	"words": [
+		"aesculapa",
 		"anki",
 		"ankidown",
 		"apkg",

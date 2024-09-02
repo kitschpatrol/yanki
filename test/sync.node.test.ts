@@ -601,3 +601,33 @@ describeWithFileFixture(
 		})
 	},
 )
+
+/**
+ * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/13
+ * Thank you to @aesculapa for the test cases.
+ */
+describeWithFileFixture(
+	'unicode deck contents',
+	{
+		assetPath: './test/assets/test-unicode',
+		cleanUpAnki: false,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('creates notes with unicode as expected', { timeout: 60_000 }, async () => {
+			// Sync
+			const results = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
+)
