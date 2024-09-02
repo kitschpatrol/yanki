@@ -552,31 +552,6 @@ export async function updateModelStyle(
 	return true
 }
 
-// For testing
-
-/**
- * For testing purposes only
- * @param client
- * @returns
- */
-export async function createModels(client: YankiConnect) {
-	for (const model of yankiModels) {
-		try {
-			await client.model.createModel(model)
-		} catch (error) {
-			if (error instanceof Error) {
-				if (error.message === `Model name already exists`) {
-					continue
-				}
-
-				throw error
-			} else {
-				throw new TypeError('Unknown error')
-			}
-		}
-	}
-}
-
 /**
  * @param client
  * @param modelName

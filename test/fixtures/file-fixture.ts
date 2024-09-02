@@ -6,6 +6,7 @@
 
 import { normalize } from '../../src/lib/utilities/path'
 import { getHash } from '../../src/lib/utilities/string'
+import { loadTestProfile } from '../utilities/anki-connect'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
@@ -75,10 +76,7 @@ export function describeWithFileFixture(
 			expect(context.allFiles.length).toBeGreaterThan(0)
 
 			// Use test profile
-			const loadProfileResult = await context.yankiConnect.miscellaneous.loadProfile({
-				name: 'yanki-obsidian-automated-tests',
-			})
-			expect(loadProfileResult).toBe(true)
+			await loadTestProfile(context.yankiConnect)
 
 			// Clean up anki first
 			if (cleanUpAnki) {

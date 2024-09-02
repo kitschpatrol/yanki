@@ -1,7 +1,7 @@
 import { formatListResult, listNotes, syncFiles } from '../src/lib'
 import { PLATFORM } from '../src/lib/utilities/platform'
 import { describeWithFileFixture } from './fixtures/file-fixture'
-import { closeAnki } from './utilities/close-anki'
+import { closeAnki } from './utilities/anki-connect'
 import { sortMultiline, stableNoteIds } from './utilities/stable-sync-results'
 import { expect, it } from 'vitest'
 

@@ -1,7 +1,7 @@
 import { formatSetStyleResult, getStyle, setStyle } from '../src/lib'
-import { createModels } from '../src/lib/utilities/anki-connect'
 import { css } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
+import { createModels } from './utilities/anki-connect'
 import { stablePrettyMs } from './utilities/stable-sync-results'
 import { expect, it } from 'vitest'
 
