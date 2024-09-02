@@ -2,7 +2,6 @@
 noteId: 1725245375909
 ---
 
-
 ## A soma de dois números inteiros de sinais diferentes é obtida como? qual sinal prevalece?
 
 ---
@@ -14,15 +13,19 @@ noteId: 1725245375909
 $$
 (-4) + (+10) = +6
 $$
+
 $$
 (-18) + (+9) = -9
 $$
+
 $$
 - 4 + 10 = 6
 $$
+
 $$
 -18 + 9 = -9
 $$
+
 $$
 +20-8=+12
 $$

@@ -1,6 +1,7 @@
 ---
 noteId: 1725245375634
 ---
+
 ## Oque são números opostos ou simétricos?
 
 ---
@@ -16,4 +17,3 @@ $$
 - **Valor Absoluto**: Ambos têm o mesmo valor absoluto, mas sinais opostos.
 - **Somam Zero**: A soma de um número e seu oposto é sempre zero:
 - O oposto de **0** é **0** (o zero é seu próprio oposto).
-

@@ -1,6 +1,7 @@
 ---
 noteId: 1725245375584
 ---
+
 ## Oque são números Inteiros?
 
 ---
@@ -14,15 +15,19 @@ $$
 $$
 
 E tem suas variações:
+
 $$
 \text{Positivos: } \mathbb{Z}^+ = \{1, 2, 3, \ldots\}
 $$
+
 $$
 \text{Negativos: } \mathbb{Z}^- = \{ \ldots, -3, -2, -1 \}
 $$
+
 $$
 \text{Maior ou igual a zero: } \mathbb{Z}_{\geq 0} = \{0, 1, 2, 3, \ldots\}
 $$
+
 $$
 \text{Menor ou igual a zero: } \mathbb{Z}_{\leq 0} = \{ \ldots, -3, -2, -1, 0 \}
 $$

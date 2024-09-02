@@ -7,6 +7,7 @@ noteId: 1725245376460
 $$
 \notin
 $$
+
 $$
 \in
 $$
@@ -20,13 +21,15 @@ O **símbolo de pertinência** na matemática, representado por ∈, é usado pa
 Seja **A** um conjunto e **X** um elemento. O símbolo **X** ∈ **A** significa que o elemento **X** está contido no conjunto **A**. Por exemplo:
 
 $$
-3 \in \{1,2,3,4\} 
+3 \in \{1,2,3,4\}
 $$
+
 Aqui, o número 3 **pertence ao conjunto** {1, 2, 3, 4}.
 
 ### Exemplos:
 
 **Números Naturais**: Se quisermos expressar que o número 5 é um número natural, podemos escrever:
+
 $$
 3 \in \mathbb{N}
 $$
@@ -38,6 +41,7 @@ Onde N representa o conjunto dos números naturais.
 $$
 b \in \text{A}
 $$
+
 $$
 d \notin A
 $$

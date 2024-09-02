@@ -1,6 +1,7 @@
 ---
 noteId: 1725245375684
 ---
+
 ## Qual o número oposto ou simétrico de 5 e -28 e 0?
 
 ---

@@ -1,6 +1,7 @@
 ---
 noteId: 1725245375259
 ---
+
 Todo número é múltiplo dele mesmo, inclusive o zero.
 
 ---

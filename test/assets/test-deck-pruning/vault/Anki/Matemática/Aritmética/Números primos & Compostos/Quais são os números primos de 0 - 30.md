@@ -1,6 +1,7 @@
 ---
 noteId: 1725245374259
 ---
+
 # Quais são os números primos de 0 - 30
 
 ---

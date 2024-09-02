@@ -19,7 +19,9 @@
 		"*.swf",
 		"*.tif",
 		"*.wav",
-		"bin/"
+		"bin/",
+		"test/assets/test-deck-pruning/*",
+		"test/assets/test-unicode/*"
 	],
 	"import": "@kitschpatrol/cspell-config",
 	"ignoreRegExpList": [

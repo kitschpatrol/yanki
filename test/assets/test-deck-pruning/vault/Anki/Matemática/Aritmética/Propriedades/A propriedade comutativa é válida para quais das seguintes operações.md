@@ -1,6 +1,7 @@
 ---
 noteId: 1725245374409
 ---
+
 ## A propriedade comutativa é válida para quais das seguintes operações?
 
 a) Adição e multiplicação  
@@ -19,4 +20,3 @@ A propriedade comutativa afirma que a ordem dos números não altera o resultado
 - **Multiplicação:** a×b = b×a
 
 A subtração e a divisão não são comutativas.
-

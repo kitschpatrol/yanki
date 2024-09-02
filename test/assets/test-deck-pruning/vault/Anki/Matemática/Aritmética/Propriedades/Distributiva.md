@@ -19,6 +19,7 @@ $$
 $$
 a \times (b - c) = a \times b - a \times c
 $$
+
 #### Exemplos
 
 ##### **Distribuição sobre a adição:**
@@ -48,11 +49,10 @@ $$
 **Aplicando a propriedade distributiva:**
 
 $$
-5 \times (8 - 3) = 5 \times 8 - 5 \times 3 = 40 - 15 = 
+5 \times (8 - 3) = 5 \times 8 - 5 \times 3 = 40 - 15 =
 $$
 
 > Novamente, ambos os métodos resultam em 25.
-
 
 ### Importância
 

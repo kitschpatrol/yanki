@@ -1,6 +1,7 @@
 ---
 noteId: 1725245374560
 ---
+
 ## Qual é o elemento Neutro para Multiplicação?
 
 ---
@@ -10,4 +11,5 @@ noteId: 1725245374560
 $$
 a \times 1 = a
 $$
+
 > onde a é qualquer número real. Portanto, um é o elemento neutro para a multiplicação.

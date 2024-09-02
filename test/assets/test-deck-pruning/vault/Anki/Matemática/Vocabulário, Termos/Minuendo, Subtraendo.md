@@ -16,6 +16,7 @@ Por exemplo, na operação:
 $$
 8-3 = 5
 $$
+
 - 8 é o **minuendo**.
 - 3 é o **subtraendo**.
 - 5 é a **diferença** (o resultado da subtração).

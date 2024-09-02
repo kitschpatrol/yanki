@@ -1,6 +1,7 @@
 ---
 noteId: 1725245374533
 ---
+
 ## Qual é o elemento neutro para a Adição?
 
 ---
@@ -10,4 +11,5 @@ noteId: 1725245374533
 $$
 a + 0 = a
 $$
->onde a é qualquer número real. Portanto, zero é o elemento neutro para a adição.
+
+> onde a é qualquer número real. Portanto, zero é o elemento neutro para a adição.

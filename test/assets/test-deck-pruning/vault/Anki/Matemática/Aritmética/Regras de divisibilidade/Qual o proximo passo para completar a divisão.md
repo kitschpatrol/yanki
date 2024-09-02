@@ -1,6 +1,7 @@
 ---
 noteId: 1725245375460
 ---
+
 ### Qual o proximo passo para completar a divisão?
 
 ![[Pasted image 20240824201501.png]]

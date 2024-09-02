@@ -1,6 +1,7 @@
 ---
 noteId: 1725245375335
 ---
+
 O dividendo é ~~o **múltiplo**~~ do divisor e do quociente.
 
 ---
