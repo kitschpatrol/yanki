@@ -59,8 +59,8 @@ export async function loadLocalNotes(
 	const localNotes: LocalNote[] = []
 
 	for (const [index, filePath] of allLocalFilePaths.entries()) {
-		const rawMarkdown = await fileAdapter.readFile(filePath)
-		const markdown = rawMarkdown.normalize('NFC')
+		// TODO normalization?
+		const markdown = await fileAdapter.readFile(filePath)
 
 		const note = await getNoteFromMarkdown(markdown, {
 			allFilePaths,
@@ -76,7 +76,8 @@ export async function loadLocalNotes(
 		})
 
 		if (note.deckName === '') {
-			note.deckName = deckNamesFromFilePaths[index].normalize('NFC')
+			// TODO normalization?
+			note.deckName = deckNamesFromFilePaths[index]
 		}
 
 		localNotes.push({

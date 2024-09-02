@@ -106,6 +106,10 @@ function getSafeFilename(text: string, maxLength?: number | undefined): string {
 		basicSafeFilename = MEDIA_DEFAULT_EMPTY_FILENAME
 	}
 
+	// Unicode normalization
+	// https://github.com/kitschpatrol/yanki-obsidian/issues/13
+	basicSafeFilename = basicSafeFilename.normalize('NFC')
+
 	if (maxLength === undefined) {
 		return basicSafeFilename
 	}

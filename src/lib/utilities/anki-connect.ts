@@ -224,7 +224,7 @@ function areFieldsEqual(
 	for (const key of keys) {
 		// Both fields have the key (e.g. Extra)
 		if (key in localFields && key in remoteFields) {
-			if (localFields[key] !== remoteFields[key]) {
+			if (localFields[key].normalize('NFC') !== remoteFields[key].normalize('NFC')) {
 				return false
 			}
 		}
@@ -272,7 +272,7 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 	if (localTags.length !== remoteTags.length) return false
 
 	for (const [i, element] of localTags.entries()) {
-		if (element !== remoteTags[i]) return false
+		if (element.normalize('NFC') !== remoteTags[i].normalize('NFC')) return false
 	}
 
 	return true
