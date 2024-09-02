@@ -425,48 +425,65 @@ export async function deleteOrphanedDecks(
 		}
 	}
 
+	// This is a dangerous place and (maybe) a potential source of bugs...
+	// https://github.com/kitschpatrol/yanki-obsidian/issues/6
+	// https://github.com/kitschpatrol/yanki-obsidian/issues/14
+	//
+	// Two possible issues:
+	// 1. The order of the decks returned from `getDeckStats` does not necessarily
+	//    match the order of the decks in the `deckDeletionCandidates` array? It's
+	//    looking for a matching deck ID anywhere in the hierarchy, which may or
+	//    may not be the leaf we want. Solution: Call it one deck at a time.
+	// 2. The `total_in_deck` field is apparently not reliable.... sometimes it
+	//    can be zero when there are cards in the deck. In those cases, it appears
+	//    that `new_count + learn_count + review_count` indicates at least a
+	//    partial non-zero quantity. (But it's not the same as `total_in_deck`
+	//    when available.) Solution: Take the max of these sources as the deck count.
+
 	const deckDeletionCandidates = (
 		[...new Set([...orphanedDeckNames, ...orphanedParentDeckNames])] as string[]
-	).sort() // Critical!
+	).sort()
+
+	const decksToDelete: string[] = []
 
 	// Ensure all decks are actually empty
-	const deckStats = await client.deck.getDeckStats({ decks: deckDeletionCandidates })
+	for (const deckName of deckDeletionCandidates) {
+		// One at a time...
+		const deckStatsObject = await client.deck.getDeckStats({ decks: [deckName] })
+		const deckStatsValues = Object.values(deckStatsObject)
 
-	const decksToDelete = Object.values(deckStats).reduce<string[]>((acc, deckStat, index) => {
-		const deckPath = deckDeletionCandidates[index]
-		const altTotalInDeck = deckStat.new_count + deckStat.learn_count + deckStat.review_count
-
-		if (dryRun) {
-			// Get number of original cards in the deck, vs the number of cards in the deck now...
-			// TODO test this
-			const originalCount = originalNotes.filter((note) => note.deckName === deckPath).length
-
-			// Total_in_deck can not be trusted!
-			// e.g.
-			// {
-			// 	'1725255113627': {
-			// 		deck_id: 1725255113627,
-			// 		name: 'Matemática',
-			// 		new_count: 3,
-			// 		learn_count: 0,
-			// 		review_count: 0,
-			// 		total_in_deck: 0
-			// 	},
-			const activeCount = activeNotes.filter((note) => note.deckName === deckPath).length
-
-			if (
-				!(deckStat.total_in_deck !== originalCount || altTotalInDeck !== originalCount) &&
-				activeCount === 0 &&
-				!acc.includes(deckPath)
-			) {
-				acc.push(deckPath)
-			}
-		} else if (!(deckStat.total_in_deck !== 0 || altTotalInDeck !== 0) && !acc.includes(deckPath)) {
-			acc.push(deckPath)
+		if (deckStatsValues.length > 1) {
+			// This should never happen, but don't touch it
+			console.warn(`Multiple decks found for deck name: ${deckName}`)
+			continue
 		}
 
-		return acc
-	}, [])
+		const deckStats = deckStatsValues.at(0)
+		if (deckStats === undefined) {
+			// Anki claims deck does not exist, but don't touch it
+			console.warn(`Deck not found for deck name: ${deckName}`)
+			continue
+		}
+
+		const cardCount = Math.max(
+			deckStats.total_in_deck,
+			deckStats.new_count + deckStats.learn_count + deckStats.review_count,
+		)
+
+		if (dryRun) {
+			// Get number of original notes in the deck, vs the number of cards in the deck now...
+			// TODO this is not correct, but only affects dry run...
+			// It's a messy card vs. note quantity situation
+			const originalCount = originalNotes.filter((note) => note.deckName === deckName).length
+			const activeCount = activeNotes.filter((note) => note.deckName === deckName).length
+
+			if (cardCount === originalCount && activeCount === 0 && !decksToDelete.includes(deckName)) {
+				decksToDelete.push(deckName)
+			}
+		} else if (cardCount === 0 && !decksToDelete.includes(deckName)) {
+			decksToDelete.push(deckName)
+		}
+	}
 
 	if (!dryRun) {
 		await client.deck.deleteDecks({ cardsToo: true, decks: decksToDelete })
