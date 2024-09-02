@@ -4,10 +4,6 @@
  * teardown.
  */
 
-import { cleanNotes } from '../../src/lib'
-import { yankiModelNames } from '../../src/lib/model/model'
-import { CSS_DEFAULT_STYLE } from '../../src/lib/shared/constants'
-import { createModels, getModelStyle, updateModelStyle } from '../../src/lib/utilities/anki-connect'
 import { normalize } from '../../src/lib/utilities/path'
 import { getHash } from '../../src/lib/utilities/string'
 import { globby } from 'globby'
@@ -47,9 +43,6 @@ export function describeWithFileFixture(
 			yankiConnect: new YankiConnect({ autoLaunch: true }),
 		}
 
-		let initialCardCount: number
-		let originalCss: string
-
 		beforeAll(async () => {
 			// Setup logic before all tests
 			context.assetPath = assetPath
@@ -81,28 +74,24 @@ export function describeWithFileFixture(
 			expect(context.markdownFiles.length).toBeGreaterThan(0)
 			expect(context.allFiles.length).toBeGreaterThan(0)
 
-			// Save CSS, so that we're always using the same stuff
-			await createModels(context.yankiConnect)
-			originalCss = await getModelStyle(context.yankiConnect)
-
-			// Set default CSS
-			for (const name of yankiModelNames) {
-				await updateModelStyle(context.yankiConnect, name, CSS_DEFAULT_STYLE, false)
-			}
+			// Use test profile
+			const loadProfileResult = await context.yankiConnect.miscellaneous.loadProfile({
+				name: 'yanki-obsidian-automated-tests',
+			})
+			expect(loadProfileResult).toBe(true)
 
 			// Clean up anki first
 			if (cleanUpAnki) {
-				await cleanNotes({
-					ankiConnectOptions: { autoLaunch: true },
-					ankiWeb: false,
-					dryRun: false,
-					namespace: context.namespace,
+				// Clean up everything, since importing apkg can have other effects...
+				const deckNamesResult = await context.yankiConnect.deck.deckNames()
+				await context.yankiConnect.deck.deleteDecks({
+					cardsToo: true,
+					decks: deckNamesResult,
 				})
+				const deckNamesResultPostClean = await context.yankiConnect.deck.deckNames()
+				expect(deckNamesResultPostClean).toEqual(['Default'])
 
-				const allNotes = await context.yankiConnect.note.findNotes({
-					query: '*',
-				})
-				initialCardCount = allNotes.length
+				// Models
 			}
 
 			// Setup logic before all tests
@@ -116,28 +105,21 @@ export function describeWithFileFixture(
 			// Teardown logic after all tests
 			// console.log(`Teardown after all tests: ${JSON.stringify(context, undefined, 2)}`)
 
-			// Sleep for 2 seconds, some issues with file writing latency
+			// Sleep for a bit, some issues with file writing latency
 			await new Promise((resolve) => {
 				setTimeout(resolve, 1000)
 			})
 
-			// Set default CSS
-			for (const name of yankiModelNames) {
-				await updateModelStyle(context.yankiConnect, name, originalCss, false)
-			}
-
 			// Clean up anki
 			if (cleanUpAnki) {
-				await cleanNotes({
-					ankiConnectOptions: { autoLaunch: true },
-					ankiWeb: false,
-					dryRun: false,
-					namespace: context.namespace,
+				// Clean up everything, since importing apkg can have other effects...
+				const deckNamesResult = await context.yankiConnect.deck.deckNames()
+				await context.yankiConnect.deck.deleteDecks({
+					cardsToo: true,
+					decks: deckNamesResult,
 				})
-				const allNotes = await context.yankiConnect.note.findNotes({ query: '*' })
-				const finalCardCount = allNotes.length
-
-				expect(initialCardCount).toEqual(finalCardCount)
+				const deckNamesResultPostClean = await context.yankiConnect.deck.deckNames()
+				expect(deckNamesResultPostClean).toEqual(['Default'])
 			}
 
 			// Clean up temp dir

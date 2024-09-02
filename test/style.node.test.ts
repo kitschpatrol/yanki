@@ -1,4 +1,5 @@
 import { formatSetStyleResult, getStyle, setStyle } from '../src/lib'
+import { createModels } from '../src/lib/utilities/anki-connect'
 import { css } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stablePrettyMs } from './utilities/stable-sync-results'
@@ -12,8 +13,10 @@ describeWithFileFixture(
 		cleanUpAnki: true,
 		cleanUpTempFiles: true,
 	},
-	() => {
+	(context) => {
 		it('gets the current style', async () => {
+			await createModels(context.yankiConnect)
+
 			const result = await getStyle({
 				ankiConnectOptions: {
 					autoLaunch: true,
@@ -22,16 +25,18 @@ describeWithFileFixture(
 
 			expect(result).toMatchInlineSnapshot(`
 				".card {
-					font-family: arial;
-					font-size: 20px;
-					text-align: center;
-					color: black;
-					background-color: white;
+					font-family: monospace;
+					font-size: 200px;
+					text-align: left;
+					color: blue;
+					background-color: gray;
 				}"
 			`)
 		})
 
 		it('sets the style', async () => {
+			await createModels(context.yankiConnect)
+
 			const customStyle = css`
 				.card {
 					font-family: monospace;
@@ -53,19 +58,19 @@ describeWithFileFixture(
 			expect(result.models).toMatchInlineSnapshot(`
 				[
 				  {
-				    "action": "updated",
+				    "action": "unchanged",
 				    "name": "Yanki - Basic",
 				  },
 				  {
-				    "action": "updated",
+				    "action": "unchanged",
 				    "name": "Yanki - Cloze",
 				  },
 				  {
-				    "action": "updated",
+				    "action": "unchanged",
 				    "name": "Yanki - Basic (type in the answer)",
 				  },
 				  {
-				    "action": "updated",
+				    "action": "unchanged",
 				    "name": "Yanki - Basic (and reversed card with extra)",
 				  },
 				]
@@ -73,14 +78,14 @@ describeWithFileFixture(
 
 			const resultReport = formatSetStyleResult(result)
 			expect(stablePrettyMs(resultReport)).toMatchInlineSnapshot(
-				`"Successfully update 4 models and left 0 models unchanged in XXX."`,
+				`"Successfully update 0 models and left 4 models unchanged in XXX."`,
 			)
 
 			const verboseResultReport = formatSetStyleResult(result, true)
 			expect(stablePrettyMs(verboseResultReport)).toMatchInlineSnapshot(`
-				"Successfully update 4 models and left 0 models unchanged in XXX.
+				"Successfully update 0 models and left 4 models unchanged in XXX.
 
-				Updated models:
+				Unchanged models:
 				  Yanki - Basic
 				  Yanki - Cloze
 				  Yanki - Basic (type in the answer)

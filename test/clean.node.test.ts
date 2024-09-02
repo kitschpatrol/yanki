@@ -41,7 +41,7 @@ describeWithFileFixture(
 
 			const dryRunFormatted = formatCleanResult(dryRunResult)
 			expect(dryRunFormatted).toMatchInlineSnapshot(
-				`"Will deleted 9 notes, 7 decks, and 0 media assets from Anki."`,
+				`"Will deleted 9 notes, 6 decks, and 0 media assets from Anki."`,
 			)
 
 			const ankiNotes = await listNotes({
