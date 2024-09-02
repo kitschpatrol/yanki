@@ -582,6 +582,7 @@ describeWithFileFixture(
 		it('syncs as expected', { timeout: 60_000 }, async () => {
 			// Sync
 			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -602,8 +603,17 @@ describeWithFileFixture(
 			}
 
 			// Sync 2
-			const files = await globby(`${context.tempAssetPath}/**/*.md`)
-			const results2 = await syncFiles(files, {
+			// Do it again to check for stability
+			const tempPath = path.posix.dirname(context.markdownFiles[0])
+			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+				absolute: true,
+			})
+			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+				absolute: true,
+			})
+
+			const results2 = await syncFiles(newFileList, {
+				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -646,9 +656,8 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			expect(
-				results.synced.map((synced) => path.basename(synced.filePath ?? '')),
-			).toMatchInlineSnapshot(`
+			expect(results.synced.map((synced) => path.basename(synced.filePath ?? '')))
+				.toMatchInlineSnapshot(`
 				[
 				  "Zoé (1).md",
 				  "Zoé (2).md",
@@ -693,9 +702,8 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			expect(
-				results2.synced.map((synced) => path.basename(synced.filePath ?? '')),
-			).toMatchInlineSnapshot(`
+			expect(results2.synced.map((synced) => path.basename(synced.filePath ?? '')))
+				.toMatchInlineSnapshot(`
 				[
 				  "Zoé (1).md",
 				  "Zoé (2).md",

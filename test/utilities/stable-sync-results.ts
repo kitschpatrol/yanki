@@ -21,6 +21,10 @@ export function cleanUpTempPath(filePath: string | undefined): string | undefine
 	return filePath.replaceAll(normalize(os.tmpdir()), '/').replaceAll(/\/\d{13}\//g, '')
 }
 
+function stripNewlines(input: string): string {
+	return input.replaceAll(/(\r\n|\n|\r)/g, '')
+}
+
 function cleanUpHashes(text: string): string {
 	return text.replaceAll(/-[\da-f]{16}/g, '-HASH')
 }
@@ -34,24 +38,44 @@ export function stableResults(results: SyncResults): SyncResults {
 	results.duration = 0
 	results.synced = results.synced.map((note) => {
 		note.filePath = cleanUpTempPath(note.filePath)
-		note.filePathOriginal = cleanUpTempPath(note.filePathOriginal)
+
+		// Different Unicode paths normalization on Windows vs. Mac...
+		note.filePathOriginal = cleanUpTempPath(note.filePathOriginal)?.normalize('NFC')
+
 		note.note.noteId = 0
 
 		if (note.note.cards !== undefined) {
 			note.note.cards = note.note.cards.map(() => 0)
 		}
 
-		note.note.fields.Front = cleanUpHashes(cleanUpTempPath(note.note.fields.Front) ?? '')
-		note.note.fields.Back = cleanUpHashes(cleanUpTempPath(note.note.fields.Back) ?? '')
+		note.note.fields.Front = stripNewlines(
+			cleanUpHashes(cleanUpTempPath(note.note.fields.Front) ?? ''),
+		)
+		note.note.fields.Back = stripNewlines(
+			cleanUpHashes(cleanUpTempPath(note.note.fields.Back) ?? ''),
+		)
 
 		return note
 	})
 
+	let sorted: SyncResults
+
 	try {
-		const sorted = sortKeys(results, { deep: true })
-		return sorted
+		sorted = sortKeys(results, { deep: true })
 	} catch {
 		console.log(`Problem sorting keys!`)
-		return results
+		sorted = results
 	}
+
+	// Extra sorting after seeing some cross-platform differences
+	sorted.deletedDecks = sorted.deletedDecks.sort()
+	sorted.deletedMedia = sorted.deletedMedia.sort()
+	sorted.synced = sorted.synced.sort((a, b) => {
+		// Glue everything together...
+		const aString = a.note.deckName + a.note.fields.Front + a.note.fields.Back
+		const bString = b.note.deckName + b.note.fields.Front + b.note.fields.Back
+		return aString.localeCompare(bString)
+	})
+
+	return sorted
 }
