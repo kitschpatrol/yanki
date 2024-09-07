@@ -1,6 +1,6 @@
+import { expect, it } from 'vitest'
 import { resolveLink } from '../src/lib/utilities/resolve-link'
 import { permute } from './utilities/permute'
-import { expect, it } from 'vitest'
 
 it('resolves links', () => {
 	// TODO windows

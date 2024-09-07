@@ -1,45 +1,45 @@
 export {
+	cleanNotes,
 	type CleanOptions,
 	type CleanResult,
-	cleanNotes,
 	defaultCleanOptions,
 	formatCleanResult,
 } from './actions/clean'
-export { type ListOptions, defaultListOptions, formatListResult, listNotes } from './actions/list'
+export { defaultListOptions, formatListResult, listNotes, type ListOptions } from './actions/list'
 export {
-	type RenameFilesOptions,
-	type RenameFilesResult,
 	defaultRenameFilesOptions,
 	renameFiles,
+	type RenameFilesOptions,
+	type RenameFilesResult,
 } from './actions/rename'
 export {
-	type GetStyleOptions,
-	type SetStyleOptions,
-	type SetStyleResult,
 	defaultGetStyleOptions,
 	defaultSetStyleOptions,
 	formatSetStyleResult,
 	getStyle,
+	type GetStyleOptions,
 	setStyle,
+	type SetStyleOptions,
+	type SetStyleResult,
 } from './actions/style'
 export {
-	type SyncFilesOptions,
-	type SyncFilesResult,
 	defaultSyncFilesOptions,
 	formatSyncFilesResult,
 	syncFiles,
+	type SyncFilesOptions,
+	type SyncFilesResult,
 } from './actions/sync-files'
 export {
-	type SyncNotesOptions,
-	type SyncNotesResult,
 	defaultSyncNotesOptions,
 	syncNotes,
+	type SyncNotesOptions,
+	type SyncNotesResult,
 } from './actions/sync-notes'
 export { type YankiNote } from './model/note'
 export {
-	type GetNoteFromMarkdownOptions,
 	defaultGetNoteFromMarkdownOptions,
 	getNoteFromMarkdown,
+	type GetNoteFromMarkdownOptions,
 } from './parse/parse'
 export { type FetchAdapter, type FileAdapter } from './shared/types'
 export { hostAndPortToUrl, urlToHostAndPort } from './utilities/url'

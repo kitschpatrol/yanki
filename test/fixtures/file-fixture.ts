@@ -4,15 +4,15 @@
  * teardown.
  */
 
-import { normalize } from '../../src/lib/utilities/path'
-import { getHash } from '../../src/lib/utilities/string'
-import { loadTestProfile } from '../utilities/anki-connect'
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'path-browserify-esm'
 import { afterAll, beforeAll, describe, expect } from 'vitest'
 import { YankiConnect } from 'yanki-connect'
+import { normalize } from '../../src/lib/utilities/path'
+import { getHash } from '../../src/lib/utilities/string'
+import { loadTestProfile } from '../utilities/anki-connect'
 
 type FixtureOptions = {
 	assetPath: string

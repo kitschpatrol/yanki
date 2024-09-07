@@ -1,15 +1,15 @@
+import { type YankiConnect } from 'yanki-connect'
 import {
-	type YankiModelName,
 	legacyYankiModelNames,
+	type YankiModelName,
 	yankiModelNames,
 	yankiModels,
 } from '../model/model'
 import { type YankiNote } from '../model/note'
-import { type Media, extractMediaFromHtml } from '../parse/rehype-utilities'
+import { extractMediaFromHtml, type Media } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
 import { getSlugifiedNamespace } from './namespace'
 import { isUrl } from './url'
-import { type YankiConnect } from 'yanki-connect'
 
 export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryRun = false) {
 	if (dryRun) {
@@ -68,7 +68,7 @@ export async function addNote(
 				},
 			},
 		})
-		.catch(async (error) => {
+		.catch(async (error: unknown) => {
 			if (error instanceof Error) {
 				if (error.message === `model was not found: ${note.modelName}`) {
 					// Create the model and try again
@@ -160,7 +160,7 @@ export async function updateNote(
 				.updateNoteModel({
 					note: { ...localNote, id: localNote.noteId, tags: localNote.tags ?? [] },
 				})
-				.catch(async (error) => {
+				.catch(async (error: unknown) => {
 					if (error instanceof Error) {
 						if (error.message === `Model '${localNote.modelName}' not found`) {
 							// Create the model and try again
@@ -315,9 +315,9 @@ export async function getRemoteNotes(
 export async function getRemoteNotesById(
 	client: YankiConnect,
 	noteIds: number[],
-): Promise<Array<YankiNote | undefined>> {
+): Promise<Array<undefined | YankiNote>> {
 	const ankiNotes = await client.note.notesInfo({ notes: noteIds })
-	const yankiNotes: Array<YankiNote | undefined> = []
+	const yankiNotes: Array<undefined | YankiNote> = []
 
 	if (ankiNotes.every((ankiNote) => ankiNote.noteId === undefined)) {
 		// All undefined, return early

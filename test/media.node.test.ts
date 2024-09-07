@@ -1,3 +1,5 @@
+import path from 'node:path'
+import { expect, it } from 'vitest'
 import { syncFiles } from '../src/lib'
 import { getDefaultFileAdapter } from '../src/lib/shared/types'
 import { getFileContentHash } from '../src/lib/utilities/file'
@@ -5,8 +7,6 @@ import { mediaAssetExists } from '../src/lib/utilities/media'
 import { getFileExtensionFromUrl, getUrlContentHash, safeParseUrl } from '../src/lib/utilities/url'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stableResults } from './utilities/stable-sync-results'
-import path from 'node:path'
-import { expect, it } from 'vitest'
 
 // eslint-disable-next-line n/no-unsupported-features/node-builtins
 const fetchAdapter = globalThis.fetch.bind(globalThis)

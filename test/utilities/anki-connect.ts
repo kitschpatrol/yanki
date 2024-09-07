@@ -1,8 +1,8 @@
+import { execa } from 'execa'
+import { YankiConnect } from 'yanki-connect'
 import { yankiModels } from '../../src/lib/model/model'
 import { requestPermission } from '../../src/lib/utilities/anki-connect'
 import { PLATFORM } from '../../src/lib/utilities/platform'
-import { execa } from 'execa'
-import { YankiConnect } from 'yanki-connect'
 
 export async function closeAnki(): Promise<void> {
 	if (PLATFORM !== 'mac') {

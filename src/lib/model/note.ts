@@ -1,6 +1,6 @@
-import type { YankiModelName } from './model'
 import { type Simplify } from 'type-fest'
 import { type YankiParamsForAction } from 'yanki-connect'
+import type { YankiModelName } from './model'
 
 export type YankiNote = Simplify<
 	{

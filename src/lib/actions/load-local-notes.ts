@@ -1,14 +1,14 @@
+import { deepmerge } from 'deepmerge-ts'
+import path from 'path-browserify-esm'
 import type { YankiNote } from '../model/note'
 import { getNoteFromMarkdown } from '../parse/parse'
 import {
-	type GlobalOptions,
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
+	type GlobalOptions,
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
-import { deepmerge } from 'deepmerge-ts'
-import path from 'path-browserify-esm'
 
 export type LoadOptions = Pick<
 	GlobalOptions,

@@ -1,3 +1,5 @@
+import stripAnsi from 'strip-ansi'
+import { expect, it, vi } from 'vitest'
 import { normalize } from '../src/lib/utilities/path'
 import {
 	hostAndPortToUrl,
@@ -6,8 +8,6 @@ import {
 	safeDecodeURIComponent,
 	urlToHostAndPort,
 } from '../src/lib/utilities/url'
-import stripAnsi from 'strip-ansi'
-import { expect, it, vi } from 'vitest'
 
 it('converts from url to host and port and back', () => {
 	const hostAndPort = urlToHostAndPort('http://localhost:8765')

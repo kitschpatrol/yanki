@@ -1,3 +1,5 @@
+import slugify from '@sindresorhus/slugify'
+import path from 'path-browserify-esm'
 import {
 	MEDIA_FILENAME_MAX_LENGTH,
 	MEDIA_INCLUDE_LEGIBLE_FILENAME,
@@ -9,8 +11,6 @@ import { fileExists, getFileContentHash } from './file'
 import { getSlugifiedNamespace } from './namespace'
 import { truncateOnWordBoundary } from './string'
 import { getFileExtensionFromUrl, getUrlContentHash, isUrl, safeParseUrl, urlExists } from './url'
-import slugify from '@sindresorhus/slugify'
-import path from 'path-browserify-esm'
 
 /**
  * @param pathOrUrl

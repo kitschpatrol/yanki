@@ -1,10 +1,10 @@
+import { expect, it } from 'vitest'
 import {
 	getBaseAndQueryParts,
 	isAbsolute,
 	normalize,
 	resolveWithBasePath,
 } from '../src/lib/utilities/path'
-import { expect, it } from 'vitest'
 
 const testPathsRaw = [
 	String.raw`C:/Bla bla bla`,

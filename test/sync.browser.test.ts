@@ -1,5 +1,5 @@
-import { type FileAdapter, getNoteFromMarkdown, syncNotes } from '../src/lib'
 import { expect, it } from 'vitest'
+import { type FileAdapter, getNoteFromMarkdown, syncNotes } from '../src/lib'
 
 it('syncs notes', async () => {
 	const namespace = 'yanki.sync.browser.test'

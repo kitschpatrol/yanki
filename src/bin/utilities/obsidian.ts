@@ -3,11 +3,11 @@
 // Obsidian global settings:
 // https://help.obsidian.md/Files+and+folders/How+Obsidian+stores+data#Global+settings
 
-import { normalize } from '../../lib/utilities/path'
-import { PLATFORM } from '../../lib/utilities/platform'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import untildify from 'untildify'
+import { normalize } from '../../lib/utilities/path'
+import { PLATFORM } from '../../lib/utilities/platform'
 
 export type ObsidianVault = {
 	directory: string

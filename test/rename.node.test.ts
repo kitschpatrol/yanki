@@ -1,7 +1,7 @@
-import { renameFiles } from '../src/lib'
-import { describeWithFileFixture } from './fixtures/file-fixture'
 import path from 'node:path'
 import { expect, it } from 'vitest'
+import { renameFiles } from '../src/lib'
+import { describeWithFileFixture } from './fixtures/file-fixture'
 
 describeWithFileFixture(
 	'list notes',

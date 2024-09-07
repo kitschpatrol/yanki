@@ -1,10 +1,10 @@
-import { ENVIRONMENT } from '../utilities/platform'
 import path from 'path-browserify-esm'
 import {
+	defaultYankiConnectOptions,
 	type YankiConnectOptions,
 	type YankiFetchAdapter,
-	defaultYankiConnectOptions,
 } from 'yanki-connect'
+import { ENVIRONMENT } from '../utilities/platform'
 
 export type FetchAdapter = YankiFetchAdapter
 export type ManageFilenames = 'off' | 'prompt' | 'response'

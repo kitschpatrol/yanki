@@ -1,3 +1,9 @@
+import { globby } from 'globby'
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import slash from 'slash'
+import sortKeys from 'sort-keys'
+import { expect, it } from 'vitest'
 import { formatSyncFilesResult, getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter } from '../src/lib/model/frontmatter'
 import * as pathExtras from '../src/lib/utilities/path'
@@ -5,12 +11,6 @@ import { getUnicodeCodePoints } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { countLinesOfFrontmatter } from './utilities/frontmatter-counter'
 import { stableNoteIds, stablePrettyMs, stableResults } from './utilities/stable-sync-results'
-import { globby } from 'globby'
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import slash from 'slash'
-import sortKeys from 'sort-keys'
-import { expect, it } from 'vitest'
 
 describeWithFileFixture(
 	'model types',

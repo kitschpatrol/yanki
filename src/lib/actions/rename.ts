@@ -1,8 +1,11 @@
+import { deepmerge } from 'deepmerge-ts'
+import path from 'path-browserify-esm'
+import { type Simplify } from 'type-fest'
 import {
-	type GlobalOptions,
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
+	type GlobalOptions,
 } from '../shared/types'
 import {
 	auditUniqueFilePath,
@@ -12,10 +15,7 @@ import {
 } from '../utilities/filenames'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { normalize } from '../utilities/path'
-import { type LoadOptions, type LocalNote, loadLocalNotes } from './load-local-notes'
-import { deepmerge } from 'deepmerge-ts'
-import path from 'path-browserify-esm'
-import { type Simplify } from 'type-fest'
+import { loadLocalNotes, type LoadOptions, type LocalNote } from './load-local-notes'
 
 export type RenameNotesOptions = Pick<
 	GlobalOptions,

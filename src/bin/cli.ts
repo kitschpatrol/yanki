@@ -1,3 +1,9 @@
+import { globby } from 'globby'
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import untildify from 'untildify'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 import { version } from '../../package.json'
 import { cleanNotes, formatCleanResult } from '../lib/actions/clean'
 import { formatListResult, listNotes } from '../lib/actions/list'
@@ -17,12 +23,6 @@ import {
 	verboseOption,
 } from './options'
 import { urlToHostAndPortValidated } from './utilities/validation'
-import { globby } from 'globby'
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import untildify from 'untildify'
-import yargs from 'yargs'
-import { hideBin } from 'yargs/helpers'
 
 // Helper for nice errors in the most common case where Anki is not running
 // Must be constant function expression to help TS infer that it exits

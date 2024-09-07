@@ -1,6 +1,8 @@
 /* eslint-disable complexity */
 // TODO move this into its own package?
 
+import { deepmerge } from 'deepmerge-ts'
+import path from 'path-browserify-esm'
 import * as pathExtras from './path'
 import {
 	fileUrlToPath,
@@ -9,8 +11,6 @@ import {
 	safeDecodeURIComponent,
 	safeParseUrl,
 } from './url'
-import { deepmerge } from 'deepmerge-ts'
-import path from 'path-browserify-esm'
 
 export type ResolveLinkType =
 	// Via a `![[link]]` or `![alt](link)` syntax

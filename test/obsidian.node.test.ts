@@ -1,3 +1,8 @@
+import { globby } from 'globby'
+import { HTMLElement, parseHTML } from 'linkedom'
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { expect, it } from 'vitest'
 import { detectVault } from '../src/bin/utilities/obsidian'
 import { getNoteFromMarkdown, syncFiles } from '../src/lib/index'
 import { getBase, normalize, stripBasePath } from '../src/lib/utilities/path'
@@ -6,11 +11,6 @@ import { safeDecodeURI } from '../src/lib/utilities/url'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stripAnkiMediaTag } from './utilities/dom-inspector'
 import { stableResults } from './utilities/stable-sync-results'
-import { globby } from 'globby'
-import { HTMLElement, parseHTML } from 'linkedom'
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import { expect, it } from 'vitest'
 
 it('detects obsidian vault', async () => {
 	// Assumes vault has been opened at least once on this machine!

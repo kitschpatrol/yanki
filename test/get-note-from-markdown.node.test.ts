@@ -1,6 +1,6 @@
+import { expect, it } from 'vitest'
 import { getNoteFromMarkdown } from '../src/lib'
 import { permute } from './utilities/permute'
-import { expect, it } from 'vitest'
 
 // Function to remove undefined fields from an object
 function stripUndefinedFields<T extends Record<string, unknown>>(object: T): T {

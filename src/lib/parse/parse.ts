@@ -2,6 +2,9 @@
  * Turns a markdown string into a YankiNote object.
  */
 
+import { deepmerge } from 'deepmerge-ts'
+import { type Root } from 'mdast'
+import { u } from 'unist-builder'
 import { type YankiNote } from '../model/note'
 import { CSS_DEFAULT_CLASS_NAME } from '../shared/constants'
 import {
@@ -21,9 +24,6 @@ import {
 	replaceDeleteNodesWithClozeMarkup,
 	splitTreeAtThematicBreak,
 } from './remark-utilities'
-import { deepmerge } from 'deepmerge-ts'
-import { type Root } from 'mdast'
-import { u } from 'unist-builder'
 
 export type GetNoteFromMarkdownOptions = {
 	/** Needed for the public API, but optional for more efficient use internally when the namespace is already validated. */

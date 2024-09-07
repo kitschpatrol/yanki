@@ -39,7 +39,7 @@ export function safeDecodeURIComponent(text: string): string | undefined {
  * @param text
  * @returns URL object if parsable, undefined if not (likely a file path)
  */
-export function safeParseUrl(text: string): URL | undefined {
+export function safeParseUrl(text: string): undefined | URL {
 	// Waiting for non-throwing URL.canParse in node 19+...
 	// return URL.canParse(text)
 	try {

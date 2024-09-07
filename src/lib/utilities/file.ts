@@ -1,7 +1,7 @@
-import { MEDIA_DEFAULT_HASH_MODE_FILE } from '../shared/constants'
-import type { FileAdapter } from '../shared/types'
-import { getHash } from './string'
 import { sha256 } from 'crypto-hash'
+import type { FileAdapter } from '../shared/types'
+import { MEDIA_DEFAULT_HASH_MODE_FILE } from '../shared/constants'
+import { getHash } from './string'
 
 export async function fileExists(
 	absoluteFilePath: string,

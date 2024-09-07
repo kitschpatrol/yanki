@@ -4,8 +4,8 @@ import {
 	type Effects,
 	type Extension,
 	type State,
-	type TokenTypeMap,
 	type TokenizeContext,
+	type TokenTypeMap,
 } from 'micromark-util-types'
 
 // Declare module 'micromark-util-types' {

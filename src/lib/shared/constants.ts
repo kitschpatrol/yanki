@@ -1,5 +1,5 @@
-import { css } from '../utilities/string'
 import { u } from 'unist-builder'
+import { css } from '../utilities/string'
 
 // These are configurations that should be relatively static and don't warrant cluttering option arguments.
 // Other defaults are defined in options.ts.

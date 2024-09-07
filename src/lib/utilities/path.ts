@@ -1,7 +1,7 @@
-import { splitAtFirstMatch } from './string'
 import isAbsolutePath from '@stdlib/assert-is-absolute-path'
 import path from 'path-browserify-esm'
 import slash from 'slash'
+import { splitAtFirstMatch } from './string'
 
 // Unused...
 // function stripLeadingSlash(filePath: string): string {

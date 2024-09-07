@@ -1,17 +1,17 @@
+import type { PartialDeep, Simplify } from 'type-fest'
+import { deepmerge } from 'deepmerge-ts'
+import plur from 'plur'
+import prettyMilliseconds from 'pretty-ms'
+import { YankiConnect } from 'yanki-connect'
 import { yankiModelNames } from '../model/model'
 import { CSS_DEFAULT_STYLE, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
+import { defaultGlobalOptions, type GlobalOptions } from '../shared/types'
 import {
 	getModelStyle,
 	requestPermission,
 	syncToAnkiWeb,
 	updateModelStyle,
 } from '../utilities/anki-connect'
-import { deepmerge } from 'deepmerge-ts'
-import plur from 'plur'
-import prettyMilliseconds from 'pretty-ms'
-import type { PartialDeep, Simplify } from 'type-fest'
-import { YankiConnect } from 'yanki-connect'
 
 export type SetStyleOptions = {
 	css: string

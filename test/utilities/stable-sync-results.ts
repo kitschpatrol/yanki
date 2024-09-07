@@ -1,7 +1,7 @@
-import { type syncFiles } from '../../src/lib'
-import { normalize } from '../../src/lib/utilities/path'
 import os from 'node:os'
 import sortKeys from 'sort-keys'
+import { type syncFiles } from '../../src/lib'
+import { normalize } from '../../src/lib/utilities/path'
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
 

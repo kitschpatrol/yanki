@@ -1,12 +1,12 @@
+import type { PartialDeep } from 'type-fest'
+import { deepmerge } from 'deepmerge-ts'
+import { YankiConnect } from 'yanki-connect'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
+import { defaultGlobalOptions, type GlobalOptions } from '../shared/types'
 import { getRemoteNotes, requestPermission } from '../utilities/anki-connect'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { truncateOnWordBoundary } from '../utilities/string'
-import { deepmerge } from 'deepmerge-ts'
-import type { PartialDeep } from 'type-fest'
-import { YankiConnect } from 'yanki-connect'
 
 export type ListOptions = Pick<GlobalOptions, 'ankiConnectOptions' | 'namespace'>
 

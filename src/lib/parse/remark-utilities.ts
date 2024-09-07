@@ -1,12 +1,7 @@
 // Helpers for working with the Markdown AST
 
-import type { Frontmatter } from '../model/frontmatter'
-import type { YankiModelName } from '../model/model'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
-import remarkResolveLinks from './remark-resolve-links'
-import remarkWikiBasic from './wiki-basic/remark-wiki-basic'
-import { deepmerge } from 'deepmerge-ts'
 import type { Emphasis, Node, Parent, PhrasingContent, Root, Text } from 'mdast'
+import { deepmerge } from 'deepmerge-ts'
 import remarkFlexibleMarkers from 'remark-flexible-markers'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
@@ -17,6 +12,11 @@ import { unified } from 'unified'
 import { u } from 'unist-builder'
 import { CONTINUE, EXIT, SKIP, visit } from 'unist-util-visit'
 import { parse as yamlParse } from 'yaml'
+import type { Frontmatter } from '../model/frontmatter'
+import type { YankiModelName } from '../model/model'
+import { defaultGlobalOptions, type GlobalOptions } from '../shared/types'
+import remarkResolveLinks from './remark-resolve-links'
+import remarkWikiBasic from './wiki-basic/remark-wiki-basic'
 
 export type AstFromMarkdownOptions = Pick<
 	GlobalOptions,
@@ -273,7 +273,7 @@ export function splitTreeAtThematicBreak(tree: Root): [Root, Root | undefined] {
 // type wins If nothing matches, then we just get a basic note with all the
 // markdown on the front, and nothing on the back
 export function getYankiModelNameFromTree(ast: Root): YankiModelName {
-	let probableType: YankiModelName | undefined
+	let probableType: undefined | YankiModelName
 
 	// Cloze must come before thematic break
 	visit(ast, (node) => {

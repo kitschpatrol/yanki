@@ -1,5 +1,5 @@
-import { css, html } from '../src/lib/utilities/string'
 import { expect, it } from 'vitest'
+import { css, html } from '../src/lib/utilities/string'
 
 it('formats html without excessive white space', () => {
 	const content = 'Some text'

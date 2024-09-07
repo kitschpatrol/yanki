@@ -1,3 +1,7 @@
+import filenamify from 'filenamify'
+import { nanoid } from 'nanoid'
+import path from 'path-browserify-esm'
+import type { ManageFilenames } from '../shared/types'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
 import {
@@ -5,11 +9,7 @@ import {
 	MEDIA_FILENAME_MAX_LENGTH,
 	NOTE_DEFAULT_EMPTY_TEXT,
 } from '../shared/constants'
-import type { ManageFilenames } from '../shared/types'
 import { emptyIsUndefined, truncateOnWordBoundary } from './string'
-import filenamify from 'filenamify'
-import { nanoid } from 'nanoid'
-import path from 'path-browserify-esm'
 
 // eslint-disable-next-line complexity
 export function getSafeTitleForNote(

@@ -1,6 +1,6 @@
 /* eslint-disable no-control-regex */
-import { NOTE_NAMESPACE_MAX_LENGTH } from '../shared/constants'
 import slugify from '@sindresorhus/slugify'
+import { NOTE_NAMESPACE_MAX_LENGTH } from '../shared/constants'
 
 /**
  * Convenience

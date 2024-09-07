@@ -1,9 +1,9 @@
+import { expect, it } from 'vitest'
 import { formatSetStyleResult, getStyle, setStyle } from '../src/lib'
 import { css } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { createModels } from './utilities/anki-connect'
 import { stablePrettyMs } from './utilities/stable-sync-results'
-import { expect, it } from 'vitest'
 
 // Handles resetting any modified CSS
 describeWithFileFixture(

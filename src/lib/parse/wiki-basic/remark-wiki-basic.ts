@@ -1,9 +1,9 @@
-import { wikiBasicFromMarkdown } from './mdast-util-wiki-basic'
-import { wikiBasic } from './micromark-extension-wiki-basic'
 import { type Root } from 'mdast'
 import { type Extension as FromMarkdownExtension } from 'mdast-util-from-markdown'
 import { type Extension as MicromarkExtension } from 'micromark-util-types'
 import { type Plugin, type Processor } from 'unified'
+import { wikiBasicFromMarkdown } from './mdast-util-wiki-basic'
+import { wikiBasic } from './micromark-extension-wiki-basic'
 
 /**
  * This Remark plugin ONLY turns wiki links and Obsidian-style wiki link image

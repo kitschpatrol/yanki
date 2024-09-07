@@ -1,5 +1,5 @@
-import { defaultGlobalOptions } from '../lib/shared/types'
 import { type Options } from 'yargs'
+import { defaultGlobalOptions } from '../lib/shared/types'
 
 export const ankiAutoLaunchOption = {
 	'anki-auto-launch': {

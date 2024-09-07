@@ -1,7 +1,12 @@
+import type { PartialDeep, Simplify } from 'type-fest'
+import { deepmerge } from 'deepmerge-ts'
+import plur from 'plur'
+import prettyMilliseconds from 'pretty-ms'
+import { YankiConnect } from 'yanki-connect'
 import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
 import { SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
+import { defaultGlobalOptions, type GlobalOptions } from '../shared/types'
 import {
 	deleteNotes,
 	deleteOrphanedDecks,
@@ -12,11 +17,6 @@ import {
 } from '../utilities/anki-connect'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { truncateOnWordBoundary } from '../utilities/string'
-import { deepmerge } from 'deepmerge-ts'
-import plur from 'plur'
-import prettyMilliseconds from 'pretty-ms'
-import type { PartialDeep, Simplify } from 'type-fest'
-import { YankiConnect } from 'yanki-connect'
 
 export type CleanOptions = Pick<
 	GlobalOptions,

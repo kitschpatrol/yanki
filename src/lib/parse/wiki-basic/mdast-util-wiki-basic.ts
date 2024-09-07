@@ -1,8 +1,8 @@
 /* eslint-disable unicorn/consistent-function-scoping */
-import { emptyIsUndefined } from '../../utilities/string'
 import type { Image, Link } from 'mdast'
 import type { CompileContext, Extension, Token } from 'mdast-util-from-markdown'
 import { sanitizeUri } from 'micromark-util-sanitize-uri'
+import { emptyIsUndefined } from '../../utilities/string'
 
 export function wikiBasicFromMarkdown(): Extension {
 	let url = ''

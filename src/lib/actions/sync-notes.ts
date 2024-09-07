@@ -1,6 +1,9 @@
+import type { PartialDeep, Simplify } from 'type-fest'
+import { deepmerge } from 'deepmerge-ts'
+import { YankiConnect } from 'yanki-connect'
 import { type YankiNote } from '../model/note'
 import { NOTE_DEFAULT_DECK_NAME, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
-import { type GlobalOptions, defaultGlobalOptions } from '../shared/types'
+import { defaultGlobalOptions, type GlobalOptions } from '../shared/types'
 import {
 	addNote,
 	deleteNotes,
@@ -13,9 +16,6 @@ import {
 	updateNote,
 } from '../utilities/anki-connect'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
-import { deepmerge } from 'deepmerge-ts'
-import type { PartialDeep, Simplify } from 'type-fest'
-import { YankiConnect } from 'yanki-connect'
 
 export type SyncedNote = {
 	action: 'ankiUnreachable' | 'created' | 'deleted' | 'recreated' | 'unchanged' | 'updated'
@@ -215,7 +215,7 @@ function findNotesWithDuplicateIds(notes: YankiNote[], noteId: number): YankiNot
 }
 
 // Function to select the note to keep based on content matching with the remote note
-function selectNoteToKeep(duplicates: YankiNote[], remoteNote: YankiNote | undefined): YankiNote {
+function selectNoteToKeep(duplicates: YankiNote[], remoteNote: undefined | YankiNote): YankiNote {
 	return (
 		duplicates.find(
 			(duplicate) =>

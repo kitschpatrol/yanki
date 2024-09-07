@@ -1,5 +1,5 @@
-import { type YankiNote, listNotes, syncNotes } from '../src/lib'
 import { expect, it } from 'vitest'
+import { listNotes, syncNotes, type YankiNote } from '../src/lib'
 
 // Browser fetch adapter example
 // async function fetchAdapter(
