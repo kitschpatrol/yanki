@@ -3,22 +3,16 @@
 	"version": "0.15.3",
 	"type": "module",
 	"description": "A CLI tool and TypeScript library for syncing Markdown to Anki flashcards.",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/kitschpatrol/yanki.git"
-	},
+	"repository": "github:kitschpatrol/yanki",
 	"homepage": "https://github.com/kitschpatrol/yanki",
-	"bugs": {
-		"url": "https://github.com/kitschpatrol/yanki/issues",
-		"email": "eric@ericmika.com"
-	},
+	"bugs": "https://github.com/kitschpatrol/yanki/issues",
 	"author": {
 		"name": "Eric Mika",
 		"email": "eric@ericmika.com",
 		"url": "https://ericmika.com"
 	},
 	"license": "MIT",
-	"packageManager": "pnpm@9.9.0",
+	"packageManager": "pnpm@9.10.0",
 	"engines": {
 		"node": "^18.19.0 || >=20.5.0",
 		"pnpm": ">=9.0.0"
@@ -50,11 +44,11 @@
 	],
 	"scripts": {
 		"build": "pkgroll --clean-dist --minify",
-		"clean": "rimraf ./pnpm-lock.yaml && git clean -fdX",
+		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"coverage": "vitest run --coverage",
 		"fix": "shared-config --fix",
 		"lint": "shared-config --lint",
-		"release": "pnpm bumpp --commit 'Release: %s' && pnpm build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
+		"release": "bumpp --commit 'Release: %s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
 		"test": "vitest"
 	},
 	"dependencies": {
@@ -71,13 +65,13 @@
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^4.7.5",
-		"@shikijs/rehype": "^1.16.2",
+		"@kitschpatrol/shared-config": "^4.7.9",
+		"@shikijs/rehype": "^1.17.6",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^2.2.1",
 		"@stdlib/assert-is-absolute-path": "^0.2.2",
-		"@vitest/browser": "^2.0.5",
-		"@vitest/coverage-istanbul": "^2.0.5",
+		"@vitest/browser": "^2.1.1",
+		"@vitest/coverage-istanbul": "^2.1.1",
 		"bumpp": "^9.5.2",
 		"crypto-hash": "^3.1.0",
 		"deepmerge-ts": "^7.1.0",
@@ -90,8 +84,8 @@
 		"micromark-util-types": "^2.0.0",
 		"nanoid": "^5.0.7",
 		"path-browserify-esm": "^1.0.6",
-		"pkgroll": "^2.4.2",
-		"playwright": "^1.47.0",
+		"pkgroll": "^2.5.0",
+		"playwright": "^1.47.1",
 		"plur": "^5.1.0",
 		"pretty-ms": "^9.1.0",
 		"rehype-format": "^5.0.0",
@@ -106,21 +100,20 @@
 		"remark-math": "^6.0.0",
 		"remark-parse": "^11.0.0",
 		"remark-rehype": "^11.1.0",
-		"rimraf": "^6.0.1",
 		"slash": "^5.1.0",
 		"sort-keys": "^5.1.0",
 		"strip-ansi": "^7.1.0",
-		"tsx": "^4.19.0",
-		"type-fest": "^4.26.0",
-		"typescript": "^5.5.4",
+		"tsx": "^4.19.1",
+		"type-fest": "^4.26.1",
+		"typescript": "^5.6.2",
 		"unified": "^11.0.5",
 		"unist-builder": "^4.0.0",
 		"unist-util-visit": "^5.0.0",
 		"untildify": "^5.0.0",
-		"vite": "^5.4.3",
-		"vitest": "^2.0.5",
+		"vite": "^5.4.5",
+		"vitest": "^2.1.1",
 		"yaml": "^2.5.1",
-		"yanki-connect": "^2.1.5"
+		"yanki-connect": "^2.1.6"
 	},
 	"publishConfig": {
 		"access": "public"

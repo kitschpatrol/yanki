@@ -8,7 +8,6 @@ module.exports = {
 		{
 			files: ['*.ts'],
 			rules: {
-				// TODO move this to shared-config
 				'@typescript-eslint/naming-convention': [
 					'error',
 					{
