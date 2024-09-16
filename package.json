@@ -65,7 +65,7 @@
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^4.7.9",
+		"@kitschpatrol/shared-config": "^4.7.10",
 		"@shikijs/rehype": "^1.17.6",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^2.2.1",
@@ -113,7 +113,7 @@
 		"vite": "^5.4.5",
 		"vitest": "^2.1.1",
 		"yaml": "^2.5.1",
-		"yanki-connect": "^2.1.6"
+		"yanki-connect": "^2.1.7"
 	},
 	"publishConfig": {
 		"access": "public"
