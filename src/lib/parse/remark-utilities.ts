@@ -2,6 +2,7 @@
 
 import type { Emphasis, Node, Parent, PhrasingContent, Root, Text } from 'mdast'
 import { deepmerge } from 'deepmerge-ts'
+import remarkRuby from 'remark-denden-ruby'
 import remarkFlexibleMarkers from 'remark-flexible-markers'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
@@ -67,6 +68,8 @@ export async function getAstFromMarkdown(
 		)
 		// Highlights
 		.use(remarkFlexibleMarkers)
+		// Furigana, https://github.com/kitschpatrol/yanki-obsidian/issues/12
+		.use(remarkRuby)
 
 	return processor.run(processor.parse(markdown))
 }

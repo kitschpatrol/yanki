@@ -126,6 +126,9 @@ importers:
       remark-breaks:
         specifier: ^4.0.0
         version: 4.0.0
+      remark-denden-ruby:
+        specifier: ^0.3.1
+        version: 0.3.1
       remark-flexible-markers:
         specifier: ^1.2.1
         version: 1.2.1
@@ -4333,6 +4336,9 @@ packages:
   remark-cli@12.0.1:
     resolution: {integrity: sha512-2NAEOACoTgo+e+YAaCTODqbrWyhMVmlUyjxNCkTrDRHHQvH6+NbrnqVvQaLH/Q8Ket3v90A43dgAJmXv8y5Tkw==}
     hasBin: true
+
+  remark-denden-ruby@0.3.1:
+    resolution: {integrity: sha512-FoRP1nOTf7b6+rTC5Rc1KMexMohK9kL5FPVYa2u5zdkjZ2QOu4Ga/Bhujrcd8tzROANaqCRmZbbR1BGAwMa3/Q==}
 
   remark-directive@3.0.0:
     resolution: {integrity: sha512-l1UyWJ6Eg1VPU7Hm/9tt0zKtReJQNOA4+iDMAxTyZNWnJnFlbS/7zhiel/rogTLQ2vMYwDzSJa4BiVNqGlqIMA==}
@@ -10353,6 +10359,13 @@ snapshots:
     transitivePeerDependencies:
       - bluebird
       - supports-color
+
+  remark-denden-ruby@0.3.1:
+    dependencies:
+      '@types/mdast': 4.0.4
+      unified: 11.0.5
+      unist-builder: 4.0.0
+      unist-util-visit: 5.0.0
 
   remark-directive@3.0.0:
     dependencies:

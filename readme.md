@@ -135,6 +135,7 @@ An extended palette of markdown syntax is available out of the box:
 - [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md)
 - [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via [MathJax](https://www.mathjax.org)
 - Support for the [`==highlights==`](https://github.com/ipikuka/remark-flexible-markers) syntax.
+- Support for the compact [furigana](https://en.wikipedia.org/wiki/Furigana) / [Ruby](https://en.wikipedia.org/wiki/Ruby_character) syntax specified by [DenDen Markdown](https://conv.denshochan.com/markdown#ruby), for example: `{東京|とうきょう}` renders as `<ruby>東京<rp>(</rp><rt>とうきょう</rt><rp>)</rp></ruby>`.
 
 ### Custom styles
 

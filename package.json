@@ -93,6 +93,7 @@
 		"rehype-stringify": "^10.0.0",
 		"remark": "^15.0.1",
 		"remark-breaks": "^4.0.0",
+		"remark-denden-ruby": "^0.3.1",
 		"remark-flexible-markers": "^1.2.1",
 		"remark-frontmatter": "^5.0.0",
 		"remark-gfm": "^4.0.0",
