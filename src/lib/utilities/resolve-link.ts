@@ -107,22 +107,20 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 	const sourceType = getSrcType(decodedUrl)
 
 	switch (sourceType) {
-		case 'obsidianVaultUrl': {
-			// Do nothing
-			return filePathOrUrl
-		}
+		case 'localFileName': {
+			let resolvedUrl = pathExtras.addExtensionIfMissing(pathExtras.normalize(decodedUrl), 'md')
 
-		case 'remoteHttpUrl': {
-			// Do nothing
-			return filePathOrUrl
-		}
+			// Fall back to base path resolution if there's no path
+			const resolvedNameLink = resolveNameLink(resolvedUrl, cwd, allFilePaths ?? [])
 
-		case 'localFileUrl': {
-			// Convert file:// url to path (file:// paths are already always absolute)
-			// Anki can't open them
-			const resolvedUrl = pathExtras.normalize(fileUrlToPath(filePathOrUrl))
+			resolvedUrl =
+				resolvedNameLink ??
+				pathExtras.resolveWithBasePath(decodedUrl, {
+					basePath,
+					cwd,
+				})
 
-			// Run it through again as a localFilePath
+			// Run it through again as a relative localFilePath
 
 			// Prevent infinite recursion
 			if (getSrcType(resolvedUrl) === 'localFilePath') {
@@ -136,7 +134,9 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 				})
 			}
 
-			console.warn(`Failed to convert file URL to path: ${filePathOrUrl} --> ${resolvedUrl}`)
+			console.warn(
+				`Failed to convert local file wiki-style name to path: ${filePathOrUrl} --> ${resolvedUrl}`,
+			)
 			return resolvedUrl
 		}
 
@@ -203,20 +203,12 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 			return pathExtras.getBase(resolvedUrl)
 		}
 
-		case 'localFileName': {
-			let resolvedUrl = pathExtras.addExtensionIfMissing(pathExtras.normalize(decodedUrl), 'md')
+		case 'localFileUrl': {
+			// Convert file:// url to path (file:// paths are already always absolute)
+			// Anki can't open them
+			const resolvedUrl = pathExtras.normalize(fileUrlToPath(filePathOrUrl))
 
-			// Fall back to base path resolution if there's no path
-			const resolvedNameLink = resolveNameLink(resolvedUrl, cwd, allFilePaths ?? [])
-
-			resolvedUrl =
-				resolvedNameLink ??
-				pathExtras.resolveWithBasePath(decodedUrl, {
-					basePath,
-					cwd,
-				})
-
-			// Run it through again as a relative localFilePath
+			// Run it through again as a localFilePath
 
 			// Prevent infinite recursion
 			if (getSrcType(resolvedUrl) === 'localFilePath') {
@@ -230,10 +222,18 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 				})
 			}
 
-			console.warn(
-				`Failed to convert local file wiki-style name to path: ${filePathOrUrl} --> ${resolvedUrl}`,
-			)
+			console.warn(`Failed to convert file URL to path: ${filePathOrUrl} --> ${resolvedUrl}`)
 			return resolvedUrl
+		}
+
+		case 'obsidianVaultUrl': {
+			// Do nothing
+			return filePathOrUrl
+		}
+
+		case 'remoteHttpUrl': {
+			// Do nothing
+			return filePathOrUrl
 		}
 
 		case 'unsupportedProtocolUrl': {

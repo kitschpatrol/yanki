@@ -17,20 +17,20 @@ export type ObsidianVault = {
 
 function getObsidianGlobalSettingsDirectory(): string {
 	switch (PLATFORM) {
-		case 'mac': {
-			return normalize(untildify('~/Library/Application Support/obsidian'))
-		}
-
-		case 'windows': {
-			return normalize(`${process.env.APPDATA}\\Obsidian`)
-		}
-
 		case 'linux': {
 			return normalize(path.join(untildify(process.env.XDG_CONFIG_HOME ?? '~/.config'), 'Obsidian'))
 		}
 
+		case 'mac': {
+			return normalize(untildify('~/Library/Application Support/obsidian'))
+		}
+
 		case 'other': {
 			throw new Error('Unsupported platform')
+		}
+
+		case 'windows': {
+			return normalize(`${process.env.APPDATA}\\Obsidian`)
 		}
 	}
 }

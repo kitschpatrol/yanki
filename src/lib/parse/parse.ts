@@ -161,45 +161,6 @@ export async function getNoteFromMarkdown(
 			break
 		}
 
-		case 'Yanki - Cloze': {
-			ast = replaceDeleteNodesWithClozeMarkup(ast)
-			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
-
-			// Cloze can't have empty front? But what does that even mean?
-			front = await mdastToHtml(firstPart, {
-				cssClassNames: [
-					CSS_DEFAULT_CLASS_NAME,
-					`namespace-${sanitizedNamespace}`,
-					'front',
-					`model-${modelName}`,
-				],
-
-				fetchAdapter,
-				fileAdapter,
-				namespace: sanitizedNamespace,
-				strictLineBreaks,
-				syncMediaAssets,
-				useEmptyPlaceholder: true,
-			})
-			back = await mdastToHtml(secondPart, {
-				cssClassNames: [
-					CSS_DEFAULT_CLASS_NAME,
-					`namespace-${sanitizedNamespace}`,
-					'back',
-					`model-${modelName}`,
-				],
-
-				fetchAdapter,
-				fileAdapter,
-				namespace: sanitizedNamespace,
-				strictLineBreaks,
-				syncMediaAssets,
-				useEmptyPlaceholder: false,
-			})
-
-			break
-		}
-
 		case 'Yanki - Basic (type in the answer)': {
 			// Mutates AST
 			const secondPart = removeLastEmphasis(ast)
@@ -246,6 +207,45 @@ export async function getNoteFromMarkdown(
 				syncMediaAssets,
 				useEmptyPlaceholder: false,
 			})
+			break
+		}
+
+		case 'Yanki - Cloze': {
+			ast = replaceDeleteNodesWithClozeMarkup(ast)
+			const [firstPart, secondPart] = splitTreeAtThematicBreak(ast)
+
+			// Cloze can't have empty front? But what does that even mean?
+			front = await mdastToHtml(firstPart, {
+				cssClassNames: [
+					CSS_DEFAULT_CLASS_NAME,
+					`namespace-${sanitizedNamespace}`,
+					'front',
+					`model-${modelName}`,
+				],
+
+				fetchAdapter,
+				fileAdapter,
+				namespace: sanitizedNamespace,
+				strictLineBreaks,
+				syncMediaAssets,
+				useEmptyPlaceholder: true,
+			})
+			back = await mdastToHtml(secondPart, {
+				cssClassNames: [
+					CSS_DEFAULT_CLASS_NAME,
+					`namespace-${sanitizedNamespace}`,
+					'back',
+					`model-${modelName}`,
+				],
+
+				fetchAdapter,
+				fileAdapter,
+				namespace: sanitizedNamespace,
+				strictLineBreaks,
+				syncMediaAssets,
+				useEmptyPlaceholder: false,
+			})
+
 			break
 		}
 	}

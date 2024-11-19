@@ -148,26 +148,6 @@ export async function mdastToHtml(
 		let absolutePathOrUrl: string | undefined
 		const srcType = getSrcType(node.properties.src)
 		switch (srcType) {
-			// All of these invalid image src types should have been converted already during MDAST generation
-			case 'unsupportedProtocolUrl':
-			case 'localFileName': {
-				console.warn(`Unsupported URL for media asset, treating as link: "${node.properties.src}"`)
-				absolutePathOrUrl = node.properties.src
-				break
-			}
-
-			// Embeds to markdown notes or PDFs become links
-			case 'obsidianVaultUrl':
-			case 'localFileUrl': {
-				absolutePathOrUrl = node.properties.src
-				break
-			}
-
-			case 'remoteHttpUrl': {
-				absolutePathOrUrl = node.properties.src
-				break
-			}
-
 			case 'localFilePath': {
 				// The src will be URI-encoded at this point, which we don't want for local files
 				// Local file URLs must be converted into paths before decoding, and must be absolute
@@ -180,6 +160,29 @@ export async function mdastToHtml(
 				// Ignore any query parameters on local files
 				absolutePathOrUrl = getBase(absolutePathOrUrl)
 
+				break
+			}
+
+			// All of these invalid image src types should have been converted already during MDAST generation
+			case 'unsupportedProtocolUrl':
+			// eslint-disable-next-line perfectionist/sort-switch-case, no-fallthrough
+			case 'localFileName': {
+				console.warn(`Unsupported URL for media asset, treating as link: "${node.properties.src}"`)
+				absolutePathOrUrl = node.properties.src
+				break
+			}
+
+			// Embeds to markdown notes or PDFs become links
+			// eslint-disable-next-line perfectionist/sort-switch-case
+			case 'obsidianVaultUrl':
+			// eslint-disable-next-line perfectionist/sort-switch-case, no-fallthrough
+			case 'localFileUrl': {
+				absolutePathOrUrl = node.properties.src
+				break
+			}
+
+			case 'remoteHttpUrl': {
+				absolutePathOrUrl = node.properties.src
 				break
 			}
 		}
