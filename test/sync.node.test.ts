@@ -713,7 +713,7 @@ describeWithFileFixture(
 			`)
 
 			expect(
-				results.synced.map((synced) =>
+				results2.synced.map((synced) =>
 					String(getUnicodeCodePoints(path.basename(synced.filePath ?? '', '.md'))),
 				),
 			).toMatchInlineSnapshot(`
@@ -725,7 +725,62 @@ describeWithFileFixture(
 				]
 			`)
 
+			expect(stableResults(results2)).toMatchSnapshot()
+		})
+	},
+)
+
+/**
+ * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/25
+ * Thank you to @zhuzhige123 for the test case.
+ */
+describeWithFileFixture(
+	'single string tag',
+	{
+		assetPath: './test/assets/test-tags',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('creates notes with single string tag as expected', { timeout: 60_000 }, async () => {
+			// Sync
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'prompt',
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
 			expect(stableResults(results)).toMatchSnapshot()
+
+			// Do it again to check for stability
+			const tempPath = path.posix.dirname(context.markdownFiles[0])
+			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+				absolute: true,
+			})
+			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+				absolute: true,
+			})
+			const results2 = await syncFiles(newFileList, {
+				allFilePaths: newAllFileList,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'prompt',
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results2)).toMatchSnapshot()
 		})
 	},
 )

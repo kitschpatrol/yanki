@@ -262,7 +262,9 @@ export async function getNoteFromMarkdown(
 		},
 		modelName,
 		noteId: frontmatter.noteId ?? undefined,
-		tags: frontmatter.tags ?? [],
+		// Convert single-string tags to array
+		// Fixes https://github.com/kitschpatrol/yanki-obsidian/issues/25
+		tags: typeof frontmatter.tags === 'string' ? [frontmatter.tags] : (frontmatter.tags ?? []),
 	}
 
 	return note
