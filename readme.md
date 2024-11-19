@@ -614,7 +614,7 @@ For type safety, access to Anki-Connect is managed through my wrapper library, [
 
 Behind the scenes, Yanki creates new note type models to match the four default Anki types. It keeps track of the notes it has ownership of via a hidden `YankiNamespace` field in each note.
 
-Linux testing was performed on a Debian 12 arm64 virtual machine. Anki does not officially support arm64 linux, but a [workaround](https://github.com/ankitects/anki/issues/2302#issuecomment-1374374155) was able to get Anki up and running.
+Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm64 virtual machine. Anki does not officially support arm64 linux, but a [workaround](https://github.com/ankitects/anki/issues/2302#issuecomment-1374374155) was able to get Anki up and running. Getting `obsidian://` links working on Linux required some [manual steps](https://amir.rachum.com/obsidian-uri-linux/).
 
 ### Other projects
 
