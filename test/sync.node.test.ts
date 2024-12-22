@@ -562,6 +562,62 @@ describeWithFileFixture(
 	},
 )
 
+describeWithFileFixture(
+	'note id edge cases',
+	{
+		assetPath: './test/assets/test-note-ids/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('handles missing note IDs gracefully', async () => {
+			// First, sync the file so they come back with an id
+			const results = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+
+			// Create a duplicate note with the same ID but different content
+			const filePathWithId = context.markdownFiles[0]
+			const originalFileContent = await fs.readFile(filePathWithId, 'utf8')
+			const duplicateModifiedFileContent = originalFileContent.replace(
+				'Replace me',
+				'I am the duplicate',
+			)
+			await fs.writeFile(
+				filePathWithId.replace('basic.md', 'a-duplicate.md'),
+				duplicateModifiedFileContent,
+			)
+
+			// Sync again
+
+			const newFileList = await globby(`${path.posix.dirname(slash(filePathWithId))}/*.md`)
+
+			const resultsWithDuplicates = await syncFiles(newFileList, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			// TODO revisit these results
+			console.log(resultsWithDuplicates)
+		})
+	},
+)
+
 /**
  * Related to:
  * https://github.com/kitschpatrol/yanki-obsidian/issues/14
