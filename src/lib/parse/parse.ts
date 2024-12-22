@@ -262,10 +262,18 @@ export async function getNoteFromMarkdown(
 		},
 		modelName,
 		noteId: frontmatter.noteId ?? undefined,
-		// Convert single-string tags to array
-		// Fixes https://github.com/kitschpatrol/yanki-obsidian/issues/25
-		tags: typeof frontmatter.tags === 'string' ? [frontmatter.tags] : (frontmatter.tags ?? []),
+		tags: obsidianTagsToAnkiTags(frontmatter.tags),
 	}
 
 	return note
+}
+
+function obsidianTagsToAnkiTags(tags: string | string[] | undefined): string[] {
+	// Obsidian delimits nested tags with a `/`
+	// Anki delimits nested tags with `::`
+	// '\' and `:` are not permitted in Obsidian tags
+	// Also convert single-string tags to array
+	// Curiously, Obsidian allows just `/` and `this//////that` as valid tags, though `/` tags are broken.
+	// Fixes https://github.com/kitschpatrol/yanki-obsidian/issues/20
+	return (typeof tags === 'string' ? [tags] : (tags ?? [])).map((tag) => tag.replaceAll('/', '::'))
 }

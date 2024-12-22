@@ -3,7 +3,7 @@ import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
 export type Frontmatter = {
 	deckName?: string
 	noteId?: number
-	tags?: string[]
+	tags?: string | string[]
 }
 
 /**

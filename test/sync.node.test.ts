@@ -759,6 +759,9 @@ describeWithFileFixture(
 
 			expect(stableResults(results)).toMatchSnapshot()
 
+			const tags = await context.yankiConnect.note.getTags()
+			expect(tags).toStrictEqual(['测试'])
+
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
 			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
@@ -781,9 +784,85 @@ describeWithFileFixture(
 			})
 
 			expect(stableResults(results2)).toMatchSnapshot()
+
+			const tags2 = await context.yankiConnect.note.getTags()
+			expect(tags2).toStrictEqual(['测试'])
 		})
 	},
 )
+
+/**
+ * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/TK
+ */
+describeWithFileFixture(
+	'nested tags',
+	{
+		assetPath: './test/assets/test-tags-nested',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('creates nested tags in anki', { timeout: 60_000 }, async () => {
+			// Sync
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'prompt',
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+
+			const tags = await context.yankiConnect.note.getTags()
+			expect(tags.sort()).toStrictEqual([
+				'one::two::three::four',
+				'other',
+				'yes::maybe::no',
+				'yes::no',
+				'yes::no::maybe::so',
+			])
+
+			// Do it again to check for stability
+			const tempPath = path.posix.dirname(context.markdownFiles[0])
+			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+				absolute: true,
+			})
+			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+				absolute: true,
+			})
+			const results2 = await syncFiles(newFileList, {
+				allFilePaths: newAllFileList,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'prompt',
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results2)).toMatchSnapshot()
+
+			const tags2 = await context.yankiConnect.note.getTags()
+			expect(tags2.sort()).toStrictEqual([
+				'one::two::three::four',
+				'other',
+				'yes::maybe::no',
+				'yes::no',
+				'yes::no::maybe::so',
+			])
+		})
+	},
+)
+
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/28
  * This bug was actually related to a missing RegEx escape in the Yanki Obsidian
@@ -814,3 +893,4 @@ describeWithFileFixture(
 			expect(stableResults(results)).toMatchSnapshot()
 		})
 	},
+)

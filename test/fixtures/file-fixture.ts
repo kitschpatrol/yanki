@@ -89,6 +89,11 @@ export function describeWithFileFixture(
 				const deckNamesResultPostClean = await context.yankiConnect.deck.deckNames()
 				expect(deckNamesResultPostClean).toEqual(['Default'])
 
+				// Clean up tags
+				await context.yankiConnect.note.clearUnusedTags()
+				const tags = await context.yankiConnect.note.getTags()
+				expect(tags).toStrictEqual([])
+
 				// Models
 			}
 

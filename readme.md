@@ -111,6 +111,8 @@ The structural cues for all four supported note types are described [later in th
 
 Optionally, you can add a `tags` array to your Markdown file's frontmatter and have it automatically synchronized to the Anki database. Frontmatter is also used to store the Anki note's ID after an initial synchronization.
 
+Nested tags are supported, and you may use `/` in addition to `::` as a delimiter in the Markdown frontmatter for compatibility with tools like Obsidian.
+
 ### Intelligent synchronization
 
 Your local Markdown files are the single point of truth for what will and up in Anki, but Yanki knows to leave your other Anki notes alone.
@@ -123,7 +125,7 @@ If you use [AnkiWeb](https://ankiweb.net/) to sync your notes to the cloud, Yank
 
 ### Existing notes are untouched
 
-Yanki tags the notes it's in charge of with a hidden field, so it will never touch your existing Anki notes. (_But please exercise caution until the 1.0.0 release..._)
+Yanki keeps track the notes it's in charge of with a hidden field in the Anki note model, so it will never touch your existing Anki notes. (_But please exercise caution until the 1.0.0 release..._)
 
 ### Fancy markdown
 
