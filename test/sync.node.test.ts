@@ -784,3 +784,33 @@ describeWithFileFixture(
 		})
 	},
 )
+/**
+ * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/28
+ * This bug was actually related to a missing RegEx escape in the Yanki Obsidian
+ * plugin, but the test will remain here for avoidance of doubt.
+ */
+describeWithFileFixture(
+	'brackets in path',
+	{
+		assetPath: './test/assets/test-[bracket]-path',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('syncs correctly with brackets in the file path', { timeout: 60_000 }, async () => {
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				basePath: context.tempAssetPath,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
