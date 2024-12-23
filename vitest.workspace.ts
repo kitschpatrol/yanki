@@ -35,6 +35,7 @@ export default defineWorkspace([
 					strictPort: true,
 				},
 				enabled: true,
+				fileParallelism: false,
 				headless: true,
 				name: 'chromium',
 				provider: 'playwright',
