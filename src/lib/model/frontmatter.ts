@@ -46,6 +46,20 @@ export async function setNoteIdInFrontmatter(
 
 	if (noteId === undefined) {
 		delete parsedFrontmatter.noteId
+
+		// Remove the frontmatter if it's empty after removing the noteId
+		if (Object.keys(parsedFrontmatter).length === 0) {
+			// Return markdown without frontmatter, trimming a single empty leading line if present
+			const markdownWithoutFrontmatter = lines.slice(frontmatterEnd + 1)
+
+			// Strip leading empty line if present
+			// (This is a common artifact of formatting Markdown files with frontmatter)
+			if (markdownWithoutFrontmatter[0].trim() === '') {
+				return markdownWithoutFrontmatter.slice(1).join('\n')
+			}
+
+			return markdownWithoutFrontmatter.join('\n')
+		}
 	} else {
 		parsedFrontmatter.noteId = noteId
 	}
