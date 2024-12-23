@@ -101,6 +101,12 @@ await yargsInstance
 						"Sync image, video, and audio assets to Anki's media storage system. Clean up is managed automatically. The `all` argument will save both local and remote assets to Anki, while `local` will only save local assets, `remote` will only save remote assets, and `off` will not save any assets.",
 					type: 'string',
 				})
+				.option('strict-matching', {
+					default: defaultGlobalOptions.strictMatching,
+					describe:
+						'Consider notes to be a "match" only if the local Markdown frontmatter `noteId` matches the remote Anki database `noteId` exactly. When disabled, Yanki will attempt to reuse existing Anki notes whose content matches a local Markdown note, even if the local and remote `noteId` differs. This helps preserve study progress in Anki if the local Markdown frontmatter is lost or corrupted. In Yanki 0.17.0 and earlier, `--strict-matching` was the default behavior. Starting with version 0.18.0, it is disabled by default and may be enabled via this flag.',
+					type: 'boolean',
+				})
 				.option(strictLineBreaks)
 				.option(jsonOption('Output the sync report as JSON.'))
 				.option(verboseOption),
@@ -116,6 +122,7 @@ await yargsInstance
 			namespace,
 			// Not exposing this option for now
 			recursive = true,
+			strictMatching,
 			syncMedia,
 			verbose,
 		}) => {
@@ -153,6 +160,7 @@ await yargsInstance
 				manageFilenames,
 				maxFilenameLength,
 				namespace,
+				strictMatching,
 				syncMediaAssets: syncMedia,
 			}).catch(ankiNotRunningErrorHandler)
 

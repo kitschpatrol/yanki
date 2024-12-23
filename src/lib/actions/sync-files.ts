@@ -147,6 +147,7 @@ export async function syncFiles(
 				loadedAndRenamedNote.markdown,
 				liveNote.note.noteId,
 			)
+
 			await fileAdapter.writeFile(loadedAndRenamedNote.filePath, updatedMarkdown)
 		}
 

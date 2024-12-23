@@ -262,6 +262,16 @@ function areMediaElementsEqual(
 	return true
 }
 
+export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = true): boolean {
+	return (
+		(!includeId || noteA.noteId === noteB.noteId) &&
+		noteA.deckName === noteB.deckName &&
+		noteA.modelName === noteB.modelName &&
+		areFieldsEqual(noteA.fields, noteB.fields) &&
+		areTagsEqual(noteA.tags ?? [], noteB.tags ?? [])
+	)
+}
+
 /**
  * Helper function to compare two arrays of tags.
  *

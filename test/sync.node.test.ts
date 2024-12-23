@@ -5,7 +5,7 @@ import slash from 'slash'
 import sortKeys from 'sort-keys'
 import { expect, it } from 'vitest'
 import { formatSyncFilesResult, getNoteFromMarkdown, syncFiles } from '../src/lib'
-import { getAllFrontmatter } from '../src/lib/model/frontmatter'
+import { getAllFrontmatter, setNoteIdInFrontmatter } from '../src/lib/model/frontmatter'
 import * as pathExtras from '../src/lib/utilities/path'
 import { getUnicodeCodePoints } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
@@ -583,25 +583,23 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
+			const ids = results.synced.map((synced) => synced.note.noteId)
+
+			expect(
+				results.synced.map((synced) => synced.action).every((action) => action === 'created'),
+			).toBe(true)
+
 			expect(stableResults(results)).toMatchSnapshot()
 
-			// Create a duplicate note with the same ID but different content
-			const filePathWithId = context.markdownFiles[0]
-			const originalFileContent = await fs.readFile(filePathWithId, 'utf8')
-			const duplicateModifiedFileContent = originalFileContent.replace(
-				'Replace me',
-				'I am the duplicate',
-			)
-			await fs.writeFile(
-				filePathWithId.replace('basic.md', 'a-duplicate.md'),
-				duplicateModifiedFileContent,
-			)
+			// Erase all the note IDs
+			for (const filePath of context.markdownFiles) {
+				const markdown = await fs.readFile(filePath, 'utf8')
+				const newMarkdown = await setNoteIdInFrontmatter(markdown, undefined)
+				await fs.writeFile(filePath, newMarkdown)
+			}
 
 			// Sync again
-
-			const newFileList = await globby(`${path.posix.dirname(slash(filePathWithId))}/*.md`)
-
-			const resultsWithDuplicates = await syncFiles(newFileList, {
+			const results2 = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
 					autoLaunch: true,
 				},
@@ -612,8 +610,44 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			// TODO revisit these results
-			console.log(resultsWithDuplicates)
+			expect(
+				results2.synced.map((synced) => synced.action).every((action) => action === 'matched'),
+			).toBe(true)
+
+			const ids2 = results2.synced.map((synced) => synced.note.noteId)
+
+			expect(ids).toEqual(ids2)
+
+			expect(stableResults(results2)).toMatchSnapshot()
+
+			// Set random note ids
+			for (const filePath of context.markdownFiles) {
+				const markdown = await fs.readFile(filePath, 'utf8')
+				const newMarkdown = await setNoteIdInFrontmatter(markdown, Math.floor(Math.random() * 1000))
+				await fs.writeFile(filePath, newMarkdown)
+			}
+
+			// Sync again
+			const results3 = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(
+				results3.synced.map((synced) => synced.action).every((action) => action === 'matched'),
+			).toBe(true)
+
+			const ids3 = results3.synced.map((synced) => synced.note.noteId)
+
+			expect(ids2).toEqual(ids3)
+
+			expect(stableResults(results3)).toMatchSnapshot()
 		})
 	},
 )

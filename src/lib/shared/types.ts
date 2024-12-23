@@ -61,6 +61,8 @@ export type GlobalOptions = {
 	/** Whether to treat single newlines in Markdown as line breaks in the
 	 * resulting HTML (Obsidian has an application-level setting for this) */
 	strictLineBreaks: boolean
+	/** Only consider exact noteId matches between the local and remote copies to be equivalent, don't match local notes with "orphaned" remote notes based on content */
+	strictMatching: boolean
 	/** Sync image, video, and audio assets to Anki's media storage system */
 	syncMediaAssets: SyncMediaAssets
 }
@@ -80,6 +82,7 @@ export const defaultGlobalOptions: GlobalOptions = {
 	obsidianVault: undefined,
 	resolveUrls: true,
 	strictLineBreaks: true, // Matches Markdown spec
+	strictMatching: false, //
 	syncMediaAssets: 'local',
 }
 

@@ -6,11 +6,11 @@ import { NOTE_DEFAULT_DECK_NAME, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../s
 import { defaultGlobalOptions, type GlobalOptions } from '../shared/types'
 import {
 	addNote,
+	areNotesEqual,
 	deleteNotes,
 	deleteOrphanedDecks,
 	deleteUnusedMedia,
 	getRemoteNotes,
-	getRemoteNotesById,
 	requestPermission,
 	syncToAnkiWeb,
 	updateNote,
@@ -18,12 +18,13 @@ import {
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 
 export type SyncedNote = {
+	action: 'ankiUnreachable' | 'created' | 'deleted' | 'matched' | 'unchanged' | 'updated'
 	note: YankiNote
 }
 
 export type SyncNotesOptions = Pick<
 	GlobalOptions,
-	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace'
+	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace' | 'strictMatching'
 >
 
 export const defaultSyncNotesOptions: SyncNotesOptions = {
@@ -53,8 +54,11 @@ export async function syncNotes(
 ): Promise<SyncNotesResult> {
 	const startTime = performance.now()
 
+	// Don't leak mutations to the notes
+	const allLocalNotesCopy = structuredClone(allLocalNotes)
+
 	// Defaults
-	const { ankiConnectOptions, ankiWeb, dryRun, namespace } = deepmerge(
+	const { ankiConnectOptions, ankiWeb, dryRun, namespace, strictMatching } = deepmerge(
 		defaultSyncNotesOptions,
 		options ?? {},
 	) as SyncNotesOptions
@@ -75,36 +79,28 @@ export async function syncNotes(
 			dryRun,
 			duration: performance.now() - startTime,
 			namespace: sanitizedNamespace,
-			synced: allLocalNotes.map((note) => ({
+			synced: allLocalNotesCopy.map((note) => ({
 				action: 'ankiUnreachable',
 				note,
 			})),
 		}
 	}
 
-	// Deletion pass, we need the full info to do deck cleanup later on
-	const existingRemoteNotes = await getRemoteNotes(client, sanitizedNamespace)
-
-	const orphanedNotes = existingRemoteNotes.filter(
-		(remoteNote) => !allLocalNotes.some((localNote) => localNote.noteId === remoteNote?.noteId),
-	)
-
-	await deleteNotes(client, orphanedNotes, dryRun)
-
-	for (const orphanedNote of orphanedNotes) {
-		synced.push({
-			action: 'deleted',
-			note: orphanedNote,
-		})
-	}
-
 	// Set undefined local note decks to the default
-	for (const note of allLocalNotes) {
-		if (note.deckName === '') {
-			note.deckName = NOTE_DEFAULT_DECK_NAME
+	for (const localNote of allLocalNotesCopy) {
+		if (localNote.deckName === '') {
+			localNote.deckName = NOTE_DEFAULT_DECK_NAME
 		}
 	}
 
+	// Get all remote notes in any namespace
+	const allRemoteNotes = await getRemoteNotes(client, '*')
+	const remoteNotes = allRemoteNotes.filter(
+		(remoteNote) => remoteNote.fields.YankiNamespace === sanitizedNamespace,
+	)
+
+	// Clear duplicate local note IDs
+	// Duplicate pass, multiple local notes with the same noteId
 	// Check for and handle duplicate local note ids...
 	// If there are multiple local notes with the same ID, we see if any of them
 	// has content matching its remote note. If so, we keep that one and create
@@ -112,19 +108,19 @@ export async function syncNotes(
 	// an edge case, but it can happen if users are manually duplicating notes
 	// that have already been synced as a shortcut to create new ones.
 	// Can't really think of a more sane thing to do without access to file metadata.
-	for (const localNote of allLocalNotes) {
+	for (const localNote of allLocalNotesCopy) {
 		if (localNote.noteId === undefined) continue
 
-		const duplicates = findNotesWithDuplicateIds(allLocalNotes, localNote.noteId)
+		const duplicates = findNotesWithDuplicateIds(allLocalNotesCopy, localNote.noteId)
 
 		if (duplicates.length <= 1) continue
 
-		const remoteNote = existingRemoteNotes.find((remote) => remote?.noteId === localNote.noteId)
+		const remoteNote = remoteNotes.find((remote) => remote.noteId === localNote.noteId)
 
 		// Defaults to the first note if no content match is found
 		const noteToKeep = selectNoteToKeep(duplicates, remoteNote)
 
-		// Reset noteId for all duplicates except the one to keep
+		// Reset noteId in allLocalNotes for all duplicates except the one to keep
 		for (const duplicate of duplicates) {
 			if (duplicate !== noteToKeep) {
 				duplicate.noteId = undefined
@@ -132,36 +128,51 @@ export async function syncNotes(
 		}
 	}
 
-	// Set undefined local note IDs to bogus ones to ensure we create them
-	const localNoteIds = allLocalNotes.map((note) => note.noteId).map((id) => id ?? -1)
-	const remoteNotes = await getRemoteNotesById(client, localNoteIds)
+	const matchedIds = new Set<number>(
+		allLocalNotesCopy
+			.filter(
+				(localNote) =>
+					localNote.noteId !== undefined &&
+					remoteNotes.some((remote) => localNote.noteId === remote.noteId),
+			)
+			.map((note) => note.noteId!),
+	)
 
-	// Creation and update pass
-	for (const [index, remoteNote] of remoteNotes.entries()) {
-		const localNote = allLocalNotes[index]
+	// Main sync pass
+	for (const localNote of allLocalNotesCopy) {
+		let remoteNote = allRemoteNotes.find((remote) => remote.noteId === localNote.noteId)
 
-		// Undefined means the note only exists locally
-		// Same ID, but different namespace, create a new note with a new ID, leave the old one alone
-		if (
-			remoteNote === undefined ||
-			localNote.fields.YankiNamespace !== remoteNote.fields.YankiNamespace
-		) {
-			// Ensure id is undefined, in case the local id is corrupted (e.g. changed
-			// by hand)
+		// Handle notes with the same ID in different namespaces
+		if (remoteNote?.fields.YankiNamespace !== sanitizedNamespace) {
+			// Reset local note id, will be recreated...
+			localNote.noteId = undefined
+			remoteNote = undefined
+		}
 
-			const newNoteId = await addNote(client, { ...localNote, noteId: undefined }, dryRun)
+		// Find matching remote note if it exists
+		if (remoteNote === undefined) {
+			localNote.noteId = strictMatching
+				? undefined
+				: findRemoteContentMatchId(localNote, remoteNotes, matchedIds)
 
-			synced.push({
-				action: 'created',
-				note: {
-					...localNote,
-					noteId: newNoteId,
-				},
-			})
+			if (localNote.noteId === undefined) {
+				// No match means it's a new note
+				localNote.noteId = await addNote(client, { ...localNote, noteId: undefined }, dryRun)
+				synced.push({
+					action: 'created',
+					note: localNote,
+				})
+			} else {
+				// Match note
+				synced.push({
+					action: 'matched',
+					note: localNote,
+				})
+			}
 		} else {
 			// Update remote notes if they differ
-			// TODO can this ever happen?
 			if (remoteNote.noteId === undefined) {
+				// Should be unreachable
 				throw new Error('Remote note ID is undefined')
 			}
 
@@ -173,6 +184,26 @@ export async function syncNotes(
 				note: localNote,
 			})
 		}
+
+		if (localNote.noteId === undefined) {
+			// Should be unreachable
+			throw new Error('Note ID is undefined')
+		}
+
+		matchedIds.add(localNote.noteId)
+	}
+
+	// Deletion pass, we need the full info to do deck cleanup later on
+	const orphanedNotes = remoteNotes.filter(
+		(remoteNote) => !allLocalNotesCopy.some((localNote) => localNote.noteId === remoteNote.noteId),
+	)
+
+	await deleteNotes(client, orphanedNotes, dryRun)
+	for (const orphanedNote of orphanedNotes) {
+		synced.push({
+			action: 'deleted',
+			note: orphanedNote,
+		})
 	}
 
 	// Purge empty yanki-related decks
@@ -186,7 +217,7 @@ export async function syncNotes(
 		}
 	}
 
-	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, existingRemoteNotes, dryRun)
+	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, remoteNotes, dryRun)
 
 	// Clean up unused media files
 	const deletedMedia = await deleteUnusedMedia(client, liveNotes, sanitizedNamespace, dryRun)
@@ -222,4 +253,18 @@ function selectNoteToKeep(duplicates: YankiNote[], remoteNote: undefined | Yanki
 				duplicate.fields.Back === remoteNote?.fields.Back,
 		) ?? duplicates[0] // Default to the first note if no content match is found
 	)
+}
+
+function findRemoteContentMatchId(
+	localNote: YankiNote,
+	remoteNotes: YankiNote[],
+	matchedIds: Set<number>,
+): number | undefined {
+	const match = remoteNotes.find(
+		(remoteNote) =>
+			remoteNote.noteId !== undefined &&
+			!matchedIds.has(remoteNote.noteId) &&
+			areNotesEqual(localNote, remoteNote, false),
+	)
+	return match?.noteId ?? undefined
 }
