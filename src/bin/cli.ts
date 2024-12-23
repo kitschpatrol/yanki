@@ -122,6 +122,7 @@ await yargsInstance
 			namespace,
 			// Not exposing this option for now
 			recursive = true,
+			strictLineBreaks,
 			strictMatching,
 			syncMedia,
 			verbose,
@@ -160,6 +161,7 @@ await yargsInstance
 				manageFilenames,
 				maxFilenameLength,
 				namespace,
+				strictLineBreaks,
 				strictMatching,
 				syncMediaAssets: syncMedia,
 			}).catch(ankiNotRunningErrorHandler)
