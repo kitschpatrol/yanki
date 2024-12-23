@@ -19,7 +19,7 @@
 
 <!-- /short-description -->
 
-> \[!IMPORTANT]
+> [!IMPORTANT]
 > Yanki is feature-complete but will remain zero-versioned until it's been thoroughly tested. Please exercise caution and make backups of your Anki notes until the 1.0.0 release.
 
 <!-- table-of-contents { depth: 2 } -->

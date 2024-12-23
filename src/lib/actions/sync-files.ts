@@ -31,7 +31,6 @@ export type SyncFilesOptions = Simplify<
 		| 'fileAdapter'
 		| 'manageFilenames'
 		| 'maxFilenameLength'
-		| 'namespace'
 		| 'obsidianVault'
 		| 'strictLineBreaks'
 		| 'syncMediaAssets'
