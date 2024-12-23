@@ -18,7 +18,6 @@ import {
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 
 export type SyncedNote = {
-	action: 'ankiUnreachable' | 'created' | 'deleted' | 'recreated' | 'unchanged' | 'updated'
 	note: YankiNote
 }
 
