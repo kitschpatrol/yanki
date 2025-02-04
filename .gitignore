@@ -19,5 +19,6 @@ node_modules/
 vendor/
 
 # Customizations
-/test/assets/test-obsidian-vault/.obsidian/workspace.json
 /src/test.ts
+/test/assets/test obsidian vault with spaces/.obsidian/workspace.json
+/test/assets/test-obsidian-vault/.obsidian/workspace.json

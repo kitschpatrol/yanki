@@ -23,6 +23,7 @@ vendor/
 /patches/
 
 # Customizations
+/test/assets/test obsidian vault with spaces/
 /test/assets/test-deck-pruning/
 /test/assets/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md
 /test/assets/test-obsidian-vault/

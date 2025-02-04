@@ -38,6 +38,22 @@ it('resolves a named file link', () => {
 	)
 })
 
+it('resolves a named file link with a space in the vault name', () => {
+	expect(
+		resolveLink('test pdf.pdf', {
+			allFilePaths: [
+				'/base-path/cwd/test/assets/test obsidian vault with spaces/Assets/test pdf.pdf',
+			],
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/cwd/',
+			obsidianVaultName: 'test obsidian vault with spaces',
+			type: 'link',
+		}),
+	).toMatchInlineSnapshot(
+		`"obsidian://open?vault=test%20obsidian%20vault%20with%20spaces&file=%2Fbase-path%2Fcwd%2Ftest%2Fassets%2Ftest%20obsidian%20vault%20with%20spaces%2FAssets%2Ftest%20pdf.pdf"`,
+	)
+})
+
 it('resolves a named file embed', () => {
 	expect(
 		resolveLink('test card', {

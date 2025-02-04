@@ -1,0 +1,42 @@
+{
+  "ankiConnect": {
+    "host": "http://localhost",
+    "port": 8765
+  },
+  "folders": [
+    "cards"
+  ],
+  "ignoreFolderNotes": true,
+  "manageFilenames": {
+    "enabled": true,
+    "maxLength": 60,
+    "mode": "prompt"
+  },
+  "namespace": "Yanki Obsidian - Vault ID 226f7ed0b929886e",
+  "showAdvancedSettings": false,
+  "stats": {
+    "sync": {
+      "auto": 0,
+      "duration": 308,
+      "errors": 0,
+      "invalid": 0,
+      "latestSyncTime": 1738629620,
+      "manual": 1,
+      "notes": {
+        "ankiUnreachable": 0,
+        "created": 3,
+        "deleted": 0,
+        "matched": 0,
+        "unchanged": 0,
+        "updated": 0
+      }
+    }
+  },
+  "sync": {
+    "autoSyncDebounceIntervalMs": 4000,
+    "autoSyncEnabled": false,
+    "mediaMode": "local",
+    "pushToAnkiWeb": false
+  },
+  "verboseNotices": false
+}
