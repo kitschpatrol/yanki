@@ -50,6 +50,11 @@ export function getSafeTitleForNote(
 
 		// eslint-disable-next-line no-fallthrough
 		case 'Yanki - Cloze': {
+			// Note that this treats the text around the cloze as the "prompt" and the
+			// text in the close as the "response", grabbing some extra text if the
+			// results are empty.
+			// This can create confusion for users, e.g.
+			// https://github.com/kitschpatrol/yanki-obsidian/issues/32.
 			const cleanFront = emptyIsUndefined(
 				getSafeFilename(note.fields.Front)
 					.replace(NOTE_DEFAULT_EMPTY_TEXT, '')
@@ -62,7 +67,7 @@ export function getSafeTitleForNote(
 			}
 
 			const textBeforeCloze = emptyIsUndefined(cleanFront.split('{{').at(0) ?? '')
-			const firstClozeText = emptyIsUndefined(/{{\w\d*::([^:}]+)/.exec(cleanFront)?.at(0))
+			const firstClozeText = emptyIsUndefined(/{{\w\d*\s?:?:?([^:}]+)/.exec(cleanFront)?.at(1))
 			const textAfterCloze = emptyIsUndefined(cleanFront.split('}}').at(1)?.split('{{').at(0) ?? '')
 
 			// Always try to provide some semantic value

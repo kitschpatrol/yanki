@@ -20,6 +20,12 @@ describeWithFileFixture(
 
 			expect(fileNames).toMatchInlineSnapshot(`
 				[
+				  "a lonely cloze.md",
+				  "cloze (1).md",
+				  "cloze (2).md",
+				  "cloze (3).md",
+				  "cloze (4).md",
+				  "emphasized but un-hinted cloze.md",
 				  "I look a lot like the thing you need to type in, but i'm... (1).md",
 				  "I look a lot like the thing you need to type in, but i'm... (2).md",
 				  "I look a lot like the thing you need to type in, but i'm... (3).md",
@@ -38,18 +44,12 @@ describeWithFileFixture(
 				  "I'm the thing you need to type on the card (3).md",
 				  "I'm the thing you need to type on the card (4).md",
 				  "I'm the thing you need to type on the card (5).md",
-				  "is the.md",
 				  "My frontmatter is empty.md",
-				  "This card has a (1).md",
-				  "This card has a (2).md",
-				  "This card has a (3).md",
-				  "This card has a (4).md",
 				  "This looks a lot like a cloze but it's a basic answer.md",
 				  "This looks a lot like a cloze or two here's a hint.md",
 				  "Untitled (1).md",
 				  "Untitled (2).md",
 				  "Untitled (3).md",
-				  "Untitled (4).md",
 				]
 			`)
 		})

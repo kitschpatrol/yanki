@@ -258,6 +258,7 @@ describeWithFileFixture(
 
 			expect(changeMap).toMatchInlineSnapshot(`
 				Map {
+				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/a lonely cloze.md",
 				  "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (1).md",
 				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (2).md",
 				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (3).md",
@@ -287,7 +288,6 @@ describeWithFileFixture(
 				  "/test-minimal-notes/basic-with-empty-everything.md" => "/test-minimal-notes/Untitled (1).md",
 				  "/test-minimal-notes/basic-with-front-image-markdown-embed-and-no-back.md" => "/test-minimal-notes/Untitled (2).md",
 				  "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md" => "/test-minimal-notes/Untitled (3).md",
-				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/Untitled (4).md",
 				}
 			`)
 
@@ -356,6 +356,12 @@ describeWithFileFixture(
 
 			expect(changeMap).toMatchInlineSnapshot(`
 				Map {
+				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/a lonely cloze.md",
+				  "/test-minimal-notes/cloze-with-extra-empty.md" => "/test-minimal-notes/cloze (1).md",
+				  "/test-minimal-notes/cloze-with-extra.md" => "/test-minimal-notes/cloze (2).md",
+				  "/test-minimal-notes/cloze-with-no-preamble.md" => "/test-minimal-notes/cloze (3).md",
+				  "/test-minimal-notes/cloze.md" => "/test-minimal-notes/cloze (4).md",
+				  "/test-minimal-notes/cloze-with-style.md" => "/test-minimal-notes/emphasized but un-hinted cloze.md",
 				  "/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (1).md",
 				  "/test-minimal-notes/basic-with-type-in-the-answer-like-front-and-no-back.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (2).md",
 				  "/test-minimal-notes/basic-with-type-in-the-answer-like-single-line-with-empty-frontmatter.md" => "/test-minimal-notes/I look a lot like the thing you need to type in, but i'm... (3).md",
@@ -374,18 +380,12 @@ describeWithFileFixture(
 				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis-and-ignored-answer-style.md" => "/test-minimal-notes/I'm the thing you need to type on the card (3).md",
 				  "/test-minimal-notes/basic-type-in-the-answer-with-multiple-emphasis.md" => "/test-minimal-notes/I'm the thing you need to type on the card (4).md",
 				  "/test-minimal-notes/basic-type-in-the-answer.md" => "/test-minimal-notes/I'm the thing you need to type on the card (5).md",
-				  "/test-minimal-notes/cloze-with-no-preamble.md" => "/test-minimal-notes/is the.md",
 				  "/test-minimal-notes/basic-with-empty-frontmatter.md" => "/test-minimal-notes/My frontmatter is empty.md",
-				  "/test-minimal-notes/cloze-with-extra-empty.md" => "/test-minimal-notes/This card has a (1).md",
-				  "/test-minimal-notes/cloze-with-extra.md" => "/test-minimal-notes/This card has a (2).md",
-				  "/test-minimal-notes/cloze-with-style.md" => "/test-minimal-notes/This card has a (3).md",
-				  "/test-minimal-notes/cloze.md" => "/test-minimal-notes/This card has a (4).md",
 				  "/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md" => "/test-minimal-notes/This looks a lot like a cloze but it's a basic answer.md",
 				  "/test-minimal-notes/basic-with-front-and-cloze-like-back.md" => "/test-minimal-notes/This looks a lot like a cloze or two here's a hint.md",
 				  "/test-minimal-notes/basic-with-empty-everything.md" => "/test-minimal-notes/Untitled (1).md",
 				  "/test-minimal-notes/basic-with-front-image-markdown-embed-and-no-back.md" => "/test-minimal-notes/Untitled (2).md",
 				  "/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md" => "/test-minimal-notes/Untitled (3).md",
-				  "/test-minimal-notes/cloze-with-nothing-else.md" => "/test-minimal-notes/Untitled (4).md",
 				}
 			`)
 
