@@ -393,6 +393,86 @@ describeWithFileFixture(
 	},
 )
 
+// https://github.com/kitschpatrol/yanki-obsidian/issues/34
+describeWithFileFixture(
+	'update model and deck simultaneously',
+	{
+		assetPath: './test/assets/test-update-model-deck/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('updates the model and changes its containing deck without creating duplicates', async () => {
+			// First sync
+			const results = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			// Now change the synced note in a way that would require a model and deck update
+			const note = results.synced[0]
+			expect(note.filePath).toBeDefined()
+			const markdown = await fs.readFile(note.filePath!, 'utf8')
+			const updatedMarkdown = markdown.replace(
+				"I'm the front of the card\n\n---",
+				"I'm the front of the card\n\n---\n---",
+			)
+
+			// Update note contents
+			await fs.writeFile(note.filePath!, updatedMarkdown)
+
+			// Move note to a new deck
+			const newBazDirectory = path.join(context.tempAssetPath, 'baz')
+			await fs.mkdir(newBazDirectory)
+			const newFilePath = path.join(newBazDirectory, path.basename(note.filePath!))
+			await fs.rename(note.filePath!, newFilePath)
+
+			// Second sync
+			// Update context
+			const newFileList = await globby(`${pathExtras.normalize(context.tempAssetPath)}/**/*.md`, {
+				absolute: true,
+			})
+			const newAllFileList = await globby(`${pathExtras.normalize(context.tempAssetPath)}/**/*`, {
+				absolute: true,
+			})
+
+			const newModelResults = await syncFiles(newFileList, {
+				allFilePaths: newAllFileList,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			const newNote = newModelResults.synced[0]
+
+			expect(newNote.note.noteId).toEqual(note.note.noteId)
+			expect(newNote.action).toEqual('updated')
+			expect(newNote.note.deckName).toEqual('baz')
+			expect(newNote.note.modelName).toEqual('Yanki - Basic (and reversed card with extra)')
+
+			// Expect the same in Anki
+			const ankiDecks = await context.yankiConnect.deck.getDeckStats({ decks: ['foo', 'baz'] })
+			const deckKeys = Object.keys(ankiDecks)
+			const fooCardCount = ankiDecks[deckKeys[0]].total_in_deck
+			const bazCardCount = ankiDecks[deckKeys[1]].total_in_deck
+
+			expect(fooCardCount, 'foo deck should be empty').toEqual(0)
+			expect(bazCardCount, 'baz deck should have one card').toEqual(1)
+		})
+	},
+)
+
 describeWithFileFixture(
 	'fancy markdown',
 	{
