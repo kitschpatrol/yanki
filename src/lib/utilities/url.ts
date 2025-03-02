@@ -1,4 +1,5 @@
-/* eslint-disable n/no-unsupported-features/node-builtins */
+/* eslint-disable jsdoc/require-jsdoc */
+/* eslint-disable node/no-unsupported-features/node-builtins */
 
 import {
 	MEDIA_DEFAULT_HASH_MODE_URL,
@@ -12,10 +13,10 @@ import { isAbsolute, normalize } from './path'
 import { getHash } from './string'
 
 // Detect probably wiki-style name links
-export function isNameUrl(text: string): boolean {
-	// Name links aren't absolute, aren't relative, and aren't URLs
-	return !text.startsWith('/') && !text.startsWith('./') && !text.startsWith('../') && !isUrl(text)
-}
+// export function isNameUrl(text: string): boolean {
+// 	// Name links aren't absolute, aren't relative, and aren't URLs
+// 	return !text.startsWith('/') && !text.startsWith('./') && !text.startsWith('../') && !isUrl(text)
+// }
 
 export function safeDecodeURI(text: string): string | undefined {
 	try {
@@ -36,8 +37,9 @@ export function safeDecodeURIComponent(text: string): string | undefined {
 }
 
 /**
- * @param text
- * @returns URL object if parsable, undefined if not (likely a file path)
+ * Parse a string into a URL object if parsable, and return undefined otherwise
+ * (e.g. if it's a file path) _instead_ of throwing an error like the native URL
+ * constructor does.
  */
 export function safeParseUrl(text: string): undefined | URL {
 	// Waiting for non-throwing URL.canParse in node 19+...
@@ -78,9 +80,7 @@ export function isUrl(text: string): boolean {
 /**
  * Helper to "filter" file URLs into path strings so they're treated
  * correctly in mdastToHtml
- * TODO need stuff from node's implementation, fileURLToPath?
- * @param url
- * @returns
+ * @todo Need stuff from node's implementation, fileURLToPath?
  */
 export function fileUrlToPath(url: string): string {
 	const parsedUrl = safeParseUrl(url)
@@ -159,6 +159,7 @@ function getHeadersString(
 			? headerKeys.map((key) => headers.get(key))
 			: headerKeys.map((key) => headers[key])
 	)
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		.filter((value) => value !== null && value !== undefined)
 		.join('')
 
@@ -250,16 +251,11 @@ export async function getFileExtensionFromUrl(
  *
  * - `filename`: Use the filename of the media asset, no network required.
  * - `metadata`: Use the metadata of the media asset, either fstat stuff for
- *   files, or reading the headers for URLs... requires a network request for
- *   remote urls. Falls through to `filename` if not available.
+ * files, or reading the headers for URLs... requires a network request for
+ * remote urls. Falls through to `filename` if not available.
  * - `content`: Actually read the content of the media asset, requires reading
- *   the file or fetching the URL. Not yet implemented. Falls through to
- *   `metadata` if not available.
- *
- * @param url
- * @param fetchAdapter
- * @param mode
- * @returns
+ * the file or fetching the URL. Not yet implemented. Falls through to
+ * `metadata` if not available.
  */
 export async function getUrlContentHash(
 	url: string,
@@ -301,7 +297,7 @@ export async function getUrlContentHash(
 	}
 }
 
-export function urlToHostAndPort(url: string): { host: string; port: number } | undefined {
+export function urlToHostAndPort(url: string): undefined | { host: string; port: number } {
 	const parsedUrl = safeParseUrl(url)
 	return parsedUrl === undefined
 		? undefined

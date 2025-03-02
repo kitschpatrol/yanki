@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import fnv1a from '@sindresorhus/fnv1a'
 
 // Don't touch this either
@@ -60,17 +62,23 @@ export function emptyIsUndefined(text: string | undefined): string | undefined {
 
 /**
  * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ * @public
  */
 export function markdown(strings: TemplateStringsArray, ...values: unknown[]): string {
 	return trimLeadingIndentation(strings, ...values)
 }
 
+/**
+ * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ * @public
+ */
 export function md(strings: TemplateStringsArray, ...values: unknown[]): string {
 	return trimLeadingIndentation(strings, ...values)
 }
 
 /**
  * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ * @public
  */
 export function html(strings: TemplateStringsArray, ...values: unknown[]): string {
 	return trimLeadingIndentation(strings, ...values)
@@ -78,6 +86,7 @@ export function html(strings: TemplateStringsArray, ...values: unknown[]): strin
 
 /**
  * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ * @public
  */
 export function css(strings: TemplateStringsArray, ...values: unknown[]): string {
 	return trimLeadingIndentation(strings, ...values)
@@ -85,12 +94,14 @@ export function css(strings: TemplateStringsArray, ...values: unknown[]): string
 
 function trimLeadingIndentation(strings: TemplateStringsArray, ...values: unknown[]): string {
 	const lines = strings
+		// eslint-disable-next-line unicorn/no-array-reduce, ts/no-base-to-string
 		.reduce((result, text, i) => `${result}${text}${String(values[i] ?? '')}`, '')
 		.split(/\r?\n/)
 		.filter((line) => line.trim() !== '')
 
 	// Get leading white space of first line, and trim that much white space
 	// from subsequent lines
+	// eslint-disable-next-line regexp/no-unused-capturing-group
 	const leadingSpace = /^(\s+)/.exec(lines[0])?.[0] ?? ''
 	const leadingSpaceRegex = new RegExp(`^${leadingSpace}`)
 	return lines.map((line) => line.replace(leadingSpaceRegex, '').trimEnd()).join('\n')
@@ -115,5 +126,6 @@ export function splitAtFirstMatch(text: string, regex: RegExp): [string, string 
 }
 
 export function getUnicodeCodePoints(text: string): string[] {
+	// eslint-disable-next-line ts/no-misused-spread
 	return [...text].map((char) => char.codePointAt(0)!.toString(16))
 }

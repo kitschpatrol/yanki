@@ -8,7 +8,7 @@ import { getFileExtensionFromUrl, getUrlContentHash, safeParseUrl } from '../src
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stableResults } from './utilities/stable-sync-results'
 
-// eslint-disable-next-line n/no-unsupported-features/node-builtins
+// eslint-disable-next-line node/no-unsupported-features/node-builtins
 const fetchAdapter = globalThis.fetch.bind(globalThis)
 
 const allLocalMediaPaths = [
@@ -291,6 +291,7 @@ it('gets content hash from url content', { timeout: 60_000 }, async () => {
 
 		const { pathname } = parsedUrl
 		const key = pathname.split('/').at(-1) ?? 'undefined'
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		results.push({ [key]: result ?? 'undefined' })
 	}
 
@@ -364,6 +365,7 @@ it('gets content hash from url metadata', { timeout: 60_000 }, async () => {
 
 		const { pathname } = parsedUrl
 		const key = pathname.split('/').at(-1) ?? 'undefined'
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		results.push({ [key]: result ?? 'undefined' })
 	}
 
@@ -437,6 +439,7 @@ it('gets content hash from url name', { timeout: 60_000 }, async () => {
 
 		const { pathname } = parsedUrl
 		const key = pathname.split('/').at(-1) ?? 'undefined'
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		results.push({ [key]: result ?? 'undefined' })
 	}
 
@@ -505,6 +508,7 @@ it('gets content hash from file content', { timeout: 60_000 }, async () => {
 	for (const filePath of allLocalMediaPaths) {
 		const result = await getFileContentHash(filePath, await getDefaultFileAdapter(), 'content')
 		const key = path.posix.basename(filePath)
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		results.push({ [key]: result ?? 'undefined' })
 	}
 
@@ -572,6 +576,7 @@ it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
 	for (const filePath of allLocalMediaPaths) {
 		const result = await getFileContentHash(filePath, await getDefaultFileAdapter(), 'metadata')
 		const key = path.posix.basename(filePath)
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		results.push({ [key]: result ?? 'undefined' })
 	}
 
@@ -641,6 +646,7 @@ it('gets content hash from file name', { timeout: 60_000 }, async () => {
 	for (const filePath of allLocalMediaPaths) {
 		const result = await getFileContentHash(filePath, await getDefaultFileAdapter(), 'name')
 		const key = path.posix.basename(filePath)
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		results.push({ [key]: result ?? 'undefined' })
 	}
 

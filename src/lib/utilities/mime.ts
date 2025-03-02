@@ -2,8 +2,6 @@ import { type MediaSupportedExtension } from '../shared/constants'
 
 /**
  * Only supports MIMEs for valid Anki media types.
- * @param mimeType
- * @returns
  */
 export function getFileExtensionForMimeType(mimeType: string): MediaSupportedExtension | undefined {
 	// TODO vet these
@@ -52,6 +50,7 @@ export function getFileExtensionForMimeType(mimeType: string): MediaSupportedExt
 
 	const result = mimeToExtension[mimeType]
 
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (result === undefined) {
 		return undefined
 	}

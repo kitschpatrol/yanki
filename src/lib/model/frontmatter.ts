@@ -15,7 +15,6 @@ export type Frontmatter = {
  * String manipulation is ugly, but it ensures that the markdown format is
  * preserved verbatim. Running it through the unified AST and then
  * remarkStringify would possibly change the format.
- *
  * @param markdown Raw markdown string with frontmatter.
  * @param noteId  The value to set the noteId to. If undefined, the noteId will
  * be removed from the frontmatter. (Useful for testing.) @returns Raw markdown
@@ -99,7 +98,6 @@ function getFrontmatterRange(
 
 /**
  * Currently used in testing only.
- * @param markdown
  * @returns All frontmatter in the markdown as an object, or an empty object if no frontmatter is found.
  */
 export async function getAllFrontmatter(markdown: string): Promise<Record<string, unknown>> {

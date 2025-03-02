@@ -1,3 +1,6 @@
+/* eslint-disable ts/no-unnecessary-condition */
+/* eslint-disable jsdoc/require-jsdoc */
+
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 import { type Simplify } from 'type-fest'
@@ -17,7 +20,7 @@ import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { normalize } from '../utilities/path'
 import { loadLocalNotes, type LoadOptions, type LocalNote } from './load-local-notes'
 
-export type RenameNotesOptions = Pick<
+type RenameNotesOptions = Pick<
 	GlobalOptions,
 	| 'dryRun'
 	| 'fileAdapter'
@@ -27,7 +30,7 @@ export type RenameNotesOptions = Pick<
 	| 'strictLineBreaks'
 >
 
-export const defaultRenameNotesOptions: RenameNotesOptions = {
+const defaultRenameNotesOptions: RenameNotesOptions = {
 	...defaultGlobalOptions,
 }
 
@@ -140,10 +143,6 @@ export const defaultRenameFilesOptions: RenameFilesOptions = {
 
 /**
  * Currently used for testing and by `yanki-obsidian`.
- *
- * @param allLocalFilePaths
- * @param options
- * @returns
  */
 export async function renameFiles(
 	allLocalFilePaths: string[],

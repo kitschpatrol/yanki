@@ -32,17 +32,16 @@ export const defaultSyncNotesOptions: SyncNotesOptions = {
 }
 
 export type SyncNotesResult = Simplify<
-	{
+	Pick<GlobalOptions, 'ankiWeb' | 'dryRun' | 'namespace'> & {
 		deletedDecks: string[]
 		deletedMedia: string[]
 		duration: number
 		synced: SyncedNote[]
-	} & Pick<GlobalOptions, 'ankiWeb' | 'dryRun' | 'namespace'>
+	}
 >
 
 /**
  * Syncs local notes to Anki.
- *
  * @param allLocalNotes All the YankiNotes to sync
  * @returns The synced notes (with new IDs where applicable), plus some stats
  * about the sync @throws
@@ -224,6 +223,7 @@ export async function syncNotes(
 
 	// AnkiWeb sync
 	const isChanged = deletedDecks.length > 0 || synced.some((note) => note.action !== 'unchanged')
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (!dryRun && ankiWeb && (isChanged || SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED)) {
 		await syncToAnkiWeb(client)
 	}
@@ -250,7 +250,7 @@ function selectNoteToKeep(duplicates: YankiNote[], remoteNote: undefined | Yanki
 		duplicates.find(
 			(duplicate) =>
 				duplicate.fields.Front === remoteNote?.fields.Front &&
-				duplicate.fields.Back === remoteNote?.fields.Back,
+				duplicate.fields.Back === remoteNote.fields.Back,
 		) ?? duplicates[0] // Default to the first note if no content match is found
 	)
 }

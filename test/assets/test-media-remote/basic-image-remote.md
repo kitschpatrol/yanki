@@ -4,11 +4,11 @@
 
 ![Yanki test image](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.png?raw=true)
 
-## Jpeg
+## JPEG
 
 ![Yanki test image](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.jpeg?raw=true)
 
-## Jpg
+## JPG
 
 ![Yanki test image](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.jpg?raw=true)
 
@@ -24,7 +24,7 @@
 
 ![Yanki test image](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.ico?raw=true)
 
-## Svg
+## SVG
 
 ![Yanki test image](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/image/yanki.svg?raw=true)
 

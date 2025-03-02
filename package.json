@@ -1,37 +1,7 @@
 {
 	"name": "yanki",
 	"version": "0.18.3",
-	"type": "module",
 	"description": "A CLI tool and TypeScript library for syncing Markdown to Anki flashcards.",
-	"repository": "github:kitschpatrol/yanki",
-	"homepage": "https://github.com/kitschpatrol/yanki",
-	"bugs": "https://github.com/kitschpatrol/yanki/issues",
-	"author": {
-		"name": "Eric Mika",
-		"email": "eric@ericmika.com",
-		"url": "https://ericmika.com"
-	},
-	"license": "MIT",
-	"packageManager": "pnpm@9.15.4",
-	"engines": {
-		"node": "^18.19.0 || >=20.5.0",
-		"pnpm": ">=9.0.0"
-	},
-	"bin": {
-		"yanki": "dist/bin/cli.js"
-	},
-	"main": "./dist/lib/index.js",
-	"module": "./dist/lib/index.js",
-	"exports": {
-		".": {
-			"import": "./dist/lib/index.js",
-			"types": "./dist/lib/index.d.ts"
-		}
-	},
-	"types": "./dist/lib/index.d.ts",
-	"files": [
-		"dist/*"
-	],
 	"keywords": [
 		"anki",
 		"flashcards",
@@ -42,12 +12,40 @@
 		"sync",
 		"npm-package"
 	],
+	"homepage": "https://github.com/kitschpatrol/yanki",
+	"bugs": "https://github.com/kitschpatrol/yanki/issues",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/kitschpatrol/yanki"
+	},
+	"license": "MIT",
+	"author": {
+		"name": "Eric Mika",
+		"email": "eric@ericmika.com",
+		"url": "https://ericmika.com"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/lib/index.js",
+			"types": "./dist/lib/index.d.ts"
+		}
+	},
+	"main": "./dist/lib/index.js",
+	"module": "./dist/lib/index.js",
+	"types": "./dist/lib/index.d.ts",
+	"bin": {
+		"yanki": "dist/bin/cli.js"
+	},
+	"files": [
+		"dist/*"
+	],
 	"scripts": {
-		"build": "pkgroll --clean-dist --minify",
+		"build": "pkgroll --clean-dist --minify --tsconfig tsconfig.build.json",
 		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"coverage": "vitest run --coverage",
-		"fix": "shared-config --fix",
-		"lint": "shared-config --lint",
+		"fix": "kpi fix",
+		"lint": "kpi lint",
 		"release": "bumpp --commit 'Release: %s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
 		"test": "vitest"
 	},
@@ -59,13 +57,13 @@
 		"@types/unist": "^3.0.3",
 		"@types/yargs": "^17.0.33",
 		"chalk": "^5.4.1",
-		"entities": "4.5.0",
+		"entities": "^6.0.0",
 		"globby": "^14.0.2",
 		"rehype-parse": "^9.0.1",
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^4.7.12",
+		"@kitschpatrol/shared-config": "^5.0.6",
 		"@shikijs/rehype": "^1.29.1",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^2.2.1",
@@ -106,7 +104,7 @@
 		"strip-ansi": "^7.1.0",
 		"tsx": "^4.19.2",
 		"type-fest": "^4.33.0",
-		"typescript": "^5.7.3",
+		"typescript": "~5.7.3",
 		"unified": "^11.0.5",
 		"unist-builder": "^4.0.0",
 		"unist-util-visit": "^5.0.0",
@@ -116,7 +114,22 @@
 		"yaml": "^2.7.0",
 		"yanki-connect": "^2.1.10"
 	},
+	"packageManager": "pnpm@10.5.2",
+	"engines": {
+		"node": "^18.19.0 || >=20.11.0",
+		"pnpm": ">=10.0.0"
+	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild",
+			"msw",
+			"puppeteer"
+		],
+		"overrides": {
+			"eslint-plugin-markdown": "^5.1.0"
+		}
 	}
 }

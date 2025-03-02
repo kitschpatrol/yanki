@@ -1,10 +1,10 @@
+/* eslint-disable regexp/control-character-escape */
 /* eslint-disable no-control-regex */
 import slugify from '@sindresorhus/slugify'
 import { NOTE_NAMESPACE_MAX_LENGTH } from '../shared/constants'
 
 /**
  * Convenience
- * @param namespace
  * @returns sanitized valid namespace
  * @throws If namespace is invalid
  */
@@ -15,7 +15,6 @@ export function validateAndSanitizeNamespace(namespace: string, allowAsterisk = 
 
 /**
  * Used internally before storing and searching
- * @param namespace
  * @returns sanitized namespace
  */
 export function sanitizeNamespace(namespace: string): string {
@@ -37,9 +36,6 @@ export function sanitizeNamespace(namespace: string): string {
  * Silently correcting the namespace would be a bad idea, because the user might
  * not realize that the namespace has been changed, and then they might not be
  * able to find their notes.
- *
- * @param namespace
- * @returns void
  * @throws Error
  */
 export function validateNamespace(namespace: string, allowAsterisk = false) {
@@ -158,7 +154,9 @@ export function validateNamespace(namespace: string, allowAsterisk = false) {
 	}
 }
 
+/**
+ * Get sanitized namespace with yanki-media- prefix (for ease of searching)
+ */
 export function getSlugifiedNamespace(namespace: string): string {
-	// Always prefix with yanki-media- for ease of searching
 	return `yanki-media-${slugify(sanitizeNamespace(namespace)).replaceAll(/-+/g, '-')}`
 }

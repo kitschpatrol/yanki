@@ -1,12 +1,10 @@
 /**
  * Takes an object and an array of dot-delimited key paths, returning a new object
  * that only includes the specified fields from the original object. Useful for test output.
- *
  * @template T - The type of the input object.
- * @param {T} object - The source object to extract fields from.
- * @param {Array<string>} fields - An array of dot-delimited key paths to include in the result.
- * @returns {Partial<T>} A new object containing only the specified fields.
- *
+ * @param object - The source object to extract fields from.
+ * @param fields - An array of dot-delimited key paths to include in the result.
+ * @returns A new object containing only the specified fields.
  * @example
  * const test = {
  *   bar: {

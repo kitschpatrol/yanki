@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+// eslint-disable-next-line ts/triple-slash-reference
 /// <reference types="vitest" />
 import { defineConfig } from 'vite'
 

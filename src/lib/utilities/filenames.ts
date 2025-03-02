@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import filenamify from 'filenamify'
 import { nanoid } from 'nanoid'
 import path from 'path-browserify-esm'
@@ -67,7 +69,7 @@ export function getSafeTitleForNote(
 			}
 
 			const textBeforeCloze = emptyIsUndefined(cleanFront.split('{{').at(0) ?? '')
-			const firstClozeText = emptyIsUndefined(/{{\w\d*\s?:?:?([^:}]+)/.exec(cleanFront)?.at(1))
+			const firstClozeText = emptyIsUndefined(/\{\{\w\d*\s?:{0,2}([^:}]+)/.exec(cleanFront)?.at(1))
 			const textAfterCloze = emptyIsUndefined(cleanFront.split('}}').at(1)?.split('{{').at(0) ?? '')
 
 			// Always try to provide some semantic value
@@ -87,18 +89,16 @@ export function getSafeTitleForNote(
 				}
 			}
 		}
-
-		// No default
 	}
 }
 
 /**
- *
- * @param text
+ * Get a safe filename for a media asset
+ * @param text Text to be converted to a safe filename
  * @param maxLength If undefined, no truncation will take place. If defined, a maximum maximum length of the filename will be enforced.
- * @returns
+ * @returns A safe filename
  */
-function getSafeFilename(text: string, maxLength?: number | undefined): string {
+function getSafeFilename(text: string, maxLength?: number): string {
 	let basicSafeFilename = filenamify(getFirstLineOfHtmlAsPlainText(text).trim(), {
 		maxLength: Number.MAX_SAFE_INTEGER,
 		replacement: ' ',
@@ -150,6 +150,7 @@ export function auditUniqueFilePath(filePath: string, existingFilenames: string[
 }
 
 /**
+ * Strip the trailing increment from a filename
  * @param filename File name with or without an extension, and possibly with a (1)
  * @returns filename without the increment
  */

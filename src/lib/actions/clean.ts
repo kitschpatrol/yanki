@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import type { PartialDeep, Simplify } from 'type-fest'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
@@ -27,21 +29,19 @@ export const defaultCleanOptions: CleanOptions = {
 }
 
 export type CleanResult = Simplify<
-	{
+	Pick<GlobalOptions, 'ankiWeb' | 'dryRun' | 'namespace'> & {
 		deletedDecks: string[]
 		deletedMedia: string[]
 		deletedNotes: YankiNote[]
 		duration: number
-	} & Pick<GlobalOptions, 'ankiWeb' | 'dryRun' | 'namespace'>
+	}
 >
 
 /**
  * Deletes all remote notes in Anki associated with the given namespace.
  *
  * Use with significant caution. Mostly useful for testing.
- *
  * @returns The IDs of the notes that were deleted
- * @param options
  * @throws
  */
 export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanResult> {
@@ -73,6 +73,7 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 
 	// AnkiWeb sync
 	const isChanged = remoteNotes.length > 0 || deletedDecks.length > 0
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (!dryRun && ankiWeb && (isChanged || SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED)) {
 		await syncToAnkiWeb(client)
 	}

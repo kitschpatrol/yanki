@@ -5,23 +5,23 @@ it('syncs notes', async () => {
 	const namespace = 'yanki.sync.browser.test'
 
 	const fileAdapter: FileAdapter = {
-		// eslint-disable-next-line @typescript-eslint/require-await
+		// eslint-disable-next-line ts/require-await
 		async readFile() {
 			throw new Error('Not implemented')
 		},
-		// eslint-disable-next-line @typescript-eslint/require-await
+		// eslint-disable-next-line ts/require-await
 		async readFileBuffer() {
 			throw new Error('Not implemented')
 		},
-		// eslint-disable-next-line @typescript-eslint/require-await
+		// eslint-disable-next-line ts/require-await
 		async rename() {
 			throw new Error('Not implemented')
 		},
-		// eslint-disable-next-line @typescript-eslint/require-await
+		// eslint-disable-next-line ts/require-await
 		async stat() {
 			throw new Error('Not implemented')
 		},
-		// eslint-disable-next-line @typescript-eslint/require-await
+		// eslint-disable-next-line ts/require-await
 		async writeFile() {
 			throw new Error('Not implemented')
 		},

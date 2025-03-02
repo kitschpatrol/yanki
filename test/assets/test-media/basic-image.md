@@ -4,11 +4,11 @@
 
 ![Yanki test image](./image/yanki.png)
 
-## Jpeg
+## JPEG
 
 ![Yanki test image](./image/yanki.jpeg)
 
-## Jpg
+## JPG
 
 ![Yanki test image](./image/yanki.jpg)
 
@@ -24,7 +24,7 @@
 
 ![Yanki test image](./image/yanki.ico)
 
-## Svg
+## SVG
 
 ![Yanki test image](./image/yanki.svg)
 

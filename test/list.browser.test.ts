@@ -6,7 +6,7 @@ import { listNotes, syncNotes, type YankiNote } from '../src/lib'
 // 	url: Parameters<FetchAdapter>['0'],
 // 	options: Parameters<FetchAdapter>['1'],
 // ): ReturnType<FetchAdapter> {
-// 	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+// 	// eslint-disable-next-line node/no-unsupported-features/node-builtins
 // 	return fetch(url, options)
 // }
 

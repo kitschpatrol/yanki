@@ -3,6 +3,7 @@
 
 import chalk from 'chalk'
 
+// eslint-disable-next-line ts/no-unnecessary-condition
 const isNode = process?.versions?.node !== undefined
 
 const log = {

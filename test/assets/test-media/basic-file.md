@@ -2,20 +2,20 @@
 
 ## File links
 
-### Pdf
+### PDF
 
 [Yanki test pdf](./file/yanki.pdf)
 
-### Md
+### Markdown
 
 [Yanki test markdown](./file/yanki.md)
 
 ## File embeds
 
-### Pdf
+### PDF
 
 ![Yanki test pdf](./file/yanki.pdf)
 
-### Md
+### Markdown
 
 ![Yanki test markdown](./file/yanki.md)

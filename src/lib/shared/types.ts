@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import path from 'path-browserify-esm'
 import {
 	defaultYankiConnectOptions,
@@ -8,7 +10,7 @@ import { ENVIRONMENT } from '../utilities/platform'
 
 export type FetchAdapter = YankiFetchAdapter
 export type ManageFilenames = 'off' | 'prompt' | 'response'
-export type SyncMediaAssets = 'all' | 'local' | 'off' | 'remote'
+type SyncMediaAssets = 'all' | 'local' | 'off' | 'remote'
 
 export type FileAdapter = {
 	readFile(filePath: string): Promise<string>
@@ -58,8 +60,10 @@ export type GlobalOptions = {
 	obsidianVault: string | undefined
 	/** Exposed for testing only */
 	resolveUrls: boolean
-	/** Whether to treat single newlines in Markdown as line breaks in the
-	 * resulting HTML (Obsidian has an application-level setting for this) */
+	/**
+	 * Whether to treat single newlines in Markdown as line breaks in the
+	 * resulting HTML (Obsidian has an application-level setting for this)
+	 */
 	strictLineBreaks: boolean
 	/** Only consider exact noteId matches between the local and remote copies to be equivalent, don't match local notes with "orphaned" remote notes based on content */
 	strictMatching: boolean
@@ -92,6 +96,7 @@ export async function getDefaultFileAdapter(): Promise<FileAdapter> {
 	if (ENVIRONMENT === 'node') {
 		// TODO memoize
 		const nodeFs = await import('node:fs/promises')
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		if (nodeFs === undefined) {
 			throw new Error('Error loading file functions in Node environment')
 		}
@@ -100,19 +105,15 @@ export async function getDefaultFileAdapter(): Promise<FileAdapter> {
 			async readFile(filePath: string): Promise<string> {
 				return nodeFs.readFile(filePath, 'utf8')
 			},
-
 			async readFileBuffer(filePath: string): Promise<Uint8Array> {
 				return nodeFs.readFile(filePath)
 			},
-
 			async rename(oldPath: string, newPath: string): Promise<void> {
 				await nodeFs.rename(oldPath, newPath)
 			},
-
 			async stat(filePath) {
 				return nodeFs.stat(filePath)
 			},
-
 			async writeFile(filePath: string, data: string): Promise<void> {
 				await nodeFs.writeFile(filePath, data, 'utf8')
 			},
@@ -125,6 +126,6 @@ export async function getDefaultFileAdapter(): Promise<FileAdapter> {
 }
 
 export function getDefaultFetchAdapter(): FetchAdapter {
-	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	// eslint-disable-next-line node/no-unsupported-features/node-builtins
 	return fetch.bind(globalThis)
 }

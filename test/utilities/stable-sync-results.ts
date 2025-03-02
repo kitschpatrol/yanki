@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import os from 'node:os'
 import sortKeys from 'sort-keys'
 import { type syncFiles } from '../../src/lib'
@@ -22,6 +24,7 @@ export function cleanUpTempPath(filePath: string | undefined): string | undefine
 }
 
 function stripNewlines(input: string): string {
+	// eslint-disable-next-line regexp/no-unused-capturing-group
 	return input.replaceAll(/(\r\n|\n|\r)/g, '')
 }
 

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 
-// Currently unused, unmodified Github Markdown CSS doesn't look great in Anki
+// Currently unused, unmodified GitHub Markdown CSS doesn't look great in Anki
 
 const inputFilePath = './node_modules/github-markdown-css/github-markdown.css'
 const outputFilePath = './src/lib/style/github-markdown-css.ts'

@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import isAbsolutePath from '@stdlib/assert-is-absolute-path'
 import path from 'path-browserify-esm'
 import slash from 'slash'
@@ -11,7 +13,7 @@ import { splitAtFirstMatch } from './string'
 /**
  * The browserify polyfill doesn't implement win32 absolute path detection...
  * @param filePath Normalized path
- * @returns
+ * @returns Whether the path is absolute
  */
 export function isAbsolute(filePath: string): boolean {
 	return isAbsolutePath.posix(filePath) || isAbsolutePath.win32(filePath)
@@ -25,7 +27,7 @@ const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/
 /**
  * Converts all paths to cross-platform 'mixed' style with forward slashes.
  * Warns on unsupported Windows extended length paths.
- * @param filePath
+ * @param filePath Path to normalize
  * @returns normalized path
  */
 export function normalize(filePath: string): string {
@@ -56,7 +58,7 @@ export function normalize(filePath: string): string {
  * and static site generators, where absolute paths are relative to a base path
  * instead of the volume root.
  *
-
+ 
  *
  * Paths starting with Windows drive letters, while technically absolute, are _not_ prepended with the base:
  * - If no base path is provided, paths are resolved relative to the the provided CWD.
@@ -98,7 +100,7 @@ export function resolveWithBasePath(
 		// Path is absolute by drive letter on Windows, or there's not base path to prepend
 		if (
 			basePath === undefined ||
-			/^[A-Za-z]:/.test(filePath) ||
+			/^[A-Z]:/i.test(filePath) ||
 			(!compoundBase && filePath.startsWith(basePath))
 		) {
 			return filePath
@@ -112,19 +114,13 @@ export function resolveWithBasePath(
 	return path.join(cwd, filePath)
 }
 
-/**
- *
- * @param filePath
- * @param cwd Absolute path
- * @returns
- */
-export function resolveWithCwd(filePath: string, cwd: string): string {
-	if (filePath.startsWith('cwd')) {
-		return filePath
-	}
+// Function resolveWithCwd(filePath: string, cwd: string): string {
+// 	if (filePath.startsWith('cwd')) {
+// 		return filePath
+// 	}
 
-	return path.join(cwd, filePath)
-}
+// 	return path.join(cwd, filePath)
+// }
 
 export function stripBasePath(filePath: string, basePath: string): string {
 	const regex = new RegExp(`^${basePath}`, 'i')
@@ -146,7 +142,7 @@ export function getQuery(filePath: string): string {
 	return getBaseAndQueryParts(filePath).at(1) ?? ''
 }
 
-export function hasExtension(filePath: string): boolean {
+function hasExtension(filePath: string): boolean {
 	return getExtension(filePath) !== ''
 }
 
@@ -163,9 +159,9 @@ export function addExtensionIfMissing(filePath: string, extension: string): stri
 	return `${base}.${extension}${query ?? ''}`
 }
 
-export function quantifyPathDistance(relativePath: string): { down: number; up: number } {
-	const up = relativePath.split('../').length - 1
-	const down = relativePath.replaceAll('../', '').split('/').length - 1
+// Function quantifyPathDistance(relativePath: string): { down: number; up: number } {
+// 	const up = relativePath.split('../').length - 1
+// 	const down = relativePath.replaceAll('../', '').split('/').length - 1
 
-	return { down, up }
-}
+// 	return { down, up }
+// }

@@ -3,7 +3,7 @@ import { type YankiParamsForAction } from 'yanki-connect'
 import type { YankiModelName } from './model'
 
 export type YankiNote = Simplify<
-	{
+	Omit<YankiParamsForAction<'addNote'>['note'], 'fields' | 'modelName' | 'options'> & {
 		cards?: number[]
 		fields: {
 			Back: string
@@ -14,5 +14,5 @@ export type YankiNote = Simplify<
 		}
 		modelName: YankiModelName
 		noteId: number | undefined
-	} & Omit<YankiParamsForAction<'addNote'>['note'], 'fields' | 'modelName' | 'options'>
+	}
 >

@@ -1,4 +1,6 @@
+/* eslint-disable jsdoc/require-jsdoc */
 /* eslint-disable complexity */
+
 // TODO move this into its own package?
 
 import { deepmerge } from 'deepmerge-ts'
@@ -12,13 +14,13 @@ import {
 	safeParseUrl,
 } from './url'
 
-export type ResolveLinkType =
+type ResolveLinkType =
 	// Via a `![[link]]` or `![alt](link)` syntax
 	| 'embed'
 	// Via a `[[link]]` or `[text](link)` syntax
 	| 'link'
 
-export type ResolveLinkOptions = {
+type ResolveLinkOptions = {
 	/**
 	 * Array of all absolute file paths to consider when resolving wiki-style named links.
 	 */
@@ -56,7 +58,7 @@ export type ResolveLinkOptions = {
 	type: ResolveLinkType
 }
 
-export const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
+const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
 	allFilePaths: [],
 	// TODO consider...
 	// barePathsAreRelativeTo: 'cwd',
@@ -71,7 +73,6 @@ export const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
  * Warning:
  * Wiki name link resolution is CASE INSENSITIVE, like in Obsidian, though
  * the case of the matching file will be preserved in the returned path.
- *
  * @param filePathOrUrl May be one of:
  * - Wiki named link
  * - Relative file path
@@ -83,7 +84,6 @@ export const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
  * (All file paths can be Windows or POSIX, with or without URI encoding, with
  * or without funky Obsidian-style post-extension block and heading anchor
  * additions.)
- *
  * @returns Resolved absolute path or URL One of:
  * - Resolved absolute POSIX-style paths
  *   - Removes any file path query parameters
@@ -95,6 +95,7 @@ export const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
 export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions): string {
 	// Defaults
 	const { allFilePaths, basePath, convertFilePathsToProtocol, cwd, obsidianVaultName, type } =
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		deepmerge(defaultResolveLinkOptions, options ?? {}) as ResolveLinkOptions
 
 	// Option validation...
@@ -162,6 +163,7 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 				if (
 					convertFilePathsToProtocol !== 'none' &&
 					(type === 'link' ||
+						// eslint-disable-next-line ts/no-unnecessary-condition
 						(type === 'embed' &&
 							// https://help.obsidian.md/Files+and+folders/Accepted+file+formats
 							['.md', '.pdf'].includes(pathExtras.getExtension(resolvedUrlWithDefaultExtension))))
@@ -250,13 +252,11 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
  * See Obsidian's `getFirstLinkpathDest()` for a roughly equivalent algorithm.
  *
  * Obsidian seems to treat note links slightly differently from image / asset links.
- *
  * @param name Non-URI-encoded name of the file, with presumed file extension. (POSIX-style paths.)
  * @param cwd Absolute path to the current working directory of the file from
  * which we're resolving the link. (POSIX-style paths)
  * @param allFilePaths Array of absolute paths to all other files in the paths
  * to be considered. (POSIX-style paths.)
- *
  * @returns Absolute path to the best matching file with the name provided, or
  * undefined if there's no valid match. (POSIX-style paths.)
  */
@@ -360,7 +360,6 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 
 /**
  * Check for presence of a path in a list in a case- and query- agnostic manner.
- *
  * @param filePath File path with file extension. (POSIX-style path.)
  * @param allFilePaths Array of absolute file paths to check. (POSIX-style paths.)
  * @returns True if the file path is present in the list of all file paths.
@@ -372,25 +371,21 @@ function pathExistsInAllFiles(filePath: string, allFilePaths: string[]): boolean
 	return allFilePaths.some((file) => file.toLowerCase().endsWith(base.toLowerCase()))
 }
 
-export function createFileLink(absolutePath: string): string {
+function createFileLink(absolutePath: string): string {
 	return `file://${absolutePath}`
 }
 
-export function createObsidianVaultLink(
-	absolutePath: string,
-	basePath: string,
-	obsidianVault: string,
-) {
+function createObsidianVaultLink(absolutePath: string, basePath: string, obsidianVault: string) {
 	const relativePath = pathExtras.stripBasePath(absolutePath, basePath)
 	return `obsidian://open?vault=${encodeURIComponent(obsidianVault)}&file=${encodeURIComponent(relativePath)}`
 }
 
 export function parseObsidianVaultLink(url: string):
+	| undefined
 	| {
 			linkPath: string
 			vaultName: string
-	  }
-	| undefined {
+	  } {
 	// Parse the URL
 	const urlObject = safeParseUrl(url)
 	if (urlObject === undefined) {

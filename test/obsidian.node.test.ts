@@ -91,7 +91,7 @@ describeWithFileFixture(
 			for (const result of results.synced) {
 				if (
 					result.filePathOriginal?.includes('/Wiki Links/') &&
-					result.filePathOriginal?.endsWith('test card.md')
+					result.filePathOriginal.endsWith('test card.md')
 				) {
 					const html = `${result.note.fields.Front}${result.note.fields.Back}`
 					checkWikiLinkResolution(html, normalize(context.tempAssetPath))
@@ -132,7 +132,7 @@ describeWithFileFixture(
 			for (const result of results.synced) {
 				if (
 					result.filePathOriginal?.includes('/Wiki Links/') &&
-					result.filePathOriginal?.endsWith('test card.md')
+					result.filePathOriginal.endsWith('test card.md')
 				) {
 					// Debug
 					// console.log(`Checking: ${result.filePathOriginal} which is now ${result.filePath}`)

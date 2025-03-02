@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 import type { YankiNote } from '../model/note'
@@ -22,7 +24,7 @@ export type LoadOptions = Pick<
 	| 'syncMediaAssets'
 >
 
-export const defaultLoadOptions: LoadOptions = {
+const defaultLoadOptions: LoadOptions = {
 	...defaultGlobalOptions,
 }
 
@@ -46,6 +48,7 @@ export async function loadLocalNotes(
 		obsidianVault,
 		strictLineBreaks,
 		syncMediaAssets,
+		// eslint-disable-next-line ts/no-unnecessary-condition
 	} = deepmerge(defaultLoadOptions, options ?? {})
 
 	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
@@ -121,7 +124,6 @@ const defaultDeckNamesFromFilePathsOptions: DeckNamesFromFilePathsOptions = {
  * Example of paths -> deck names with `common-parent`:
  * /base/foo/note.md -> foo
  * /base/foo/note.md -> foo
- *
  * @param absoluteFilePaths Absolute paths to all markdown Anki note files. (Ensures proper resolution if path module is polyfilled.)
  * @returns array of ::-delimited deck paths
  */
@@ -136,6 +138,7 @@ function getDeckNamesFromFilePaths(
 	)
 
 	// Trim to the shortest common path
+	// eslint-disable-next-line unicorn/no-array-reduce
 	const commonPathSegments = filePathSegments.reduce((acc, pathSegments) => {
 		const commonPath = acc.filter((segment, index) => segment === pathSegments[index])
 		return commonPath

@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import type { PartialDeep, Simplify } from 'type-fest'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
@@ -13,9 +15,9 @@ import {
 	updateModelStyle,
 } from '../utilities/anki-connect'
 
-export type SetStyleOptions = {
+export type SetStyleOptions = Pick<GlobalOptions, 'ankiConnectOptions' | 'ankiWeb' | 'dryRun'> & {
 	css: string
-} & Pick<GlobalOptions, 'ankiConnectOptions' | 'ankiWeb' | 'dryRun'>
+}
 
 export const defaultSetStyleOptions: SetStyleOptions = {
 	css: CSS_DEFAULT_STYLE,
@@ -23,13 +25,13 @@ export const defaultSetStyleOptions: SetStyleOptions = {
 }
 
 export type SetStyleResult = Simplify<
-	{
+	Pick<GlobalOptions, 'ankiWeb' | 'dryRun'> & {
 		duration: number
 		models: Array<{
 			action: 'unchanged' | 'updated'
 			name: string
 		}>
-	} & Pick<GlobalOptions, 'ankiWeb' | 'dryRun'>
+	}
 >
 
 export type GetStyleOptions = Pick<GlobalOptions, 'ankiConnectOptions'>
@@ -39,6 +41,7 @@ export const defaultGetStyleOptions: GetStyleOptions = {
 
 export async function getStyle(options: PartialDeep<GetStyleOptions>): Promise<string> {
 	// Defaults
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	const { ankiConnectOptions } = deepmerge(defaultSetStyleOptions, options ?? {}) as GetStyleOptions
 
 	const client = new YankiConnect(ankiConnectOptions)
@@ -95,6 +98,7 @@ export async function setStyle(options?: PartialDeep<SetStyleOptions>): Promise<
 
 	// AnkiWeb sync
 	const isChanged = modelsReport.some((model) => model.action !== 'unchanged')
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (!dryRun && ankiWeb && (isChanged || SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED)) {
 		await syncToAnkiWeb(client)
 	}

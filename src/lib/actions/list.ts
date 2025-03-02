@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import type { PartialDeep } from 'type-fest'
 import { deepmerge } from 'deepmerge-ts'
 import { YankiConnect } from 'yanki-connect'
@@ -14,7 +16,7 @@ export const defaultListOptions: ListOptions = {
 	...defaultGlobalOptions,
 }
 
-export type ListResult = {
+type ListResult = {
 	duration: number
 	namespace: string
 	notes: YankiNote[]
@@ -22,8 +24,6 @@ export type ListResult = {
 
 /**
  * Description List notes currently in Anki...
- * @param options
- * @returns
  */
 export async function listNotes(options?: PartialDeep<ListOptions>): Promise<ListResult> {
 	const startTime = performance.now()

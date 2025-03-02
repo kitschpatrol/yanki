@@ -1,3 +1,6 @@
+/* eslint-disable ts/no-unnecessary-condition */
+/* eslint-disable jsdoc/require-jsdoc */
+
 import { type YankiConnect } from 'yanki-connect'
 import {
 	legacyYankiModelNames,
@@ -20,17 +23,17 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 	await client.note.deleteNotes({ notes: noteIds })
 }
 
-export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun = false) {
-	if (note.noteId === undefined) {
-		throw new Error('Note ID is undefined')
-	}
+// export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun = false) {
+// 	if (note.noteId === undefined) {
+// 		throw new Error('Note ID is undefined')
+// 	}
 
-	if (dryRun) {
-		return
-	}
+// 	if (dryRun) {
+// 		return
+// 	}
 
-	await client.note.deleteNotes({ notes: [note.noteId] })
-}
+// 	await client.note.deleteNotes({ notes: [note.noteId] })
+// }
 
 /**
  * Add a note to Anki.
@@ -39,7 +42,6 @@ export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun =
  *
  * Duplicates will be created. It's up to the user to manage their markdown
  * files as they like.
- *
  * @param client An instance of YankiConnect
  * @param note The note to add @returns The ID of the newly created note in Anki
  * @param dryRun If true, the note will not be created and an ID of 0 will be returned
@@ -100,7 +102,7 @@ export async function addNote(
 				// if (error.message === 'cannot create note because it is empty') {
 				// 	return addNote(
 				// 		client,
-				// 		// eslint-disable-next-line @typescript-eslint/naming-convention
+				// 		// eslint-disable-next-line ts/naming-convention
 				// 		{ ...note, fields: { ...note.fields, Front: '<p><em>(Empty)</em></p>' } },
 				// 		dryRun,
 				// 	)
@@ -123,7 +125,6 @@ export async function addNote(
 
 /**
  * Updates a note in Anki.
- *
  * @param client An instance of YankiConnect
  * @param localNote A note read from a markdown file @param remoteNote A note
  * loaded from Anki @returns True if the note was updated, false otherwise.
@@ -208,11 +209,8 @@ export async function updateNote(
 }
 
 /**
- * Helper to compare field contents.
- *
- * @param localFields
- * @param remoteFields
- * @returns
+ * Helper to compare local and remote field contents.
+ * @returns True if the fields are equal, false otherwise.
  */
 function areFieldsEqual(
 	localFields: Record<string, string>,
@@ -274,9 +272,7 @@ export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = tr
 
 /**
  * Helper function to compare two arrays of tags.
- *
- * @param localTags
- * @param remoteTags @returns True if the tags are equal, false otherwise.
+ * @returns True if the tags are equal, false otherwise.
  */
 function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 	if (localTags.length !== remoteTags.length) return false
@@ -290,7 +286,6 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 
 /**
  * Get all notes from Anki that match the model prefix.
- *
  * @param client An instance of YankiConnect
  * @param namespace The value of the YankiNamespace field, or search with '*' to get all notes. Defaults to the global default namespace.
  * @returns An array of YankiNote objects
@@ -315,14 +310,12 @@ export async function getRemoteNotes(
  *
  * Undefined elements in the returned array are subsequently used to identify
  * notes that need to be created.
- *
  * @param client An instance of YankiConnect
- * @param namespace An instance of YankiConnect
  * @param noteIds An array of local note IDs to (attempt) to fetch @returns
  * Array of YankiNote objects, with undefined for notes that could not be found.
  * @throws
  */
-export async function getRemoteNotesById(
+async function getRemoteNotesById(
 	client: YankiConnect,
 	noteIds: number[],
 ): Promise<Array<undefined | YankiNote>> {
@@ -504,10 +497,6 @@ export async function deleteOrphanedDecks(
 
 /**
  * Global! Does not respect namespace. You can write namespace checks into your css if you want.
- * @param client
- * @param modelName
- * @param css
- * @returns
  */
 export async function updateModelStyle(
 	client: YankiConnect,
@@ -562,11 +551,6 @@ export async function updateModelStyle(
 	return true
 }
 
-/**
- * @param client
- * @param modelName
- * @returns css
- */
 export async function getModelStyle(
 	client: YankiConnect,
 	modelName: string = yankiModelNames[0],
@@ -576,10 +560,7 @@ export async function getModelStyle(
 }
 
 /**
- *
- * @param client
- * @param note
- * @param dryRun
+ * Upload all media files for a note to Anki.
  * @returns Original source name of media files uploaded
  */
 async function uploadMediaForNote(
@@ -678,7 +659,7 @@ export async function deleteUnusedMedia(
 }
 
 /**
- * @param client
+ * Request permission to access Anki through Anki-Connect.
  * @returns 'ankiUnreachable' if Anki is not open, or 'granted' if everything is copacetic
  * @throws if access is denied
  */

@@ -17,15 +17,14 @@ import { wikiBasic } from './micromark-extension-wiki-basic'
  *   remark-resolve-links.ts
  * - Parsing of Obsidian-style image size from alias / alt text happens later in
  *   rehype-utilities.ts
- * 
- * 
- * Note that only wiki links support spaces in the src, regular markdown
-				links MUST be URI-encoded in the Markdown source Here, we URI-encode
-				for consistency with the regular image syntax in the resulting HAST
-				`<>` escaped spaces handled correctly already
-
-				Images are also used for audio, and video, and other embeds in Obsidian...
- * 
+ *
+ *
+ * Note that only wiki links support spaces in the src, regular markdown links
+ * MUST be URI-encoded in the Markdown source Here, we URI-encode for
+ * consistency with the regular image syntax in the resulting HAST `<>` escaped
+ * spaces handled correctly
+ *
+ * Images are also used for audio, and video, and other embeds in Obsidian...
  */
 const plugin: Plugin<unknown[], Root> = function (this: Processor) {
 	const data = this.data() as {

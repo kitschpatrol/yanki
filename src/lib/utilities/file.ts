@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import { sha256 } from 'crypto-hash'
 import type { FileAdapter } from '../shared/types'
 import { MEDIA_DEFAULT_HASH_MODE_FILE } from '../shared/constants'
@@ -33,6 +35,7 @@ export async function getFileContentHash(
 			const { mtimeMs, size } = await fileAdapter.stat(absoluteFilePath)
 
 			// Ctime not stable?
+			// eslint-disable-next-line ts/no-unnecessary-condition
 			const stringToHash = `${mtimeMs ?? ''}${size ?? ''}`
 
 			if (stringToHash === '') {

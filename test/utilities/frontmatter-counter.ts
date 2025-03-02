@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import fs from 'node:fs/promises'
 
 export async function countLinesOfFrontmatter(filePath: string) {

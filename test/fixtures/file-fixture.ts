@@ -1,9 +1,3 @@
-/**
- * Provides a test fixture that copies a directory of markdown files to a
- * temporary directory for mutation tests, and manages Yanki Connect clean up, start up, and
- * teardown.
- */
-
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import os from 'node:os'
@@ -29,6 +23,11 @@ type TestContext = {
 	yankiConnect: YankiConnect
 }
 
+/**
+ * Provides a test fixture that copies a directory of markdown files to a
+ * temporary directory for mutation tests, and manages Yanki Connect clean up,
+ * start up, and teardown.
+ */
 export function describeWithFileFixture(
 	description: string,
 	{ assetPath, cleanUpAnki = true, cleanUpTempFiles = true }: FixtureOptions,
@@ -54,7 +53,7 @@ export function describeWithFileFixture(
 			)
 
 			// Copy the asset path to a temp directory
-			// eslint-disable-next-line n/no-unsupported-features/node-builtins
+			// eslint-disable-next-line node/no-unsupported-features/node-builtins
 			await fs.cp(context.assetPath, context.tempAssetPath, {
 				force: true,
 				preserveTimestamps: true,

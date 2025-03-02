@@ -1,3 +1,6 @@
+/* eslint-disable ts/no-unnecessary-condition */
+/* eslint-disable jsdoc/require-jsdoc */
+
 // Helpers for converting MDAST trees to HTML
 
 import type { Root as MdastRoot } from 'mdast'
@@ -65,16 +68,16 @@ const processor = unified()
 	.use(rehypeFormat)
 	.use(rehypeStringify)
 
-export type MdastToHtmlOptions = Simplify<
-	{
+type MdastToHtmlOptions = Simplify<
+	Pick<
+		GlobalOptions,
+		'fetchAdapter' | 'fileAdapter' | 'namespace' | 'strictLineBreaks' | 'syncMediaAssets'
+	> & {
 		/** CSS class names to apply to the output HTML */
 		cssClassNames?: string[]
 		/** Whether to use an empty placeholder if the output is empty */
 		useEmptyPlaceholder?: boolean
-	} & Pick<
-		GlobalOptions,
-		'fetchAdapter' | 'fileAdapter' | 'namespace' | 'strictLineBreaks' | 'syncMediaAssets'
-	>
+	}
 >
 
 const defaultMdastToHtmlOptions: MdastToHtmlOptions = {
@@ -460,7 +463,7 @@ function parseDimensionsFromAltText(alt: string): {
 	const firstAltPart = emptyIsUndefined(altParts.join('|'))
 
 	if (lastAltPart !== undefined) {
-		const { height, width } = parseDimensions(lastAltPart)
+		const { width, height } = parseDimensions(lastAltPart)
 		if (width !== undefined || height !== undefined) {
 			return {
 				alt: firstAltPart,
@@ -483,7 +486,7 @@ function parseDimensions(dimensions: string): {
 } {
 	// Ensure all characters in the string are number or 'x':
 	if (!/^[\dx]+$/.test(dimensions)) {
-		return { height: undefined, width: undefined }
+		return { width: undefined, height: undefined }
 	}
 
 	// Try for a single number first
@@ -491,7 +494,7 @@ function parseDimensions(dimensions: string): {
 		const widthOnly = Number.parseInt(dimensions, 10)
 
 		if (!Number.isNaN(widthOnly)) {
-			return { height: undefined, width: widthOnly }
+			return { width: widthOnly, height: undefined }
 		}
 	}
 
@@ -506,15 +509,15 @@ function parseDimensions(dimensions: string): {
 	const heightIsNan = Number.isNaN(height)
 
 	return {
-		height: heightIsNan || height === undefined ? undefined : height,
 		width: widthIsNan || width === undefined ? undefined : width,
+		height: heightIsNan || height === undefined ? undefined : height,
 	}
 }
 
 /**
  * Determine if a HAST tree is visually empty.
- * @param {Node} tree - The HAST tree to check.
- * @returns {boolean} - True if the tree is visually empty, otherwise false.
+ * @param tree - The HAST tree to check.
+ * @returns - True if the tree is visually empty, otherwise false.
  */
 function isVisuallyEmpty(tree: HastRoot): boolean {
 	let hasVisualContent = false

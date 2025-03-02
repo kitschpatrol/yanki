@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable ts/naming-convention */
 
 import { type YankiParamsForAction } from 'yanki-connect'
 
-export type YankiModel = YankiParamsForAction<'createModel'>
+type YankiModel = YankiParamsForAction<'createModel'>
 
 export const yankiModels = [
 	{

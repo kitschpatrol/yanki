@@ -13,10 +13,10 @@ import { truncateOnWordBoundary } from './string'
 import { getFileExtensionFromUrl, getUrlContentHash, isUrl, safeParseUrl, urlExists } from './url'
 
 /**
- * @param pathOrUrl
+ * Get the extension of a media file, if it's supported
  * @returns Extension without the `.`, possibly an extra string if no extension is found
- * TODO check for how it handles query strings
- * TODO clean up type casting
+ * @todo Check for how it handles query strings
+ * @todo Clean up type casting
  */
 export async function getAnkiMediaFilenameExtension(
 	pathOrUrl: string,
@@ -53,6 +53,7 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 	}
 
 	// Should never happen
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (legibleFilename === undefined) {
 		throw new Error(`Could not create a legible file name for: ${pathOrUrl}`)
 	}
@@ -66,6 +67,9 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 	)
 }
 
+/**
+ * Check if a media asset exists
+ */
 export async function mediaAssetExists(
 	absolutePathOrUrl: string,
 	fileAdapter: FileAdapter,
@@ -78,8 +82,10 @@ export async function mediaAssetExists(
 	return fileExists(absolutePathOrUrl, fileAdapter)
 }
 
-// Anki truncates long file names... so we crush the complete path down to a hash
-
+/**
+ * Get a safe filename for an Anki media asset
+ * Anki truncates long file names... so we crush the complete path down to a hash
+ */
 export async function getSafeAnkiMediaFilename(
 	absolutePathOrUrl: string,
 	namespace: string,
@@ -99,6 +105,7 @@ export async function getSafeAnkiMediaFilename(
 
 	let safeFilename: string | undefined
 
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (MEDIA_INCLUDE_LEGIBLE_FILENAME) {
 		// Make the legible filename as long as possible, add in the dash widths, dot is included in the extension
 		const legibleFilenameLength =

@@ -1,4 +1,6 @@
+/* eslint-disable jsdoc/require-jsdoc */
 /* eslint-disable unicorn/consistent-function-scoping */
+
 import {
 	type Code,
 	type Effects,

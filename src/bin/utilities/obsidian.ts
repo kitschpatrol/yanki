@@ -9,7 +9,7 @@ import untildify from 'untildify'
 import { normalize } from '../../lib/utilities/path'
 import { PLATFORM } from '../../lib/utilities/platform'
 
-export type ObsidianVault = {
+type ObsidianVault = {
 	directory: string
 	id: string
 	name: string

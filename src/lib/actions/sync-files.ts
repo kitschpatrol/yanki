@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 import type { PartialDeep, Simplify } from 'type-fest'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
@@ -43,17 +45,17 @@ export const defaultSyncFilesOptions: SyncFilesOptions = {
 	...defaultSyncNotesOptions,
 }
 
-export type SyncedFile = Simplify<
-	{
+type SyncedFile = Simplify<
+	SyncedNote & {
 		filePath: string | undefined
 		filePathOriginal: string | undefined
-	} & SyncedNote
+	}
 >
 
 export type SyncFilesResult = Simplify<
-	{
+	Omit<SyncNotesResult, 'synced'> & {
 		synced: SyncedFile[]
-	} & Omit<SyncNotesResult, 'synced'>
+	}
 >
 
 /**
@@ -63,7 +65,6 @@ export type SyncFilesResult = Simplify<
  *
  * Most importantly, it updates the note IDs in the frontmatter of the local
  * files.
- *
  * @param allLocalFilePaths Array of paths to the local markdown files
  * @returns The synced files (with new IDs where applicable), plus some stats
  * about the sync @throws
@@ -185,6 +186,7 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 	const { synced } = result
 
 	// Aggregate the counts of each action:
+	// eslint-disable-next-line unicorn/no-array-reduce
 	const actionCounts = synced.reduce<Record<string, number>>((acc, note) => {
 		acc[note.action] = (acc[note.action] || 0) + 1
 		return acc

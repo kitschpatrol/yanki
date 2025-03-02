@@ -4,6 +4,12 @@ import { yankiModels } from '../../src/lib/model/model'
 import { requestPermission } from '../../src/lib/utilities/anki-connect'
 import { PLATFORM } from '../../src/lib/utilities/platform'
 
+/**
+ * Closes Anki by sending a quit command to the application.
+ * This function will wait until Anki is unreachable.
+ *
+ * This function only works on Mac.
+ */
 export async function closeAnki(): Promise<void> {
 	if (PLATFORM !== 'mac') {
 		throw new Error('This function only works on Mac')
@@ -31,7 +37,6 @@ export async function closeAnki(): Promise<void> {
 
 /**
  * For testing purposes only
- * @param client
  */
 export async function loadTestProfile(client: YankiConnect) {
 	// Use test profile
@@ -39,6 +44,7 @@ export async function loadTestProfile(client: YankiConnect) {
 		name: 'yanki-tests',
 	})
 
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (!loadProfileResult) {
 		throw new Error('Could not load test profile')
 	}
@@ -46,8 +52,6 @@ export async function loadTestProfile(client: YankiConnect) {
 
 /**
  * For testing purposes only
- * @param client
- * @returns
  */
 export async function createModels(client: YankiConnect) {
 	for (const model of yankiModels) {

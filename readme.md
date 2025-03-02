@@ -133,7 +133,7 @@ Yanki keeps track the notes it's in charge of with a hidden field in the Anki no
 
 An extended palette of markdown syntax is available out of the box:
 
-- Most [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-throughs~~`, `- [x] task lists`, and autolinks.
+- Most [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-through~~`, `- [x] task lists`, and auto-links.
 - Syntax highlighting via [Shiki](https://shiki.style).
 - GitHub-style [Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
 - [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md)
@@ -628,7 +628,7 @@ Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm
 - Ben Weinstein-Raun's [ankidown](https://github.com/ankicommunity/ankidown/)
 - Alex Biosa's [Markdown2Anki](https://github.com/Mochitto/Markdown2Anki)
 - Pradhyo Bijja's [anki-markdown-notes](https://github.com/Pradhyo/anki-markdown-notes)
-- langfield's [ki](https://langfield.github.io/ki/)
+- Langfield's [ki](https://langfield.github.io/ki/)
 
 ## Known issues
 

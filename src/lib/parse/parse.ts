@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-jsdoc */
+
 /**
  * Turns a markdown string into a YankiNote object.
  */
@@ -25,10 +27,7 @@ import {
 	splitTreeAtThematicBreak,
 } from './remark-utilities'
 
-export type GetNoteFromMarkdownOptions = {
-	/** Needed for the public API, but optional for more efficient use internally when the namespace is already validated. */
-	namespaceValidationAndSanitization: boolean
-} & Pick<
+export type GetNoteFromMarkdownOptions = Pick<
 	GlobalOptions,
 	| 'allFilePaths'
 	| 'basePath'
@@ -40,7 +39,10 @@ export type GetNoteFromMarkdownOptions = {
 	| 'resolveUrls' // For testing only
 	| 'strictLineBreaks'
 	| 'syncMediaAssets'
->
+> & {
+	/** Needed for the public API, but optional for more efficient use internally when the namespace is already validated. */
+	namespaceValidationAndSanitization: boolean
+}
 
 export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
 	namespaceValidationAndSanitization: true,
@@ -182,7 +184,6 @@ export async function getNoteFromMarkdown(
 					'front',
 					`model-${modelName}`,
 				],
-
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
@@ -199,7 +200,6 @@ export async function getNoteFromMarkdown(
 					'back',
 					`model-${modelName}`,
 				],
-
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
@@ -222,7 +222,6 @@ export async function getNoteFromMarkdown(
 					'front',
 					`model-${modelName}`,
 				],
-
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
@@ -237,7 +236,6 @@ export async function getNoteFromMarkdown(
 					'back',
 					`model-${modelName}`,
 				],
-
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,

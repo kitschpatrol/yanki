@@ -4,7 +4,7 @@ import { visit } from 'unist-util-visit'
 import { resolveLink } from '../utilities/resolve-link'
 import { isUrl } from '../utilities/url'
 
-export type Options = {
+type Options = {
 	allFilePaths?: string[]
 	basePath?: string
 	cwd: string
@@ -25,6 +25,7 @@ const plugin: Plugin<[Options], Root> = function (options) {
 			// The hProperties object makes it into the final html
 			node.data ??= {}
 			node.data.hProperties = {
+				// eslint-disable-next-line ts/no-unnecessary-condition
 				...node.data?.hProperties,
 				'data-yanki-src-original': node.url,
 			}
@@ -48,6 +49,7 @@ const plugin: Plugin<[Options], Root> = function (options) {
 			// The hProperties object makes it into the final html
 			node.data ??= {}
 			node.data.hProperties = {
+				// eslint-disable-next-line ts/no-unnecessary-condition
 				...node.data?.hProperties,
 				'data-yanki-src-original': node.url,
 			}

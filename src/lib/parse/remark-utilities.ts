@@ -1,3 +1,6 @@
+/* eslint-disable ts/no-unnecessary-condition */
+/* eslint-disable jsdoc/require-jsdoc */
+
 // Helpers for working with the Markdown AST
 
 import type { Emphasis, Node, Parent, PhrasingContent, Root, Text } from 'mdast'
@@ -19,12 +22,12 @@ import { defaultGlobalOptions, type GlobalOptions } from '../shared/types'
 import remarkResolveLinks from './remark-resolve-links'
 import remarkWikiBasic from './wiki-basic/remark-wiki-basic'
 
-export type AstFromMarkdownOptions = Pick<
+type AstFromMarkdownOptions = Pick<
 	GlobalOptions,
 	'allFilePaths' | 'basePath' | 'cwd' | 'obsidianVault' | 'resolveUrls'
 >
 
-export const defaultAstFromMarkdownOptions: AstFromMarkdownOptions = {
+const defaultAstFromMarkdownOptions: AstFromMarkdownOptions = {
 	...defaultGlobalOptions,
 }
 
@@ -80,13 +83,13 @@ function isText(node: Node): node is Text {
 }
 
 // Function to extract text from the first phrasing content node
-export function extractTextFromNode(node: Parent): string | undefined {
-	if (node.children.length > 0 && isText(node.children[0])) {
-		return node.children[0].value
-	}
+// function extractTextFromNode(node: Parent): string | undefined {
+// 	if (node.children.length > 0 && isText(node.children[0])) {
+// 		return node.children[0].value
+// 	}
 
-	return undefined
-}
+// 	return undefined
+// }
 
 export function deleteFirstNodeOfType(tree: Root, nodeType: string): Root {
 	visit(tree, nodeType, (_, index, parent) => {
@@ -105,9 +108,8 @@ export function deleteFirstNodeOfType(tree: Root, nodeType: string): Root {
  *
  * This is useful in cases where surrounding white space in text nodes is not
  * necessary and should be removed to clean up the content.
- *
- * @param {PhrasingContent[]} nodes - An array of phrasing content nodes.
- * @returns {PhrasingContent[]} The modified array of nodes with leading and trailing spaces trimmed.
+ * @param nodes - An array of phrasing content nodes.
+ * @returns The modified array of nodes with leading and trailing spaces trimmed.
  */
 function trimLeadingAndTrailingSpaces(nodes: PhrasingContent[]): PhrasingContent[] {
 	// Trim leading spaces from the first text node
@@ -149,7 +151,7 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 		// cloze number
 		if (node.children.length > 0 && isText(node.children[0])) {
 			// Detect a bunch of number variations at the start of the cloze
-			const result = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/g.exec(node.children[0].value)
+			const result = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/.exec(node.children[0].value)
 
 			if (result !== null) {
 				const possibleClozeIndex = Number.parseInt(result.at(1) ?? '', 10)
@@ -192,42 +194,42 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 }
 
 // For Basic (type in the answer) notes
-export function splitTreeAtEmphasis(tree: Root): [Root, string] {
-	let splitIndex: number | undefined
-	let typeInText: string | undefined
+// export function splitTreeAtEmphasis(tree: Root): [Root, string] {
+// 	let splitIndex: number | undefined
+// 	let typeInText: string | undefined
 
-	// Find the index of the last thematicBreak node
-	visit(tree, 'emphasis', (node, index, parent) => {
-		if (index === undefined || parent === undefined || !('children' in parent)) {
-			return CONTINUE
-		}
+// 	// Find the index of the last thematicBreak node
+// 	visit(tree, 'emphasis', (node, index, parent) => {
+// 		if (index === undefined || parent === undefined || !('children' in parent)) {
+// 			return CONTINUE
+// 		}
 
-		// Get index of parent
-		// TODO type issue
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-		const parentIndex = parent.children.indexOf(node as unknown as any)
+// 		// Get index of parent
+// 		// TODO type issue
+// 		// eslint-disable-next-line ts/no-unsafe-argument, ts/no-explicit-any
+// 		const parentIndex = parent.children.indexOf(node as unknown as any)
 
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-		typeInText = extractTextFromNode(node as unknown as any)
-		splitIndex = parentIndex
-	})
+// 		// eslint-disable-next-line ts/no-unsafe-argument, ts/no-explicit-any
+// 		typeInText = extractTextFromNode(node as unknown as any)
+// 		splitIndex = parentIndex
+// 	})
 
-	if (splitIndex === undefined) {
-		throw new Error('Could not find emphasis in Basic (type in the answer) note AST.')
-	}
+// 	if (splitIndex === undefined) {
+// 		throw new Error('Could not find emphasis in Basic (type in the answer) note AST.')
+// 	}
 
-	if (typeInText === undefined) {
-		throw new Error('Could not find answer in Basic (type in the answer) note AST.')
-	}
+// 	if (typeInText === undefined) {
+// 		throw new Error('Could not find answer in Basic (type in the answer) note AST.')
+// 	}
 
-	// Split the tree at the found index
-	const firstPart: Root = {
-		children: tree.children.slice(0, splitIndex - 1),
-		type: 'root',
-	}
+// 	// Split the tree at the found index
+// 	const firstPart: Root = {
+// 		children: tree.children.slice(0, splitIndex - 1),
+// 		type: 'root',
+// 	}
 
-	return [firstPart, typeInText]
-}
+// 	return [firstPart, typeInText]
+// }
 
 // For Basic and Basic (and reversed card) notes
 export function splitTreeAtThematicBreak(tree: Root): [Root, Root | undefined] {
