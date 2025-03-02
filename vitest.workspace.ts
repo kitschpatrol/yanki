@@ -37,7 +37,7 @@ export default defineWorkspace([
 				enabled: true,
 				fileParallelism: false,
 				headless: true,
-				name: 'chromium',
+				instances: [{ browser: 'chromium' }],
 				provider: 'playwright',
 			},
 			exclude: ['test/**/*.node.test.ts'],
