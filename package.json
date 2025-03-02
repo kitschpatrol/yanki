@@ -57,7 +57,7 @@
 		"@types/unist": "^3.0.3",
 		"@types/yargs": "^17.0.33",
 		"chalk": "^5.4.1",
-		"entities": "^6.0.0",
+		"entities": "4.5.0",
 		"globby": "^14.0.2",
 		"rehype-parse": "^9.0.1",
 		"yargs": "^17.7.2"
