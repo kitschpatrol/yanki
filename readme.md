@@ -597,7 +597,7 @@ For example, the front of a basic card would look like:
 
 ### Browser environments
 
-The Yanki TypeScript / JavaScript library is idempotent, so you can run it in a browser you'd like.
+The Yanki TypeScript / JavaScript library is isomorphic, so you can run it in a browser you'd like.
 
 There's one exception, the `syncFiles(...)` function, which by default relies on file system access to work.
 
