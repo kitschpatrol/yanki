@@ -16,7 +16,7 @@
 	"bugs": "https://github.com/kitschpatrol/yanki/issues",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/kitschpatrol/yanki"
+		"url": "git+https://github.com/kitschpatrol/yanki.git"
 	},
 	"license": "MIT",
 	"author": {
@@ -53,7 +53,7 @@
 		"@types/hast": "^3.0.4",
 		"@types/lodash-es": "^4.17.12",
 		"@types/mdast": "^4.0.4",
-		"@types/node": "18.19.0",
+		"@types/node": "^18.19.79",
 		"@types/unist": "^3.0.3",
 		"@types/yargs": "^17.0.33",
 		"chalk": "^5.4.1",
@@ -63,7 +63,7 @@
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^5.0.6",
+		"@kitschpatrol/shared-config": "^5.2.0",
 		"@shikijs/rehype": "^3.1.0",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^2.2.1",
@@ -113,12 +113,11 @@
 		"vite": "^6.2.0",
 		"vitest": "^3.0.7",
 		"yaml": "^2.7.0",
-		"yanki-connect": "^2.1.11"
+		"yanki-connect": "^2.1.12"
 	},
 	"packageManager": "pnpm@10.5.2",
 	"engines": {
-		"node": "^18.19.0 || >=20.11.0",
-		"pnpm": ">=10.0.0"
+		"node": "^18.15.0 || >=20.11.0"
 	},
 	"publishConfig": {
 		"access": "public"

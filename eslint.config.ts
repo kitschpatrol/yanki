@@ -21,9 +21,6 @@ export default eslintConfig({
 					allowed: ['execa', 'strip-ansi', 'globby'],
 				},
 			],
-			// Knip workaround...
-			// https://github.com/webpro-nl/knip/issues/158#issuecomment-1632648598
-			'jsdoc/check-tag-names': ['error', { definedTags: ['public'] }],
 			'ts/naming-convention': [
 				'error',
 				{
@@ -38,10 +35,3 @@ export default eslintConfig({
 	},
 	type: 'lib',
 })
-
-// {
-// 	files: ['./src/cli/**/*'],
-// 	rules: {
-// 		'n/shebang': 'off',
-// 	},
-// },
