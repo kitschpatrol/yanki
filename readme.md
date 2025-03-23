@@ -65,7 +65,7 @@ The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Ank
 
 Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 18.19.0+, 20.5.0+, or newer.)
 
-Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on installed:
+Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on installed:
 
 ```sh
 npx yanki ./folder-of-markdown
@@ -109,13 +109,13 @@ The structural cues for all four supported note types are described [later in th
 
 ### Tags in frontmatter
 
-Optionally, you can add a `tags` array to your Markdown file's frontmatter and have it automatically synchronized to the Anki database. Frontmatter is also used to store the Anki note's ID after an initial synchronization.
+Optionally, you can add a `tags` array to your Markdown file's frontmatter and have them automatically synchronized to the Anki database. Frontmatter is also used to store the Anki note's ID after an initial synchronization.
 
 Nested tags are supported, and you may use `/` in addition to `::` as a delimiter in the Markdown frontmatter for compatibility with tools like Obsidian.
 
 ### Intelligent synchronization
 
-Your local Markdown files are the single point of truth for what will and up in Anki, but Yanki knows to leave your other Anki notes alone.
+Your local Markdown files are the single point of truth for what will end up in Anki, but Yanki knows to leave your other Anki notes alone.
 
 When you edit a local markdown note, Yanki makes every effort to update rather than recreate it in the Anki database so that progress is preserved.
 
@@ -127,7 +127,7 @@ If you accidentally delete the frontmatter with the associated Anki `noteId` in 
 
 ### Existing notes are untouched
 
-Yanki keeps track the notes it's in charge of with a hidden field in the Anki note model, so it will never touch your existing Anki notes. (_But please exercise caution until the 1.0.0 release..._)
+Yanki keeps track the notes it manages with a hidden field in the Anki note model, so it will never touch your existing Anki notes. (_But please exercise caution until the 1.0.0 release..._)
 
 ### Fancy markdown
 
@@ -292,7 +292,7 @@ The tool has been tested on Windows, macOS, and Linux.
 #### Prerequisites:
 
 - The [Anki desktop app](https://apps.ankiweb.net)
-- The [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on
+- The [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on
 
   If you need to install it, select _Tools → Add-ons_ from the menu, click _Get Add-ons..._, and then enter the code `2055492159` in the field to get Anki-Connect.
 
@@ -330,11 +330,11 @@ npm install --save-dev yanki
 
 Create a folder of Markdown files that you'd like to use as Anki notes. (See the [section on Markdown notes](#markdown-note-types) for details on how to structure your document to create different card types in Anki.)
 
-Launch the Anki desktop app. Ensure that the [Anki-Connect](https://foosoft.net/projects/anki-connect/) add-on is installed and set up.
+Launch the Anki desktop app. Ensure that the [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on is installed and set up.
 
 #### Create
 
-Pass the path to a folder of Markdown notes to turn them into Anki notes and send them to the Anki database:
+Pass the path to a folder of Markdown notes to turn into Anki notes and send to the Anki database:
 
 ```sh
 yanki ./your-deck-folder
@@ -556,7 +556,7 @@ Yanki will put the cards in eponymous decks, so you'll still have a clean separa
 
 By default, Yanki will automatically copy local image, media, and audio media linked in your notes' markdown to Anki's media storage system. With an option, it can do the same for remote assets.
 
-Note that there Anki's underlying implementation requires media assets to be less than 100 MB in size. There are also internal limits around filename length, but Yanki manages the filename for you internally, so this is not a concern.
+Note that Anki's underlying implementation requires media assets to be less than 100 MB in size. There are also internal limits around filename length, but Yanki manages the filename for you internally, so this is not a concern.
 
 Support file formats / codecs is a bit nuanced, and some variations have been observed between what is officially supported according to the Anki source code and what actually works in practice on different platforms.
 
@@ -613,7 +613,7 @@ The rest of the library should work fine in both contexts without special measur
 
 The excellent [unified](https://unifiedjs.com) / [remark](https://remark.js.org) / [rehype](https://github.com/rehypejs/rehype) libraries are used extensively to traverse and render the underlying Markdown ASTs.
 
-[Anki-Connect](https://foosoft.net/projects/anki-connect/) provides access to Anki's database.
+[Anki-Connect](https://ankiweb.net/shared/info/2055492159) provides access to Anki's database.
 
 For type safety, access to Anki-Connect is managed through my wrapper library, [yanki-connect](https://github.com/kitschpatrol/yanki-connect).
 
@@ -651,7 +651,7 @@ Possible features on the horizon:
 
 ## Acknowledgments
 
-Thanks to Alex Yatskov for creating [Anki-Connect](https://foosoft.net/projects/anki-connect/).
+Thanks to Alex Yatskov for creating [Anki-Connect](https://ankiweb.net/shared/info/2055492159).
 
 Thanks to the [unified team](https://github.com/orgs/unifiedjs/people) for their superb ecosystem of AST tools.
 
