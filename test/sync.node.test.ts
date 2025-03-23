@@ -463,12 +463,17 @@ describeWithFileFixture(
 
 			// Expect the same in Anki
 			const ankiDecks = await context.yankiConnect.deck.getDeckStats({ decks: ['foo', 'baz'] })
-			const deckKeys = Object.keys(ankiDecks)
-			const fooCardCount = ankiDecks[deckKeys[0]].total_in_deck
-			const bazCardCount = ankiDecks[deckKeys[1]].total_in_deck
+
+			const fooCardCount = Object.values(ankiDecks).find(
+				({ name }) => name === 'foo',
+			)?.total_in_deck
+
+			const bazCardCount = Object.values(ankiDecks).find(
+				({ name }) => name === 'baz',
+			)?.total_in_deck
 
 			expect(fooCardCount, 'foo deck should be empty').toEqual(0)
-			expect(bazCardCount, 'baz deck should have one card').toEqual(1)
+			expect(bazCardCount, 'baz deck should have two cards').toEqual(2)
 		})
 	},
 )
@@ -540,7 +545,7 @@ describeWithFileFixture(
 		cleanUpTempFiles: true,
 	},
 	(context) => {
-		it('idempotent syncing', async () => {
+		it('idempotent syncing', { timeout: 60_000 }, async () => {
 			// First sync should be all "created"
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {

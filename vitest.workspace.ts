@@ -44,6 +44,11 @@ export default defineWorkspace([
 			include: ['test/**/*.test.ts'],
 			maxConcurrency: 1,
 			name: 'browser',
+			poolOptions: {
+				forks: {
+					singleFork: true,
+				},
+			},
 		},
 	},
 	{
@@ -54,6 +59,11 @@ export default defineWorkspace([
 			include: ['test/**/*.test.ts'],
 			maxConcurrency: 1,
 			name: 'node',
+			poolOptions: {
+				forks: {
+					singleFork: true,
+				},
+			},
 			root: path.resolve(path.dirname(fileURLToPath(import.meta.url))),
 		},
 	},

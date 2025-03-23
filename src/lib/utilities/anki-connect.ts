@@ -147,6 +147,21 @@ export async function updateNote(
 
 	let updated = false
 
+	// Check if decks are different
+	// Doing this first fixes https://github.com/kitschpatrol/yanki-obsidian/issues/34
+	if (localNote.deckName !== remoteNote.deckName) {
+		if (localNote.deckName === '') {
+			throw new Error('Local deck name is empty')
+		}
+
+		if (!dryRun) {
+			// Remember that the local remoteNote object's deck name is not updated...
+			await client.deck.changeDeck({ cards: remoteNote.cards, deck: localNote.deckName })
+		}
+
+		updated = true
+	}
+
 	if (
 		!areTagsEqual(localNote.tags ?? [], remoteNote.tags ?? []) ||
 		!areFieldsEqual(localNote.fields, remoteNote.fields) ||
@@ -157,6 +172,7 @@ export async function updateNote(
 			// - fields
 			// - tags
 			// - assigned model
+
 			await client.note
 				.updateNoteModel({
 					note: { ...localNote, id: localNote.noteId, tags: localNote.tags ?? [] },
@@ -187,19 +203,6 @@ export async function updateNote(
 			if (!areMediaElementsEqual(localNote.fields, remoteNote.fields)) {
 				await uploadMediaForNote(client, localNote, dryRun)
 			}
-		}
-
-		updated = true
-	}
-
-	// Check if decks are different
-	if (localNote.deckName !== remoteNote.deckName) {
-		if (localNote.deckName === '') {
-			throw new Error('Local deck name is empty')
-		}
-
-		if (!dryRun) {
-			await client.deck.changeDeck({ cards: remoteNote.cards, deck: localNote.deckName })
 		}
 
 		updated = true
