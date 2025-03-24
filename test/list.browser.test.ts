@@ -10,7 +10,7 @@ import { listNotes, syncNotes, type YankiNote } from '../src/lib'
 // 	return fetch(url, options)
 // }
 
-it('lists notes', async () => {
+it('lists notes', { only: true }, async () => {
 	// Mock data
 	const namespace = 'Yanki Test - list.browser.test'
 	const testNote: YankiNote = {
