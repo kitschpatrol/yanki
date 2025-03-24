@@ -78,8 +78,8 @@ export function wikiBasicFromMarkdown(): Extension {
 			{
 				type: 'text',
 				value:
-					// Obsidian strips backslashes and pipes from link aliases, so we will too
-					emptyIsUndefined((label ?? '').replaceAll('\\', '').replaceAll('|', '')) ??
+					// Obsidian strips pipes from link labels / aliases, so we will too
+					emptyIsUndefined((label ?? '').replaceAll('|', '')) ??
 					url.split('#').pop() ??
 					url.split('/').pop() ??
 					url,

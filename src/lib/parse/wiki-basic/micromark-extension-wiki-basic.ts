@@ -10,18 +10,6 @@ import {
 	type TokenTypeMap,
 } from 'micromark-util-types'
 
-// Declare module 'micromark-util-types' {
-// 	type TokenTypeMap = {
-// 		wikiEmbed: 'wikiEmbed'
-// 		wikiLabel: 'wikiLabel'
-// 		wikiLink: 'wikiLink'
-// 		wikiUrl: 'wikiUrl'
-// 	}
-// }
-
-// Do i need?
-// https://www.npmjs.com/package/micromark-util-resolve-all
-
 // Extension name
 export function wikiBasic(): Extension {
 	return {
@@ -77,77 +65,121 @@ export function wikiBasic(): Extension {
 			if (code === 91) {
 				effects.consume(code)
 				effects.exit('wikiMarker' as keyof TokenTypeMap)
-				return inside
+				return startUrl
 			}
 
 			return nok(code)
 		}
 
-		function inside(code: Code): State | undefined {
-			// Check for escape '\'
-			if (code === 92) {
-				effects.consume(code)
-				return insideEscape
-			}
-
-			// Check for ']'
-			if (code === 93) {
-				return lookaheadClosingMarker(code)
-			}
-
-			// Check for invalid
+		function startUrl(code: Code): State | undefined {
+			// Check for invalid characters immediately
 			if (code === -5 || code === -4 || code === -3 || code === null) {
 				return nok(code)
 			}
 
-			// Check for '|' label divider
-			if (code === 124 && !inLabel) {
-				if (linkLength > 0) {
-					effects.exit('chunkString')
-					effects.exit('wikiUrl' as keyof TokenTypeMap)
-				}
-
-				inLabel = true
-				effects.enter('wikiLabelMarker' as keyof TokenTypeMap)
-				effects.consume(code)
-				effects.exit('wikiLabelMarker' as keyof TokenTypeMap)
-				return inside
+			// Check for pipe character which would be invalid at start
+			if (code === 124) {
+				return nok(code)
 			}
 
-			// Normal character
-			// Use great care to avoid creating empty tokens
-			if (!inLabel) {
-				// First character in URL, start tokens
-				if (linkLength === 0) {
-					effects.enter('wikiUrl' as keyof TokenTypeMap)
-					effects.enter('chunkString', { contentType: 'string' })
-				}
-
-				linkLength++
+			// Check for closing marker which would create empty link
+			if (code === 93) {
+				return nok(code)
 			}
 
-			if (inLabel) {
-				// First character in label, start token
-				if (labelLength === 0) {
-					effects.enter('wikiLabel' as keyof TokenTypeMap)
-					effects.enter('chunkString', { contentType: 'string' })
-				}
+			// Start URL token
+			effects.enter('wikiUrl' as keyof TokenTypeMap)
+			effects.enter('chunkString', { contentType: 'string' })
 
-				labelLength++
-			}
-
+			// Consume first character
 			effects.consume(code)
-			return inside
+			linkLength++
+
+			return insideUrl
 		}
 
-		function insideEscape(code: Code): State | undefined {
-			// '|'
-			if (code === 124) {
-				effects.consume(code)
-				return inside
+		function insideUrl(code: Code): State | undefined {
+			// Check for invalid characters
+			if (code === -5 || code === -4 || code === -3 || code === null) {
+				return nok(code)
 			}
 
-			return inside(code)
+			// Direct pipe transitions to label
+			if (code === 124) {
+				// Special case if there's no link at this point,
+				// e.g. [[\|]]
+				if (linkLength === 1) {
+					return nok(code)
+				}
+
+				return transitionToLabel(code)
+			}
+
+			// Backslash - look ahead to check if followed by pipe
+			if (code === 92) {
+				return effects.check(
+					{ partial: true, tokenize: backslashPipeLookahead },
+					// If it's \|, transition to label
+					transitionToLabel,
+					// Otherwise treat backslash as a normal character
+					normalUrlChar,
+				)(code)
+			}
+
+			// Check for closing marker
+			if (code === 93) {
+				return lookaheadClosingMarker(code)
+			}
+
+			// Normal character in URL
+			return normalUrlChar(code)
+		}
+
+		function normalUrlChar(code: Code): State | undefined {
+			// Normal character in URL
+			effects.consume(code)
+			linkLength++
+			return insideUrl
+		}
+
+		function startLabel(code: Code): State | undefined {
+			// Check for invalid characters immediately
+			if (code === -5 || code === -4 || code === -3 || code === null) {
+				return nok(code)
+			}
+
+			// Check for closing marker which would create empty label
+			if (code === 93) {
+				return lookaheadClosingMarker(code)
+			}
+
+			// Start label token
+			effects.enter('wikiLabel' as keyof TokenTypeMap)
+			effects.enter('chunkString', { contentType: 'string' })
+
+			// Consume first character
+			effects.consume(code)
+			labelLength++
+
+			return insideLabel
+		}
+
+		function insideLabel(code: Code): State | undefined {
+			// Check for invalid characters
+			if (code === -5 || code === -4 || code === -3 || code === null) {
+				return nok(code)
+			}
+
+			// Check for closing marker
+			if (code === 93) {
+				return lookaheadClosingMarker(code)
+			}
+
+			// Backslash is just a normal character in label (not an escape)
+			// Every character in label is treated normally
+			effects.consume(code)
+			labelLength++
+			return insideLabel
 		}
 
 		/**
@@ -164,7 +196,7 @@ export function wikiBasic(): Extension {
 
 			// Lookahead
 			return effects.check(
-				// Check if the next two characters are `]]`
+				// Check if the next character is also a `]`
 				{ partial: true, tokenize: closingMarkerLookahead },
 				// End
 				firstClosingMarker,
@@ -177,14 +209,17 @@ export function wikiBasic(): Extension {
 			// Invalid
 			// ']'
 			if (code !== 93) {
-				console.warn('Invalid use of firstClosingMarker')
 				return nok(code)
 			}
 
-			if (inLabel && labelLength > 0) {
-				effects.exit('chunkString')
-				effects.exit('wikiLabel' as keyof TokenTypeMap)
-			} else if (!inLabel && linkLength > 0) {
+			// Close any open string tokens
+			if (inLabel) {
+				// Only exit string and label tokens if we actually entered them
+				if (labelLength > 0) {
+					effects.exit('chunkString')
+					effects.exit('wikiLabel' as keyof TokenTypeMap)
+				}
+			} else if (linkLength > 0) {
 				effects.exit('chunkString')
 				effects.exit('wikiUrl' as keyof TokenTypeMap)
 			}
@@ -198,17 +233,15 @@ export function wikiBasic(): Extension {
 			// Invalid
 			// ']'
 			if (code !== 93) {
-				console.warn('Invalid use of secondClosingMarker')
 				return nok(code)
 			}
 
-			// Empty
+			// Empty link is invalid
 			if (linkLength === 0) {
 				return nok(code)
 			}
 
 			effects.consume(code)
-
 			effects.exit('wikiMarker' as keyof TokenTypeMap)
 
 			if (isEmbed) {
@@ -224,15 +257,24 @@ export function wikiBasic(): Extension {
 			// Invalid
 			// ']'
 			if (code !== 93) {
-				console.warn('Invalid use of consumeMarker')
 				return nok(code)
 			}
 
+			// Consume as regular character
 			effects.consume(code)
-			return inside
+
+			// If we're in a label, add to label length
+			if (inLabel) {
+				labelLength++
+				return insideLabel
+			}
+
+			// Otherwise add to link length
+			linkLength++
+			return insideUrl
 		}
 
-		/** If the next two characters are `]]`, run `ok`, else `nok`. */
+		/** If the next character is also `]`, run `ok`, else `nok`. */
 		function closingMarkerLookahead(effects: Effects, ok: State, nok: State): State {
 			return start
 
@@ -245,20 +287,97 @@ export function wikiBasic(): Extension {
 				effects.enter('wikiMarkerTemp' as keyof TokenTypeMap)
 				effects.consume(code)
 				effects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
-				return lookaheadAt
+				return ok(code)
 			}
+		}
 
-			function lookaheadAt(code: Code) {
-				// ']'
-				if (code !== 93) {
+		/** Check if backslash is followed by pipe. */
+		function backslashPipeLookahead(effects: Effects, ok: State, nok: State): State {
+			return start
+
+			function start(code: Code) {
+				// Backslash (should already be consumed in the temp token)
+				if (code !== 92) {
 					return nok(code)
 				}
 
 				effects.enter('wikiMarkerTemp' as keyof TokenTypeMap)
 				effects.consume(code)
-				effects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
-				return ok(code)
+				return checkNext
 			}
+
+			function checkNext(code: Code) {
+				// '|' after backslash
+				if (code === 124) {
+					effects.consume(code)
+					effects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
+					return ok(code)
+				}
+
+				// Not a pipe after backslash
+				effects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
+				return nok(code)
+			}
+		}
+
+		function transitionToLabel(code: Code): State | undefined {
+			// Exit current tokens for URL
+			effects.exit('chunkString')
+			effects.exit('wikiUrl' as keyof TokenTypeMap)
+
+			// Enter marker token
+			effects.enter('wikiMarker' as keyof TokenTypeMap)
+
+			// Consume the character (pipe or backslash)
+			effects.consume(code)
+
+			// If it's a backslash, we need to continue with consuming the pipe
+			if (code === 92) {
+				return consumePipeAfterBackslash
+			}
+
+			// Otherwise finish the marker
+			effects.exit('wikiMarker' as keyof TokenTypeMap)
+			inLabel = true
+
+			// Look ahead to check if the next character is a closing bracket
+			return effects.check(
+				{ partial: true, tokenize: closingBracketLookahead },
+				// If it's an immediate closing bracket, skip entering the label tokens
+				lookaheadClosingMarker,
+				// Otherwise enter label as normal
+				startLabel,
+			)(code)
+		}
+
+		/** Check if next character is a closing bracket. */
+		function closingBracketLookahead(effects: Effects, ok: State, nok: State): State {
+			return start
+
+			function start(code: Code) {
+				// ']'
+				if (code === 93) {
+					effects.enter('wikiMarkerTemp' as keyof TokenTypeMap)
+					effects.consume(code)
+					effects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
+					return ok(code)
+				}
+
+				return nok(code)
+			}
+		}
+
+		function consumePipeAfterBackslash(code: Code): State | undefined {
+			// Must be a pipe
+			if (code !== 124) {
+				return nok(code)
+			}
+
+			// Consume the pipe
+			effects.consume(code)
+			effects.exit('wikiMarker' as keyof TokenTypeMap)
+			inLabel = true
+			return startLabel
 		}
 	}
 }
