@@ -150,10 +150,16 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 		// If the first node is a text node with a number in it, we treat it as the
 		// cloze number
 		if (node.children.length > 0 && isText(node.children[0])) {
-			// Detect a bunch of number variations at the start of the cloze
+			// Detect a bunch of number variations at the start of the cloze...
+			// But there must be extra content after the number, otherwise
+			// the leading number _is_ the cloze
 			const result = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/.exec(node.children[0].value)
 
-			if (result !== null) {
+			if (
+				result !== null &&
+				// Edge case if cloze is just a number with no extra content
+				(node.children.length > 1 || (result.at(2) ?? '').length > 0)
+			) {
 				const possibleClozeIndex = Number.parseInt(result.at(1) ?? '', 10)
 
 				if (!Number.isNaN(possibleClozeIndex)) {
