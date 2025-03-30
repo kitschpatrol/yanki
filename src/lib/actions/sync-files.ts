@@ -149,7 +149,9 @@ export async function syncFiles(
 				liveNote.note.noteId,
 			)
 
-			await fileAdapter.writeFile(loadedAndRenamedNote.filePath, updatedMarkdown)
+			if (!dryRun) {
+				await fileAdapter.writeFile(loadedAndRenamedNote.filePath, updatedMarkdown)
+			}
 		}
 
 		// Set file paths

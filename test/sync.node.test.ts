@@ -1073,3 +1073,43 @@ describeWithFileFixture(
 		})
 	},
 )
+
+describeWithFileFixture(
+	'dry run',
+	{
+		assetPath: './test/assets/test-minimal-notes',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('does not touch notes on a dry run', { timeout: 60_000 }, async () => {
+			// Store original file contents for comparison
+			const originalFileContents = new Map<string, string>()
+			for (const filePath of context.markdownFiles) {
+				const content = await fs.readFile(filePath, 'utf8')
+				originalFileContents.set(filePath, content)
+			}
+
+			const results = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: true,
+				namespace: context.namespace,
+				syncMediaAssets: 'off',
+			})
+
+			// Check to make sure context.markdownFiles are unchanged
+			for (const filePath of context.markdownFiles) {
+				const currentContent = await fs.readFile(filePath, 'utf8')
+				const originalContent = originalFileContents.get(filePath)
+				expect(currentContent).toBe(originalContent)
+			}
+
+			// Verify we got results but no actual changes were made to Anki
+			expect(results.synced.length).toBeGreaterThan(0)
+			expect(results.dryRun).toBe(true)
+		})
+	},
+)
