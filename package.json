@@ -1,6 +1,6 @@
 {
 	"name": "yanki",
-	"version": "0.18.8",
+	"version": "0.18.9",
 	"description": "A CLI tool and TypeScript library for syncing Markdown to Anki flashcards.",
 	"keywords": [
 		"anki",
