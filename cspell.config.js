@@ -16,6 +16,7 @@ export default cspellConfig({
 		'fislysandi',
 		'ftest',
 		'furigana',
+		'ISOGE',
 		'jīng',
 		'Langfield',
 		'linkpath',

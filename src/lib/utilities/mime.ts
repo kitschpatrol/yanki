@@ -1,4 +1,4 @@
-import { type MediaSupportedExtension } from '../shared/constants'
+import type { MediaSupportedExtension } from '../shared/constants'
 
 /**
  * Only supports MIMEs for valid Anki media types.

@@ -1,5 +1,5 @@
-import { type Root } from 'hast'
-import { type Plugin } from 'unified'
+import type { Root } from 'hast'
+import type { Plugin } from 'unified'
 import { CONTINUE, visit } from 'unist-util-visit'
 
 /**

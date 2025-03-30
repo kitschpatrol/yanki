@@ -1,15 +1,12 @@
 /* eslint-disable ts/no-unnecessary-condition */
 /* eslint-disable jsdoc/require-jsdoc */
 
-import { type YankiConnect } from 'yanki-connect'
-import {
-	legacyYankiModelNames,
-	type YankiModelName,
-	yankiModelNames,
-	yankiModels,
-} from '../model/model'
-import { type YankiNote } from '../model/note'
-import { extractMediaFromHtml, type Media } from '../parse/rehype-utilities'
+import type { YankiConnect } from 'yanki-connect'
+import type { YankiModelName } from '../model/model'
+import type { YankiNote } from '../model/note'
+import type { Media } from '../parse/rehype-utilities'
+import { legacyYankiModelNames, yankiModelNames, yankiModels } from '../model/model'
+import { extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
 import { getSlugifiedNamespace } from './namespace'
 import { isUrl } from './url'

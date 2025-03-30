@@ -3,20 +3,21 @@
 
 // Helpers for converting MDAST trees to HTML
 
+import type { Element, ElementContent, Root as HastRoot } from 'hast'
 import type { Root as MdastRoot } from 'mdast'
+import type { Simplify } from 'type-fest'
 import rehypeShiki from '@shikijs/rehype'
 import { deepmerge } from 'deepmerge-ts'
-import { type Element, type ElementContent, type Root as HastRoot } from 'hast'
 import { toText } from 'hast-util-to-text'
 import rehypeFormat from 'rehype-format'
 import rehypeParse from 'rehype-parse'
 import rehypeRaw from 'rehype-raw'
 import rehypeStringify from 'rehype-stringify'
 import remarkRehype from 'remark-rehype'
-import { type Simplify } from 'type-fest'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
 import { CONTINUE, EXIT, visit } from 'unist-util-visit'
+import type { GlobalOptions } from '../shared/types'
 import {
 	MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS,
 	MEDIA_SUPPORTED_FILE_EXTENSIONS,
@@ -27,7 +28,6 @@ import {
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
-	type GlobalOptions,
 } from '../shared/types'
 import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
 import { getBase, getQuery } from '../utilities/path'

@@ -1,14 +1,15 @@
 /* eslint-disable ts/no-unnecessary-condition */
 /* eslint-disable jsdoc/require-jsdoc */
 
+import type { Simplify } from 'type-fest'
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
-import { type Simplify } from 'type-fest'
+import type { GlobalOptions } from '../shared/types'
+import type { LoadOptions, LocalNote } from './load-local-notes'
 import {
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
-	type GlobalOptions,
 } from '../shared/types'
 import {
 	auditUniqueFilePath,
@@ -18,7 +19,7 @@ import {
 } from '../utilities/filenames'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { normalize } from '../utilities/path'
-import { loadLocalNotes, type LoadOptions, type LocalNote } from './load-local-notes'
+import { loadLocalNotes } from './load-local-notes'
 
 type RenameNotesOptions = Pick<
 	GlobalOptions,

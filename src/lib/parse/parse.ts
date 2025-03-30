@@ -4,17 +4,17 @@
  * Turns a markdown string into a YankiNote object.
  */
 
+import type { Root } from 'mdast'
 import { deepmerge } from 'deepmerge-ts'
-import { type Root } from 'mdast'
 import { u } from 'unist-builder'
-import { type YankiNote } from '../model/note'
+import type { YankiNote } from '../model/note'
+import type { GlobalOptions } from '../shared/types'
 import { CSS_DEFAULT_CLASS_NAME } from '../shared/constants'
 import {
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
 } from '../shared/types'
-import { type GlobalOptions } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { mdastToHtml } from './rehype-utilities'
 import {

@@ -1,11 +1,8 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
+import type { YankiConnectOptions, YankiFetchAdapter } from 'yanki-connect'
 import path from 'path-browserify-esm'
-import {
-	defaultYankiConnectOptions,
-	type YankiConnectOptions,
-	type YankiFetchAdapter,
-} from 'yanki-connect'
+import { defaultYankiConnectOptions } from 'yanki-connect'
 import { ENVIRONMENT } from '../utilities/platform'
 
 export type FetchAdapter = YankiFetchAdapter

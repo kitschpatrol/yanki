@@ -3,12 +3,12 @@
 import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 import type { YankiNote } from '../model/note'
+import type { GlobalOptions } from '../shared/types'
 import { getNoteFromMarkdown } from '../parse/parse'
 import {
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
-	type GlobalOptions,
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 

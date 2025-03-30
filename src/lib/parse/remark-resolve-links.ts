@@ -1,5 +1,5 @@
-import { type Root } from 'mdast'
-import { type Plugin } from 'unified'
+import type { Root } from 'mdast'
+import type { Plugin } from 'unified'
 import { visit } from 'unist-util-visit'
 import { resolveLink } from '../utilities/resolve-link'
 import { isUrl } from '../utilities/url'

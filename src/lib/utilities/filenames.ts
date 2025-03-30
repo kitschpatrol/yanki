@@ -3,8 +3,8 @@
 import filenamify from 'filenamify'
 import { nanoid } from 'nanoid'
 import path from 'path-browserify-esm'
+import type { YankiNote } from '../model/note'
 import type { ManageFilenames } from '../shared/types'
-import { type YankiNote } from '../model/note'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
 import {
 	MEDIA_DEFAULT_EMPTY_FILENAME,

@@ -4,25 +4,20 @@ import type { PartialDeep, Simplify } from 'type-fest'
 import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
+import type { GlobalOptions } from '../shared/types'
+import type { SyncedNote, SyncNotesOptions, SyncNotesResult } from './sync-notes'
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
 import {
 	defaultGlobalOptions,
 	getDefaultFetchAdapter,
 	getDefaultFileAdapter,
-	type GlobalOptions,
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { normalize } from '../utilities/path'
 import { capitalize } from '../utilities/string'
 import { loadLocalNotes } from './load-local-notes'
 import { renameNotes } from './rename'
-import {
-	defaultSyncNotesOptions,
-	type SyncedNote,
-	syncNotes,
-	type SyncNotesOptions,
-	type SyncNotesResult,
-} from './sync-notes'
+import { defaultSyncNotesOptions, syncNotes } from './sync-notes'
 
 export type SyncFilesOptions = Simplify<
 	Pick<

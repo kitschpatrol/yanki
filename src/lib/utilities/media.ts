@@ -1,12 +1,12 @@
 import slugify from '@sindresorhus/slugify'
 import path from 'path-browserify-esm'
+import type { MediaSupportedExtension } from '../shared/constants'
+import type { FetchAdapter, FileAdapter } from '../shared/types'
 import {
 	MEDIA_FILENAME_MAX_LENGTH,
 	MEDIA_INCLUDE_LEGIBLE_FILENAME,
 	MEDIA_SUPPORTED_EXTENSIONS,
-	type MediaSupportedExtension,
 } from '../shared/constants'
-import { type FetchAdapter, type FileAdapter } from '../shared/types'
 import { fileExists, getFileContentHash } from './file'
 import { getSlugifiedNamespace } from './namespace'
 import { truncateOnWordBoundary } from './string'

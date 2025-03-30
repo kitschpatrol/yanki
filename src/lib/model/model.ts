@@ -1,6 +1,6 @@
 /* eslint-disable ts/naming-convention */
 
-import { type YankiParamsForAction } from 'yanki-connect'
+import type { YankiParamsForAction } from 'yanki-connect'
 
 type YankiModel = YankiParamsForAction<'createModel'>
 

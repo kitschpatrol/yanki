@@ -1,9 +1,10 @@
 import type { PartialDeep, Simplify } from 'type-fest'
 import { deepmerge } from 'deepmerge-ts'
 import { YankiConnect } from 'yanki-connect'
-import { type YankiNote } from '../model/note'
+import type { YankiNote } from '../model/note'
+import type { GlobalOptions } from '../shared/types'
 import { NOTE_DEFAULT_DECK_NAME, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
-import { defaultGlobalOptions, type GlobalOptions } from '../shared/types'
+import { defaultGlobalOptions } from '../shared/types'
 import {
 	addNote,
 	areNotesEqual,

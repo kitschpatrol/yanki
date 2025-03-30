@@ -1,13 +1,13 @@
 /* eslint-disable jsdoc/require-jsdoc */
 /* eslint-disable node/no-unsupported-features/node-builtins */
 
+import type { MediaSupportedExtension } from '../shared/constants'
+import type { FetchAdapter } from '../shared/types'
 import {
 	MEDIA_DEFAULT_HASH_MODE_URL,
 	MEDIA_SUPPORTED_EXTENSIONS,
 	MEDIA_URL_CONTENT_TYPE_MODE,
-	type MediaSupportedExtension,
 } from '../shared/constants'
-import { type FetchAdapter } from '../shared/types'
 import { getFileExtensionForMimeType } from './mime'
 import { isAbsolute, normalize } from './path'
 import { getHash } from './string'

@@ -1,6 +1,6 @@
-import { type Root } from 'mdast'
+import type { Root } from 'mdast'
+import type { Plugin } from 'unified'
 import remarkBreaks from 'remark-breaks'
-import { type Plugin } from 'unified'
 
 const plugin: Plugin<[undefined?], Root> = function () {
 	return function (tree, file) {

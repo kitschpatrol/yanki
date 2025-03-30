@@ -1,13 +1,13 @@
 /* eslint-disable jsdoc/require-jsdoc */
 /* eslint-disable unicorn/consistent-function-scoping */
 
-import {
-	type Code,
-	type Effects,
-	type Extension,
-	type State,
-	type TokenizeContext,
-	type TokenTypeMap,
+import type {
+	Code,
+	Effects,
+	Extension,
+	State,
+	TokenizeContext,
+	TokenTypeMap,
 } from 'micromark-util-types'
 
 // Extension name

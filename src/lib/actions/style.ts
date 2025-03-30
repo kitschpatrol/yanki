@@ -5,9 +5,10 @@ import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
 import { YankiConnect } from 'yanki-connect'
+import type { GlobalOptions } from '../shared/types'
 import { yankiModelNames } from '../model/model'
 import { CSS_DEFAULT_STYLE, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
-import { defaultGlobalOptions, type GlobalOptions } from '../shared/types'
+import { defaultGlobalOptions } from '../shared/types'
 import {
 	getModelStyle,
 	requestPermission,
