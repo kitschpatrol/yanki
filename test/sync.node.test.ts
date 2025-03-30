@@ -393,7 +393,10 @@ describeWithFileFixture(
 	},
 )
 
-// https://github.com/kitschpatrol/yanki-obsidian/issues/34
+/**
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/34
+ * Thank you to @N-ISOGE for reporting.
+ */
 describeWithFileFixture(
 	'update model and deck simultaneously',
 	{
@@ -738,8 +741,7 @@ describeWithFileFixture(
 )
 
 /**
- * Related to:
- * https://github.com/kitschpatrol/yanki-obsidian/issues/14
+ * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/14
  * Thank you to @BrianRonin for the test files.
  *
  * Initially, there was an issue with decks being pruned despite containing
@@ -967,7 +969,8 @@ describeWithFileFixture(
 )
 
 /**
- * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/TK
+ * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/20
+ * Thank you to @Positron010 for the suggestion.
  */
 describeWithFileFixture(
 	'nested tags',
@@ -1040,6 +1043,7 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/28
+ * Thanks to @fislysandi for reporting.
  * This bug was actually related to a missing RegEx escape in the Yanki Obsidian
  * plugin, but the test will remain here for avoidance of doubt.
  */

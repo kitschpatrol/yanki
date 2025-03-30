@@ -13,6 +13,7 @@ export default cspellConfig({
 		'fassets',
 		'fbase',
 		'fcwd',
+		'fislysandi',
 		'ftest',
 		'furigana',
 		'jīng',
