@@ -112,38 +112,42 @@ describeWithFileFixture(
 		cleanUpTempFiles: true,
 	},
 	(context) => {
-		it('correctly syncs an entire obsidian vault', { timeout: 60_000 }, async () => {
-			const results = await syncFiles(context.markdownFiles, {
-				allFilePaths: context.allFiles,
-				ankiConnectOptions: {
-					autoLaunch: true,
-				},
-				ankiWeb: false,
-				basePath: context.tempAssetPath,
-				dryRun: false,
-				manageFilenames: 'prompt',
-				namespace: context.namespace,
-				obsidianVault: 'test-obsidian-vault',
-				syncMediaAssets: 'off',
-			})
+		it(
+			'correctly syncs an entire obsidian vault with managed filenames',
+			{ timeout: 60_000 },
+			async () => {
+				const results = await syncFiles(context.markdownFiles, {
+					allFilePaths: context.allFiles,
+					ankiConnectOptions: {
+						autoLaunch: true,
+					},
+					ankiWeb: false,
+					basePath: context.tempAssetPath,
+					dryRun: false,
+					manageFilenames: 'prompt',
+					namespace: context.namespace,
+					obsidianVault: 'test-obsidian-vault',
+					syncMediaAssets: 'off',
+				})
 
-			// Valid wiki links
-			// TODO revisit this after link updating is implemented
-			for (const result of results.synced) {
-				if (
-					result.filePathOriginal?.includes('/Wiki Links/') &&
-					result.filePathOriginal.endsWith('test card.md')
-				) {
-					// Debug
-					// console.log(`Checking: ${result.filePathOriginal} which is now ${result.filePath}`)
-					const html = `${result.note.fields.Front}${result.note.fields.Back}`
-					checkWikiLinkResolution(html, normalize(context.tempAssetPath))
-				}
-			}
+				// Valid wiki links
+				// TODO revisit this if link updating is implemented
+				// for (const result of results.synced) {
+				// 	if (
+				// 		result.filePathOriginal?.includes('/Wiki Links/') &&
+				// 		result.filePathOriginal.endsWith('test card.md')
+				// 	) {
+				// 		// Debug
+				// 		console.log(`Checking: ${result.filePathOriginal} which is now ${result.filePath}`)
+				// 		const html = `${result.note.fields.Front}${result.note.fields.Back}`
+				// 		checkWikiLinkResolution(html, normalize(context.tempAssetPath))
+				// 	}
+				// }
 
-			// Basic stability
-			expect(stableResults(results)).toMatchSnapshot()
-		})
+				// Basic stability
+				expect(stableResults(results)).toMatchSnapshot()
+			},
+		)
 	},
 )
 

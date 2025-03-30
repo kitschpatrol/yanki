@@ -113,8 +113,44 @@ export async function syncFiles(
 		maxFilenameLength,
 	})
 
-	// TODO reconcile renamedLocalNotes with what was passed in `allFilePaths`
-	// Reload notes if necessary to reconcile any changes to intra-note link paths?
+	// In Obsidian, note contents might change if the file name changes
+	// because intra-note links might have been updates, so we have to check
+	// for this and reload the notes
+	if (obsidianVault !== undefined) {
+		// Check to see if any notes were renamed
+		const notesWereRenamed = renamedLocalNotes.some(
+			(renamedNote) => renamedNote.filePath !== renamedNote.filePathOriginal,
+		)
+
+		// Reload notes if necessary to reconcile any changes to intra-note link paths
+		if (notesWereRenamed) {
+			const allLocalFilePathsReloaded = renamedLocalNotes.map((note) => note.filePath)
+
+			// Update note names in allFilePaths so links resolve correctly
+			const allFilePathsReloaded = allFilePaths.map((filePath) => {
+				const renamedNote = renamedLocalNotes.find(
+					(renamedNote) => renamedNote.filePathOriginal === filePath,
+				)
+				return renamedNote ? renamedNote.filePath : filePath
+			})
+
+			const reloadedLocalNotes = await loadLocalNotes(allLocalFilePathsReloaded, {
+				allFilePaths: allFilePathsReloaded,
+				basePath,
+				fetchAdapter,
+				fileAdapter,
+				namespace,
+				obsidianVault,
+				strictLineBreaks,
+				syncMediaAssets,
+			})
+
+			// Replace the renamed notes with the reloaded notes
+			for (const [index, renamedNote] of renamedLocalNotes.entries()) {
+				renamedNote.note = reloadedLocalNotes[index].note
+			}
+		}
+	}
 
 	const allLocalNotes = renamedLocalNotes.map((note) => note.note)
 
