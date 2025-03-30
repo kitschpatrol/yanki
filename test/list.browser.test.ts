@@ -2,6 +2,7 @@ import { expect, it } from 'vitest'
 import type { YankiNote } from '../src/lib'
 import { listNotes, syncNotes } from '../src/lib'
 
+// Unused, yanki-connect uses browser fetch automatically if available
 // Browser fetch adapter example
 // async function fetchAdapter(
 // 	url: Parameters<FetchAdapter>['0'],
@@ -15,7 +16,7 @@ it('lists notes', { only: true }, async () => {
 	// Mock data
 	const namespace = 'Yanki Test - list.browser.test'
 	const testNote: YankiNote = {
-		deckName: 'test-minimal-notes',
+		deckName: 'test-browser-notes',
 		fields: {
 			Back: 'Bye',
 			Front: 'Hi',
@@ -27,15 +28,9 @@ it('lists notes', { only: true }, async () => {
 	}
 
 	try {
-		await syncNotes([testNote], {
-			ankiConnectOptions: {
-				// Unused, yanki-connect uses browser fetch automatically if available
-				// fetchAdapter,
-			},
-		})
+		await syncNotes([testNote])
 	} catch (error) {
 		console.log(error)
-		// Assert(false, String(error))
 	}
 
 	const notes = await listNotes({ namespace })
