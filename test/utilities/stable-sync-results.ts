@@ -57,6 +57,11 @@ export function stableResults(results: SyncResults): SyncResults {
 		note.note.fields.Back = stripNewlines(
 			cleanUpHashes(cleanUpTempPath(note.note.fields.Back) ?? ''),
 		)
+		if (note.note.fields.Extra !== undefined) {
+			note.note.fields.Extra = stripNewlines(
+				cleanUpHashes(cleanUpTempPath(note.note.fields.Extra) ?? ''),
+			)
+		}
 
 		return note
 	})
@@ -75,8 +80,8 @@ export function stableResults(results: SyncResults): SyncResults {
 	sorted.deletedMedia = sorted.deletedMedia.sort()
 	sorted.synced = sorted.synced.sort((a, b) => {
 		// Glue everything together...
-		const aString = a.note.deckName + a.note.fields.Front + a.note.fields.Back
-		const bString = b.note.deckName + b.note.fields.Front + b.note.fields.Back
+		const aString = a.note.deckName + a.note.fields.Front + a.note.fields.Back + a.note.fields.Extra
+		const bString = b.note.deckName + b.note.fields.Front + b.note.fields.Back + b.note.fields.Extra
 		return aString.localeCompare(bString)
 	})
 

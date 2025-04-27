@@ -240,10 +240,14 @@ function areMediaElementsEqual(
 	localFields: Record<string, string>,
 	remoteFields: Record<string, string>,
 ): boolean {
-	const localMediaFilenames = extractMediaFromHtml(`${localFields.Front}\n${localFields.Back}`)
+	const localMediaFilenames = extractMediaFromHtml(
+		`${localFields.Front}\n${localFields.Back}\n${localFields.Extra}`,
+	)
 		.map(({ filename }) => filename)
 		.sort()
-	const remoteMediaFilenames = extractMediaFromHtml(`${remoteFields.Front}\n${remoteFields.Back}`)
+	const remoteMediaFilenames = extractMediaFromHtml(
+		`${remoteFields.Front}\n${remoteFields.Back}\n${localFields.Extra}`,
+	)
 		.map(({ filename }) => filename)
 		.sort()
 
@@ -569,7 +573,9 @@ async function uploadMediaForNote(
 	dryRun: boolean,
 ): Promise<Media[]> {
 	// Upload media
-	const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
+	const mediaPaths = extractMediaFromHtml(
+		`${note.fields.Front}\n${note.fields.Back}\n${note.fields.Extra}`,
+	)
 
 	const uploadedMedia = []
 
@@ -636,7 +642,9 @@ export async function deleteUnusedMedia(
 	const activeMediaFilenames: string[] = []
 	for (const note of liveNotes) {
 		// Room for optimization to avoid re-parsing the HTML...
-		const mediaPaths = extractMediaFromHtml(`${note.fields.Front}\n${note.fields.Back}`)
+		const mediaPaths = extractMediaFromHtml(
+			`${note.fields.Front}\n${note.fields.Back}\n${note.fields.Extra}`,
+		)
 		for (const { filename } of mediaPaths) {
 			activeMediaFilenames.push(filename)
 		}

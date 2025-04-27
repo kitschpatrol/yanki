@@ -59,7 +59,7 @@ it('correctly resolves obsidian wiki links', async () => {
 			syncMediaAssets: 'off',
 		})
 
-		const noteHtml = `${noteResolved.fields.Front}${noteResolved.fields.Back}`
+		const noteHtml = `${noteResolved.fields.Front}${noteResolved.fields.Back}${noteResolved.fields.Extra}`
 		checkWikiLinkResolution(noteHtml, basePath)
 	}
 })
@@ -93,7 +93,7 @@ describeWithFileFixture(
 					result.filePathOriginal?.includes('/Wiki Links/') &&
 					result.filePathOriginal.endsWith('test card.md')
 				) {
-					const html = `${result.note.fields.Front}${result.note.fields.Back}`
+					const html = `${result.note.fields.Front}${result.note.fields.Back}${result.note.fields.Extra}`
 					checkWikiLinkResolution(html, normalize(context.tempAssetPath))
 				}
 			}
@@ -139,7 +139,7 @@ describeWithFileFixture(
 				// 	) {
 				// 		// Debug
 				// 		console.log(`Checking: ${result.filePathOriginal} which is now ${result.filePath}`)
-				// 		const html = `${result.note.fields.Front}${result.note.fields.Back}`
+				// 		const html = `${result.note.fields.Front}${result.note.fields.Back}${result.note.fields.Extra}`
 				// 		checkWikiLinkResolution(html, normalize(context.tempAssetPath))
 				// 	}
 				// }
