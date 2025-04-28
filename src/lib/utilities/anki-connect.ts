@@ -196,10 +196,9 @@ export async function updateNote(
 					}
 				})
 
-			// Also update media if relevant
-			if (!areMediaElementsEqual(localNote.fields, remoteNote.fields)) {
-				await uploadMediaForNote(client, localNote, dryRun)
-			}
+			// Always try to update media, in case media assets are missing from Anki
+			// Check happens in uploadMediaForNote
+			await uploadMediaForNote(client, localNote, dryRun)
 		}
 
 		updated = true
