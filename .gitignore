@@ -22,4 +22,6 @@ vendor/
 # Customizations
 /src/test.ts
 /test/assets/test obsidian vault with spaces/.obsidian/workspace.json
+/test/assets/test obsidian vault with spaces/.obsidian/plugins
 /test/assets/test-obsidian-vault/.obsidian/workspace.json
+/test/assets/test-obsidian-vault/.obsidian/plugins
