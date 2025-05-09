@@ -117,7 +117,7 @@ Nested tags are supported, and you may use `/` in addition to `::` as a delimite
 
 Your local Markdown files are the single point of truth for what will end up in Anki, but Yanki knows to leave your other Anki notes alone.
 
-When you edit a local markdown note, Yanki makes every effort to update rather than recreate it in the Anki database so that progress is preserved.
+When you edit a local Markdown note, Yanki makes every effort to update rather than recreate it in the Anki database so that progress is preserved.
 
 But when you do want to delete something, it's as simple as deleting the local Markdown note from the file system and running `yanki sync` to remove it from the Anki database. Protections are in place to prevent deleting Anki notes that weren't initially created by Yanki.
 
@@ -129,9 +129,9 @@ If you accidentally delete the frontmatter with the associated Anki `noteId` in 
 
 Yanki keeps track the notes it manages with a hidden field in the Anki note model, so it will never touch your existing Anki notes. (_But please exercise caution until the 1.0.0 release..._)
 
-### Fancy markdown
+### Fancy Markdown
 
-An extended palette of markdown syntax is available out of the box:
+An extended palette of Markdown syntax is available out of the box:
 
 - Most [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-through~~`, `- [x] task lists`, and auto-links.
 - Syntax highlighting via [Shiki](https://shiki.style).
@@ -288,6 +288,8 @@ _Note: While you can encloze images, math equations, and other inline-styled syn
 The `yanki` CLI tool requires Node 18+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
 
 The tool has been tested on Windows, macOS, and Linux.
+
+_Linux users should note that the flatpak version of Anki is not recommended, because of reported issues with media asset sync and `obsidian://` URI links Linux systems might require [extra steps](https://amir.rachum.com/obsidian-uri-linux/) to register Obsidian URI links._
 
 #### Prerequisites:
 
@@ -512,7 +514,7 @@ See the [source code](https://github.com/kitschpatrol/yanki/blob/main/src/lib/in
 
 ### Namespaces
 
-For simplicity's sake, Yanki anticipates syncing one folder of notes on one machine as its primary use case. Every note uploaded to Anki has a "namespace" string in a hidden field. Yanki uses this field to identify the notes it's in charge of, and to identify notes for deletion if they are present in the Anki database but missing in the collection of local markdown notes.
+For simplicity's sake, Yanki anticipates syncing one folder of notes on one machine as its primary use case. Every note uploaded to Anki has a "namespace" string in a hidden field. Yanki uses this field to identify the notes it's in charge of, and to identify notes for deletion if they are present in the Anki database but missing in the collection of local Markdown notes.
 
 For example, if you run:
 
@@ -554,7 +556,7 @@ Yanki will put the cards in eponymous decks, so you'll still have a clean separa
 
 ### Media asset synchronization
 
-By default, Yanki will automatically copy local image, media, and audio media linked in your notes' markdown to Anki's media storage system. With an option, it can do the same for remote assets.
+By default, Yanki will automatically copy local image, media, and audio media linked in your notes' Markdown to Anki's media storage system. With an option, it can do the same for remote assets.
 
 Note that Anki's underlying implementation requires media assets to be less than 100 MB in size. There are also internal limits around filename length, but Yanki manages the filename for you internally, so this is not a concern.
 
@@ -619,7 +621,7 @@ For type safety, access to Anki-Connect is managed through my wrapper library, [
 
 Behind the scenes, Yanki creates new note type models to match the four default Anki types. It keeps track of the notes it has ownership of via a hidden `YankiNamespace` field in each note.
 
-Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm64 virtual machine. Anki does not officially support arm64 linux, but a [workaround](https://github.com/ankitects/anki/issues/2302#issuecomment-1374374155) was able to get Anki up and running. Getting `obsidian://` links working on Linux required some [manual steps](https://amir.rachum.com/obsidian-uri-linux/).
+Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm64 virtual machine. Anki does not officially support arm64 Linux, but a [workaround](https://github.com/ankitects/anki/issues/2302#issuecomment-1374374155) was able to get Anki up and running. Getting `obsidian://` links working on Linux required some [manual steps](https://amir.rachum.com/obsidian-uri-linux/).
 
 ### Other projects
 
@@ -638,7 +640,7 @@ Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm
 
 Possible features on the horizon:
 
-- [ ] Command to convert markdown notes to Anki packages (`.apkg` files), instead of syncing directly with Anki.
+- [ ] Command to convert Markdown notes to Anki packages (`.apkg` files), instead of syncing directly with Anki.
 - [ ] Sync and store Anki's review statistics to the Markdown file's frontmatter. This could be useful to both "back up" progress made in Anki, and to afford integration with other local tools. (In exchange for some extra noise in the frontmatter.)
 - [ ] Model migrations.
 - [ ] Include a built-in CSS stylesheet, since Anki's defaults can't always anticipate the kinds of HTML you're likely to generate from Markdown.
