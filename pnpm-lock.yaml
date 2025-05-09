@@ -26,9 +26,6 @@ importers:
       '@types/yargs':
         specifier: ^17.0.33
         version: 17.0.33
-      chalk:
-        specifier: ^5.4.1
-        version: 5.4.1
       globby:
         specifier: ^14.1.0
         version: 14.1.0
@@ -99,6 +96,9 @@ importers:
       path-browserify-esm:
         specifier: ^1.0.6
         version: 1.0.6
+      picocolors:
+        specifier: ^1.1.1
+        version: 1.1.1
       pkgroll:
         specifier: ^2.12.2
         version: 2.12.2(typescript@5.8.3)
