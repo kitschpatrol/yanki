@@ -289,7 +289,7 @@ The `yanki` CLI tool requires Node 18+. The exported TypeScript / JavaScript API
 
 The tool has been tested on Windows, macOS, and Linux.
 
-_Linux users should note that the flatpak version of Anki is not recommended, because of reported issues with media asset sync and `obsidian://` URI links Linux systems might require [extra steps](https://amir.rachum.com/obsidian-uri-linux/) to register Obsidian URI links._
+_Linux users should note that the flatpak version of Anki is not recommended, because of reported issues with media asset sync and `obsidian://` URI links. Linux systems might require [extra steps](https://amir.rachum.com/obsidian-uri-linux/) to register Obsidian URI links._
 
 #### Prerequisites:
 
