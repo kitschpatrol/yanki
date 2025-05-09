@@ -234,35 +234,6 @@ function areFieldsEqual(
 	return true
 }
 
-// TODO is this faster than querying Anki-Connect for media files?
-function areMediaElementsEqual(
-	localFields: Record<string, string>,
-	remoteFields: Record<string, string>,
-): boolean {
-	const localMediaFilenames = extractMediaFromHtml(
-		`${localFields.Front}\n${localFields.Back}\n${localFields.Extra}`,
-	)
-		.map(({ filename }) => filename)
-		.sort()
-	const remoteMediaFilenames = extractMediaFromHtml(
-		`${remoteFields.Front}\n${remoteFields.Back}\n${localFields.Extra}`,
-	)
-		.map(({ filename }) => filename)
-		.sort()
-
-	if (localMediaFilenames.length !== remoteMediaFilenames.length) {
-		return false
-	}
-
-	for (const [i, filename] of localMediaFilenames.entries()) {
-		if (filename !== remoteMediaFilenames[i]) {
-			return false
-		}
-	}
-
-	return true
-}
-
 export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = true): boolean {
 	return (
 		(!includeId || noteA.noteId === noteB.noteId) &&
