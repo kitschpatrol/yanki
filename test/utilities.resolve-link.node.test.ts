@@ -38,6 +38,50 @@ it('resolves a named file link', () => {
 	)
 })
 
+it('resolves wiki links', () => {
+	expect(
+		resolveLink('pandas-DataFrame-xs', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/pandas-DataFrame-xs.md'],
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/cwd/',
+			obsidianVaultName: 'test-obsidian-vault',
+			type: 'link',
+		}),
+	).toMatchInlineSnapshot(
+		`"obsidian://open?vault=test-obsidian-vault&file=%2Fbase-path%2Fcwd%2Ftest%2Fassets%2Ftest-obsidian-vault%2Fpandas-DataFrame-xs.md"`,
+	)
+})
+
+// https://github.com/kitschpatrol/yanki-obsidian/issues/42
+it('resolves wiki links with many dots and a good extension', () => {
+	expect(
+		resolveLink('pandas.DataFrame.xs.md', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/pandas.DataFrame.xs.md'],
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/cwd/',
+			obsidianVaultName: 'test-obsidian-vault',
+			type: 'link',
+		}),
+	).toMatchInlineSnapshot(
+		`"obsidian://open?vault=test-obsidian-vault&file=%2Fbase-path%2Fcwd%2Ftest%2Fassets%2Ftest-obsidian-vault%2Fpandas.DataFrame.xs.md"`,
+	)
+})
+
+// https://github.com/kitschpatrol/yanki-obsidian/issues/42
+it('resolves wiki links with many dots and a weird extension', () => {
+	expect(
+		resolveLink('pandas.DataFrame.xs', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/pandas.DataFrame.xs.md'],
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/cwd/',
+			obsidianVaultName: 'test-obsidian-vault',
+			type: 'link',
+		}),
+	).toMatchInlineSnapshot(
+		`"obsidian://open?vault=test-obsidian-vault&file=%2Fbase-path%2Fcwd%2Ftest%2Fassets%2Ftest-obsidian-vault%2Fpandas.DataFrame.xs.md"`,
+	)
+})
+
 it('resolves a named file link with a space in the vault name', () => {
 	expect(
 		resolveLink('test pdf.pdf', {
