@@ -155,6 +155,10 @@ export function addExtensionIfMissing(filePath: string, extension: string): stri
 		return filePath
 	}
 
+	return addExtension(filePath, extension)
+}
+
+export function addExtension(filePath: string, extension: string): string {
 	const [base, query] = getBaseAndQueryParts(filePath)
 	return `${base}.${extension}${query ?? ''}`
 }

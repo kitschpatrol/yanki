@@ -15,6 +15,7 @@ export default cspellConfig({
 		'fcwd',
 		'fislysandi',
 		'Flathub',
+		'Fpandas',
 		'ftest',
 		'furigana',
 		'ISOGE',

@@ -148,15 +148,20 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 				cwd,
 			})
 
-			// Always try a .md extension if it's missing... in Obsidian, ![[these links]] and ![](<these links>) without an extension are always to an MD file
-			const resolvedUrlWithDefaultExtension = pathExtras.addExtensionIfMissing(resolvedUrl, 'md')
+			// If undefined, there was no match in the list of all file paths
+			const resolvedUrlWithMatchedExtension: string | undefined =
+				// Assume extension-less files are .md
+				// in Obsidian, ![[these links]] and ![](<these links>) without an extension are always to an MD file
+				pathExistsInAllFiles(
+					pathExtras.addExtensionIfMissing(resolvedUrl, 'md'),
+					allFilePaths ?? [],
+				) ??
+				// Add an .md extension even if we already have an extension.
+				// This handles cases with dots in the name.
+				pathExistsInAllFiles(pathExtras.addExtension(resolvedUrl, 'md'), allFilePaths ?? []) ??
+				undefined
 
-			const fileProbablyExists = pathExistsInAllFiles(
-				resolvedUrlWithDefaultExtension,
-				allFilePaths ?? [],
-			)
-
-			if (fileProbablyExists) {
+			if (resolvedUrlWithMatchedExtension !== undefined) {
 				// Perform obsidian vault link protocol conversion if requested
 				// For links, anything that exists should become an obsidian link
 				// For embeds, only markdown files should become obsidian links
@@ -166,11 +171,11 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 						// eslint-disable-next-line ts/no-unnecessary-condition
 						(type === 'embed' &&
 							// https://help.obsidian.md/Files+and+folders/Accepted+file+formats
-							['.md', '.pdf'].includes(pathExtras.getExtension(resolvedUrlWithDefaultExtension))))
+							['.md', '.pdf'].includes(pathExtras.getExtension(resolvedUrlWithMatchedExtension))))
 				) {
 					if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName !== undefined) {
 						return createObsidianVaultLink(
-							resolvedUrlWithDefaultExtension,
+							resolvedUrlWithMatchedExtension,
 							basePath ?? '',
 							obsidianVaultName,
 						)
@@ -179,11 +184,11 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 					// This doesn't work in the Anki desktop application or the AnkiWeb browser version...
 					// Not really worth it
 					if (convertFilePathsToProtocol === 'file') {
-						return createFileLink(resolvedUrlWithDefaultExtension)
+						return createFileLink(resolvedUrlWithMatchedExtension)
 					}
 				}
 
-				return pathExtras.getBase(resolvedUrlWithDefaultExtension)
+				return pathExtras.getBase(resolvedUrlWithMatchedExtension)
 			}
 
 			// TODO good idea?
@@ -252,7 +257,9 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
  * See Obsidian's `getFirstLinkpathDest()` for a roughly equivalent algorithm.
  *
  * Obsidian seems to treat note links slightly differently from image / asset links.
- * @param name Non-URI-encoded name of the file, with presumed file extension. (POSIX-style paths.)
+ * @param name Non-URI-encoded name of the file, may have file extension, if no
+ * match with a non-.md extension is found, a match will be attempted with .md
+ * regardless. (POSIX-style paths.)
  * @param cwd Absolute path to the current working directory of the file from
  * which we're resolving the link. (POSIX-style paths)
  * @param allFilePaths Array of absolute paths to all other files in the paths
@@ -268,11 +275,19 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 
 	const [base, query] = pathExtras.getBaseAndQueryParts(name)
 
-	const pathsToName = allFilePaths.filter((filePath) =>
-		// Obsidian is not case sensitive
-		filePath.toLowerCase().endsWith(base.toLowerCase()),
-	)
+	// To address https://github.com/kitschpatrol/yanki-obsidian/issues/42, ignore .md extensions when matching
+	// Obsidian is not case sensitive
+	const baseWithoutMd = base.replace(/\.md$/, '').toLowerCase()
 
+	const pathsToName = allFilePaths.filter((filePath) => {
+		// Strip .md extensions
+		// Name-only files with dots in the name won't match
+		// Since add extensionIfMissing won't have added .md to those files
+		const pathWithoutMd = filePath.replace(/\.md$/, '').toLowerCase()
+		return pathWithoutMd.endsWith(baseWithoutMd)
+	})
+
+	// No matches found
 	if (pathsToName.length === 0) {
 		return undefined
 	}
@@ -360,15 +375,21 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 
 /**
  * Check for presence of a path in a list in a case- and query- agnostic manner.
+ * Ignores .md extensions to simplify matching files
  * @param filePath File path with file extension. (POSIX-style path.)
  * @param allFilePaths Array of absolute file paths to check. (POSIX-style paths.)
- * @returns True if the file path is present in the list of all file paths.
+ * @returns The file path if it is present in the list of all file paths, or
+ * undefined if it is not.
  */
-function pathExistsInAllFiles(filePath: string, allFilePaths: string[]): boolean {
+function pathExistsInAllFiles(filePath: string, allFilePaths: string[]): string | undefined {
 	const base = pathExtras.getBase(filePath)
 
 	// Obsidian is not case sensitive
-	return allFilePaths.some((file) => file.toLowerCase().endsWith(base.toLowerCase()))
+	if (allFilePaths.some((file) => file.toLowerCase().endsWith(base.toLowerCase()))) {
+		return filePath
+	}
+
+	return undefined
 }
 
 function createFileLink(absolutePath: string): string {

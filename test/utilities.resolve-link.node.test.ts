@@ -178,6 +178,18 @@ it('resolves a relative file path without an extension', () => {
 	).toMatchInlineSnapshot(`"/base-path/cwd/test/assets/test-obsidian-vault/test card.md"`)
 })
 
+it('resolves a relative file path without an extension with dots in the name', () => {
+	// The allFilePaths option is hard-coded for the browser test, since globby
+	// has Node dependencies
+	expect(
+		resolveLink('./test/assets/test-obsidian-vault/te.st ca.rd', {
+			allFilePaths: ['/base-path/cwd/test/assets/test-obsidian-vault/te.st ca.rd.md'],
+			cwd: '/base-path/cwd/',
+			type: 'link',
+		}),
+	).toMatchInlineSnapshot(`"/base-path/cwd/test/assets/test-obsidian-vault/te.st ca.rd.md"`)
+})
+
 it('resolves relative file paths', () => {
 	// The allFilePaths option is hard-coded for the browser test, since globby
 	// has Node dependencies
