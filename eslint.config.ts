@@ -31,6 +31,7 @@ export default eslintConfig({
 					types: ['boolean', 'string', 'number', 'array'],
 				},
 			],
+			'ts/no-unsafe-type-assertion': 'off',
 		},
 	},
 	type: 'lib',

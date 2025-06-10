@@ -4,5 +4,12 @@ export default knipConfig({
 	entry: ['test/utilities/field-mask.ts'],
 	ignore: ['test/assets/**/*'],
 	ignoreBinaries: ['osascript'],
-	ignoreDependencies: ['@types/lodash-es', '@types/unist', 'playwright', 'remark', 'tsx'],
+	ignoreDependencies: [
+		'@types/lodash-es',
+		'@types/unist',
+		'@vitest/coverage-v8',
+		'playwright',
+		'remark',
+		'tsx',
+	],
 })
