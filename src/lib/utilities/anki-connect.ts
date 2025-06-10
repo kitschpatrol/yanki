@@ -246,13 +246,17 @@ export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = tr
 
 /**
  * Helper function to compare two arrays of tags.
+ * Note some nuances around case insensitivity as discussed here:
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/44
  * @returns True if the tags are equal, false otherwise.
  */
 function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 	if (localTags.length !== remoteTags.length) return false
 
 	for (const [i, element] of localTags.entries()) {
-		if (element.normalize('NFC') !== remoteTags[i].normalize('NFC')) return false
+		if (element.normalize('NFC').toLowerCase() !== remoteTags[i].normalize('NFC').toLowerCase()) {
+			return false
+		}
 	}
 
 	return true

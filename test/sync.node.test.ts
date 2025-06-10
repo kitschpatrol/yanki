@@ -1042,6 +1042,97 @@ describeWithFileFixture(
 )
 
 /**
+ * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/44
+ * Thank you to @99887 for identifying this issue.
+ */
+describeWithFileFixture(
+	'mixed case tags',
+	{
+		assetPath: './test/assets/test-tags-case',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('treats tags as case insensitive', { timeout: 60_000 }, async () => {
+			// Sync
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'off',
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			const actions = results.synced.map((r) => r.action)
+			expect(actions).toMatchInlineSnapshot(`
+				[
+				  "created",
+				  "created",
+				]
+			`)
+
+			const obsidianTags = results.synced.flatMap((r) => r.note.tags)
+			expect(obsidianTags).toMatchInlineSnapshot(`
+				[
+				  "foo::BAR::Baz",
+				  "pleasant::canoe",
+				  "foo::bar::baz",
+				  "PLEASANT::CANOE",
+				]
+			`)
+
+			const ankiTags = await context.yankiConnect.note.getTags()
+			expect(ankiTags).toMatchInlineSnapshot(`
+				[
+				  "foo::BAR::Baz",
+				  "pleasant::canoe",
+				]
+			`)
+
+			// Do it again to check for stability
+			const results2 = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'off',
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			const actions2 = results2.synced.map((r) => r.action)
+			expect(actions2).toMatchInlineSnapshot(`
+				[
+				  "unchanged",
+				  "unchanged",
+				]
+			`)
+
+			const obsidianTags2 = results2.synced.flatMap((r) => r.note.tags)
+			expect(obsidianTags2).toMatchInlineSnapshot(`
+				[
+				  "foo::BAR::Baz",
+				  "pleasant::canoe",
+				  "foo::bar::baz",
+				  "PLEASANT::CANOE",
+				]
+			`)
+
+			const ankiTags2 = await context.yankiConnect.note.getTags()
+			expect(ankiTags2).toEqual(expect.arrayContaining(['foo::BAR::Baz', 'pleasant::canoe']))
+		})
+	},
+)
+
+/**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/28
  * Thanks to @fislysandi for reporting.
  * This bug was actually related to a missing RegEx escape in the Yanki Obsidian
