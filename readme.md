@@ -19,9 +19,6 @@
 
 <!-- /short-description -->
 
-> [!IMPORTANT]
-> Yanki is feature-complete but will remain zero-versioned until it's been thoroughly tested. Please exercise caution and make backups of your Anki notes until the 1.0.0 release.
-
 <!-- table-of-contents { depth: 2 } -->
 
 ## Table of contents
@@ -127,7 +124,7 @@ If you accidentally delete the frontmatter with the associated Anki `noteId` in 
 
 ### Existing notes are untouched
 
-Yanki keeps track the notes it manages with a hidden field in the Anki note model, so it will never touch your existing Anki notes. (_But please exercise caution until the 1.0.0 release..._)
+Yanki keeps track the notes it manages with a hidden field in the Anki note model, so it will never touch your existing Anki notes.
 
 ### Fancy Markdown
 
