@@ -100,8 +100,8 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1
       pkgroll:
-        specifier: 2.13.1
-        version: 2.13.1(typescript@5.8.3)
+        specifier: ^2.14.2
+        version: 2.14.2(typescript@5.8.3)
       playwright:
         specifier: ^1.54.1
         version: 1.54.1
@@ -4276,8 +4276,8 @@ packages:
   pkg-types@2.2.0:
     resolution: {integrity: sha512-2SM/GZGAEkPp3KWORxQZns4M+WSeXbC2HEvmOIJe3Cmiv6ieAJvdVhDldtHqM5J1Y7MrR1XhkBT/rMlhh9FdqQ==}
 
-  pkgroll@2.13.1:
-    resolution: {integrity: sha512-SO50Oh3ycFUI26n5au3Iq/XhC1x8garmmaIF5m/8f+s8ntUWC9oZONlz0rjT12OSfY3gCkc564t3HWvuClzQNg==}
+  pkgroll@2.14.2:
+    resolution: {integrity: sha512-oS5vF/dMzMWh2+xncm0vh64IoAEkevZz3+Ws113Orqf7ecJI82lBJcVSd0sVZ0zTuy45oRz3oSL5CVXrL5kOhQ==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -10784,7 +10784,7 @@ snapshots:
       exsolve: 1.0.7
       pathe: 2.0.3
 
-  pkgroll@2.13.1(typescript@5.8.3):
+  pkgroll@2.14.2(typescript@5.8.3):
     dependencies:
       '@rollup/plugin-alias': 5.1.1(rollup@4.45.0)
       '@rollup/plugin-commonjs': 28.0.6(rollup@4.45.0)

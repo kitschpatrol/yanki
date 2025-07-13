@@ -82,7 +82,7 @@
 		"nanoid": "^5.1.5",
 		"path-browserify-esm": "^1.0.6",
 		"picocolors": "^1.1.1",
-		"pkgroll": "2.13.1",
+		"pkgroll": "^2.14.2",
 		"playwright": "^1.54.1",
 		"plur": "^5.1.0",
 		"pretty-ms": "^9.2.0",
