@@ -53,7 +53,7 @@
 		"@types/hast": "^3.0.4",
 		"@types/lodash-es": "^4.17.12",
 		"@types/mdast": "^4.0.4",
-		"@types/node": "^18.19.118",
+		"@types/node": "^18.19.119",
 		"@types/unist": "^3.0.3",
 		"@types/yargs": "^17.0.33",
 		"globby": "^14.1.0",
@@ -62,7 +62,7 @@
 	},
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^5.5.0",
-		"@shikijs/rehype": "^3.7.0",
+		"@shikijs/rehype": "^3.8.0",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^2.2.1",
 		"@stdlib/assert-is-absolute-path": "^0.2.2",
@@ -82,7 +82,7 @@
 		"nanoid": "^5.1.5",
 		"path-browserify-esm": "^1.0.6",
 		"picocolors": "^1.1.1",
-		"pkgroll": "^2.14.2",
+		"pkgroll": "^2.14.3",
 		"playwright": "^1.54.1",
 		"plur": "^5.1.0",
 		"pretty-ms": "^9.2.0",
@@ -112,7 +112,7 @@
 		"vite": "^6.3.5",
 		"vitest": "^3.2.4",
 		"yaml": "^2.8.0",
-		"yanki-connect": "^3.0.1"
+		"yanki-connect": "^3.0.2"
 	},
 	"packageManager": "pnpm@10.13.1",
 	"engines": {
