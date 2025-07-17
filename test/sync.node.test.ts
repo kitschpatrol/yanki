@@ -1204,3 +1204,77 @@ describeWithFileFixture(
 		})
 	},
 )
+
+/**
+ * Attempt to reproduce https://github.com/kitschpatrol/yanki-obsidian/issues/46
+ */
+describeWithFileFixture(
+	'deck safety',
+	{
+		assetPath: './test/assets/test-deck-safety',
+		cleanUpAnki: false,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('preserves existing decks', { timeout: 60_000 }, async () => {
+			// First, create existing deck outside of Yanki
+			await context.yankiConnect.deck.createDeck({ deck: 'Test Deck' })
+
+			// Add note to existing deck that's NOT managed by Yanki
+			await context.yankiConnect.note.addNote({
+				note: {
+					deckName: 'Test Deck',
+					fields: {
+						Back: 'Existing test note back',
+						Front: 'Existing test note front',
+					},
+					modelName: 'Basic',
+				},
+			})
+
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				basePath: context.tempAssetPath,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+
+			const deckStats = await context.yankiConnect.deck.getDeckStats({ decks: ['Test Deck'] })
+			const totalInDeck = Object.entries(deckStats)[0][1].total_in_deck
+			expect(totalInDeck).toBe(2)
+
+			// Now delete the Yanki-managed note from the file system and sync again
+			await fs.unlink(context.markdownFiles[0])
+			context.markdownFiles.splice(0, 1)
+			context.allFiles.splice(0, 1)
+
+			const results2 = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				basePath: context.tempAssetPath,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results2)).toMatchSnapshot()
+
+			// The existing note in the eponymous deck should still be there
+			const deckStats2 = await context.yankiConnect.deck.getDeckStats({ decks: ['Test Deck'] })
+			const totalInDeck2 = Object.entries(deckStats2)[0][1].total_in_deck
+			expect(totalInDeck2).toBe(1)
+		})
+	},
+)
