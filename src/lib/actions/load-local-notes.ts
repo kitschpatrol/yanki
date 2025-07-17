@@ -130,8 +130,12 @@ const defaultDeckNamesFromFilePathsOptions: DeckNamesFromFilePathsOptions = {
 function getDeckNamesFromFilePaths(
 	absoluteFilePaths: string[],
 	options?: Partial<DeckNamesFromFilePathsOptions>,
-) {
+): string[] {
 	const { mode } = deepmerge(defaultDeckNamesFromFilePathsOptions, options ?? {})
+
+	if (absoluteFilePaths.length === 0) {
+		return []
+	}
 
 	const filePathSegments = absoluteFilePaths.map((filePath) =>
 		path.dirname(filePath).split(path.sep),
