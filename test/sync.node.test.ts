@@ -1212,11 +1212,11 @@ describeWithFileFixture(
 	'deck safety',
 	{
 		assetPath: './test/assets/test-deck-safety',
-		cleanUpAnki: false,
+		cleanUpAnki: true,
 		cleanUpTempFiles: true,
 	},
 	(context) => {
-		it('preserves existing decks', { timeout: 60_000 }, async () => {
+		it('preserves existing mixed decks', { timeout: 60_000 }, async () => {
 			// First, create existing deck outside of Yanki
 			await context.yankiConnect.deck.createDeck({ deck: 'Test Deck' })
 
@@ -1275,6 +1275,119 @@ describeWithFileFixture(
 			const deckStats2 = await context.yankiConnect.deck.getDeckStats({ decks: ['Test Deck'] })
 			const totalInDeck2 = Object.entries(deckStats2)[0][1].total_in_deck
 			expect(totalInDeck2).toBe(1)
+		})
+	},
+)
+
+/**
+ * Another attempt to reproduce https://github.com/kitschpatrol/yanki-obsidian/issues/46
+ * based on https://github.com/kitschpatrol/yanki-obsidian/issues/46#issuecomment-3086363899
+ */
+describeWithFileFixture(
+	'deep deck safety',
+	{
+		assetPath: './test/assets/test-deep-deck-safety',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('preserves existing deeply nested mixed decks', { timeout: 60_000 }, async () => {
+			// "I created three-level folders, which means three nested decks within each other."
+			// Presumably in Obsidian...
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				basePath: context.tempAssetPath,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+
+			// "In the third-level folder, I added another deck directly in Anki but not in the plugin."
+			await context.yankiConnect.deck.createDeck({
+				deck: 'Test Deck A::Test Deck B::Test Deck C::Test Deck D',
+			})
+
+			// "I added new cards to that Anki deck..." (Presumably in the Anki desktop app)
+			await context.yankiConnect.note.addNote({
+				note: {
+					deckName: 'Test Deck A::Test Deck B::Test Deck C::Test Deck D',
+					fields: {
+						Back: 'New card from Anki desktop app back',
+						Front: 'New card from Anki desktop app front',
+					},
+					modelName: 'Basic',
+				},
+			})
+
+			// We should have a mix of notes from the plugin and the Anki desktop app
+			const allNotes1 = await context.yankiConnect.note.findNotes({ query: '*' })
+			expect(allNotes1.length).toBe(4)
+
+			// "...and also added cards from the plugin."
+			const testDeckDPath = path.join(
+				context.tempAssetPath,
+				'Test Deck A',
+				'Test Deck B',
+				'Test Deck C',
+				'Test Deck D',
+			)
+			const newNotePath = path.join(testDeckDPath, 'basic.md')
+			await fs.mkdir(testDeckDPath, { recursive: true })
+			await fs.writeFile(
+				newNotePath,
+				'New card from Obsidian front\n---\nNew card from Obsidian back',
+			)
+			context.markdownFiles.push(newNotePath)
+			context.allFiles.push(newNotePath)
+
+			const results2 = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				basePath: context.tempAssetPath,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results2)).toMatchSnapshot()
+
+			// We should have a mix of notes from the plugin and the Anki desktop app
+			const allNotes2 = await context.yankiConnect.note.findNotes({ query: '*' })
+			expect(allNotes2.length).toBe(5)
+
+			// "Afterwards, I deleted the cards, and emptied the folders(notes deleted) as well." (Presumably in Obsidian?)
+			context.markdownFiles = []
+			context.allFiles = []
+
+			const results3 = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				basePath: context.tempAssetPath,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results3)).toMatchSnapshot()
+
+			// The note added manually in the Anki desktop app should still be there
+			const allNotes3 = await context.yankiConnect.note.findNotes({ query: '*' })
+			expect(allNotes3.length).toBe(1)
 		})
 	},
 )
