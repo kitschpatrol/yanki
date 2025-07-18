@@ -4,7 +4,7 @@ import { expect, it } from 'vitest'
 import { syncFiles } from '../src/lib'
 import * as pathExtras from '../src/lib/utilities/path'
 import { describeWithFileFixture } from './fixtures/file-fixture'
-import { cleanUpTempPath } from './utilities/stable-sync-results'
+import { cleanUpTempPath, stableResults } from './utilities/stable-sync-results'
 
 describeWithFileFixture(
 	'filename management',
@@ -420,6 +420,32 @@ describeWithFileFixture(
 			}
 
 			expect(renamedFilesMap).toMatchInlineSnapshot(`Map {}`)
+		})
+	},
+)
+
+describeWithFileFixture(
+	'filename collision management',
+	{
+		assetPath: './test/assets/test-filename-management-collision/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('handles filename management deck collisions', async () => {
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'prompt',
+				namespace: context.namespace,
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
 		})
 	},
 )
