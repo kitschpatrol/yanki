@@ -891,7 +891,7 @@ exports[`complex trees > makes the right decisions about deck naming without a f
 }
 `;
 
-exports[`deck safety > preserves existing decks 1`] = `
+exports[`deck safety > preserves existing mixed decks 1`] = `
 {
   "ankiWeb": false,
   "deletedDecks": [],
@@ -920,7 +920,7 @@ exports[`deck safety > preserves existing decks 1`] = `
 }
 `;
 
-exports[`deck safety > preserves existing decks 2`] = `
+exports[`deck safety > preserves existing mixed decks 2`] = `
 {
   "ankiWeb": false,
   "deletedDecks": [],
