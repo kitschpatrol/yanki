@@ -194,6 +194,7 @@ export async function syncNotes(
 	}
 
 	// Deletion pass, we need the full info to do deck cleanup later on
+	// TODO does strictMatching have implications here?
 	const orphanedNotes = remoteNotes.filter(
 		(remoteNote) => !allLocalNotesCopy.some((localNote) => localNote.noteId === remoteNote.noteId),
 	)
