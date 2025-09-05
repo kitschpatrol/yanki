@@ -84,6 +84,7 @@ export async function syncFiles(
 		namespace: namespaceRaw, // To be validated and sanitized
 		obsidianVault,
 		strictLineBreaks,
+		strictMatching,
 		syncMediaAssets,
 	} = deepmerge(defaultSyncFilesOptions, options ?? {}) as SyncFilesOptions
 
@@ -159,6 +160,7 @@ export async function syncFiles(
 		ankiWeb,
 		dryRun,
 		namespace,
+		strictMatching,
 	})
 
 	// Write Anki note IDs to the local files as necessary
