@@ -7,6 +7,7 @@ exports[`all media > fetches and adds local media files and remote urls to anki 
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 6004fd0740d5a6e0",
   "synced": [
     {
@@ -100,6 +101,7 @@ exports[`local media > adds local media files to anki when appropriate 1`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - a95afd60b2228aac",
   "synced": [
     {
@@ -258,6 +260,7 @@ exports[`remote media > fetches and adds media urls to anki when appropriate 1`]
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - be90c6c257be9707",
   "synced": [
     {

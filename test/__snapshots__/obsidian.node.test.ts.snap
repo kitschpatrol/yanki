@@ -7,6 +7,7 @@ exports[`obsidian vault sync > correctly syncs an entire obsidian vault 1`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 9acc6db986e7d5ff",
   "synced": [
     {
@@ -549,6 +550,7 @@ exports[`obsidian vault wiki link stability > correctly syncs an entire obsidian
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 175fa4fb08db0a9b",
   "synced": [
     {

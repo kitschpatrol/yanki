@@ -66,6 +66,7 @@ it('syncs notes', async () => {
 		  "deletedMedia": [],
 		  "dryRun": false,
 		  "duration": 0,
+		  "fixedDatabase": false,
 		  "namespace": "yanki.sync.browser.test",
 		  "synced": [
 		    {

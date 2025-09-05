@@ -154,6 +154,8 @@ describeWithFileFixture(
 				Sync Summary:
 				  Created: 30
 
+				Database automatically fixed: No
+
 				Sync Details:
 				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card-with-extra.md
 				  Note ID 0 Created /test-minimal-notes/basic-and-reversed-card-with-no-back.md
@@ -338,60 +340,70 @@ describeWithFileFixture(
 	},
 )
 
-describeWithFileFixture(
-	'update model',
-	{
-		assetPath: './test/assets/test-update-model/',
-		cleanUpAnki: true,
-		cleanUpTempFiles: true,
-	},
-	(context) => {
-		it('updates the model if it changes without destroying the note', async () => {
-			// First sync
-			const results = await syncFiles(context.markdownFiles, {
-				ankiConnectOptions: {
-					autoLaunch: true,
-				},
-				ankiWeb: false,
-				dryRun: false,
-				namespace: context.namespace,
-				obsidianVault: 'Vault',
-				syncMediaAssets: 'off',
+for (const targetType of ['basic', 'cloze', 'type', 'reverse']) {
+	describeWithFileFixture(
+		`update model permutations to ${targetType}`,
+		{
+			assetPath: './test/assets/test-update-model-permutations/',
+			cleanUpAnki: true,
+			cleanUpTempFiles: true,
+		},
+		(context) => {
+			it(`updates the model if it changes to ${targetType}`, async () => {
+				// Store note variations markdown in model type keyed map
+				const originalFileContents = new Map<string, string>()
+				for (const markdownFilePath of context.markdownFiles) {
+					const key = path.basename(markdownFilePath, path.extname(markdownFilePath))
+					const content = await fs.readFile(markdownFilePath, 'utf8')
+					originalFileContents.set(key, content)
+				}
+
+				// First sync
+				const results = await syncFiles(context.markdownFiles, {
+					ankiConnectOptions: {
+						autoLaunch: true,
+					},
+					ankiWeb: false,
+					dryRun: false,
+					namespace: context.namespace,
+					obsidianVault: 'Vault',
+					syncMediaAssets: 'off',
+				})
+
+				expect(results.fixedDatabase).toBe(false)
+				expect(results.synced.map(({ action }) => action)).toMatchSnapshot()
+				expect(results.synced.map(({ note }) => note.modelName)).toMatchSnapshot()
+
+				// Update files to new type
+				for (const { filePath } of results.synced) {
+					const markdown = await fs.readFile(filePath!, 'utf8')
+					const key = path.basename(filePath!, path.extname(filePath!))
+					const updatedMarkdown = markdown.replace(
+						originalFileContents.get(key)!,
+						originalFileContents.get(targetType)!,
+					)
+					await fs.writeFile(filePath!, updatedMarkdown)
+				}
+
+				// Second sync
+				const newModelResults = await syncFiles(context.markdownFiles, {
+					ankiConnectOptions: {
+						autoLaunch: true,
+					},
+					ankiWeb: false,
+					dryRun: false,
+					namespace: context.namespace,
+					obsidianVault: 'Vault',
+					syncMediaAssets: 'off',
+				})
+
+				expect(newModelResults.fixedDatabase).toMatchSnapshot()
+				expect(newModelResults.synced.map(({ action }) => action)).toMatchSnapshot()
+				expect(newModelResults.synced.map(({ note }) => note.modelName)).toMatchSnapshot()
 			})
-
-			// Now change the synced note in a way that would require a model update
-
-			const note = results.synced[0]
-
-			expect(note.filePath).toBeDefined()
-			const markdown = await fs.readFile(note.filePath!, 'utf8')
-			const updatedMarkdown = markdown.replace(
-				"I'm the front of the card\n\n---",
-				"I'm the front of the card\n\n---\n---",
-			)
-
-			await fs.writeFile(note.filePath!, updatedMarkdown)
-
-			// Second sync
-			const newModelResults = await syncFiles(context.markdownFiles, {
-				ankiConnectOptions: {
-					autoLaunch: true,
-				},
-				ankiWeb: false,
-				dryRun: false,
-				namespace: context.namespace,
-				obsidianVault: 'Vault',
-				syncMediaAssets: 'off',
-			})
-
-			const newNote = newModelResults.synced[0]
-
-			expect(newNote.note.noteId).toEqual(note.note.noteId)
-			expect(newNote.action).toEqual('updated')
-			expect(newNote.note.modelName).toEqual('Yanki - Basic (and reversed card with extra)')
-		})
-	},
-)
+		},
+	)
+}
 
 /**
  * https://github.com/kitschpatrol/yanki-obsidian/issues/34

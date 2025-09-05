@@ -7,6 +7,7 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - b9918cfa0f62798d",
   "synced": [
     {
@@ -508,6 +509,7 @@ exports[`brackets in path > syncs correctly with brackets in the file path 1`] =
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - eb2be65a6859382e",
   "synced": [
     {
@@ -538,6 +540,7 @@ exports[`complex trees > makes the right decisions about deck naming with a file
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - b5346192b9b2fb82",
   "synced": [
     {
@@ -726,6 +729,7 @@ exports[`complex trees > makes the right decisions about deck naming without a f
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - b5346192b9b2fb82",
   "synced": [
     {
@@ -898,6 +902,7 @@ exports[`deck safety > preserves existing mixed decks 1`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - bbbb46623ed24aae",
   "synced": [
     {
@@ -927,6 +932,7 @@ exports[`deck safety > preserves existing mixed decks 2`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - bbbb46623ed24aae",
   "synced": [
     {
@@ -959,6 +965,7 @@ exports[`deep deck safety > preserves existing deeply nested mixed decks 1`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 274fc3dd5b623496",
   "synced": [
     {
@@ -1020,6 +1027,7 @@ exports[`deep deck safety > preserves existing deeply nested mixed decks 2`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 274fc3dd5b623496",
   "synced": [
     {
@@ -1097,6 +1105,7 @@ exports[`deep deck safety > preserves existing deeply nested mixed decks 3`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 274fc3dd5b623496",
   "synced": [
     {
@@ -1186,6 +1195,7 @@ exports[`deepest deck safety > preserves existing deeply nested mixed decks with
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 7dfb5506aa6306e0",
   "synced": [
     {
@@ -1217,6 +1227,7 @@ exports[`deepest deck safety > preserves existing deeply nested mixed decks with
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 7dfb5506aa6306e0",
   "synced": [
     {
@@ -1249,6 +1260,7 @@ exports[`duplicate node ids > handles duplicate node ids for notes with differen
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 00e8048e96c5000c",
   "synced": [
     {
@@ -1278,6 +1290,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 4b7d855f1825e39f",
   "synced": [
     {
@@ -1628,6 +1641,7 @@ exports[`nested tags > creates nested tags in anki 1`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - f89ad494c2533a37",
   "synced": [
     {
@@ -1699,6 +1713,7 @@ exports[`nested tags > creates nested tags in anki 2`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - f89ad494c2533a37",
   "synced": [
     {
@@ -1770,6 +1785,7 @@ exports[`note id edge cases > handles missing note IDs gracefully 1`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 1382890845fc6716",
   "synced": [
     {
@@ -1866,6 +1882,7 @@ exports[`note id edge cases > handles missing note IDs gracefully 2`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 1382890845fc6716",
   "synced": [
     {
@@ -1962,6 +1979,7 @@ exports[`note id edge cases > handles missing note IDs gracefully 3`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 1382890845fc6716",
   "synced": [
     {
@@ -2058,6 +2076,7 @@ exports[`single string tag > creates notes with single string tag as expected 1`
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 44c8bd7d7fbe0b32",
   "synced": [
     {
@@ -2089,6 +2108,7 @@ exports[`single string tag > creates notes with single string tag as expected 2`
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 44c8bd7d7fbe0b32",
   "synced": [
     {
@@ -2120,6 +2140,7 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - ee8a558c89d868bf",
   "synced": [
     {
@@ -2185,6 +2206,7 @@ exports[`unicode deck contents > creates notes with unicode as expected 3`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - b16c58c6b0fc450d",
   "synced": [
     {
@@ -2262,6 +2284,7 @@ exports[`unicode deck contents > creates notes with unicode as expected 6`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - b16c58c6b0fc450d",
   "synced": [
     {
@@ -2339,6 +2362,7 @@ exports[`unicode deck names and invalid note ids > syncs as expected 1`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 38ab363c72c9eedb",
   "synced": [
     {
@@ -3558,6 +3582,7 @@ exports[`unicode deck names and invalid note ids > syncs as expected 2`] = `
   "deletedMedia": [],
   "dryRun": false,
   "duration": 0,
+  "fixedDatabase": false,
   "namespace": "Yanki Test - 38ab363c72c9eedb",
   "synced": [
     {
@@ -4968,4 +4993,156 @@ exports[`unicode deck names and invalid note ids > syncs as expected 2`] = `
     },
   ],
 }
+`;
+
+exports[`update model permutations to basic > updates the model if it changes to basic 1`] = `
+[
+  "created",
+  "created",
+  "created",
+  "created",
+]
+`;
+
+exports[`update model permutations to basic > updates the model if it changes to basic 2`] = `
+[
+  "Yanki - Basic",
+  "Yanki - Cloze",
+  "Yanki - Basic (and reversed card with extra)",
+  "Yanki - Basic (type in the answer)",
+]
+`;
+
+exports[`update model permutations to basic > updates the model if it changes to basic 3`] = `true`;
+
+exports[`update model permutations to basic > updates the model if it changes to basic 4`] = `
+[
+  "unchanged",
+  "updated",
+  "updated",
+  "updated",
+]
+`;
+
+exports[`update model permutations to basic > updates the model if it changes to basic 5`] = `
+[
+  "Yanki - Basic",
+  "Yanki - Basic",
+  "Yanki - Basic",
+  "Yanki - Basic",
+]
+`;
+
+exports[`update model permutations to cloze > updates the model if it changes to cloze 1`] = `
+[
+  "created",
+  "created",
+  "created",
+  "created",
+]
+`;
+
+exports[`update model permutations to cloze > updates the model if it changes to cloze 2`] = `
+[
+  "Yanki - Basic",
+  "Yanki - Cloze",
+  "Yanki - Basic (and reversed card with extra)",
+  "Yanki - Basic (type in the answer)",
+]
+`;
+
+exports[`update model permutations to cloze > updates the model if it changes to cloze 3`] = `false`;
+
+exports[`update model permutations to cloze > updates the model if it changes to cloze 4`] = `
+[
+  "updated",
+  "unchanged",
+  "updated",
+  "updated",
+]
+`;
+
+exports[`update model permutations to cloze > updates the model if it changes to cloze 5`] = `
+[
+  "Yanki - Cloze",
+  "Yanki - Cloze",
+  "Yanki - Cloze",
+  "Yanki - Cloze",
+]
+`;
+
+exports[`update model permutations to reverse > updates the model if it changes to reverse 1`] = `
+[
+  "created",
+  "created",
+  "created",
+  "created",
+]
+`;
+
+exports[`update model permutations to reverse > updates the model if it changes to reverse 2`] = `
+[
+  "Yanki - Basic",
+  "Yanki - Cloze",
+  "Yanki - Basic (and reversed card with extra)",
+  "Yanki - Basic (type in the answer)",
+]
+`;
+
+exports[`update model permutations to reverse > updates the model if it changes to reverse 3`] = `false`;
+
+exports[`update model permutations to reverse > updates the model if it changes to reverse 4`] = `
+[
+  "updated",
+  "updated",
+  "unchanged",
+  "updated",
+]
+`;
+
+exports[`update model permutations to reverse > updates the model if it changes to reverse 5`] = `
+[
+  "Yanki - Basic (and reversed card with extra)",
+  "Yanki - Basic (and reversed card with extra)",
+  "Yanki - Basic (and reversed card with extra)",
+  "Yanki - Basic (and reversed card with extra)",
+]
+`;
+
+exports[`update model permutations to type > updates the model if it changes to type 1`] = `
+[
+  "created",
+  "created",
+  "created",
+  "created",
+]
+`;
+
+exports[`update model permutations to type > updates the model if it changes to type 2`] = `
+[
+  "Yanki - Basic",
+  "Yanki - Cloze",
+  "Yanki - Basic (and reversed card with extra)",
+  "Yanki - Basic (type in the answer)",
+]
+`;
+
+exports[`update model permutations to type > updates the model if it changes to type 3`] = `true`;
+
+exports[`update model permutations to type > updates the model if it changes to type 4`] = `
+[
+  "updated",
+  "updated",
+  "updated",
+  "unchanged",
+]
+`;
+
+exports[`update model permutations to type > updates the model if it changes to type 5`] = `
+[
+  "Yanki - Basic (type in the answer)",
+  "Yanki - Basic (type in the answer)",
+  "Yanki - Basic (type in the answer)",
+  "Yanki - Basic (type in the answer)",
+]
 `;

@@ -25,7 +25,7 @@ export type SyncedNote = {
 
 export type SyncNotesOptions = Pick<
 	GlobalOptions,
-	'ankiConnectOptions' | 'ankiWeb' | 'dryRun' | 'namespace' | 'strictMatching'
+	'ankiConnectOptions' | 'ankiWeb' | 'checkDatabase' | 'dryRun' | 'namespace' | 'strictMatching'
 >
 
 export const defaultSyncNotesOptions: SyncNotesOptions = {
@@ -37,6 +37,7 @@ export type SyncNotesResult = Simplify<
 		deletedDecks: string[]
 		deletedMedia: string[]
 		duration: number
+		fixedDatabase: boolean
 		synced: SyncedNote[]
 	}
 >
@@ -58,10 +59,8 @@ export async function syncNotes(
 	const allLocalNotesCopy = structuredClone(allLocalNotes)
 
 	// Defaults
-	const { ankiConnectOptions, ankiWeb, dryRun, namespace, strictMatching } = deepmerge(
-		defaultSyncNotesOptions,
-		options ?? {},
-	) as SyncNotesOptions
+	const { ankiConnectOptions, ankiWeb, checkDatabase, dryRun, namespace, strictMatching } =
+		deepmerge(defaultSyncNotesOptions, options ?? {}) as SyncNotesOptions
 
 	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
 
@@ -78,6 +77,7 @@ export async function syncNotes(
 			deletedMedia: [],
 			dryRun,
 			duration: performance.now() - startTime,
+			fixedDatabase: false,
 			namespace: sanitizedNamespace,
 			synced: allLocalNotesCopy.map((note) => ({
 				action: 'ankiUnreachable',
@@ -220,6 +220,36 @@ export async function syncNotes(
 
 	const deletedDecks = await deleteOrphanedDecks(client, liveNotes, remoteNotes, dryRun)
 
+	let fixedDatabase = false
+	if (checkDatabase) {
+		// Check for database corruption
+		// (can happen if a model update changes a card count for a note)
+		const updatedModelRemoteNotes = remoteNotes.filter((remoteNote) =>
+			synced.some(
+				(localNote) =>
+					localNote.action === 'updated' &&
+					// TODO does strictMatching have implications here?
+					localNote.note.noteId === remoteNote.noteId &&
+					localNote.note.modelName !== remoteNote.modelName,
+			),
+		)
+
+		if (updatedModelRemoteNotes.length > 0) {
+			const cardIdsToCheck: number[] = updatedModelRemoteNotes.flatMap(({ cards }) => cards ?? [])
+
+			console.log('cardIdsToCheck')
+			console.log(cardIdsToCheck)
+
+			try {
+				// This will throw a template error if there are bad cards...
+				await client.card.cardsInfo({ cards: cardIdsToCheck })
+			} catch {
+				fixedDatabase = true
+				await client.graphical.guiCheckDatabase()
+			}
+		}
+	}
+
 	// Clean up unused media files
 	const deletedMedia = await deleteUnusedMedia(client, liveNotes, sanitizedNamespace, dryRun)
 
@@ -236,6 +266,7 @@ export async function syncNotes(
 		deletedMedia,
 		dryRun,
 		duration: performance.now() - startTime,
+		fixedDatabase,
 		namespace: sanitizedNamespace,
 		synced,
 	}

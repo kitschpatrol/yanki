@@ -107,6 +107,12 @@ await yargsInstance
 						'Consider notes to be a "match" only if the local Markdown frontmatter `noteId` matches the remote Anki database `noteId` exactly. When disabled, Yanki will attempt to reuse existing Anki notes whose content matches a local Markdown note, even if the local and remote `noteId` differs. This helps preserve study progress in Anki if the local Markdown frontmatter is lost or corrupted. In Yanki 0.17.0 and earlier, `--strict-matching` was the default behavior. Starting with version 0.18.0, it is disabled by default.',
 					type: 'boolean',
 				})
+				.option('check-database', {
+					default: defaultGlobalOptions.checkDatabase,
+					describe:
+						'Automatically run Anki\'s "Check Database" command after note model updates that might produce database corruption. In Yanki 1.0.2 and earlier, `--check-database false` was the default behavior. Starting with version 1.1.0, it is enabled by default.',
+					type: 'boolean',
+				})
 				.option(strictLineBreaks)
 				.option(jsonOption('Output the sync report as JSON.'))
 				.option(verboseOption),
@@ -114,6 +120,7 @@ await yargsInstance
 			ankiAutoLaunch,
 			ankiConnect,
 			ankiWeb,
+			checkDatabase,
 			directory,
 			dryRun,
 			json,
@@ -157,6 +164,7 @@ await yargsInstance
 					port,
 				},
 				ankiWeb,
+				checkDatabase,
 				dryRun,
 				manageFilenames,
 				maxFilenameLength,

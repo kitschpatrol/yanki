@@ -76,6 +76,7 @@ export async function syncFiles(
 		ankiConnectOptions,
 		ankiWeb,
 		basePath: basePathRaw, // To be normalized
+		checkDatabase,
 		dryRun,
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
@@ -155,9 +156,10 @@ export async function syncFiles(
 
 	const allLocalNotes = renamedLocalNotes.map((note) => note.note)
 
-	const { deletedDecks, deletedMedia, synced } = await syncNotes(allLocalNotes, {
+	const { deletedDecks, deletedMedia, fixedDatabase, synced } = await syncNotes(allLocalNotes, {
 		ankiConnectOptions,
 		ankiWeb,
+		checkDatabase,
 		dryRun,
 		namespace,
 		strictMatching,
@@ -212,6 +214,7 @@ export async function syncFiles(
 		deletedMedia,
 		dryRun,
 		duration: performance.now() - startTime,
+		fixedDatabase,
 		namespace,
 		synced: syncedAndSorted,
 	}
@@ -252,6 +255,12 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 
 		if (result.deletedMedia.length > 0) {
 			lines.push('', `Media assets deleted: ${result.deletedMedia.length}`)
+		}
+
+		// Will never apply to a dry run since the Anki database is not mutated, and
+		// therefore no corruption is possible
+		if (!result.dryRun) {
+			lines.push('', `Database automatically fixed: ${result.fixedDatabase ? 'Yes' : 'No'}`)
 		}
 
 		lines.push('', result.dryRun ? 'Sync Plan Details:' : 'Sync Details:')
