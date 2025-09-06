@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -1484,5 +1485,172 @@ describeWithFileFixture(
 				expect(allNotes2.length).toBe(1)
 			},
 		)
+	},
+)
+
+describeWithFileFixture(
+	`handle multi-cloze model type change`,
+	{
+		assetPath: './test/assets/test-cloze-multiple/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it(`cleans up database when a multi cloze note changes model type`, async () => {
+			// First sync
+			const results = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			// Change to basic
+			const { filePath } = results.synced[0]
+			const markdown = await fs.readFile(filePath!, 'utf8')
+			const updatedMarkdown = markdown
+				.replace('~~Cloze One~~\n', 'Front of card')
+				.replace('~~Cloze Two~~\n', '---')
+				.replace('~~Cloze Three~~\n', 'Back of card')
+			await fs.writeFile(filePath!, updatedMarkdown)
+
+			expect(stableResults(results)).toMatchSnapshot()
+			const cards = await context.yankiConnect.card.findCards({ query: '*' })
+			expect(cards.length).toBe(3)
+
+			// Second sync
+			const secondResults = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(secondResults)).toMatchSnapshot()
+
+			const cards2 = await context.yankiConnect.card.findCards({ query: '*' })
+			expect(cards2.length).toBe(1)
+		})
+	},
+)
+
+describeWithFileFixture(
+	`handle multi-cloze addition`,
+	{
+		assetPath: './test/assets/test-cloze-multiple/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it(`cleanly adds additional cloze to a multi-cloze note`, async () => {
+			// First sync
+			const results = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			// Change to basic
+			const { filePath } = results.synced[0]
+
+			const markdown = await fs.readFile(filePath!, 'utf8')
+			const updatedMarkdown = `${markdown}\n~~Cloze Four~~\n`
+			await fs.writeFile(filePath!, updatedMarkdown)
+
+			expect(stableResults(results)).toMatchSnapshot()
+			const cards = await context.yankiConnect.card.findCards({ query: '*' })
+			expect(cards.length).toBe(3)
+
+			// Second sync
+			const secondResults = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(secondResults)).toMatchSnapshot()
+
+			const cards2 = await context.yankiConnect.card.findCards({ query: '*' })
+			expect(cards2.length).toBe(4)
+		})
+	},
+)
+
+/**
+ * Reproduces https://github.com/kitschpatrol/yanki-obsidian/issues/51
+ * There's no way to automate a fix through Anki Connect, so the user will just
+ * have to run Tools --> Empty Cards... This seems preferable to destroying
+ * progress on the retained clozes by deleting and recreating the note.
+ */
+describeWithFileFixture(
+	`handle cloze removal`,
+	{
+		assetPath: './test/assets/test-cloze-multiple/',
+		cleanUpAnki: false,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		// Skipped until there's a way to handle this automatically
+		it.skip(`cleans up orphaned cards when one of several clozes is removed`, async () => {
+			// First sync
+			const results = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			// Remove one of the clozes
+			const { filePath } = results.synced[0]
+			const markdown = await fs.readFile(filePath!, 'utf8')
+			const updatedMarkdown = markdown.replace('~~Cloze Two~~\n', '')
+			await fs.writeFile(filePath!, updatedMarkdown)
+
+			expect(stableResults(results)).toMatchSnapshot()
+
+			const cards = await context.yankiConnect.card.findCards({ query: '*' })
+			expect(cards.length).toBe(3)
+
+			// Second sync
+			const secondResults = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			console.log(secondResults)
+
+			const cards2 = await context.yankiConnect.card.findCards({ query: '*' })
+
+			console.log(cards2.length)
+			// Expect(cards2.length).toBe(2)
+		})
 	},
 )

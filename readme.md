@@ -278,6 +278,11 @@ The difference is subtle, but note the matching `{{c1`s. This markup yields a si
 
 _Note: While you can encloze images, math equations, and other inline-styled syntax, clozing over multiple lines or block elements is not currently supported._
 
+_Note: If you delete one of several clozes from an existing note, previous cards associated with the now-missing cloze will linger in Anki's database. While studying, you may see the message "No cloze found on card. Please either add a cloze deletion, or use the Empty Cards tool." In these cases, you must run the "Tools → Empty Cards..." command from Anki desktop application menu bar._
+
+_**Warning: Risk of progress loss**_  
+_If you delete one of several implicitly numbered clozes (e.g. `~~hidden~~`) from a note, then study progress will "move" from one cloze to another. For example, if you have three clozes in a note, but then delete the second cloze and sync to Anki, then what was previously the "third" cloze becomes the new "second" cloze, inheriting study progress associated with the now-deleted second cloze. If you plan on editing your cloze notes heavily after the fact, consider using explicit numbering syntax (e.g. `~~1 hidden~~`) instead._
+
 ## Getting started
 
 ### Dependencies
