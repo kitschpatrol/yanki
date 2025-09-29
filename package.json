@@ -112,7 +112,7 @@
 		"vite": "^7.1.4",
 		"vitest": "^3.2.4",
 		"yaml": "^2.8.1",
-		"yanki-connect": "^3.0.4"
+		"yanki-connect": "^3.0.5"
 	},
 	"packageManager": "pnpm@10.15.1",
 	"engines": {

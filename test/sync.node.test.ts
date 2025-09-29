@@ -1124,8 +1124,8 @@ describeWithFileFixture(
 			const actions2 = results2.synced.map((r) => r.action)
 			expect(actions2).toMatchInlineSnapshot(`
 				[
-				  "unchanged",
-				  "unchanged",
+				  "updated",
+				  "updated",
 				]
 			`)
 
@@ -1604,7 +1604,7 @@ describeWithFileFixture(
 	`handle cloze removal`,
 	{
 		assetPath: './test/assets/test-cloze-multiple/',
-		cleanUpAnki: false,
+		cleanUpAnki: true,
 		cleanUpTempFiles: true,
 	},
 	(context) => {
@@ -1651,6 +1651,92 @@ describeWithFileFixture(
 
 			console.log(cards2.length)
 			// Expect(cards2.length).toBe(2)
+		})
+	},
+)
+
+/**
+ * Check Filtered / custom study decks
+ * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/52
+ * Thanks @edgarguo for reporting.
+ *
+ * "I put tags in notes, and then manually created a filtered deck in Anki by
+ * search results of the tag. Everything working so far. Now I sync, the
+ * filtered deck is deleted. Tags are preserved, only the filtered deck is
+ * gone."
+ *
+ * Tangentially related:
+ * https://github.com/FooSoft/anki-connect/issues/147
+ * https://forums.ankiweb.net/t/ankiconnect-getting-unsupported-action-error-createfiltereddeck-command-not-working/59387
+ *
+ * Filtered decks are tagged with:
+ * 'dyn': 1
+ * 'conf': (absent if the deck is filtered)
+ *
+ * Deck JSON via: https://github.com/ankidroid/Anki-Android/wiki/Database-Structure#decks-jsonobjects
+ */
+describeWithFileFixture(
+	'filtered decks',
+	{
+		assetPath: './test/assets/test-tags-filtered-decks',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		// Skipped until there's a way to handle this without manual user action
+		it.skip('tests filtered decks', { timeout: 30_000 }, async () => {
+			// Sync
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'off',
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+			expect(results.synced.every((synced) => synced.action === 'created')).toBe(true)
+
+			const tags = await context.yankiConnect.note.getTags()
+			expect(tags).toStrictEqual(['foobar', 'marsupials', 'reticulation', 'splines'])
+
+			// User action required...
+			console.log(
+				'Manually create a filtered deck (F key) with the query "tag:splines" in the Anki desktop app...',
+			)
+			// Poll every second for an increase in deck count
+			const { length: startingDeckCount } = await context.yankiConnect.deck.deckNames()
+			let currentDeckCount = startingDeckCount
+			while (startingDeckCount === currentDeckCount) {
+				await new Promise((resolve) => {
+					setTimeout(resolve, 1000)
+				})
+				const { length: latestDeckCount } = await context.yankiConnect.deck.deckNames()
+				currentDeckCount = latestDeckCount
+			}
+			console.log('Continuing...')
+
+			// Second sync
+			const secondResults = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				manageFilenames: 'off',
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(secondResults)).toMatchSnapshot()
+			expect(secondResults.synced.every((synced) => synced.action === 'unchanged')).toBe(true)
 		})
 	},
 )

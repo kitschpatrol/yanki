@@ -190,8 +190,8 @@ importers:
         specifier: ^2.8.1
         version: 2.8.1
       yanki-connect:
-        specifier: ^3.0.4
-        version: 3.0.4
+        specifier: ^3.0.5
+        version: 3.0.5
 
 packages:
 
@@ -1464,6 +1464,9 @@ packages:
 
   '@types/node@18.19.124':
     resolution: {integrity: sha512-hY4YWZFLs3ku6D2Gqo3RchTd9VRCcrjqp/I0mmohYeUVA5Y8eCXKJEasHxLAJVZRJuQogfd1GiJ9lgogBgKeuQ==}
+
+  '@types/node@18.19.128':
+    resolution: {integrity: sha512-m7wxXGpPpqxp2QDi/rpih5O772APRuBIa/6XiGqLNoM1txkjI8Sz1V4oSXJxQLTz/yP5mgy9z6UXEO6/lP70Gg==}
 
   '@types/node@22.18.1':
     resolution: {integrity: sha512-rzSDyhn4cYznVG+PCzGe1lwuMYJrcBS1fc3JqSa2PvtABwWo+dZ1ij5OVok3tqfpEBCBoaR4d7upFJk73HRJDw==}
@@ -5458,8 +5461,8 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
-  yanki-connect@3.0.4:
-    resolution: {integrity: sha512-NK2rpdImUcqS1r3e/j19DTJ1X0PLi4LbUQw/mlIUkc0M2+Ly4WceAYC6vM4Q+esdaaHGbCsr8YpQrkaK/MGjTw==}
+  yanki-connect@3.0.5:
+    resolution: {integrity: sha512-EbVmaPQW/PhmQKNLikH+3zMZKcmZXktr/2pTBlHbpmSNpuW66/wpmyO/jpX+hRYd6zt7PGILEoYaHcP5hZ36XA==}
     engines: {node: ^18.15.0 || >=20.11.0}
 
   yargs-parser@21.1.1:
@@ -7022,6 +7025,10 @@ snapshots:
   '@types/ms@2.1.0': {}
 
   '@types/node@18.19.124':
+    dependencies:
+      undici-types: 5.26.5
+
+  '@types/node@18.19.128':
     dependencies:
       undici-types: 5.26.5
 
@@ -12246,9 +12253,9 @@ snapshots:
 
   yaml@2.8.1: {}
 
-  yanki-connect@3.0.4:
+  yanki-connect@3.0.5:
     dependencies:
-      '@types/node': 18.19.124
+      '@types/node': 18.19.128
       open: 10.2.0
 
   yargs-parser@21.1.1: {}

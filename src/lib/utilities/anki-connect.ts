@@ -1,3 +1,5 @@
+/* eslint-disable complexity */
+/* eslint-disable max-depth */
 /* eslint-disable ts/no-unnecessary-condition */
 /* eslint-disable jsdoc/require-jsdoc */
 
@@ -307,7 +309,6 @@ async function getRemoteNotesById(
 
 	if (ankiNotes.every((ankiNote) => ankiNote.noteId === undefined)) {
 		// All undefined, return early
-
 		// eslint-disable-next-line unicorn/no-useless-undefined
 		return Array.from<undefined>({ length: ankiNotes.length }).fill(undefined)
 	}
@@ -324,29 +325,17 @@ async function getRemoteNotesById(
 		}
 	}
 
+	// Figure out which decks are filtered, if any
+	// Have to search the whole collection, unfortunately
+	const deckFilteredStatusMap = new Map<string, boolean>()
+
+	// Populated as needed with a list of all non-filtered decks in the collection (if we spot a filtered deck)
+	const unfilteredDeckNoteIdMap = new Map<string, number[] | undefined>()
+
 	for (const ankiNote of ankiNotes) {
 		if (ankiNote.noteId === undefined) {
 			yankiNotes.push(undefined)
 			continue
-		}
-
-		// Get deck name
-		const deckSet = new Set<string>()
-		for (const card of ankiNote.cards) {
-			const deck = cardIdToDeckMap.get(card)
-			if (deck === undefined) {
-				throw new Error(`No deck found for card ${card}`)
-			}
-
-			deckSet.add(deck)
-		}
-
-		if (deckSet.size === 0) {
-			throw new Error(`No decks found for note ${ankiNote.noteId}`)
-		}
-
-		if (deckSet.size > 1) {
-			throw new Error(`Multiple decks found for note ${ankiNote.noteId}`)
 		}
 
 		if (
@@ -356,10 +345,84 @@ async function getRemoteNotesById(
 			throw new Error(`Unknown model name ${ankiNote.modelName} for note ${ankiNote.noteId}`)
 		}
 
+		// Cards from the same technically can be moved to different decks in Anki
+		// GUI, but Yanki does not support this!
+		const deckNamesForNote = [...new Set(ankiNote.cards.map((card) => cardIdToDeckMap.get(card)))]
+		if (deckNamesForNote.length > 1) {
+			throw new Error(
+				`Multiple decks found for cards in note ${ankiNote.noteId}. Yanki does not support this.`,
+			)
+		}
+
+		let deckName = deckNamesForNote.at(0)
+		if (deckName === undefined) {
+			throw new Error(`No deck found for cards in note ${ankiNote.noteId}`)
+		}
+
+		// Look up deck filter status
+		if (!deckFilteredStatusMap.has(deckName)) {
+			const deckConfig = await client.deck.getDeckConfig({ deck: deckName })
+
+			const isFiltered = Boolean(deckConfig.dyn)
+			deckFilteredStatusMap.set(deckName, isFiltered)
+
+			if (isFiltered) {
+				// Now we have to search all decks to find what non-filtered deck has this note
+				// ... so completely populate the filtered deck map now, and reuse it for future notes
+				const allDeckNames = await client.deck.deckNames()
+				for (const localName of allDeckNames) {
+					if (!deckFilteredStatusMap.has(localName)) {
+						const deckConfig = await client.deck.getDeckConfig({ deck: localName })
+
+						deckFilteredStatusMap.set(localName, Boolean(deckConfig.dyn))
+					}
+				}
+
+				for (const [localDeckName, isFiltered] of deckFilteredStatusMap.entries()) {
+					if (!isFiltered && localDeckName !== 'Default') {
+						unfilteredDeckNoteIdMap.set(localDeckName, undefined)
+					}
+				}
+
+				// Default always at the end, least likely to contain a Yanki note
+				unfilteredDeckNoteIdMap.set('Default', undefined)
+			}
+		}
+
+		// Look up matching "real" non-filtered decks if the note is in a filtered deck
+		if (deckFilteredStatusMap.get(deckName)) {
+			const namesToCheck = unfilteredDeckNoteIdMap.keys()
+
+			let found = false
+			for (const nameToCheck of namesToCheck) {
+				// Populate and cache the unfiltered deck note IDs if needed
+				if (unfilteredDeckNoteIdMap.get(nameToCheck) === undefined) {
+					unfilteredDeckNoteIdMap.set(
+						nameToCheck,
+						await client.note.findNotes({ query: `"deck:${nameToCheck}"` }),
+					)
+				}
+
+				// Find the matching note in the unfiltered deck
+				if (unfilteredDeckNoteIdMap.get(nameToCheck)?.includes(ankiNote.noteId)) {
+					// Update deck name
+					deckName = nameToCheck
+					found = true
+					break
+				}
+			}
+
+			if (!found) {
+				throw new Error(`No matching non-filtered deck found for note ${ankiNote.noteId}`)
+			}
+		} else {
+			// Deck is good, leave it alone
+		}
+
 		// Picture, sound, etc. fields are never provided
 		yankiNotes.push({
 			cards: ankiNote.cards,
-			deckName: [...deckSet][0],
+			deckName,
 			fields: {
 				Back: ankiNote.fields.Back.value ?? '',
 				...(ankiNote.fields.Extra !== undefined && { Extra: ankiNote.fields.Extra.value ?? '' }),
@@ -579,7 +642,6 @@ async function uploadMediaForNote(
 								},
 					)
 
-					// eslint-disable-next-line max-depth
 					if (filename !== ankiMediaFilename) {
 						console.warn(
 							`Anki media filename mismatch: Expected: "${filename}" -> Received: "${ankiMediaFilename}"`,
