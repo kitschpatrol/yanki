@@ -248,18 +248,23 @@ export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = tr
  * Helper function to compare two arrays of tags.
  * Note some nuances around case insensitivity as discussed here:
  * https://github.com/kitschpatrol/yanki-obsidian/issues/44
+ * Anki will alphabetically sort tags, so we sort as well.
+ * Duplicate tags are ignored in Anki, so we ignore them here:
+ * ['yes', 'yes'] is considered equal to ['yes'].
+ * Tags in different orders are considered equal:
+ * ['yes', 'no'] is considered equal to ['no', 'yes'].
  * @returns True if the tags are equal, false otherwise.
  */
 function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 	if (localTags.length !== remoteTags.length) return false
 
-	for (const [i, element] of localTags.entries()) {
-		if (element.normalize('NFC').toLowerCase() !== remoteTags[i].normalize('NFC').toLowerCase()) {
-			return false
-		}
-	}
+	// Create a set of both tags
+	const localTagsSet = new Set(localTags.map((tag) => tag.normalize('NFC').toLowerCase()))
+	const remoteTagsSet = new Set(remoteTags.map((tag) => tag.normalize('NFC').toLowerCase()))
+	const allTagsSet = new Set([...localTagsSet, ...remoteTags])
 
-	return true
+	// If the merged tags sets are the same size, then the tags must be equal
+	return allTagsSet.size === remoteTagsSet.size
 }
 
 /**
