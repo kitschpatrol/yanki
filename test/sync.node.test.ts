@@ -1678,7 +1678,7 @@ describeWithFileFixture(
 describeWithFileFixture(
 	'filtered decks',
 	{
-		assetPath: './test/assets/test-tags-filtered-decks',
+		assetPath: './test/assets/test-filtered-decks',
 		cleanUpAnki: true,
 		cleanUpTempFiles: true,
 	},
@@ -1752,7 +1752,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		// Skipped until there's a way to handle this without manual user action
-		it.skip('tests filtered decks', { timeout: 60_000 }, async () => {
+		it.skip('tests filtered decks alongside deep nesting', { timeout: 60_000 }, async () => {
 			// Sync
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,

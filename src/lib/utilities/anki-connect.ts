@@ -349,10 +349,13 @@ async function getRemoteNotesById(
 		// Cards from the same technically can be moved to different decks in Anki
 		// GUI, but Yanki does not support this!
 		const deckNamesForNote = [...new Set(ankiNote.cards.map((card) => cardIdToDeckMap.get(card)))]
+
 		if (deckNamesForNote.length > 1) {
-			throw new Error(
-				`Multiple decks found for cards in note ${ankiNote.noteId}. Yanki does not support this.`,
-			)
+			// No longer considering this an error
+			// Filtered decks sometimes seem to create a second note... sometimes not
+			// console.warn(
+			// 	`Multiple decks found for cards in note ${ankiNote.noteId}. Yanki does not support this.`,
+			// )
 		}
 
 		let deckName = deckNamesForNote.at(0)
