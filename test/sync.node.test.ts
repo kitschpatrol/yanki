@@ -1737,6 +1737,73 @@ describeWithFileFixture(
 
 			expect(stableResults(secondResults)).toMatchSnapshot()
 			expect(secondResults.synced.every((synced) => synced.action === 'unchanged')).toBe(true)
+
+			console.log('Good!')
+		})
+	},
+)
+
+describeWithFileFixture(
+	'filtered decks alongside deep nesting',
+	{
+		assetPath: './test/assets/test-obsidian-vault',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		// Skipped until there's a way to handle this without manual user action
+		it.skip('tests filtered decks', { timeout: 60_000 }, async () => {
+			// Sync
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				basePath: context.tempAssetPath,
+				dryRun: false,
+				manageFilenames: 'off',
+				namespace: context.namespace,
+				obsidianVault: 'test-obsidian-vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(results.synced.every((synced) => synced.action === 'created')).toBe(true)
+
+			// User action required...
+			console.log(
+				'Manually create a filtered deck (F key) with the query "*" in the Anki desktop app...',
+			)
+			// Poll every second for an increase in deck count
+			const { length: startingDeckCount } = await context.yankiConnect.deck.deckNames()
+			let currentDeckCount = startingDeckCount
+			while (startingDeckCount === currentDeckCount) {
+				await new Promise((resolve) => {
+					setTimeout(resolve, 1000)
+				})
+				const { length: latestDeckCount } = await context.yankiConnect.deck.deckNames()
+				currentDeckCount = latestDeckCount
+			}
+			console.log('Continuing...')
+
+			// Second sync
+			const secondResults = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				basePath: context.tempAssetPath,
+				dryRun: false,
+				manageFilenames: 'off',
+				namespace: context.namespace,
+				obsidianVault: 'test-obsidian-vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(secondResults.synced.every((synced) => synced.action === 'unchanged')).toBe(true)
+
+			console.log('Good!')
 		})
 	},
 )

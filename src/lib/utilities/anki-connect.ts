@@ -371,6 +371,7 @@ async function getRemoteNotesById(
 				// Now we have to search all decks to find what non-filtered deck has this note
 				// ... so completely populate the filtered deck map now, and reuse it for future notes
 				const allDeckNames = await client.deck.deckNames()
+
 				for (const localName of allDeckNames) {
 					if (!deckFilteredStatusMap.has(localName)) {
 						const deckConfig = await client.deck.getDeckConfig({ deck: localName })
@@ -379,14 +380,19 @@ async function getRemoteNotesById(
 					}
 				}
 
-				for (const [localDeckName, isFiltered] of deckFilteredStatusMap.entries()) {
-					if (!isFiltered && localDeckName !== 'Default') {
-						unfilteredDeckNoteIdMap.set(localDeckName, undefined)
-					}
-				}
-
+				// Sort decks deep to shallow, prevents deep child notes
+				// from ending up in a parent deck
+				const sortedUnfilteredDeckNames = [...deckFilteredStatusMap.entries()]
+					.filter(([deck, isFiltered]) => !isFiltered && deck !== 'Default')
+					.map(([deck]) => deck)
+					.sort((a, b) => b.split('::').length - a.split('::').length)
 				// Default always at the end, least likely to contain a Yanki note
-				unfilteredDeckNoteIdMap.set('Default', undefined)
+				sortedUnfilteredDeckNames.push('Default')
+
+				for (const localDeckName of sortedUnfilteredDeckNames) {
+					// Undefined will be populated with nodeIDs lazily as needed
+					unfilteredDeckNoteIdMap.set(localDeckName, undefined)
+				}
 			}
 		}
 
