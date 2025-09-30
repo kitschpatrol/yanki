@@ -101,6 +101,7 @@ export function getSafeTitleForNote(
 function getSafeFilename(text: string, maxLength?: number): string {
 	let basicSafeFilename = filenamify(getFirstLineOfHtmlAsPlainText(text).trim(), {
 		maxLength: Number.MAX_SAFE_INTEGER,
+		// TODO Filename 7 doesn't tolerate whitespace...
 		replacement: ' ',
 	})
 		.replaceAll(/\s+/g, ' ')

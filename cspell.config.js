@@ -5,7 +5,6 @@ export default cspellConfig({
 	words: [
 		'aesculapa',
 		'ankiweb',
-		'clozed',
 		'clozing',
 		'denden',
 		'edgarguo',
@@ -17,7 +16,6 @@ export default cspellConfig({
 		'Fpandas',
 		'ftest',
 		'jīng',
-		'killall',
 		'linkpath',
 		'mathbf',
 		'matroska',
@@ -25,7 +23,6 @@ export default cspellConfig({
 		'mdanki',
 		'msvideo',
 		'namespac',
-		'odid',
 		'thisnotehasaverylongonewordtitlecanwestillsplititusingthe',
 		'thisnotehasaverylongonewordtitlecanwestillsplititusingthetruncationalgorithm',
 		'vmatrix',

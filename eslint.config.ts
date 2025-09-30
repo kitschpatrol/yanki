@@ -32,6 +32,8 @@ export default eslintConfig({
 				},
 			],
 			'ts/no-unsafe-type-assertion': 'off',
+			// Next major...
+			'unicorn/no-array-sort': 'off',
 		},
 	},
 	type: 'lib',

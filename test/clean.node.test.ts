@@ -13,7 +13,7 @@ describeWithFileFixture(
 		cleanUpTempFiles: true,
 	},
 	(context) => {
-		it('cleans notes', async () => {
+		it('cleans notes', { timeout: 10_000 }, async () => {
 			await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {

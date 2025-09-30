@@ -45,7 +45,7 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
  * @param note The note to add @returns The ID of the newly created note in Anki
  * @param dryRun If true, the note will not be created and an ID of 0 will be returned
  * @returns The ID of the newly created note in Anki
- * @throws
+ * @throws {Error}
  */
 export async function addNote(
 	client: YankiConnect,
@@ -125,9 +125,10 @@ export async function addNote(
 /**
  * Updates a note in Anki.
  * @param client An instance of YankiConnect
- * @param localNote A note read from a markdown file @param remoteNote A note
- * loaded from Anki @returns True if the note was updated, false otherwise.
- * @throws
+ * @param localNote A note read from a markdown file
+ * @param remoteNote A note loaded from Anki
+ * @returns True if the note was updated, false otherwise.
+ * @throws {Error} If the local note ID or remote note cards are undefined, or if model/deck errors occur.
  */
 export async function updateNote(
 	client: YankiConnect,
@@ -274,7 +275,7 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
  * @param client An instance of YankiConnect
  * @param namespace The value of the YankiNamespace field, or search with '*' to get all notes. Defaults to the global default namespace.
  * @returns An array of YankiNote objects
- * @throws
+ * @throws {Error}
  */
 export async function getRemoteNotes(
 	client: YankiConnect,
@@ -296,9 +297,9 @@ export async function getRemoteNotes(
  * Undefined elements in the returned array are subsequently used to identify
  * notes that need to be created.
  * @param client An instance of YankiConnect
- * @param noteIds An array of local note IDs to (attempt) to fetch @returns
- * Array of YankiNote objects, with undefined for notes that could not be found.
- * @throws
+ * @param noteIds An array of local note IDs to (attempt) to fetch
+ * @returns Array of YankiNote objects, with undefined for notes that could not be found.
+ * @throws {Error} If an unknown model name or multiple decks are found for a note, or if no deck is found.
  */
 async function getRemoteNotesById(
 	client: YankiConnect,
@@ -710,7 +711,7 @@ export async function deleteUnusedMedia(
 /**
  * Request permission to access Anki through Anki-Connect.
  * @returns 'ankiUnreachable' if Anki is not open, or 'granted' if everything is copacetic
- * @throws if access is denied
+ * @throws {Error} If access is denied
  */
 export async function requestPermission(
 	client: YankiConnect,

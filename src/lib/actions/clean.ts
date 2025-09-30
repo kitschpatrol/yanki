@@ -43,7 +43,7 @@ export type CleanResult = Simplify<
  *
  * Use with significant caution. Mostly useful for testing.
  * @returns The IDs of the notes that were deleted
- * @throws
+ * @throws {Error} If Anki is unreachable or another error occurs during deletion.
  */
 export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanResult> {
 	const startTime = performance.now()

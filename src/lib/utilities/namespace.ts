@@ -6,7 +6,7 @@ import { NOTE_NAMESPACE_MAX_LENGTH } from '../shared/constants'
 /**
  * Convenience
  * @returns sanitized valid namespace
- * @throws If namespace is invalid
+ * @throws {Error} If namespace is invalid
  */
 export function validateAndSanitizeNamespace(namespace: string, allowAsterisk = false): string {
 	validateNamespace(namespace, allowAsterisk)
@@ -36,7 +36,7 @@ export function sanitizeNamespace(namespace: string): string {
  * Silently correcting the namespace would be a bad idea, because the user might
  * not realize that the namespace has been changed, and then they might not be
  * able to find their notes.
- * @throws Error
+ * @throws {Error}
  */
 export function validateNamespace(namespace: string, allowAsterisk = false) {
 	const errorMessages: string[] = []

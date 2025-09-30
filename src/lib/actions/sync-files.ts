@@ -63,7 +63,7 @@ export type SyncFilesResult = Simplify<
  * @param allLocalFilePaths Array of paths to the local markdown files
  * @returns The synced files (with new IDs where applicable), plus some stats
  * about the sync
- * @throws
+ * @throws {Error} If syncing fails or file operations encounter an error.
  */
 export async function syncFiles(
 	allLocalFilePaths: string[],
