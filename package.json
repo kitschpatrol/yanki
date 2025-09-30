@@ -44,8 +44,8 @@
 		"build": "export NODE_OPTIONS=--max-old-space-size=16384 && pkgroll --clean-dist --minify --tsconfig tsconfig.build.json",
 		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"coverage": "vitest run --coverage",
-		"fix": "kpi fix",
-		"lint": "kpi lint",
+		"fix": "ksc fix",
+		"lint": "ksc lint",
 		"release": "bumpp --commit 'Release: %s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
 		"test": "vitest"
 	},
