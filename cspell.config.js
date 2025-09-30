@@ -4,6 +4,7 @@ export default cspellConfig({
 	ignorePaths: ['test/assets/test-deck-pruning/*', 'test/assets/test-unicode/*', '**/*.svg'],
 	words: [
 		'aesculapa',
+		'ankiweb',
 		'clozed',
 		'clozing',
 		'denden',
@@ -16,6 +17,7 @@ export default cspellConfig({
 		'Fpandas',
 		'ftest',
 		'jīng',
+		'killall',
 		'linkpath',
 		'mathbf',
 		'matroska',

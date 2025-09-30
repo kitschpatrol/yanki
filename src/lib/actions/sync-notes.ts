@@ -240,6 +240,7 @@ export async function syncNotes(
 			console.log('cardIdsToCheck')
 			console.log(cardIdsToCheck)
 
+			// TODO: Is the miscellaneous.reloadCollection() a better option?
 			try {
 				// This will throw a template error if there are bad cards...
 				await client.card.cardsInfo({ cards: cardIdsToCheck })

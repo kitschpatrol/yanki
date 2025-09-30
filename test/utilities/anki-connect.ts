@@ -20,14 +20,22 @@ export async function closeAnki(): Promise<void> {
 		autoLaunch: false,
 	})
 
-	let permissionStatus: string | undefined
-	while (permissionStatus !== 'ankiUnreachable') {
+	let permissionStatus = await requestPermission(client)
+	if (permissionStatus !== 'ankiUnreachable') {
 		// For some reason the provided Anki-Connect endpoint doesn't work, at least
 		// on Mac
 		// await client.graphical.guiExitAnki()
-		await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(() => {
-			// Ignore errors
+		await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(async () => {
+			// If that fails (e.g., windows open), force quit
+			await execa('sh', [
+				'-c',
+				"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
+			])
 		})
+	}
+
+	// Spin until it's done...
+	while (permissionStatus !== 'ankiUnreachable') {
 		await new Promise((resolve) => {
 			setTimeout(resolve, 1000)
 		})

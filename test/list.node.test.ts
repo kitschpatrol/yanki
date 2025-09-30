@@ -73,7 +73,7 @@ describeWithFileFixture(
 	},
 )
 
-it('throws if anki is closed', { skip: PLATFORM !== 'mac', timeout: 20_000 }, async () => {
+it('throws if anki is closed', { skip: PLATFORM !== 'mac', timeout: 10_000 }, async () => {
 	await closeAnki()
 
 	await expect(
