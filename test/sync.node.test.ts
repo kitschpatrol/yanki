@@ -1807,3 +1807,61 @@ describeWithFileFixture(
 		})
 	},
 )
+
+/**
+ * Performance benchmark for synchronization optimizations
+ */
+describeWithFileFixture(
+	'synchronization performance',
+	{
+		assetPath: './test/assets/test-minimal-notes/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('completes synchronization within reasonable time bounds', { timeout: 60_000 }, async () => {
+			// First sync - creates all notes
+			const firstSyncStart = performance.now()
+			const firstResults = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				syncMediaAssets: 'off',
+			})
+			const firstSyncDuration = performance.now() - firstSyncStart
+
+			expect(firstResults.synced.length).toBe(30)
+			expect(firstResults.synced.every((s) => s.action === 'created')).toBe(true)
+
+			// Second sync - should be faster (unchanged notes)
+			const secondSyncStart = performance.now()
+			const secondResults = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				syncMediaAssets: 'off',
+			})
+			const secondSyncDuration = performance.now() - secondSyncStart
+
+			expect(secondResults.synced.length).toBe(30)
+			expect(secondResults.synced.every((s) => s.action === 'unchanged')).toBe(true)
+
+			// Log performance metrics
+			console.log(`First sync (create): ${firstSyncDuration.toFixed(2)}ms`)
+			console.log(`Second sync (unchanged): ${secondSyncDuration.toFixed(2)}ms`)
+			console.log(`Average per note (first): ${(firstSyncDuration / 30).toFixed(2)}ms`)
+			console.log(`Average per note (second): ${(secondSyncDuration / 30).toFixed(2)}ms`)
+
+			// Verify optimizations are effective
+			// Second sync should be reasonably fast (not blocking on O(n²) operations)
+			// This is a sanity check - actual times will vary by machine
+			expect(secondSyncDuration).toBeLessThan(30_000) // 30 seconds max for 30 notes
+		})
+	},
+)
