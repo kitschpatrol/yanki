@@ -59,37 +59,38 @@ export async function loadLocalNotes(
 	// affect note names not directory names
 	const deckNamesFromFilePaths = getDeckNamesFromFilePaths(allLocalFilePaths)
 
-	const localNotes: LocalNote[] = []
-
-	for (const [index, filePath] of allLocalFilePaths.entries()) {
-		// TODO normalization?
-		const markdown = await fileAdapter.readFile(filePath)
-
-		const note = await getNoteFromMarkdown(markdown, {
-			allFilePaths,
-			basePath,
-			cwd: path.dirname(filePath),
-			fetchAdapter,
-			fileAdapter,
-			namespace: sanitizedNamespace,
-			namespaceValidationAndSanitization: false, // Optimization
-			obsidianVault,
-			strictLineBreaks,
-			syncMediaAssets,
-		})
-
-		if (note.deckName === '') {
+	// Parallelize file reading and parsing for better performance
+	const localNotes: LocalNote[] = await Promise.all(
+		allLocalFilePaths.map(async (filePath, index) => {
 			// TODO normalization?
-			note.deckName = deckNamesFromFilePaths[index]
-		}
+			const markdown = await fileAdapter.readFile(filePath)
 
-		localNotes.push({
-			filePath,
-			filePathOriginal: filePath,
-			markdown,
-			note,
-		})
-	}
+			const note = await getNoteFromMarkdown(markdown, {
+				allFilePaths,
+				basePath,
+				cwd: path.dirname(filePath),
+				fetchAdapter,
+				fileAdapter,
+				namespace: sanitizedNamespace,
+				namespaceValidationAndSanitization: false, // Optimization
+				obsidianVault,
+				strictLineBreaks,
+				syncMediaAssets,
+			})
+
+			if (note.deckName === '') {
+				// TODO normalization?
+				note.deckName = deckNamesFromFilePaths[index]
+			}
+
+			return {
+				filePath,
+				filePathOriginal: filePath,
+				markdown,
+				note,
+			}
+		}),
+	)
 
 	return localNotes
 }
