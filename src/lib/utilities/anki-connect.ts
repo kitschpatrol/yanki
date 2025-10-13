@@ -264,7 +264,7 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 	// Create a set of both tags
 	const localTagsSet = new Set(localTags.map((tag) => tag.normalize('NFC').toLowerCase()))
 	const remoteTagsSet = new Set(remoteTags.map((tag) => tag.normalize('NFC').toLowerCase()))
-	const allTagsSet = new Set([...localTagsSet, ...remoteTags])
+	const allTagsSet = new Set([...localTagsSet, ...remoteTagsSet])
 
 	// If the merged tags sets are the same size, then the tags must be equal
 	return allTagsSet.size === remoteTagsSet.size
