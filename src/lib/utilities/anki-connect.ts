@@ -259,8 +259,6 @@ export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = tr
  * @returns True if the tags are equal, false otherwise.
  */
 function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
-	if (localTags.length !== remoteTags.length) return false
-
 	// Create a set of both tags
 	const localTagsSet = new Set(localTags.map((tag) => tag.normalize('NFC').toLowerCase()))
 	const remoteTagsSet = new Set(remoteTags.map((tag) => tag.normalize('NFC').toLowerCase()))

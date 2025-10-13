@@ -1124,8 +1124,8 @@ describeWithFileFixture(
 			const actions2 = results2.synced.map((r) => r.action)
 			expect(actions2).toMatchInlineSnapshot(`
 				[
-				  "updated",
-				  "updated",
+				  "unchanged",
+				  "unchanged",
 				]
 			`)
 
