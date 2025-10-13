@@ -17,8 +17,8 @@ export type Frontmatter = {
  * remarkStringify would possibly change the format.
  * @param markdown Raw markdown string with frontmatter.
  * @param noteId  The value to set the noteId to. If undefined, the noteId will
- * be removed from the frontmatter. (Useful for testing.) @returns Raw markdown
- * string with updated frontmatter.
+ * be removed from the frontmatter. (Useful for testing.)
+ * @returns Raw markdown string with updated frontmatter.
  */
 export async function setNoteIdInFrontmatter(
 	markdown: string,

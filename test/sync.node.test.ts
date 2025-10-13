@@ -408,7 +408,7 @@ for (const targetType of ['basic', 'cloze', 'type', 'reverse']) {
 
 /**
  * https://github.com/kitschpatrol/yanki-obsidian/issues/34
- * Thank you to @N-ISOGE for reporting.
+ * Thank you to \@N-ISOGE for reporting.
  */
 describeWithFileFixture(
 	'update model and deck simultaneously',
@@ -755,7 +755,7 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/14
- * Thank you to @BrianRonin for the test files.
+ * Thank you to \@BrianRonin for the test files.
  *
  * Initially, there was an issue with decks being pruned despite containing
  * notes, due to unusual responses from the Anki-Connect deck stats method. this
@@ -821,7 +821,7 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/13
- * Thank you to @aesculapa for the test cases.
+ * Thank you to \@aesculapa for the test cases.
  */
 describeWithFileFixture(
 	'unicode deck contents',
@@ -922,7 +922,7 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/25
- * Thank you to @zhuzhige123 for the test case.
+ * Thank you to \@zhuzhige123 for the test case.
  */
 describeWithFileFixture(
 	'single string tag',
@@ -983,7 +983,7 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/20
- * Thank you to @Positron010 for the suggestion.
+ * Thank you to \@Positron010 for the suggestion.
  */
 describeWithFileFixture(
 	'nested tags',
@@ -1056,7 +1056,7 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/44
- * Thank you to @99887 for identifying this issue.
+ * Thank you to \@99887 for identifying this issue.
  */
 describeWithFileFixture(
 	'mixed case tags',
@@ -1147,7 +1147,7 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/28
- * Thanks to @fislysandi for reporting.
+ * Thanks to \@fislysandi for reporting.
  * This bug was actually related to a missing RegEx escape in the Yanki Obsidian
  * plugin, but the test will remain here for avoidance of doubt.
  */
@@ -1658,7 +1658,7 @@ describeWithFileFixture(
 /**
  * Check Filtered / custom study decks
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/52
- * Thanks @edgarguo for reporting.
+ * Thanks \@edgarguo for reporting.
  *
  * "I put tags in notes, and then manually created a filtered deck in Anki by
  * search results of the tag. Everything working so far. Now I sync, the

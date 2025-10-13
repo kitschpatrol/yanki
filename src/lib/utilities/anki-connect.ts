@@ -42,7 +42,7 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
  * Duplicates will be created if present in the source. It's up to the user to
  * manage their Markdown files as they like.
  * @param client An instance of YankiConnect
- * @param note The note to add @returns The ID of the newly created note in Anki
+ * @param note The note to add
  * @param dryRun If true, the note will not be created and an ID of 0 will be returned
  * @returns The ID of the newly created note in Anki
  * @throws {Error}

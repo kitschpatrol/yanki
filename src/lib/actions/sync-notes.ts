@@ -46,7 +46,8 @@ export type SyncNotesResult = Simplify<
  * Syncs local notes to Anki.
  * @param allLocalNotes All the YankiNotes to sync
  * @returns The synced notes (with new IDs where applicable), plus some stats
- * about the sync @throws
+ * about the sync
+ * @throws {Error} For various reasons...
  */
 // eslint-disable-next-line complexity
 export async function syncNotes(
