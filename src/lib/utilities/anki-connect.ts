@@ -238,13 +238,13 @@ function areFieldsEqual(
 }
 
 export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = true): boolean {
-	return (
-		(!includeId || noteA.noteId === noteB.noteId) &&
-		noteA.deckName === noteB.deckName &&
-		noteA.modelName === noteB.modelName &&
-		areFieldsEqual(noteA.fields, noteB.fields) &&
-		areTagsEqual(noteA.tags ?? [], noteB.tags ?? [])
-	)
+	// Early exit on simple comparisons before expensive field/tag checks
+	if (includeId && noteA.noteId !== noteB.noteId) return false
+	if (noteA.deckName !== noteB.deckName) return false
+	if (noteA.modelName !== noteB.modelName) return false
+	if (!areFieldsEqual(noteA.fields, noteB.fields)) return false
+	if (!areTagsEqual(noteA.tags ?? [], noteB.tags ?? [])) return false
+	return true
 }
 
 /**
