@@ -396,7 +396,7 @@ function isLastVisibleNodeEmphasisWithOthers(ast: Root): boolean {
 		}
 	})
 
-	return lastVisibleNode !== undefined && lastVisibleNode.type === 'emphasis' && visibleCount > 1
+	return lastVisibleNode?.type === 'emphasis' && visibleCount > 1
 }
 
 // Export function removeLastEmphasis(ast: Root): Emphasis | undefined {

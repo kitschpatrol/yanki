@@ -27,8 +27,8 @@
 	"type": "module",
 	"exports": {
 		".": {
-			"import": "./dist/lib/index.js",
-			"types": "./dist/lib/index.d.ts"
+			"types": "./dist/lib/index.d.ts",
+			"import": "./dist/lib/index.js"
 		}
 	},
 	"main": "./dist/lib/index.js",
@@ -46,7 +46,7 @@
 		"coverage": "vitest run --coverage",
 		"fix": "ksc fix",
 		"lint": "ksc lint",
-		"release": "bumpp --commit 'Release: %s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
+		"release": "bumpp --commit 'Release: %s' && pnpm run build && NPM_AUTH_TOKEN=$(op read 'op://Personal/npm/token') && pnpm publish",
 		"test": "vitest"
 	},
 	"dependencies": {
@@ -112,7 +112,7 @@
 		"vite": "^7.1.10",
 		"vitest": "^3.2.4",
 		"yaml": "^2.8.1",
-		"yanki-connect": "file:../yanki-connect"
+		"yanki-connect": "^3.0.9"
 	},
 	"packageManager": "pnpm@10.18.3",
 	"engines": {

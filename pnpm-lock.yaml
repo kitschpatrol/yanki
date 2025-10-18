@@ -190,8 +190,8 @@ importers:
         specifier: ^2.8.1
         version: 2.8.1
       yanki-connect:
-        specifier: file:../yanki-connect
-        version: file:../yanki-connect
+        specifier: ^3.0.9
+        version: 3.0.9
 
 packages:
 
@@ -876,9 +876,11 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@keyv/bigmap@1.0.3':
-    resolution: {integrity: sha512-jUEkNlnE9tYzX2AIBeoSe1gVUvSOfIOQ5EFPL5Un8cFHGvjD9L/fxpxlS1tEivRLHgapO2RZJ3D93HYAa049pg==}
+  '@keyv/bigmap@1.1.0':
+    resolution: {integrity: sha512-MX7XIUNwVRK+hjZcAbNJ0Z8DREo+Weu9vinBOjGU1thEi9F6vPhICzBbk4CCf3eEefKRz7n6TfZXwUFZTSgj8Q==}
     engines: {node: '>= 18'}
+    peerDependencies:
+      keyv: ^5.5.3
 
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
@@ -5516,8 +5518,8 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
-  yanki-connect@file:../yanki-connect:
-    resolution: {directory: ../yanki-connect, type: directory}
+  yanki-connect@3.0.9:
+    resolution: {integrity: sha512-kU63+TUMyippF4iLqdh3FY8ChMc9bqBLNcqI7NIN0ZqMp96qUD+8T84aUdFl3NuiyPiYDbzK/pPQ8RlsxblPCw==}
     engines: {node: ^18.15.0 || >=20.11.0}
 
   yargs-parser@21.1.1:
@@ -5682,7 +5684,7 @@ snapshots:
     dependencies:
       '@cacheable/memoize': 2.0.3
       '@cacheable/utils': 2.1.0
-      '@keyv/bigmap': 1.0.3
+      '@keyv/bigmap': 1.1.0(keyv@5.5.3)
       hookified: 1.12.2
       keyv: 5.5.3
 
@@ -6282,9 +6284,10 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@keyv/bigmap@1.0.3':
+  '@keyv/bigmap@1.1.0(keyv@5.5.3)':
     dependencies:
       hookified: 1.12.2
+      keyv: 5.5.3
 
   '@keyv/serialize@1.1.1': {}
 
@@ -12402,7 +12405,7 @@ snapshots:
 
   yaml@2.8.1: {}
 
-  yanki-connect@file:../yanki-connect:
+  yanki-connect@3.0.9:
     dependencies:
       '@types/node': 18.19.130
       open: 10.2.0

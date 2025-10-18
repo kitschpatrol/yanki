@@ -481,8 +481,8 @@ function parseDimensionsFromAltText(alt: string): {
 }
 
 function parseDimensions(dimensions: string): {
-	height: number | undefined
 	width: number | undefined
+	height: number | undefined
 } {
 	// Ensure all characters in the string are number or 'x':
 	if (!/^[\dx]+$/.test(dimensions)) {
