@@ -1865,3 +1865,34 @@ describeWithFileFixture(
 		})
 	},
 )
+
+/**
+ * Check for "cannot create note for unknown reason" error
+ * when there are multiple frontmatter blocks in a single file.
+ * Thanks \@metametapod for reporting.
+ * Reproduces https://github.com/kitschpatrol/yanki-obsidian/issues/56
+ * See also "handles strikethrough before and after a break" in
+ */
+describeWithFileFixture(
+	'never puts cloze markup on the back of cloze notes',
+	{
+		assetPath: './test/assets/test-cloze-back/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('never puts cloze markup on the back of cloze notes', async () => {
+			const results = await syncFiles(context.markdownFiles, {
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
+)

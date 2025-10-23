@@ -356,3 +356,17 @@ it('handles link aliases in tables and surplus pipes like in obsidian', async ()
 
 	/* Spell-checker: enable */
 })
+
+/**
+ * Make sure the back of cloze notes never have cloze markup.
+ * Thanks \@metametapod for reporting.
+ * Reproduces https://github.com/kitschpatrol/yanki-obsidian/issues/56
+ */
+it('handles strikethrough before and after a break', async () => {
+	const markdown = `~~cloze~~\n\n---\n\n~~cloze~~`
+	const note = await getNoteFromMarkdown(markdown)
+
+	// Back of card should NOT have Anki cloze markup
+	expect(note.fields.Front).toContain('{{c1::cloze}}')
+	expect(note.fields.Back).toContain('<del>cloze</del>')
+})

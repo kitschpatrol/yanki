@@ -11,6 +11,7 @@ export default eslintConfig({
 		'test/assets/test-unexpected-formatting/basic-with-confusing-setext-headline.md',
 		'test/assets/test-unexpected-formatting/basic-with-tight-spacing-and-frontmatter.md',
 		'test/assets/test-unexpected-formatting/basic-with-tight-spacing.md',
+		'test/assets/test-cloze-back/**/*',
 		'test/assets/test-unicode/**/*',
 	],
 	ts: {
