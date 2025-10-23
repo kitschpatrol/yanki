@@ -109,12 +109,12 @@
 		"unist-builder": "^4.0.0",
 		"unist-util-visit": "^5.0.0",
 		"untildify": "^6.0.0",
-		"vite": "^7.1.11",
+		"vite": "^7.1.12",
 		"vitest": "^3.2.4",
 		"yaml": "^2.8.1",
 		"yanki-connect": "^3.0.10"
 	},
-	"packageManager": "pnpm@10.18.3",
+	"packageManager": "pnpm@10.19.0",
 	"engines": {
 		"node": "^18.15.0 || >=20.11.0"
 	},
