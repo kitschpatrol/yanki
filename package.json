@@ -55,7 +55,7 @@
 		"@types/mdast": "^4.0.4",
 		"@types/node": "^18.19.130",
 		"@types/unist": "^3.0.3",
-		"@types/yargs": "^17.0.33",
+		"@types/yargs": "^17.0.34",
 		"globby": "^14.1.0",
 		"rehype-parse": "^9.0.1",
 		"yargs": "^17.7.2"

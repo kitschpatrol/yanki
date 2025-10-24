@@ -5,7 +5,10 @@ import { nanoid } from 'nanoid'
 import path from 'path-browserify-esm'
 import type { YankiNote } from '../model/note'
 import type { ManageFilenames } from '../shared/types'
-import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
+import {
+	getAllLinesOfHtmlAsPlainText,
+	getFirstLineOfHtmlAsPlainText,
+} from '../parse/rehype-utilities'
 import {
 	MEDIA_DEFAULT_EMPTY_FILENAME,
 	MEDIA_FILENAME_MAX_LENGTH,
@@ -53,20 +56,11 @@ export function getSafeTitleForNote(
 		// eslint-disable-next-line no-fallthrough
 		case 'Yanki - Cloze': {
 			// Note that this treats the text around the cloze as the "prompt" and the
-			// text in the close as the "response", grabbing some extra text if the
+			// text in the cloze as the "response", grabbing some extra text if the
 			// results are empty.
 			// This can create confusion for users, e.g.
 			// https://github.com/kitschpatrol/yanki-obsidian/issues/32.
-			const cleanFront = emptyIsUndefined(
-				getSafeFilename(note.fields.Front)
-					.replace(NOTE_DEFAULT_EMPTY_TEXT, '')
-					.replace(MEDIA_DEFAULT_EMPTY_FILENAME, ''),
-			)
-
-			if (cleanFront === undefined) {
-				// Should never happen
-				return getSafeFilename('', maxLength)
-			}
+			const cleanFront = getAllLinesOfHtmlAsPlainText(note.fields.Front)
 
 			const textBeforeCloze = emptyIsUndefined(cleanFront.split('{{').at(0) ?? '')
 			const firstClozeText = emptyIsUndefined(/\{\{\w\d*\s?:{0,2}([^:}]+)/.exec(cleanFront)?.at(1))

@@ -29,7 +29,7 @@ it('generates filename from a note with a cloze at the end', async () => {
 	const response = getSafeTitleForNote(note, 'response', 1000)
 
 	expect(prompt).toMatchInlineSnapshot(`"There is a cloze at the"`)
-	expect(response).toMatchInlineSnapshot(`"end of this note with a hint"`)
+	expect(response).toMatchInlineSnapshot(`"end of this note"`)
 })
 
 it('generates filename from a note that is all cloze', async () => {
@@ -60,4 +60,16 @@ it('generates filename from a note with explicitly indexed clozes', async () => 
 
 	expect(prompt).toMatchInlineSnapshot(`"This"`)
 	expect(response).toMatchInlineSnapshot(`"note"`)
+})
+
+// Via https://github.com/kitschpatrol/yanki-obsidian/issues/56
+it('generates filename from a note with multiline clozes', async () => {
+	const markdown = '_Example Note Category_\n\ntesting 1\n\n~~cloze 1~~\n'
+
+	const note = await getNoteFromMarkdown(markdown)
+	const prompt = getSafeTitleForNote(note, 'prompt', 1000)
+	const response = getSafeTitleForNote(note, 'response', 1000)
+
+	expect(prompt).toMatchInlineSnapshot(`"Example Note Category testing 1"`)
+	expect(response).toMatchInlineSnapshot(`"cloze 1"`)
 })

@@ -401,6 +401,15 @@ function htmlToPlainText(html: string): string {
 	return hastToPlainText(hast)
 }
 
+export function getAllLinesOfHtmlAsPlainText(html: string): string {
+	const text = htmlToPlainText(html)
+	return text
+		.split('\n')
+		.map((line) => line.trim())
+		.filter((line) => line.length > 0)
+		.join(' ')
+}
+
 export function getFirstLineOfHtmlAsPlainText(html: string): string {
 	const text = htmlToPlainText(html)
 	return (
