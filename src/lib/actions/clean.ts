@@ -99,11 +99,9 @@ export function formatCleanResult(result: CleanResult, verbose = false): string 
 		return 'Nothing to delete'
 	}
 
-	const lines: string[] = []
-
-	lines.push(
+	const lines: string[] = [
 		`${result.dryRun ? 'Will' : 'Successfully'} deleted ${noteCount} ${plur('note', noteCount)}, ${deckCount} ${plur('deck', deckCount)}, and ${mediaCount} media ${plur('asset', mediaCount)} from Anki${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,
-	)
+	]
 
 	if (verbose) {
 		if (noteCount > 0) {

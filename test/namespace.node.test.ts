@@ -1,4 +1,6 @@
+/* eslint-disable unicorn/prefer-string-raw */
 /* eslint-disable no-irregular-whitespace */
+
 import { expect, it } from 'vitest'
 import { NOTE_NAMESPACE_MAX_LENGTH } from '../src/lib/shared/constants'
 import { sanitizeNamespace, validateNamespace } from '../src/lib/utilities/namespace'

@@ -1,3 +1,5 @@
+/* eslint-disable unicorn/prefer-string-raw */
+
 import { expect, it } from 'vitest'
 import {
 	getBaseAndQueryParts,
