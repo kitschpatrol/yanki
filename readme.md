@@ -129,13 +129,15 @@ Yanki keeps track the notes it manages with a hidden field in the Anki note mode
 
 An extended palette of Markdown syntax is available out of the box:
 
-- Most [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-through~~`, `- [x] task lists`, and auto-links.
+- [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-through~~`, `- [x] task lists`, and auto-links.
 - Syntax highlighting via [Shiki](https://shiki.style).
 - GitHub-style [Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
-- [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md)
-- [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via [MathJax](https://www.mathjax.org)
-- Support for the [`==highlights==`](https://github.com/ipikuka/remark-flexible-markers) syntax.
-- Support for the compact [furigana](https://en.wikipedia.org/wiki/Furigana) / [Ruby](https://en.wikipedia.org/wiki/Ruby_character) syntax specified by [DenDen Markdown](https://conv.denshochan.com/markdown#ruby), for example: `{東京|とうきょう}` renders as `<ruby>東京<rp>(</rp><rt>とうきょう</rt><rp>)</rp></ruby>`.
+- The aforementioned [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md).
+- [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via Anki's built-in [MathJax](https://www.mathjax.org) rendering support.
+- The [`==highlights==`](https://github.com/ipikuka/remark-flexible-markers) syntax.
+- Compact [furigana](https://en.wikipedia.org/wiki/Furigana) / [Ruby](https://en.wikipedia.org/wiki/Ruby_character) syntax specified by [DenDen Markdown](https://conv.denshochan.com/markdown#ruby), for example: `{東京|とうきょう}` renders as `<ruby>東京<rp>(</rp><rt>とうきょう</rt><rp>)</rp></ruby>`. This matches support in Obsidian provided by the [Markdown Furigana](https://github.com/steven-kraft/obsidian-markdown-furigana) plugin.
+- Obsidian-style [block links](https://help.obsidian.md/links#Link+to+a+block+in+a+note), e.g. `[[Some Note#^37066d]]`
+- Obsidian-style [heading links](https://help.obsidian.md/links#Link+to+a+heading+in+a+note), e.g. `[[Some Note#Heading]]`
 
 ### Custom styles
 
