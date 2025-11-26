@@ -19,7 +19,7 @@ export default eslintConfig({
 			'depend/ban-dependencies': [
 				'error',
 				{
-					allowed: ['execa', 'strip-ansi', 'globby'],
+					allowed: ['execa', 'strip-ansi', 'globby', 'slash'],
 				},
 			],
 			'ts/naming-convention': [

@@ -55,19 +55,19 @@
 		"@types/mdast": "^4.0.4",
 		"@types/node": "^18.19.130",
 		"@types/unist": "^3.0.3",
-		"@types/yargs": "^17.0.34",
+		"@types/yargs": "^17.0.35",
 		"globby": "^14.1.0",
 		"rehype-parse": "^9.0.1",
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^5.8.3",
+		"@kitschpatrol/shared-config": "^5.9.1",
 		"@shikijs/rehype": "^3.15.0",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^3.0.0",
 		"@stdlib/assert-is-absolute-path": "^0.2.2",
-		"@vitest/browser-playwright": "^4.0.8",
-		"@vitest/coverage-v8": "^4.0.8",
+		"@vitest/browser-playwright": "^4.0.14",
+		"@vitest/coverage-v8": "^4.0.14",
 		"bumpp": "^10.3.1",
 		"crypto-hash": "^4.0.0",
 		"deepmerge-ts": "^7.1.5",
@@ -82,8 +82,8 @@
 		"nanoid": "^5.1.6",
 		"path-browserify-esm": "^1.0.6",
 		"picocolors": "^1.1.1",
-		"pkgroll": "^2.20.1",
-		"playwright": "^1.56.1",
+		"pkgroll": "^2.21.3",
+		"playwright": "^1.57.0",
 		"plur": "^6.0.0",
 		"pretty-ms": "^9.3.0",
 		"rehype-format": "^5.0.1",
@@ -109,15 +109,12 @@
 		"unist-builder": "^4.0.0",
 		"unist-util-visit": "^5.0.0",
 		"untildify": "^6.0.0",
-		"vitest": "^4.0.8",
+		"vitest": "^4.0.14",
 		"yaml": "^2.8.1",
-		"yanki-connect": "^3.2.0"
+		"yanki-connect": "^3.2.1"
 	},
-	"packageManager": "pnpm@10.20.0",
+	"packageManager": "pnpm@10.23.0",
 	"engines": {
 		"node": "^18.15.0 || >=20.11.0"
-	},
-	"publishConfig": {
-		"access": "public"
 	}
 }
