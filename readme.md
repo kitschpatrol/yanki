@@ -15,7 +15,7 @@
 
 <!-- short-description -->
 
-**A CLI tool and TypeScript library for syncing Markdown to Anki flashcards.**
+**A CLI tool and TypeScript library to turn Markdown into Anki flashcards.**
 
 <!-- /short-description -->
 
