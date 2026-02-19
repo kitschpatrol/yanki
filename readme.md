@@ -53,13 +53,13 @@ The primary novelty of its approach is in how Markdown is translated into Anki n
 
 This package provides both a stand-alone CLI tool and a TypeScript library for ease of integration in other projects.
 
-The library powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) Obsidian plugin. And for lower-level access to Anki, please take a look at the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) TypeScript library.
+The library powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) Obsidian plugin. For lower-level access to Anki, please take a look at the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) TypeScript library.
 
 The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
 
 ## Quick start
 
-Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 18.19.0+, 20.5.0+, or newer.)
+Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 20.11 or newer.)
 
 Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on installed:
 
