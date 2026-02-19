@@ -5,6 +5,22 @@ import { requestPermission } from '../../src/lib/utilities/anki-connect'
 import { PLATFORM } from '../../src/lib/utilities/platform'
 
 /**
+ * Launches Anki
+ */
+export async function openAnki(): Promise<void> {
+	if (PLATFORM !== 'mac') {
+		throw new Error('This function only works on Mac')
+	}
+
+	const client = new YankiConnect({
+		autoLaunch: 'immediately',
+	})
+
+	// Sanity
+	await client.miscellaneous.version()
+}
+
+/**
  * Closes Anki by sending a quit command to the application.
  * This function will wait until Anki is unreachable.
  *
@@ -30,14 +46,16 @@ export async function closeAnki(): Promise<void> {
 			await execa('sh', [
 				'-c',
 				"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
-			])
+			]).catch(() => {
+				// Ignore
+			})
 		})
 	}
 
 	// Spin until it's done...
 	while (permissionStatus !== 'ankiUnreachable') {
 		await new Promise((resolve) => {
-			setTimeout(resolve, 1000)
+			setTimeout(resolve, 250)
 		})
 		permissionStatus = await requestPermission(client)
 	}

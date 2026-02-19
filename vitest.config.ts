@@ -15,6 +15,7 @@ export default defineConfig({
 		// Running tests concurrently across files can create race conditions in
 		// total note counts that will cause assertions to fail.
 		fileParallelism: false,
+		globalSetup: './test/utilities/global-setup.ts',
 		maxConcurrency: 1,
 		maxWorkers: 1,
 		projects: [
