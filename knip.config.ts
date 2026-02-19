@@ -5,6 +5,7 @@ export default knipConfig({
 	ignore: ['test/assets/**/*'],
 	ignoreBinaries: ['osascript'],
 	ignoreDependencies: [
+		'@kitschpatrol/typescript-config',
 		'@types/lodash-es',
 		'@types/unist',
 		'@vitest/coverage-v8',
