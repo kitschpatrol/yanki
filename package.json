@@ -1,6 +1,6 @@
 {
 	"name": "yanki",
-	"version": "1.2.11",
+	"version": "2.0.0",
 	"description": "A CLI tool and TypeScript library to turn Markdown into Anki flashcards.",
 	"keywords": [
 		"anki",
