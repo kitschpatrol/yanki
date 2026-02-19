@@ -62,13 +62,15 @@ export function describeWithFileFixture(
 
 			// Sync files and rename files will do path normalization internally,
 			// so we don't do it here for better and more representative test path hygiene
-			context.markdownFiles = await globby(`${normalize(context.tempAssetPath)}/**/*.md`, {
+			context.markdownFiles = await globby('**/*.md', {
 				absolute: true,
+				cwd: normalize(context.tempAssetPath),
 			})
 
 			// Same as above
-			context.allFiles = await globby(`${normalize(context.tempAssetPath)}/**/*`, {
+			context.allFiles = await globby('**/*', {
 				absolute: true,
+				cwd: normalize(context.tempAssetPath),
 			})
 
 			expect(context.markdownFiles.length).toBeGreaterThan(0)

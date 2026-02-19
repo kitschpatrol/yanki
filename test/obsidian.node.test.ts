@@ -43,7 +43,10 @@ it('correctly resolves obsidian wiki links', async () => {
 
 	const notesToTest = notesToTestRaw.map((file) => normalize(path.resolve(file)))
 
-	const allFilePathsRaw = await globby('./test/assets/test-obsidian-vault/**/*', { absolute: true })
+	const allFilePathsRaw = await globby('**/*', {
+		absolute: true,
+		cwd: './test/assets/test-obsidian-vault',
+	})
 	const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
 	const basePath = normalize(path.resolve('./test/assets/test-obsidian-vault'))
 

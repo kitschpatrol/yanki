@@ -58,11 +58,13 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+			const newFileList = await globby('**/*.md', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
-			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+			const newAllFileList = await globby('**/*', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
@@ -143,11 +145,13 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+			const newFileList = await globby('**/*.md', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
-			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+			const newAllFileList = await globby('**/*', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
@@ -293,11 +297,13 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+			const newFileList = await globby('**/*.md', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
-			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+			const newAllFileList = await globby('**/*', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {
@@ -391,11 +397,13 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+			const newFileList = await globby('**/*.md', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
-			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+			const newAllFileList = await globby('**/*', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
 
 			const resultsRound2 = await syncFiles(newFileList, {

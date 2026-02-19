@@ -136,12 +136,18 @@ await yargsInstance
 		}) => {
 			log.verbose = verbose
 			const expandedDirectory = normalize(untildify(directory))
-			const globPattern = recursive ? `${expandedDirectory}/**/*.md` : `${expandedDirectory}/*.md`
-			const markdownFilePathsRaw = await globby(globPattern, { absolute: true })
+			const globPattern = recursive ? '**/*.md' : '*.md'
+			const markdownFilePathsRaw = await globby(globPattern, {
+				absolute: true,
+				cwd: expandedDirectory,
+			})
 			const markdownFilePaths = markdownFilePathsRaw.map((path) => normalize(path))
 
 			// Get a list of all files for name-only wiki link resolution
-			const allFilePathsRaw = await globby(`${expandedDirectory}/**/*`, { absolute: true })
+			const allFilePathsRaw = await globby('**/*', {
+				absolute: true,
+				cwd: expandedDirectory,
+			})
 			const allFilePaths = allFilePathsRaw.map((path) => normalize(path))
 
 			if (markdownFilePaths.length === 0) {

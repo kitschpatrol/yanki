@@ -3,6 +3,7 @@ import { cspellConfig } from '@kitschpatrol/cspell-config'
 export default cspellConfig({
 	ignorePaths: ['test/assets/test-deck-pruning/*', 'test/assets/test-unicode/*', '**/*.svg'],
 	words: [
+		'extglob',
 		'Fpandas',
 		'mathbf',
 		'matroska',

@@ -451,11 +451,13 @@ describeWithFileFixture(
 
 			// Second sync
 			// Update context
-			const newFileList = await globby(`${pathExtras.normalize(context.tempAssetPath)}/**/*.md`, {
+			const newFileList = await globby('**/*.md', {
 				absolute: true,
+				cwd: pathExtras.normalize(context.tempAssetPath),
 			})
-			const newAllFileList = await globby(`${pathExtras.normalize(context.tempAssetPath)}/**/*`, {
+			const newAllFileList = await globby('**/*', {
 				absolute: true,
+				cwd: pathExtras.normalize(context.tempAssetPath),
 			})
 
 			const newModelResults = await syncFiles(newFileList, {
@@ -644,7 +646,10 @@ describeWithFileFixture(
 
 			// Sync again
 
-			const newFileList = await globby(`${path.posix.dirname(slash(filePathWithId))}/*.md`)
+			const newFileList = await globby('*.md', {
+				absolute: true,
+				cwd: path.posix.dirname(slash(filePathWithId)),
+			})
 
 			const resultsWithDuplicates = await syncFiles(newFileList, {
 				ankiConnectOptions: {
@@ -795,11 +800,13 @@ describeWithFileFixture(
 			// Sync 2
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+			const newFileList = await globby('**/*.md', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
-			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+			const newAllFileList = await globby('**/*', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
 
 			const results2 = await syncFiles(newFileList, {
@@ -873,11 +880,13 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+			const newFileList = await globby('**/*.md', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
-			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+			const newAllFileList = await globby('**/*', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
@@ -954,11 +963,13 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+			const newFileList = await globby('**/*.md', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
-			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+			const newAllFileList = await globby('**/*', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
@@ -1021,11 +1032,13 @@ describeWithFileFixture(
 
 			// Do it again to check for stability
 			const tempPath = path.posix.dirname(context.markdownFiles[0])
-			const newFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*.md`, {
+			const newFileList = await globby('**/*.md', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
-			const newAllFileList = await globby(`${pathExtras.normalize(tempPath)}/**/*`, {
+			const newAllFileList = await globby('**/*', {
 				absolute: true,
+				cwd: pathExtras.normalize(tempPath),
 			})
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
@@ -1160,6 +1173,39 @@ describeWithFileFixture(
 	},
 	(context) => {
 		it('syncs correctly with brackets in the file path', { timeout: 60_000 }, async () => {
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				basePath: context.tempAssetPath,
+				dryRun: false,
+				namespace: context.namespace,
+				obsidianVault: 'Vault',
+				syncMediaAssets: 'off',
+			})
+
+			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
+)
+
+/**
+ * Related to https://github.com/kitschpatrol/yanki/issues/5
+ * Thanks to \@l1mey112 for reporting.
+ * Parentheses in directory paths are glob special characters (used in extglob
+ * patterns) and must be escaped before being passed to globby.
+ */
+describeWithFileFixture(
+	'parentheses in path',
+	{
+		assetPath: './test/assets/test-(paren)-path',
+		cleanUpAnki: true,
+		cleanUpTempFiles: false,
+	},
+	(context) => {
+		it('syncs correctly with parentheses in the file path', { timeout: 60_000 }, async () => {
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {

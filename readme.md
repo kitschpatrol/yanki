@@ -310,10 +310,10 @@ _Linux users should note that the Flatpak / Flathub version of Anki is not recom
 
 ### Installation
 
-Invoke directly:
+Invoke directly on Markdown files in a directory:
 
 ```sh
-npx yanki ./folder-to-sync/**/*.md
+npx yanki ./folder-to-sync
 ```
 
 ...or install globally:
