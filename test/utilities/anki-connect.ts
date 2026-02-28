@@ -64,10 +64,10 @@ export async function closeAnki(): Promise<void> {
 /**
  * For testing purposes only
  */
-export async function loadTestProfile(client: YankiConnect) {
+export async function loadTestProfile(client: YankiConnect, testProfileName: string) {
 	// Use test profile
 	const loadProfileResult = await client.miscellaneous.loadProfile({
-		name: 'yanki-tests',
+		name: testProfileName,
 	})
 
 	// eslint-disable-next-line ts/no-unnecessary-condition

@@ -7,6 +7,7 @@ import { YankiConnect } from 'yanki-connect'
 import { normalize } from '../../src/lib/utilities/path'
 import { getHash } from '../../src/lib/utilities/string'
 import { loadTestProfile } from '../utilities/anki-connect'
+import { TEST_PROFILE_NAME } from '../utilities/test-constants'
 
 type FixtureOptions = {
 	assetPath: string
@@ -77,7 +78,7 @@ export function describeWithFileFixture(
 			expect(context.allFiles.length).toBeGreaterThan(0)
 
 			// Use test profile
-			await loadTestProfile(context.yankiConnect)
+			await loadTestProfile(context.yankiConnect, TEST_PROFILE_NAME)
 
 			// Clean up anki first
 			if (cleanUpAnki) {

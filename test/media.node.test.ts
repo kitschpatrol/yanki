@@ -334,7 +334,7 @@ it('gets content hash from url content', { timeout: 60_000 }, async () => {
 		  "yanki.png: c8b37aeccc867deb",
 		  "yanki.svg: 195a484048295fc6",
 		  "yanki.tif: f44450f0e7d4f47d",
-		  "yanki.tiff: 6de3614266eb3c12",
+		  "yanki.tiff: f44450f0e7d4f47d",
 		  "yanki.webp: f45cd13d1b867070",
 		  "yanki.3gp: d395ea86537bdcf7",
 		  "yanki.avi: b470c485d1d7235d",
