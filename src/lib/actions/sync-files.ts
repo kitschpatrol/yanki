@@ -161,6 +161,7 @@ export async function syncFiles(
 		ankiWeb,
 		checkDatabase,
 		dryRun,
+		fileAdapter,
 		namespace,
 		strictMatching,
 	})

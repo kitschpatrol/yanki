@@ -4,9 +4,11 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
 import type { YankiConnect } from 'yanki-connect'
+import { uint8ArrayToBase64 } from 'uint8array-extras'
 import type { YankiModelName } from '../model/model'
 import type { YankiNote } from '../model/note'
 import type { Media } from '../parse/rehype-utilities'
+import type { FileAdapter } from '../shared/types'
 import { legacyYankiModelNames, yankiModelNames, yankiModels } from '../model/model'
 import { extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
@@ -51,6 +53,7 @@ export async function addNote(
 	client: YankiConnect,
 	note: YankiNote,
 	dryRun: boolean,
+	fileAdapter?: FileAdapter,
 ): Promise<number> {
 	if (note.noteId !== undefined) {
 		throw new Error('Note already has an ID')
@@ -80,7 +83,7 @@ export async function addNote(
 
 					await client.model.createModel(model)
 
-					return addNote(client, note, dryRun)
+					return addNote(client, note, dryRun, fileAdapter)
 				}
 
 				if (error.message === `deck was not found: ${note.deckName}`) {
@@ -91,7 +94,7 @@ export async function addNote(
 					}
 
 					await client.deck.createDeck({ deck: note.deckName })
-					return addNote(client, note, dryRun)
+					return addNote(client, note, dryRun, fileAdapter)
 				}
 
 				// Do this in parse.ts instead to simplify future local / remote diffs
@@ -117,7 +120,7 @@ export async function addNote(
 		throw new Error('Note creation failed')
 	}
 
-	await uploadMediaForNote(client, note, dryRun)
+	await uploadMediaForNote(client, note, dryRun, fileAdapter)
 
 	return newNote
 }
@@ -135,6 +138,7 @@ export async function updateNote(
 	localNote: YankiNote,
 	remoteNote: YankiNote,
 	dryRun: boolean,
+	fileAdapter?: FileAdapter,
 ): Promise<boolean> {
 	// Check if tags are different
 	if (localNote.noteId === undefined) {
@@ -188,7 +192,7 @@ export async function updateNote(
 
 							await client.model.createModel(model)
 
-							return updateNote(client, localNote, remoteNote, dryRun)
+							return updateNote(client, localNote, remoteNote, dryRun, fileAdapter)
 						}
 
 						// TODO What about missing decks?
@@ -201,7 +205,7 @@ export async function updateNote(
 
 			// Always try to update media, in case media assets are missing from Anki
 			// Check happens in uploadMediaForNote
-			await uploadMediaForNote(client, localNote, dryRun)
+			await uploadMediaForNote(client, localNote, dryRun, fileAdapter)
 		}
 
 		updated = true
@@ -621,6 +625,7 @@ async function uploadMediaForNote(
 	client: YankiConnect,
 	note: YankiNote,
 	dryRun: boolean,
+	fileAdapter?: FileAdapter,
 ): Promise<Media[]> {
 	// Upload media
 	const mediaPaths = extractMediaFromHtml(
@@ -644,9 +649,9 @@ async function uploadMediaForNote(
 									url: originalSrc,
 								}
 							: {
+									data: uint8ArrayToBase64(await fileAdapter!.readFileBuffer(originalSrc)),
 									deleteExisting: true,
 									filename,
-									path: originalSrc,
 								},
 					)
 

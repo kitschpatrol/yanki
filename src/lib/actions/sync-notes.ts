@@ -25,7 +25,13 @@ export type SyncedNote = {
 
 export type SyncNotesOptions = Pick<
 	GlobalOptions,
-	'ankiConnectOptions' | 'ankiWeb' | 'checkDatabase' | 'dryRun' | 'namespace' | 'strictMatching'
+	| 'ankiConnectOptions'
+	| 'ankiWeb'
+	| 'checkDatabase'
+	| 'dryRun'
+	| 'fileAdapter'
+	| 'namespace'
+	| 'strictMatching'
 >
 
 export const defaultSyncNotesOptions: SyncNotesOptions = {
@@ -60,8 +66,15 @@ export async function syncNotes(
 	const allLocalNotesCopy = structuredClone(allLocalNotes)
 
 	// Defaults
-	const { ankiConnectOptions, ankiWeb, checkDatabase, dryRun, namespace, strictMatching } =
-		deepmerge(defaultSyncNotesOptions, options ?? {}) as SyncNotesOptions
+	const {
+		ankiConnectOptions,
+		ankiWeb,
+		checkDatabase,
+		dryRun,
+		fileAdapter,
+		namespace,
+		strictMatching,
+	} = deepmerge(defaultSyncNotesOptions, options ?? {}) as SyncNotesOptions
 
 	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
 
@@ -158,7 +171,12 @@ export async function syncNotes(
 
 			if (localNote.noteId === undefined) {
 				// No match means it's a new note
-				localNote.noteId = await addNote(client, { ...localNote, noteId: undefined }, dryRun)
+				localNote.noteId = await addNote(
+					client,
+					{ ...localNote, noteId: undefined },
+					dryRun,
+					fileAdapter ?? undefined,
+				)
 				synced.push({
 					action: 'created',
 					note: localNote,
@@ -178,7 +196,13 @@ export async function syncNotes(
 			}
 
 			// Also handles model updates
-			const wasUpdated = await updateNote(client, localNote, remoteNote, dryRun)
+			const wasUpdated = await updateNote(
+				client,
+				localNote,
+				remoteNote,
+				dryRun,
+				fileAdapter ?? undefined,
+			)
 
 			synced.push({
 				action: wasUpdated ? 'updated' : 'unchanged',

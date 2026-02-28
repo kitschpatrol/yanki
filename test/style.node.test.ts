@@ -25,12 +25,14 @@ describeWithFileFixture(
 
 			expect(result).toMatchInlineSnapshot(`
 				".card {
-					font-family: monospace;
-					font-size: 200px;
-					text-align: left;
-					color: blue;
-					background-color: gray;
-				}"
+				    font-family: arial;
+				    font-size: 20px;
+				    line-height: 1.5;
+				    text-align: center;
+				    color: black;
+				    background-color: white;
+				}
+				"
 			`)
 		})
 
@@ -58,19 +60,19 @@ describeWithFileFixture(
 			expect(result.models).toMatchInlineSnapshot(`
 				[
 				  {
-				    "action": "unchanged",
+				    "action": "updated",
 				    "name": "Yanki - Basic",
 				  },
 				  {
-				    "action": "unchanged",
+				    "action": "updated",
 				    "name": "Yanki - Cloze",
 				  },
 				  {
-				    "action": "unchanged",
+				    "action": "updated",
 				    "name": "Yanki - Basic (type in the answer)",
 				  },
 				  {
-				    "action": "unchanged",
+				    "action": "updated",
 				    "name": "Yanki - Basic (and reversed card with extra)",
 				  },
 				]
@@ -78,14 +80,14 @@ describeWithFileFixture(
 
 			const resultReport = formatSetStyleResult(result)
 			expect(stablePrettyMs(resultReport)).toMatchInlineSnapshot(
-				`"Successfully update 0 models and left 4 models unchanged in XXX."`,
+				`"Successfully update 4 models and left 0 models unchanged in XXX."`,
 			)
 
 			const verboseResultReport = formatSetStyleResult(result, true)
 			expect(stablePrettyMs(verboseResultReport)).toMatchInlineSnapshot(`
-				"Successfully update 0 models and left 4 models unchanged in XXX.
+				"Successfully update 4 models and left 0 models unchanged in XXX.
 
-				Unchanged models:
+				Updated models:
 				  Yanki - Basic
 				  Yanki - Cloze
 				  Yanki - Basic (type in the answer)

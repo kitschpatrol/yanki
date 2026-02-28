@@ -106,7 +106,7 @@ export async function getDefaultFileAdapter(): Promise<FileAdapter> {
 				return nodeFs.readFile(filePath, 'utf8')
 			},
 			async readFileBuffer(filePath: string): Promise<Uint8Array> {
-				return nodeFs.readFile(filePath)
+				return new Uint8Array(await nodeFs.readFile(filePath))
 			},
 			async rename(oldPath: string, newPath: string): Promise<void> {
 				await nodeFs.rename(oldPath, newPath)

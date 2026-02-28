@@ -99,6 +99,7 @@
 		"sort-keys": "^6.0.0",
 		"strip-ansi": "^7.2.0",
 		"type-fest": "^5.4.4",
+		"uint8array-extras": "^1.5.0",
 		"unified": "^11.0.5",
 		"unist-builder": "^4.0.0",
 		"unist-util-visit": "^5.1.0",
