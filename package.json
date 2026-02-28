@@ -24,14 +24,21 @@
 		"email": "eric@ericmika.com",
 		"url": "https://ericmika.com"
 	},
+	"sideEffects": false,
 	"type": "module",
 	"exports": {
 		".": {
 			"types": "./dist/lib/index.d.ts",
 			"import": "./dist/lib/index.js"
+		},
+		"./standalone": {
+			"types": "./dist/standalone/index.d.ts",
+			"import": "./dist/standalone/index.js"
 		}
 	},
 	"main": "./dist/lib/index.js",
+	"jsdelivr": "./dist/standalone/index.js",
+	"unpkg": "./dist/standalone/index.js",
 	"module": "./dist/lib/index.js",
 	"types": "./dist/lib/index.d.ts",
 	"bin": {
@@ -41,7 +48,7 @@
 		"dist/*"
 	],
 	"scripts": {
-		"build": "tsdown",
+		"build": "tsdown && attw -P --profile esm-only && publint",
 		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"coverage": "vitest run --coverage",
 		"fix": "ksc fix",
@@ -50,7 +57,7 @@
 		"test": "vitest"
 	},
 	"dependencies": {
-		"@shikijs/rehype": "^3.22.0",
+		"@shikijs/rehype": "^3.23.0",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^3.0.0",
 		"@stdlib/assert-is-absolute-path": "^0.2.3",
@@ -66,7 +73,7 @@
 		"globby": "^16.1.1",
 		"hast-util-to-text": "^4.0.2",
 		"linkedom": "^0.18.12",
-		"mdast-util-from-markdown": "^2.0.2",
+		"mdast-util-from-markdown": "^2.0.3",
 		"micromark-util-sanitize-uri": "^2.0.1",
 		"micromark-util-types": "^2.0.2",
 		"nanoid": "^5.1.6",
@@ -90,24 +97,24 @@
 		"remark-rehype": "^11.1.2",
 		"slash": "^5.1.0",
 		"sort-keys": "^6.0.0",
-		"strip-ansi": "^7.1.2",
+		"strip-ansi": "^7.2.0",
 		"type-fest": "^5.4.4",
 		"unified": "^11.0.5",
 		"unist-builder": "^4.0.0",
 		"unist-util-visit": "^5.1.0",
 		"untildify": "^6.0.0",
 		"yaml": "^2.8.2",
-		"yanki-connect": "^4.0.0",
+		"yanki-connect": "^4.0.1",
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@arethetypeswrong/core": "^0.18.2",
-		"@kitschpatrol/shared-config": "^5.13.0",
+		"@arethetypeswrong/cli": "^0.18.2",
+		"@kitschpatrol/shared-config": "^6.0.2",
 		"@vitest/browser-playwright": "^4.0.18",
 		"@vitest/coverage-v8": "^4.0.18",
 		"bumpp": "^10.4.1",
 		"execa": "^9.6.1",
-		"mdat-plugin-cli-help": "^1.0.6",
+		"mdat-plugin-cli-help": "^1.0.7",
 		"playwright": "^1.58.2",
 		"publint": "^0.3.17",
 		"tsdown": "^0.20.3",
@@ -115,11 +122,14 @@
 		"typescript": "~5.9.3",
 		"vitest": "^4.0.18"
 	},
-	"packageManager": "pnpm@10.30.0",
+	"packageManager": "pnpm@10.30.3",
 	"engines": {
 		"node": ">=20.11.0"
 	},
 	"devEngines": {
-		"node": ">=20.19"
+		"runtime": {
+			"name": "node",
+			"version": ">=20.19.0"
+		}
 	}
 }
