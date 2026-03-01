@@ -289,7 +289,7 @@ _If you delete one of several implicitly numbered clozes (e.g. `~~hidden~~`) fro
 
 ### Dependencies
 
-The `yanki` CLI tool requires Node 18+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
+The `yanki` CLI tool requires Node 20.11+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
 
 The tool has been tested on Windows, macOS, and Linux.
 
@@ -302,7 +302,7 @@ _Linux users should note that the Flatpak / Flathub version of Anki is not recom
 
   If you need to install it, select _Tools → Add-ons_ from the menu, click _Get Add-ons..._, and then enter the code `2055492159` in the field to get Anki-Connect.
 
-  Anki-Connect may ask for your permission in the Anki application to connect to Obsidian on the first sync.
+  Anki-Connect may ask for your permission in the Anki application to allow the connection on the first sync.
 
   If the automatic permission request fails, you might need to configure Anki-Connect to accept connections from your origin.
 
@@ -406,7 +406,7 @@ yanki sync <directory> [options]
 | `--anki-connect`               | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                                                                                                                                                                                                                                                                                                     | `string`                             | `"http://127.0.0.1:8765"` |
 | `--anki-auto-launch`<br>`-l`   | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                                                                                                                                                                                                                                                                                                                                                       | `boolean`                            | `false`                   |
 | `--anki-web`<br>`-w`           | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app.                                                                                                                                                                                                                                                                                  | `boolean`                            | `true`                    |
-| `--manage-filenames`<br>`-m`   | Rename local note files to match their content. Useful if you want to feel have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of.                                                                                                             | `"off"` `"prompt"` `"response"`      | `"off"`                   |
+| `--manage-filenames`<br>`-m`   | Rename local note files to match their content. Useful if you want to have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of.                                                                                                                  | `"off"` `"prompt"` `"response"`      | `"off"`                   |
 | `--max-filename-length`        | If `manage-filenames` is enabled, this option specifies the maximum length of the filename in characters.                                                                                                                                                                                                                                                                                                                                                                                                                           | `number`                             | `60`                      |
 | `--sync-media`<br>`-s`         | Sync image, video, and audio assets to Anki's media storage system. Clean up is managed automatically. The `all` argument will save both local and remote assets to Anki, while `local` will only save local assets, `remote` will only save remote assets, and `off` will not save any assets.                                                                                                                                                                                                                                     | `"off"` `"all"` `"local"` `"remote"` | `"local"`                 |
 | `--strict-matching`            | Consider notes to be a "match" only if the local Markdown frontmatter `noteId` matches the remote Anki database `noteId` exactly. When disabled, Yanki will attempt to reuse existing Anki notes whose content matches a local Markdown note, even if the local and remote `noteId` differs. This helps preserve study progress in Anki if the local Markdown frontmatter is lost or corrupted. In Yanki 0.17.0 and earlier, `--strict-matching` was the default behavior. Starting with version 0.18.0, it is disabled by default. | `boolean`                            | `false`                   |
@@ -498,7 +498,7 @@ function getNoteFromMarkdown(
 
 function syncNotes(
   allLocalNotes: YankiNote[],
-  options?: PartialDeep<SyncOptions>,
+  options?: PartialDeep<SyncNotesOptions>,
 ): Promise<SyncNotesResult>
 
 function syncFiles(
@@ -548,7 +548,7 @@ But in general, a better solution would be to give them a common parent director
 
 ```sh
 # Move to a common parent
-mv ./important-cards ~/cards/imporant-cards
+mv ./important-cards ~/cards/important-cards
 mv ./more-important-cards ~/cards/more-important-cards
 
 # Sync the parent
@@ -608,9 +608,9 @@ The Yanki TypeScript / JavaScript library is isomorphic, so you can run it in a 
 
 There's one exception, the `syncFiles(...)` function, which by default relies on file system access to work.
 
-To retain `syncFiles(...)`'s utility in a browser environment, has the optional arguments `readFile`, `writeFile`, and `rename`, which are implemented by `node:fs/promises` by default in Node environments.
+To retain `syncFiles(...)`'s utility in a browser environment, it accepts an optional `fileAdapter` argument providing implementations of `readFile`, `readFileBuffer`, `rename`, `stat`, and `writeFile`, which are implemented via `node:fs/promises` by default in Node environments.
 
-Running Yanki in a browser environment requires implementing and passing `readFile`, `writeFile`, and `rename` implementations to `syncFiles(...)` that are suited to your particular use case. (A warning will be provided if you neglect to do so.)
+Running Yanki in a browser environment requires implementing and passing a `fileAdapter` with these five functions to `syncFiles(...)`, suited to your particular use case. (A warning will be provided if you neglect to do so.)
 
 The rest of the library should work fine in both contexts without special measures.
 
@@ -641,7 +641,7 @@ Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm
 
 - Intra-note links _do not update_ after automatic renaming, e.g. via the `--manage-filenames` flag, potentially resulting in broken links.
 
-- Removing one ore more clozes from a note with multiple closes can result in empty cards after syncing. The only way around this is to run the "Tools → Empty Cards..." command from Anki desktop application menu bar.
+- Removing one or more clozes from a note with multiple clozes can result in empty cards after syncing. The only way around this is to run the "Tools → Empty Cards..." command from Anki desktop application menu bar.
 
 - The Anki application lets you split the cards from a single note across multiple decks. (E.g. you might have a card with dozens of clozes, some of which you want to study under a different deck.) Yanki does _not_ support this scenario in the notes / cards it manages — it maintains a strict hierarchical relationship in which a note and its cards always live in a single deck. Notes may be deleted / recreated and study progress might be lost if this is attempted.
 

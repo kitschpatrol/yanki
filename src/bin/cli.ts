@@ -84,7 +84,7 @@ await yargsInstance
 					choices: ['off', 'prompt', 'response'] as const,
 					default: defaultGlobalOptions.manageFilenames,
 					describe:
-						'Rename local note files to match their content. Useful if you want to feel have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of.',
+						'Rename local note files to match their content. Useful if you want to have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of.',
 					type: 'string',
 				})
 				.option('max-filename-length', {
