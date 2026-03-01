@@ -1,5 +1,5 @@
-import { expect, it } from 'vitest'
-import { resolveLink } from '../src/lib/utilities/resolve-link'
+import { expect, it, vi } from 'vitest'
+import { parseObsidianVaultLink, resolveLink } from '../src/lib/utilities/resolve-link'
 import { permute } from './utilities/permute'
 
 it('resolves links', () => {
@@ -236,6 +236,114 @@ it('resolves relative file paths', () => {
 			'/base-path/cwd/test/assets/test-obsidian-vault/test card.md',
 		),
 	).toBeTruthy()
+})
+
+it('warns when obsidian protocol set without vault name', () => {
+	const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+
+	resolveLink('test card', {
+		allFilePaths: ['/base-path/cwd/test card.md'],
+		convertFilePathsToProtocol: 'obsidian',
+		cwd: '/base-path/cwd/',
+		type: 'link',
+	})
+
+	expect(spyWarn).toHaveBeenCalledWith(
+		expect.stringContaining("convertFilePathsToProtocol is 'obsidian'"),
+	)
+	spyWarn.mockRestore()
+})
+
+it('resolves named links without matching file in allFilePaths', () => {
+	// When there's no match, the name gets resolved via the base path
+	// and then re-enters as a localFilePath
+	const result = resolveLink('nonexistent note', {
+		allFilePaths: [],
+		cwd: '/base-path/cwd/',
+		type: 'link',
+	})
+
+	// Should resolve to an absolute path via cwd
+	expect(result).toContain('nonexistent note')
+})
+
+it('resolves file:// URLs to file paths', () => {
+	expect(
+		resolveLink('file:///base-path/cwd/test/assets/test card.md', {
+			allFilePaths: ['/base-path/cwd/test/assets/test card.md'],
+			cwd: '/base-path/cwd/',
+			type: 'link',
+		}),
+	).toBe('/base-path/cwd/test/assets/test card.md')
+})
+
+it('returns obsidian URLs unchanged', () => {
+	const obsidianUrl = 'obsidian://open?vault=test-vault&file=some%20note.md'
+
+	expect(
+		resolveLink(obsidianUrl, {
+			cwd: '/base-path/cwd/',
+			type: 'link',
+		}),
+	).toBe(obsidianUrl)
+})
+
+it('returns remote HTTP URLs unchanged', () => {
+	expect(
+		resolveLink('http://example.com/page', {
+			cwd: '/base-path/cwd/',
+			type: 'link',
+		}),
+	).toBe('http://example.com/page')
+
+	expect(
+		resolveLink('https://example.com/page', {
+			cwd: '/base-path/cwd/',
+			type: 'link',
+		}),
+	).toBe('https://example.com/page')
+})
+
+it('warns for unsupported protocol URLs', () => {
+	const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+
+	const result = resolveLink('ftp://example.com/file', {
+		cwd: '/base-path/cwd/',
+		type: 'link',
+	})
+
+	expect(result).toBe('ftp://example.com/file')
+	expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('Unsupported URL protocol'))
+	spyWarn.mockRestore()
+})
+
+it('parses valid obsidian vault links', () => {
+	/* Spell-checker:disable */
+	const result = parseObsidianVaultLink('obsidian://open?vault=my-vault&file=path%2Fto%2Fnote.md')
+	/* Spell-checker:enable */
+	expect(result).toEqual({
+		linkPath: 'path/to/note.md',
+		vaultName: 'my-vault',
+	})
+})
+
+it('returns undefined for non-obsidian URLs in parseObsidianVaultLink', () => {
+	expect(parseObsidianVaultLink('http://example.com')).toBeUndefined()
+	expect(parseObsidianVaultLink('not a url')).toBeUndefined()
+})
+
+it('returns undefined for obsidian URLs without vault or file params', () => {
+	const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+
+	expect(parseObsidianVaultLink('obsidian://open')).toBeUndefined()
+	expect(parseObsidianVaultLink('obsidian://open?vault=test')).toBeUndefined()
+	expect(parseObsidianVaultLink('obsidian://open?file=test')).toBeUndefined()
+
+	spyWarn.mockRestore()
+})
+
+it('returns undefined for non-open obsidian URLs', () => {
+	expect(parseObsidianVaultLink('obsidian://settings?vault=test&file=note')).toBeUndefined()
 })
 
 function allCorrect(testPaths: string[], resolvedTestPaths: string[], test: string) {

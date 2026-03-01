@@ -130,7 +130,7 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": ">=20.19.0"
+			"version": ">=21.0.0"
 		}
 	}
 }

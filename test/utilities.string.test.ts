@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import { css, html } from '../src/lib/utilities/string'
+import { css, emptyIsUndefined, html, md } from '../src/lib/utilities/string'
 
 it('formats html without excessive white space', () => {
 	const content = 'Some text'
@@ -50,4 +50,33 @@ it('formats css without excessive white space', () => {
 		font-family: ${content};
 	`
 	expect(singleLineCss).toMatchInlineSnapshot(`"font-family: arial;"`)
+})
+
+it('formats md without excessive white space', () => {
+	const content = 'world'
+	const multiLineMd = md`
+		# Hello
+		${content}
+	`
+
+	expect(multiLineMd).toMatchInlineSnapshot(`
+		"# Hello
+		world"
+	`)
+})
+
+it('returns undefined for undefined input in emptyIsUndefined', () => {
+	// eslint-disable-next-line unicorn/no-useless-undefined
+	expect(emptyIsUndefined(undefined)).toBeUndefined()
+})
+
+it('returns undefined for empty or whitespace-only strings in emptyIsUndefined', () => {
+	expect(emptyIsUndefined('')).toBeUndefined()
+	expect(emptyIsUndefined('   ')).toBeUndefined()
+	expect(emptyIsUndefined('\t')).toBeUndefined()
+})
+
+it('returns the string for non-empty strings in emptyIsUndefined', () => {
+	expect(emptyIsUndefined('hello')).toBe('hello')
+	expect(emptyIsUndefined(' hello ')).toBe(' hello ')
 })
