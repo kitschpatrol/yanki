@@ -10,8 +10,8 @@ import {
 	areNotesEqual,
 	deleteNotes,
 	deleteOrphanedDecks,
-	deleteUnusedMedia,
 	getRemoteNotes,
+	reconcileMedia,
 	requestPermission,
 	syncToAnkiWeb,
 	updateNote,
@@ -44,6 +44,7 @@ export type SyncNotesResult = Simplify<
 		deletedMedia: string[]
 		duration: number
 		fixedDatabase: boolean
+		reuploadedMedia: string[]
 		synced: SyncedNote[]
 	}
 >
@@ -93,6 +94,7 @@ export async function syncNotes(
 			duration: performance.now() - startTime,
 			fixedDatabase: false,
 			namespace: sanitizedNamespace,
+			reuploadedMedia: [],
 			synced: allLocalNotesCopy.map((note) => ({
 				action: 'ankiUnreachable',
 				note,
@@ -273,8 +275,14 @@ export async function syncNotes(
 		}
 	}
 
-	// Clean up unused media files
-	const deletedMedia = await deleteUnusedMedia(client, liveNotes, sanitizedNamespace, dryRun)
+	// Reconcile media: delete unused and re-upload missing
+	const { deleted: deletedMedia, reuploaded: reuploadedMedia } = await reconcileMedia(
+		client,
+		liveNotes,
+		sanitizedNamespace,
+		dryRun,
+		fileAdapter ?? undefined,
+	)
 
 	// AnkiWeb sync
 	const isChanged = deletedDecks.length > 0 || synced.some((note) => note.action !== 'unchanged')
@@ -291,6 +299,7 @@ export async function syncNotes(
 		duration: performance.now() - startTime,
 		fixedDatabase,
 		namespace: sanitizedNamespace,
+		reuploadedMedia,
 		synced,
 	}
 }

@@ -679,45 +679,78 @@ async function uploadMediaForNote(
 	return uploadedMedia
 }
 
-export async function deleteUnusedMedia(
+export async function reconcileMedia(
 	client: YankiConnect,
 	liveNotes: YankiNote[],
 	namespace: string,
 	dryRun: boolean,
-): Promise<string[]> {
+	fileAdapter?: FileAdapter,
+): Promise<{ deleted: string[]; reuploaded: string[] }> {
 	if (dryRun) {
-		return []
+		return { deleted: [], reuploaded: [] }
 	}
 
 	// Note this always includes a `yanki-` prefix for ease of identification
 	// in the Anki media asset manager UI
 	const slugifiedNamespace = getSlugifiedNamespace(namespace)
 
-	const activeMediaFilenames: string[] = []
+	const expectedMedia: Media[] = []
 	for (const note of liveNotes) {
 		// Room for optimization to avoid re-parsing the HTML...
 		const mediaPaths = extractMediaFromHtml(
 			`${note.fields.Front}\n${note.fields.Back}\n${note.fields.Extra}`,
 		)
-		for (const { filename } of mediaPaths) {
-			activeMediaFilenames.push(filename)
+		for (const media of mediaPaths) {
+			expectedMedia.push(media)
 		}
 	}
+
+	const activeMediaFilenames = new Set(expectedMedia.map(({ filename }) => filename))
 
 	const allMediaInNamespace = await client.media.getMediaFilesNames({
 		pattern: `${slugifiedNamespace}-*`,
 	})
 
+	// Delete media in Anki but NOT in expected list
 	const deletedMediaFilenames: string[] = []
-
 	for (const remoteMediaFilename of allMediaInNamespace) {
-		if (!activeMediaFilenames.includes(remoteMediaFilename)) {
+		if (!activeMediaFilenames.has(remoteMediaFilename)) {
 			await client.media.deleteMediaFile({ filename: remoteMediaFilename })
 			deletedMediaFilenames.push(remoteMediaFilename)
 		}
 	}
 
-	return deletedMediaFilenames
+	// Re-upload media in expected list but NOT in Anki
+	const reuploadedMediaFilenames: string[] = []
+	for (const { filename, originalSrc } of expectedMedia) {
+		if (!allMediaInNamespace.includes(filename)) {
+			try {
+				if (isUrl(originalSrc)) {
+					await client.media.storeMediaFile({
+						deleteExisting: true,
+						filename,
+						url: originalSrc,
+					})
+					reuploadedMediaFilenames.push(filename)
+				} else if (fileAdapter === undefined) {
+					console.warn(
+						`Could not re-upload local media file "${filename}": no file adapter provided`,
+					)
+				} else {
+					await client.media.storeMediaFile({
+						data: uint8ArrayToBase64(await fileAdapter.readFileBuffer(originalSrc)),
+						deleteExisting: true,
+						filename,
+					})
+					reuploadedMediaFilenames.push(filename)
+				}
+			} catch (error) {
+				console.warn(`Anki could not re-upload media file: "${filename}"\n${String(error)}`)
+			}
+		}
+	}
+
+	return { deleted: deletedMediaFilenames, reuploaded: reuploadedMediaFilenames }
 }
 
 /**

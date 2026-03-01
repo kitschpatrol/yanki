@@ -9,6 +9,7 @@ exports[`filename collision management > handles filename management deck collis
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - ab27c9c22de22d6b",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",

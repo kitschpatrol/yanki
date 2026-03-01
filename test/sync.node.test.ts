@@ -7,6 +7,7 @@ import sortKeys from 'sort-keys'
 import { expect, it } from 'vitest'
 import { formatSyncFilesResult, getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter, setNoteIdInFrontmatter } from '../src/lib/model/frontmatter'
+import { getSlugifiedNamespace } from '../src/lib/utilities/namespace'
 import * as pathExtras from '../src/lib/utilities/path'
 import { getUnicodeCodePoints } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
@@ -1850,6 +1851,86 @@ describeWithFileFixture(
 			expect(secondResults.synced.every((synced) => synced.action === 'unchanged')).toBe(true)
 
 			console.log('Good!')
+		})
+	},
+)
+
+/**
+ * Reproduces an edge case where media synced to Anki and then manually deleted
+ * in Anki is not re-synced on the next sync, because uploadMediaForNote is only
+ * called when note fields/tags/model change.
+ */
+describeWithFileFixture(
+	'media resync after deletion in Anki',
+	{
+		assetPath: './test/assets/test-media-resync/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('re-uploads media that was manually deleted in Anki', { timeout: 60_000 }, async () => {
+			// First sync — note is created and media is uploaded
+			const results = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				syncMediaAssets: 'local',
+			})
+
+			expect(results.synced.length).toBe(1)
+			expect(results.synced[0].action).toBe('created')
+
+			// Verify media was uploaded by finding it in Anki
+			const slugifiedNamespace = getSlugifiedNamespace(context.namespace)
+			const mediaFiles = await context.yankiConnect.media.getMediaFilesNames({
+				pattern: `${slugifiedNamespace}-*`,
+			})
+
+			expect(mediaFiles.length).toBeGreaterThan(0)
+			const uploadedMediaFilename = mediaFiles[0]
+
+			// Simulate user manually deleting the media file in Anki
+			await context.yankiConnect.media.deleteMediaFile({
+				filename: uploadedMediaFilename,
+			})
+
+			// Confirm it's gone
+			const mediaFilesAfterDelete = await context.yankiConnect.media.getMediaFilesNames({
+				pattern: `${slugifiedNamespace}-*`,
+			})
+			expect(mediaFilesAfterDelete.length).toBe(0)
+
+			// Second sync — note is unchanged, but media should be re-uploaded
+			const results2 = await syncFiles(context.markdownFiles, {
+				allFilePaths: context.allFiles,
+				ankiConnectOptions: {
+					autoLaunch: true,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				syncMediaAssets: 'local',
+			})
+
+			// The note itself is unchanged
+			expect(results2.synced.length).toBe(1)
+			expect(results2.synced[0].action).toBe('unchanged')
+
+			// But the media should have been re-uploaded
+			const mediaFilesAfterResync = await context.yankiConnect.media.getMediaFilesNames({
+				pattern: `${slugifiedNamespace}-*`,
+			})
+
+			// This assertion confirms the bug: media is NOT re-synced for unchanged notes
+			// Once the bug is fixed, this should pass (media re-uploaded)
+			expect(
+				mediaFilesAfterResync.length,
+				'Media deleted in Anki should be re-uploaded on next sync',
+			).toBeGreaterThan(0)
 		})
 	},
 )

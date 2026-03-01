@@ -9,6 +9,7 @@ exports[`obsidian vault sync > correctly syncs an entire obsidian vault 1`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 9acc6db986e7d5ff",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -552,6 +553,7 @@ exports[`obsidian vault wiki link stability > correctly syncs an entire obsidian
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 175fa4fb08db0a9b",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",

@@ -156,15 +156,18 @@ export async function syncFiles(
 
 	const allLocalNotes = renamedLocalNotes.map((note) => note.note)
 
-	const { deletedDecks, deletedMedia, fixedDatabase, synced } = await syncNotes(allLocalNotes, {
-		ankiConnectOptions,
-		ankiWeb,
-		checkDatabase,
-		dryRun,
-		fileAdapter,
-		namespace,
-		strictMatching,
-	})
+	const { deletedDecks, deletedMedia, fixedDatabase, reuploadedMedia, synced } = await syncNotes(
+		allLocalNotes,
+		{
+			ankiConnectOptions,
+			ankiWeb,
+			checkDatabase,
+			dryRun,
+			fileAdapter,
+			namespace,
+			strictMatching,
+		},
+	)
 
 	// Write Anki note IDs to the local files as necessary
 	// Can't just get markdown from the note because there might be extra
@@ -217,6 +220,7 @@ export async function syncFiles(
 		duration: performance.now() - startTime,
 		fixedDatabase,
 		namespace,
+		reuploadedMedia,
 		synced: syncedAndSorted,
 	}
 }
@@ -256,6 +260,10 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 
 		if (result.deletedMedia.length > 0) {
 			lines.push('', `Media assets deleted: ${result.deletedMedia.length}`)
+		}
+
+		if (result.reuploadedMedia.length > 0) {
+			lines.push('', `Media assets re-uploaded: ${result.reuploadedMedia.length}`)
 		}
 
 		// Will never apply to a dry run since the Anki database is not mutated, and

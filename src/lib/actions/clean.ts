@@ -13,8 +13,8 @@ import { defaultGlobalOptions } from '../shared/types'
 import {
 	deleteNotes,
 	deleteOrphanedDecks,
-	deleteUnusedMedia,
 	getRemoteNotes,
+	reconcileMedia,
 	requestPermission,
 	syncToAnkiWeb,
 } from '../utilities/anki-connect'
@@ -69,8 +69,8 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	await deleteNotes(client, remoteNotes, dryRun)
 	const deletedDecks = await deleteOrphanedDecks(client, [], remoteNotes, dryRun)
 
-	// Media deletion pass
-	const deletedMedia = await deleteUnusedMedia(client, [], sanitizedNamespace, dryRun)
+	// Media deletion pass (no fileAdapter needed — liveNotes is empty so re-upload is a no-op)
+	const { deleted: deletedMedia } = await reconcileMedia(client, [], sanitizedNamespace, dryRun)
 
 	// AnkiWeb sync
 	const isChanged = remoteNotes.length > 0 || deletedDecks.length > 0

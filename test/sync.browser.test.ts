@@ -68,6 +68,7 @@ it('syncs notes', async () => {
 		  "duration": 0,
 		  "fixedDatabase": false,
 		  "namespace": "yanki.sync.browser.test",
+		  "reuploadedMedia": [],
 		  "synced": [
 		    {
 		      "action": "created",

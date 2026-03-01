@@ -9,6 +9,7 @@ exports[`basic synchronization > synchronizes notes to anki and has the correct 
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - b9918cfa0f62798d",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -511,6 +512,7 @@ exports[`brackets in path > syncs correctly with brackets in the file path 1`] =
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - eb2be65a6859382e",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -542,6 +544,7 @@ exports[`complex trees > makes the right decisions about deck naming with a file
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - b5346192b9b2fb82",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -731,6 +734,7 @@ exports[`complex trees > makes the right decisions about deck naming without a f
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - b5346192b9b2fb82",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -904,6 +908,7 @@ exports[`deck safety > preserves existing mixed decks 1`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - bbbb46623ed24aae",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -934,6 +939,7 @@ exports[`deck safety > preserves existing mixed decks 2`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - bbbb46623ed24aae",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "deleted",
@@ -967,6 +973,7 @@ exports[`deep deck safety > preserves existing deeply nested mixed decks 1`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 274fc3dd5b623496",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -1029,6 +1036,7 @@ exports[`deep deck safety > preserves existing deeply nested mixed decks 2`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 274fc3dd5b623496",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -1107,6 +1115,7 @@ exports[`deep deck safety > preserves existing deeply nested mixed decks 3`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 274fc3dd5b623496",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "deleted",
@@ -1197,6 +1206,7 @@ exports[`deepest deck safety > preserves existing deeply nested mixed decks with
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 7dfb5506aa6306e0",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -1229,6 +1239,7 @@ exports[`deepest deck safety > preserves existing deeply nested mixed decks with
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 7dfb5506aa6306e0",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "deleted",
@@ -1262,6 +1273,7 @@ exports[`duplicate node ids > handles duplicate node ids for notes with differen
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 00e8048e96c5000c",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -1292,6 +1304,7 @@ exports[`fancy markdown > handles fancy markdown 1`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 4b7d855f1825e39f",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -1821,6 +1834,7 @@ exports[`handle multi-cloze addition > cleanly adds additional cloze to a multi-
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 860a907acbdaebf6",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -1851,6 +1865,7 @@ exports[`handle multi-cloze addition > cleanly adds additional cloze to a multi-
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 860a907acbdaebf6",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "updated",
@@ -1881,6 +1896,7 @@ exports[`handle multi-cloze model type change > cleans up database when a multi 
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 41723d70f25b7347",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -1911,6 +1927,7 @@ exports[`handle multi-cloze model type change > cleans up database when a multi 
   "duration": 0,
   "fixedDatabase": true,
   "namespace": "Yanki Test - 41723d70f25b7347",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "updated",
@@ -1941,6 +1958,7 @@ exports[`nested tags > creates nested tags in anki 1`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - f89ad494c2533a37",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -2013,6 +2031,7 @@ exports[`nested tags > creates nested tags in anki 2`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - f89ad494c2533a37",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "unchanged",
@@ -2085,6 +2104,7 @@ exports[`never puts cloze markup on the back of cloze notes > never puts cloze m
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - e72a0f654f3751e6",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -2147,6 +2167,7 @@ exports[`note id edge cases > handles missing note IDs gracefully 1`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 1382890845fc6716",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -2244,6 +2265,7 @@ exports[`note id edge cases > handles missing note IDs gracefully 2`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 1382890845fc6716",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "matched",
@@ -2341,6 +2363,7 @@ exports[`note id edge cases > handles missing note IDs gracefully 3`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 1382890845fc6716",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "matched",
@@ -2438,6 +2461,7 @@ exports[`parentheses in path > syncs correctly with parentheses in the file path
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - b024c6112aadcd71",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -2469,6 +2493,7 @@ exports[`single string tag > creates notes with single string tag as expected 1`
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 44c8bd7d7fbe0b32",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -2501,6 +2526,7 @@ exports[`single string tag > creates notes with single string tag as expected 2`
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 44c8bd7d7fbe0b32",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "unchanged",
@@ -2533,6 +2559,7 @@ exports[`surplus frontmatter > preserves and merges unrelated surplus frontmatte
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - ee8a558c89d868bf",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -2599,6 +2626,7 @@ exports[`unicode deck contents > creates notes with unicode as expected 3`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - b16c58c6b0fc450d",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -2677,6 +2705,7 @@ exports[`unicode deck contents > creates notes with unicode as expected 6`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - b16c58c6b0fc450d",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "unchanged",
@@ -2755,6 +2784,7 @@ exports[`unicode deck names and invalid note ids > syncs as expected 1`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 38ab363c72c9eedb",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "created",
@@ -3975,6 +4005,7 @@ exports[`unicode deck names and invalid note ids > syncs as expected 2`] = `
   "duration": 0,
   "fixedDatabase": false,
   "namespace": "Yanki Test - 38ab363c72c9eedb",
+  "reuploadedMedia": [],
   "synced": [
     {
       "action": "deleted",
