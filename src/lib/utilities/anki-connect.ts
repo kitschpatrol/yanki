@@ -478,7 +478,7 @@ export async function deleteOrphanedDecks(
 		while (parts.length > 1) {
 			parts.pop()
 			const parentDeckName = parts.join('::')
-			if (activeNoteDeckNames.some((deckName) => parentDeckName.includes(deckName))) {
+			if (activeNoteDeckNames.some((deckName) => deckName.startsWith(`${parentDeckName}::`))) {
 				break
 			}
 
