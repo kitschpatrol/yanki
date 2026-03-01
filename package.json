@@ -57,7 +57,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@shikijs/rehype": "^3.23.0",
+		"@shikijs/rehype": "^4.0.0",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^3.0.0",
 		"@stdlib/assert-is-absolute-path": "^0.2.3",
@@ -117,7 +117,7 @@
 		"execa": "^9.6.1",
 		"mdat-plugin-cli-help": "^1.0.7",
 		"playwright": "^1.58.2",
-		"publint": "^0.3.17",
+		"publint": "^0.3.18",
 		"tsdown": "^0.20.3",
 		"tsx": "^4.21.0",
 		"typescript": "~5.9.3",
