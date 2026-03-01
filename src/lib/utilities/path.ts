@@ -123,8 +123,11 @@ export function resolveWithBasePath(
 // }
 
 export function stripBasePath(filePath: string, basePath: string): string {
-	const regex = new RegExp(`^${basePath}`, 'i')
-	return filePath.replace(regex, '')
+	if (filePath.toLowerCase().startsWith(basePath.toLowerCase())) {
+		return filePath.slice(basePath.length)
+	}
+
+	return filePath
 }
 
 export function getBaseAndQueryParts(filePath: string): [string, string | undefined] {
