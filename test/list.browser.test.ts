@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest'
 import type { YankiNote } from '../src/lib'
 import { listNotes, syncNotes } from '../src/lib'
+import { PLATFORM } from '../src/lib/utilities/platform'
 
 // Unused, yanki-connect uses browser fetch automatically if available
 // Browser fetch adapter example
@@ -12,7 +13,8 @@ import { listNotes, syncNotes } from '../src/lib'
 // 	return fetch(url, options)
 // }
 
-it('lists notes', { only: true }, async () => {
+// This test only runs on macOS
+it.skipIf(PLATFORM !== 'mac')('lists notes', async () => {
 	// Mock data
 	const namespace = 'Yanki Test - list.browser.test'
 	const testNote: YankiNote = {

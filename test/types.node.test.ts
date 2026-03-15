@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { expect, it } from 'vitest'
 import {
 	defaultGlobalOptions,
@@ -18,20 +19,20 @@ it('returns a valid file adapter in node', async () => {
 
 it('file adapter can read a file', async () => {
 	const adapter = await getDefaultFileAdapter()
-	const content = await adapter.readFile(new URL(import.meta.url).pathname)
+	const content = await adapter.readFile(fileURLToPath(import.meta.url))
 	expect(content).toContain('getDefaultFileAdapter')
 })
 
 it('file adapter can read a file as buffer', async () => {
 	const adapter = await getDefaultFileAdapter()
-	const buffer = await adapter.readFileBuffer(new URL(import.meta.url).pathname)
+	const buffer = await adapter.readFileBuffer(fileURLToPath(import.meta.url))
 	expect(buffer).toBeInstanceOf(Uint8Array)
 	expect(buffer.length).toBeGreaterThan(0)
 })
 
 it('file adapter can stat a file', async () => {
 	const adapter = await getDefaultFileAdapter()
-	const stats = await adapter.stat(new URL(import.meta.url).pathname)
+	const stats = await adapter.stat(fileURLToPath(import.meta.url))
 	expect(stats.size).toBeGreaterThan(0)
 	expect(stats.mtimeMs).toBeGreaterThan(0)
 	expect(stats.ctimeMs).toBeGreaterThan(0)

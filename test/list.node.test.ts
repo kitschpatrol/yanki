@@ -87,7 +87,8 @@ it('throws if anki is closed', { skip: PLATFORM !== 'mac', timeout: 10_000 }, as
 	).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Anki is unreachable. Is Anki running?]`)
 })
 
-it('tells the truth if no notes are found', async () => {
+// This test only runs on macOS
+it.skipIf(PLATFORM !== 'mac')('tells the truth if no notes are found', async () => {
 	const result = await listNotes({
 		ankiConnectOptions: {
 			autoLaunch: true,

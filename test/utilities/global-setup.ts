@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { PLATFORM } from '../../src/lib/utilities/platform'
 import { TEST_PROFILE_NAME } from '../utilities/test-constants'
 import { closeAnki, openAnki } from './anki-connect'
 
@@ -45,6 +46,11 @@ function getAnkiProfilePath(profileName: string): string {
  * Ensure Anki is running before tests run
  */
 export async function setup() {
+	if (PLATFORM !== 'mac') {
+		console.warn('Skipping Anki global setup: only supported on Mac')
+		return
+	}
+
 	// Close Anki if running, then reset the test profile for repeatable tests
 	await closeAnki()
 
@@ -69,5 +75,9 @@ export async function setup() {
  * Clean up
  */
 export async function teardown() {
+	if (PLATFORM !== 'mac') {
+		return
+	}
+
 	await closeAnki()
 }

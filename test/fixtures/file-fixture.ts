@@ -5,6 +5,7 @@ import path from 'path-browserify-esm'
 import { afterAll, beforeAll, describe, expect } from 'vitest'
 import { YankiConnect } from 'yanki-connect'
 import { normalize } from '../../src/lib/utilities/path'
+import { PLATFORM } from '../../src/lib/utilities/platform'
 import { getHash } from '../../src/lib/utilities/string'
 import { loadTestProfile } from '../utilities/anki-connect'
 import { TEST_PROFILE_NAME } from '../utilities/test-constants'
@@ -34,7 +35,8 @@ export function describeWithFileFixture(
 	{ assetPath, cleanUpAnki = true, cleanUpTempFiles = true }: FixtureOptions,
 	tests: (context: TestContext) => void,
 ) {
-	describe(description, () => {
+	// This test only runs on macOS
+	describe.skipIf(PLATFORM !== 'mac')(description, () => {
 		const context: TestContext = {
 			allFiles: [],
 			assetPath: '',

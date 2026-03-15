@@ -6,13 +6,15 @@ import { expect, it } from 'vitest'
 import { detectVault } from '../src/bin/utilities/obsidian'
 import { getNoteFromMarkdown, syncFiles } from '../src/lib/index'
 import { getBase, normalize, stripBasePath } from '../src/lib/utilities/path'
+import { PLATFORM } from '../src/lib/utilities/platform'
 import { parseObsidianVaultLink } from '../src/lib/utilities/resolve-link'
 import { safeDecodeURI } from '../src/lib/utilities/url'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stripAnkiMediaTag } from './utilities/dom-inspector'
 import { stableResults } from './utilities/stable-sync-results'
 
-it('detects obsidian vault', async () => {
+// This test only runs on macOS
+it.skipIf(PLATFORM !== 'mac')('detects obsidian vault', async () => {
 	// Assumes vault has been opened at least once on this machine!
 	expect(await detectVault('./test/assets/test-obsidian-vault')).toBeDefined()
 	expect(await detectVault('./test/assets/test-obsidian-vault/')).toBeDefined()

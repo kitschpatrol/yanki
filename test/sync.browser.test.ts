@@ -1,8 +1,10 @@
 import { expect, it } from 'vitest'
 import type { FileAdapter } from '../src/lib'
 import { getNoteFromMarkdown, syncNotes } from '../src/lib'
+import { PLATFORM } from '../src/lib/utilities/platform'
 
-it('syncs notes', async () => {
+// This test only runs on macOS
+it.skipIf(PLATFORM !== 'mac')('syncs notes', async () => {
 	const namespace = 'yanki.sync.browser.test'
 
 	const fileAdapter: FileAdapter = {
