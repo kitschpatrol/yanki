@@ -12,6 +12,7 @@ export default cspellConfig({
 		'metametapod',
 		'msvideo',
 		'namespac',
+		'pkill',
 		'thisnotehasaverylongonewordtitlecanwestillsplititusingthe',
 		'thisnotehasaverylongonewordtitlecanwestillsplititusingthetruncationalgorithm',
 		'vmatrix',

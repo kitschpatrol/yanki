@@ -3,7 +3,7 @@ import { knipConfig } from '@kitschpatrol/knip-config'
 export default knipConfig({
 	entry: ['test/utilities/field-mask.ts'],
 	ignore: ['test/assets/**/*'],
-	ignoreBinaries: ['osascript'],
+	ignoreBinaries: ['awk', 'launchctl', 'open', 'osascript'],
 	ignoreDependencies: [
 		'@kitschpatrol/typescript-config',
 		'@types/lodash-es',
