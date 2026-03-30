@@ -79,7 +79,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -122,7 +122,7 @@ describeWithFileFixture(
 				const results = await syncFiles(context.markdownFiles, {
 					allFilePaths: context.allFiles,
 					ankiConnectOptions: {
-						autoLaunch: true,
+						autoLaunch: false,
 					},
 					ankiWeb: false,
 					basePath: context.tempAssetPath,

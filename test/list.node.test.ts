@@ -1,8 +1,8 @@
-import { expect, it } from 'vitest'
+import { afterAll, expect, inject, it } from 'vitest'
 import { formatListResult, listNotes, syncFiles } from '../src/lib'
 import { PLATFORM } from '../src/lib/utilities/platform'
 import { describeWithFileFixture } from './fixtures/file-fixture'
-import { closeAnki } from './utilities/anki-connect'
+import { closeAnki, openAnki } from './utilities/anki-connect'
 import { sortMultiline, stableNoteIds } from './utilities/stable-sync-results'
 
 describeWithFileFixture(
@@ -17,7 +17,7 @@ describeWithFileFixture(
 			await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -27,7 +27,7 @@ describeWithFileFixture(
 
 			const result = await listNotes({
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				namespace: context.namespace,
 			})
@@ -73,7 +73,7 @@ describeWithFileFixture(
 	},
 )
 
-it('throws if anki is closed', { skip: PLATFORM !== 'mac', timeout: 10_000 }, async () => {
+it('throws if anki is closed', { skip: PLATFORM !== 'mac', timeout: 30_000 }, async () => {
 	await closeAnki()
 
 	await expect(
@@ -85,12 +85,15 @@ it('throws if anki is closed', { skip: PLATFORM !== 'mac', timeout: 10_000 }, as
 			namespace: 'D2FCB6BB-7214-458C-82C6-1ECC7593656F',
 		}),
 	).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Anki is unreachable. Is Anki running?]`)
+
+	// Restart for subsequent tests in this file
+	await openAnki(inject('ankiBasePath'))
 })
 
 it('tells the truth if no notes are found', async () => {
 	const result = await listNotes({
 		ankiConnectOptions: {
-			autoLaunch: true,
+			autoLaunch: false,
 		},
 		namespace:
 			// Random UUID, won't exist
@@ -109,4 +112,9 @@ it('handles undefined options', { skip: PLATFORM !== 'mac', timeout: 20_000 }, a
 	await expect(listNotes()).rejects.toThrowErrorMatchingInlineSnapshot(
 		`[Error: Anki is unreachable. Is Anki running?]`,
 	)
+})
+
+// Restart Anki for subsequent test files
+afterAll(async () => {
+	await openAnki(inject('ankiBasePath'))
 })

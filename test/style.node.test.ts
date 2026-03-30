@@ -19,7 +19,7 @@ describeWithFileFixture(
 
 			const result = await getStyle({
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 			})
 
@@ -51,7 +51,7 @@ describeWithFileFixture(
 
 			const result = await setStyle({
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				css: customStyle,
@@ -96,7 +96,7 @@ describeWithFileFixture(
 
 			const newStyle = await getStyle({
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 			})
 

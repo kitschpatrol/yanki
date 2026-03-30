@@ -41,7 +41,7 @@ export function describeWithFileFixture(
 			markdownFiles: [],
 			namespace: `Yanki Test - ${getHash(description, 16)}`,
 			tempAssetPath: '',
-			yankiConnect: new YankiConnect({ autoLaunch: true }),
+			yankiConnect: new YankiConnect({ autoLaunch: false }),
 		}
 
 		beforeAll(async () => {

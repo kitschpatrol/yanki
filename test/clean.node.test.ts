@@ -1,8 +1,8 @@
-import { expect, it } from 'vitest'
+import { afterAll, expect, inject, it } from 'vitest'
 import { cleanNotes, formatCleanResult, listNotes, syncFiles } from '../src/lib'
 import { PLATFORM } from '../src/lib/utilities/platform'
 import { describeWithFileFixture } from './fixtures/file-fixture'
-import { closeAnki } from './utilities/anki-connect'
+import { closeAnki, openAnki } from './utilities/anki-connect'
 import { stableNoteIds, stablePrettyMs } from './utilities/stable-sync-results'
 
 describeWithFileFixture(
@@ -17,7 +17,7 @@ describeWithFileFixture(
 			await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -28,7 +28,7 @@ describeWithFileFixture(
 			// Dry run
 			const dryRunResult = await cleanNotes({
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: true,
@@ -46,7 +46,7 @@ describeWithFileFixture(
 
 			const ankiNotes = await listNotes({
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				namespace: context.namespace,
 			})
@@ -55,7 +55,7 @@ describeWithFileFixture(
 			// Real run
 			const runResult = await cleanNotes({
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				namespace: context.namespace,
@@ -106,7 +106,7 @@ describeWithFileFixture(
 
 			const postCleanAnkiNotes = await listNotes({
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				namespace: context.namespace,
 			})
@@ -115,7 +115,7 @@ describeWithFileFixture(
 			// At which point, there's nothing to delete...
 			const postCleanResult = await cleanNotes({
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				namespace: context.namespace,
@@ -145,4 +145,9 @@ it('handles undefined options', { skip: PLATFORM !== 'mac', timeout: 20_000 }, a
 	await expect(cleanNotes()).rejects.toThrowErrorMatchingInlineSnapshot(
 		`[Error: Anki is unreachable. Is Anki running?]`,
 	)
+})
+
+// Restart Anki for subsequent test files
+afterAll(async () => {
+	await openAnki(inject('ankiBasePath'))
 })

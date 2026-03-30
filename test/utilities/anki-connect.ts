@@ -3,21 +3,34 @@ import { YankiConnect } from 'yanki-connect'
 import { yankiModels } from '../../src/lib/model/model'
 import { requestPermission } from '../../src/lib/utilities/anki-connect'
 import { PLATFORM } from '../../src/lib/utilities/platform'
+import { TEST_PROFILE_NAME } from './test-constants'
 
 /**
- * Launches Anki
+ * Launches Anki with a custom base directory.
  */
-export async function openAnki(): Promise<void> {
+export async function openAnki(basePath: string): Promise<void> {
 	if (PLATFORM !== 'mac') {
 		throw new Error('This function only works on Mac')
 	}
 
-	const client = new YankiConnect({
-		autoLaunch: 'immediately',
-	})
+	await execa('open', ['/Applications/Anki.app', '--args', '-b', basePath, '-p', TEST_PROFILE_NAME])
 
-	// Sanity
-	await client.miscellaneous.version()
+	// Poll until AnkiConnect is reachable
+	const client = new YankiConnect({ autoLaunch: false })
+	const maxWait = 30_000
+	const start = Date.now()
+	while (Date.now() - start < maxWait) {
+		try {
+			await client.miscellaneous.version()
+			return
+		} catch {
+			await new Promise((resolve) => {
+				setTimeout(resolve, 500)
+			})
+		}
+	}
+
+	throw new Error('Anki did not become reachable within 30s')
 }
 
 /**

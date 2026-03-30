@@ -117,7 +117,7 @@ describeWithFileFixture(
 		it('synchronizes notes to anki and has the correct deck name', async () => {
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -216,7 +216,7 @@ describeWithFileFixture(
 		it('preserves and merges unrelated surplus frontmatter', async () => {
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -256,7 +256,7 @@ describeWithFileFixture(
 		it('makes the right decisions about deck naming with a file in the root', async () => {
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -305,7 +305,7 @@ describeWithFileFixture(
 		it('makes the right decisions about deck naming without a file in the root', async () => {
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -363,7 +363,7 @@ for (const targetType of ['basic', 'cloze', 'type', 'reverse']) {
 				// First sync
 				const results = await syncFiles(context.markdownFiles, {
 					ankiConnectOptions: {
-						autoLaunch: true,
+						autoLaunch: false,
 					},
 					ankiWeb: false,
 					dryRun: false,
@@ -390,7 +390,7 @@ for (const targetType of ['basic', 'cloze', 'type', 'reverse']) {
 				// Second sync
 				const newModelResults = await syncFiles(context.markdownFiles, {
 					ankiConnectOptions: {
-						autoLaunch: true,
+						autoLaunch: false,
 					},
 					ankiWeb: false,
 					dryRun: false,
@@ -423,7 +423,7 @@ describeWithFileFixture(
 			// First sync
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -464,7 +464,7 @@ describeWithFileFixture(
 			const newModelResults = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -509,7 +509,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -538,7 +538,7 @@ describeWithFileFixture(
 
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -568,7 +568,7 @@ describeWithFileFixture(
 			// First sync should be all "created"
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -587,7 +587,7 @@ describeWithFileFixture(
 
 			const secondSyncResults = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -622,7 +622,7 @@ describeWithFileFixture(
 
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -654,7 +654,7 @@ describeWithFileFixture(
 
 			const resultsWithDuplicates = await syncFiles(newFileList, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -681,7 +681,7 @@ describeWithFileFixture(
 			// First, sync the file so they come back with an id
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -708,7 +708,7 @@ describeWithFileFixture(
 			// Sync again
 			const results2 = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -737,7 +737,7 @@ describeWithFileFixture(
 			// Sync again
 			const results3 = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -780,7 +780,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -813,7 +813,7 @@ describeWithFileFixture(
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -844,7 +844,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -892,7 +892,7 @@ describeWithFileFixture(
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -947,7 +947,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -975,7 +975,7 @@ describeWithFileFixture(
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1010,7 +1010,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1044,7 +1044,7 @@ describeWithFileFixture(
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1085,7 +1085,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1125,7 +1125,7 @@ describeWithFileFixture(
 			const results2 = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1177,7 +1177,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -1210,7 +1210,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -1243,7 +1243,7 @@ describeWithFileFixture(
 
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: true,
@@ -1295,7 +1295,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -1319,7 +1319,7 @@ describeWithFileFixture(
 			const results2 = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -1357,7 +1357,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -1410,7 +1410,7 @@ describeWithFileFixture(
 			const results2 = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -1433,7 +1433,7 @@ describeWithFileFixture(
 			const results3 = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -1472,7 +1472,7 @@ describeWithFileFixture(
 				const results = await syncFiles(context.markdownFiles, {
 					allFilePaths: context.allFiles,
 					ankiConnectOptions: {
-						autoLaunch: true,
+						autoLaunch: false,
 					},
 					ankiWeb: false,
 					basePath: context.tempAssetPath,
@@ -1515,7 +1515,7 @@ describeWithFileFixture(
 				const results2 = await syncFiles(context.markdownFiles, {
 					allFilePaths: context.allFiles,
 					ankiConnectOptions: {
-						autoLaunch: true,
+						autoLaunch: false,
 					},
 					ankiWeb: false,
 					basePath: context.tempAssetPath,
@@ -1547,7 +1547,7 @@ describeWithFileFixture(
 			// First sync
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1572,7 +1572,7 @@ describeWithFileFixture(
 			// Second sync
 			const secondResults = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1601,7 +1601,7 @@ describeWithFileFixture(
 			// First sync
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1624,7 +1624,7 @@ describeWithFileFixture(
 			// Second sync
 			const secondResults = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1660,7 +1660,7 @@ describeWithFileFixture(
 			// First sync
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1683,7 +1683,7 @@ describeWithFileFixture(
 			// Second sync
 			const secondResults = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1736,7 +1736,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1772,7 +1772,7 @@ describeWithFileFixture(
 			const secondResults = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1804,7 +1804,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -1837,7 +1837,7 @@ describeWithFileFixture(
 			const secondResults = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				basePath: context.tempAssetPath,
@@ -1873,7 +1873,7 @@ describeWithFileFixture(
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1908,7 +1908,7 @@ describeWithFileFixture(
 			const results2 = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1951,7 +1951,7 @@ describeWithFileFixture(
 			const firstSyncStart = performance.now()
 			const firstResults = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -1967,7 +1967,7 @@ describeWithFileFixture(
 			const secondSyncStart = performance.now()
 			const secondResults = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
@@ -2011,7 +2011,7 @@ describeWithFileFixture(
 		it('never puts cloze markup on the back of cloze notes', async () => {
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
-					autoLaunch: true,
+					autoLaunch: false,
 				},
 				ankiWeb: false,
 				dryRun: false,
