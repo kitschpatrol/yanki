@@ -1,6 +1,5 @@
 import { afterAll, expect, inject, it } from 'vitest'
 import { formatListResult, listNotes, syncFiles } from '../src/lib'
-import { PLATFORM } from '../src/lib/utilities/platform'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { closeAnki, openAnki } from './utilities/anki-connect'
 import { sortMultiline, stableNoteIds } from './utilities/stable-sync-results'
@@ -73,7 +72,7 @@ describeWithFileFixture(
 	},
 )
 
-it('throws if anki is closed', { skip: PLATFORM !== 'mac', timeout: 30_000 }, async () => {
+it('throws if anki is closed', { timeout: 30_000 }, async () => {
 	await closeAnki()
 
 	await expect(
@@ -107,7 +106,7 @@ it('tells the truth if no notes are found', async () => {
 	expect(formatted).toMatchInlineSnapshot(`"No notes found."`)
 })
 
-it('handles undefined options', { skip: PLATFORM !== 'mac', timeout: 20_000 }, async () => {
+it('handles undefined options', { timeout: 20_000 }, async () => {
 	await closeAnki()
 	await expect(listNotes()).rejects.toThrowErrorMatchingInlineSnapshot(
 		`[Error: Anki is unreachable. Is Anki running?]`,
