@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ANKI_VERSION: '25.02.7'
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      # ── Install Anki (Linux) ──────────────────────────────────────
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            zstd \
+            xvfb \
+            libxcb-xinerama0 \
+            libxcb-cursor0 \
+            libnss3 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2 \
+            libxtst6 \
+            libxkbcommon0 \
+            libgbm1 \
+            libasound2t64 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libdrm2 \
+            libpango-1.0-0 \
+            libcairo2 \
+            libatspi2.0-0
+
+      - name: Install Anki (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          curl -fsSL -o anki.tar.zst \
+            "https://github.com/ankitects/anki/releases/download/${ANKI_VERSION}/anki-${ANKI_VERSION}-linux-qt6.tar.zst"
+          tar xaf anki.tar.zst
+          cd "anki-${ANKI_VERSION}-linux-qt6"
+          sudo ./install.sh
+
+      # ── Install Anki (macOS) ──────────────────────────────────────
+      - name: Install Anki (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          curl -fsSL -o anki.dmg \
+            "https://github.com/ankitects/anki/releases/download/${ANKI_VERSION}/anki-${ANKI_VERSION}-mac-apple-qt6.dmg"
+          hdiutil attach anki.dmg -nobrowse -quiet
+          cp -R /Volumes/Anki/Anki.app /Applications/Anki.app
+          hdiutil detach /Volumes/Anki -quiet
+
+      # ── Install Anki (Windows) ────────────────────────────────────
+      - name: Install Anki (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $url = "https://github.com/ankitects/anki/releases/download/$env:ANKI_VERSION/anki-$env:ANKI_VERSION-windows-qt6.exe"
+          $installer = "$env:TEMP\anki-installer.exe"
+          Invoke-WebRequest -Uri $url -OutFile $installer -UseBasicParsing
+          Start-Process -FilePath $installer -ArgumentList '/S' -Wait
+          if (!(Test-Path 'C:\Program Files\Anki\anki.exe')) {
+            Write-Error 'Anki was not found at expected path after installation'
+            exit 1
+          }
+
+      # ── Verify Anki is discoverable ──────────────────────────────
+      - name: Verify Anki binary
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            test -x /usr/local/bin/anki && echo "Found: /usr/local/bin/anki"
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            test -d /Applications/Anki.app && echo "Found: /Applications/Anki.app"
+          elif [ "$RUNNER_OS" = "Windows" ]; then
+            test -f "C:/Program Files/Anki/anki.exe" && echo "Found: C:/Program Files/Anki/anki.exe"
+          fi
+
+      # ── Setup pnpm and Node.js ───────────────────────────────────
+      - name: Install pnpm
+        uses: pnpm/action-setup@a15d269cd4658e1107c09f1fabf4cbd7bd1f308a # v4.4.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # ── Build ─────────────────────────────────────────────────────
+      - name: Build
+        run: pnpm run build
+
+      # ── Test ──────────────────────────────────────────────────────
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum pnpm test
+
+      - name: Test (macOS / Windows)
+        if: runner.os != 'Linux'
+        run: pnpm test
