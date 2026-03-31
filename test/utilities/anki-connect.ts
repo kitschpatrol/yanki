@@ -188,7 +188,7 @@ export async function closeAnki(): Promise<void> {
 
 			case 'mac': {
 				if (ankiPid !== undefined) {
-					// Pip-installed Anki: kill the entire process group (negative PID)
+					// Kill the entire process group (negative PID)
 					// so Qt/WebEngine child processes are also terminated
 					try {
 						process.kill(-ankiPid, 'SIGKILL')
@@ -211,6 +211,13 @@ export async function closeAnki(): Promise<void> {
 					)
 				}
 
+				// Fallback for pip-installed Anki where ankiPid is unavailable
+				// (e.g. in Vitest worker processes that don't share module state
+				// with the global setup). Matches the script path to avoid killing
+				// unrelated processes.
+				await execa('pkill', ['-9', '-f', 'bin/anki']).catch(() => {
+					// Ignore if no matching processes
+				})
 				break
 			}
 
