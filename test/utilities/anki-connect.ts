@@ -166,7 +166,9 @@ export async function closeAnki(): Promise<void> {
 		switch (PLATFORM) {
 			case 'linux': {
 				if (ankiPid !== undefined) {
-					await execa('kill', [String(ankiPid)]).catch(() => {
+					// Kill the entire process group (negative PID)
+					// so Qt/WebEngine child processes are also terminated
+					await execa('kill', ['-9', `-${String(ankiPid)}`]).catch(() => {
 						// Ignore if process already exited
 					})
 					ankiPid = undefined
@@ -183,14 +185,12 @@ export async function closeAnki(): Promise<void> {
 
 			case 'mac': {
 				if (ankiPid !== undefined) {
-					// Pip-installed Anki: force kill by PID
-					await execa('kill', ['-9', String(ankiPid)]).catch(() => {
+					// Pip-installed Anki: kill the entire process group (negative PID)
+					// so Qt/WebEngine child processes are also terminated
+					await execa('kill', ['-9', `-${String(ankiPid)}`]).catch(() => {
 						// Ignore if process already exited
 					})
 					ankiPid = undefined
-					await execa('pkill', ['-9', '-f', 'aqt']).catch(() => {
-						// Ignore if no matching processes
-					})
 				} else {
 					// .app bundle: use AppleScript
 					await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(
