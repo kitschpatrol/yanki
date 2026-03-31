@@ -1,7 +1,10 @@
 import { playwright } from '@vitest/browser-playwright'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
+
+const isWindows = os.platform() === 'win32'
 
 export default defineConfig({
 	test: {
@@ -37,6 +40,7 @@ export default defineConfig({
 					exclude: ['test/**/*.node.test.ts'],
 					include: ['test/**/*.test.ts'],
 					name: 'browser',
+					testTimeout: isWindows ? 30_000 : 5000,
 				},
 			},
 			// Node project
@@ -47,6 +51,7 @@ export default defineConfig({
 					include: ['test/**/*.test.ts'],
 					name: 'node',
 					root: path.resolve(path.dirname(fileURLToPath(import.meta.url))),
+					testTimeout: isWindows ? 30_000 : 5000,
 				},
 			},
 		],

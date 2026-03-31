@@ -1,15 +1,77 @@
 import { execa } from 'execa'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import { YankiConnect } from 'yanki-connect'
 import { yankiModels } from '../../src/lib/model/model'
 import { requestPermission } from '../../src/lib/utilities/anki-connect'
 import { PLATFORM } from '../../src/lib/utilities/platform'
 import { TEST_PROFILE_NAME } from './test-constants'
 
+let ankiPid: number | undefined
+
+/**
+ * Finds the Anki executable on Windows by checking common installation locations.
+ */
+function findAnkiWindows(): string {
+	const userProfile = os.homedir()
+	const candidates = [
+		// Scoop installation
+		path.join(
+			userProfile,
+			'scoop',
+			'apps',
+			'anki',
+			'current',
+			'programfiles',
+			'.venv',
+			'Scripts',
+			'anki.exe',
+		),
+		// Regular installer
+		path.join('C:', 'Program Files', 'Anki', 'anki.exe'),
+	]
+
+	for (const candidate of candidates) {
+		if (fs.existsSync(candidate)) {
+			return candidate
+		}
+	}
+
+	// Fallback: hope it's on PATH (chocolatey, manual install, etc.)
+	// Return bare command and let execa resolve it
+	return 'anki'
+}
+
 /**
  * Launches Anki with a custom base directory.
  */
 export async function openAnki(basePath: string): Promise<void> {
 	switch (PLATFORM) {
+		case 'linux': {
+			// TODO: Launch `anki -b basePath -p TEST_PROFILE_NAME` detached so it
+			// doesn't block the test process. Ensure the child is unref'd.
+			// Example: execa('anki', ['-b', basePath, '-p', TEST_PROFILE_NAME], { detached: true, stdio: 'ignore' }).unref()
+			throw new Error('Not implemented yet: launching Anki on Linux')
+		}
+
+		case 'windows': {
+			const ankiPath = findAnkiWindows()
+			const child = execa(ankiPath, ['-b', basePath, '-p', TEST_PROFILE_NAME], {
+				detached: true,
+				stdio: 'ignore',
+				windowsHide: true,
+			})
+
+			// Suppress the expected rejection when Anki is killed during teardown
+			child.catch(() => {
+				// Expected: process is killed via taskkill during closeAnki
+			})
+			ankiPid = child.pid
+			child.unref()
+			break
+		}
+
 		case 'mac': {
 			await execa('open', [
 				'/Applications/Anki.app',
@@ -20,21 +82,6 @@ export async function openAnki(basePath: string): Promise<void> {
 				TEST_PROFILE_NAME,
 			])
 			break
-		}
-
-		case 'linux': {
-			// TODO: Launch `anki -b basePath -p TEST_PROFILE_NAME` detached so it
-			// doesn't block the test process. Ensure the child is unref'd.
-			// Example: execa('anki', ['-b', basePath, '-p', TEST_PROFILE_NAME], { detached: true, stdio: 'ignore' }).unref()
-			throw new Error('Not implemented yet: launching Anki on Linux')
-		}
-
-		case 'windows': {
-			// TODO: Launch Anki via its exe. The default install path is
-			// C:\Program Files\Anki\anki.exe but may vary. Consider searching
-			// PATH or common install locations.
-			// Example: execa('anki.exe', ['-b', basePath, '-p', TEST_PROFILE_NAME], { detached: true, stdio: 'ignore' }).unref()
-			throw new Error('Not implemented yet: launching Anki on Windows')
 		}
 
 		case 'other': {
@@ -72,6 +119,28 @@ export async function closeAnki(): Promise<void> {
 	let permissionStatus = await requestPermission(client)
 	if (permissionStatus !== 'ankiUnreachable') {
 		switch (PLATFORM) {
+			case 'linux': {
+				// TODO: Send SIGTERM to the Anki process.
+				// Example: execa('pkill', ['-f', 'anki'])
+				throw new Error('Not implemented yet: closing Anki on Linux')
+			}
+
+			case 'windows': {
+				// Kill the exact process tree we started (catches Python + Qt children)
+				if (ankiPid !== undefined) {
+					await execa('taskkill', ['/PID', String(ankiPid), '/T', '/F']).catch(() => {
+						// Ignore if process already exited
+					})
+					ankiPid = undefined
+				}
+
+				// Also kill any remaining anki processes by name as a fallback
+				await execa('taskkill', ['/IM', 'anki.exe', '/T', '/F']).catch(() => {
+					// Ignore if no matching processes
+				})
+				break
+			}
+
 			case 'mac': {
 				await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(async () => {
 					await execa('sh', [
@@ -82,18 +151,6 @@ export async function closeAnki(): Promise<void> {
 					})
 				})
 				break
-			}
-
-			case 'linux': {
-				// TODO: Send SIGTERM to the Anki process.
-				// Example: execa('pkill', ['-f', 'anki'])
-				throw new Error('Not implemented yet: closing Anki on Linux')
-			}
-
-			case 'windows': {
-				// TODO: Kill the Anki process.
-				// Example: execa('taskkill', ['/IM', 'anki.exe'])
-				throw new Error('Not implemented yet: closing Anki on Windows')
 			}
 
 			case 'other': {

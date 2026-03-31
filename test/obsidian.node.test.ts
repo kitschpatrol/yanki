@@ -1,18 +1,29 @@
 import { globby } from 'globby'
 import { HTMLElement, parseHTML } from 'linkedom'
+import nodeFs from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { expect, it } from 'vitest'
 import { detectVault } from '../src/bin/utilities/obsidian'
 import { getNoteFromMarkdown, syncFiles } from '../src/lib/index'
 import { getBase, normalize, stripBasePath } from '../src/lib/utilities/path'
+import { PLATFORM } from '../src/lib/utilities/platform'
 import { parseObsidianVaultLink } from '../src/lib/utilities/resolve-link'
 import { safeDecodeURI } from '../src/lib/utilities/url'
 import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stripAnkiMediaTag } from './utilities/dom-inspector'
 import { stableResults } from './utilities/stable-sync-results'
 
-it('detects obsidian vault', async () => {
+// Vault detection tests require Obsidian to have opened the vault at least once
+const obsidianConfigDirectory =
+	PLATFORM === 'windows'
+		? String.raw`${process.env.APPDATA}\Obsidian`
+		: PLATFORM === 'mac'
+			? `${process.env.HOME}/Library/Application Support/obsidian`
+			: `${process.env.XDG_CONFIG_HOME ?? `${process.env.HOME}/.config`}/Obsidian`
+const isObsidianInstalled = nodeFs.existsSync(obsidianConfigDirectory)
+
+it.skipIf(!isObsidianInstalled)('detects obsidian vault', async () => {
 	// Assumes vault has been opened at least once on this machine!
 	expect(await detectVault('./test/assets/test-obsidian-vault')).toBeDefined()
 	expect(await detectVault('./test/assets/test-obsidian-vault/')).toBeDefined()
@@ -23,7 +34,7 @@ it('detects obsidian vault', async () => {
 	).toBeDefined()
 })
 
-it('detects absence of obsidian vault', async () => {
+it.skipIf(!isObsidianInstalled)('detects absence of obsidian vault', async () => {
 	// Assumes vault has been opened at least once on this machine!
 	expect(await detectVault('./test/assets/test-media')).toBeUndefined()
 	expect(await detectVault('./test/assets/test-media/')).toBeUndefined()
