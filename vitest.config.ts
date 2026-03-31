@@ -6,6 +6,7 @@ import { defineConfig } from 'vitest/config'
 
 const isCI = Boolean(process.env.CI)
 const isWindows = os.platform() === 'win32'
+const isSlow = isCI || isWindows
 
 export default defineConfig({
 	test: {
@@ -44,7 +45,7 @@ export default defineConfig({
 								exclude: ['test/**/*.node.test.ts'],
 								include: ['test/**/*.test.ts'],
 								name: 'browser',
-								testTimeout: isWindows ? 30_000 : 5000,
+								testTimeout: isSlow ? 30_000 : 5000,
 							},
 						},
 					]),
@@ -56,7 +57,7 @@ export default defineConfig({
 					include: ['test/**/*.test.ts'],
 					name: 'node',
 					root: path.resolve(path.dirname(fileURLToPath(import.meta.url))),
-					testTimeout: isWindows ? 30_000 : 5000,
+					testTimeout: isSlow ? 30_000 : 5000,
 				},
 			},
 		],

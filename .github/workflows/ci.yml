@@ -41,6 +41,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             xvfb \
+            libegl1 \
+            libgl1 \
             libnss3 \
             libxcomposite1 \
             libxdamage1 \
@@ -60,8 +62,8 @@ jobs:
       - name: Install Anki
         run: pip install "aqt==${{ env.ANKI_VERSION }}"
 
-      - name: Verify Anki on PATH
-        run: anki --help || true
+      - name: Verify Anki is importable
+        run: python -c "from aqt import run; print('aqt OK')"
 
       # ── Setup pnpm and Node.js ───────────────────────────────────
       - name: Install pnpm

@@ -183,12 +183,12 @@ export async function closeAnki(): Promise<void> {
 
 			case 'mac': {
 				if (ankiPid !== undefined) {
-					// Pip-installed Anki: kill by PID like Linux
-					await execa('kill', [String(ankiPid)]).catch(() => {
+					// Pip-installed Anki: force kill by PID
+					await execa('kill', ['-9', String(ankiPid)]).catch(() => {
 						// Ignore if process already exited
 					})
 					ankiPid = undefined
-					await execa('pkill', ['-x', 'anki']).catch(() => {
+					await execa('pkill', ['-9', '-f', 'aqt']).catch(() => {
 						// Ignore if no matching processes
 					})
 				} else {
