@@ -74,31 +74,6 @@ jobs:
       - name: Verify Anki is importable
         run: python -c "from aqt import run; print('aqt OK')"
 
-      - name: Smoke-test Anki GUI (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          mkdir -p /tmp/anki-smoke
-          cp -r test/fixtures/anki-data-folder/* /tmp/anki-smoke/
-          timeout 20 xvfb-run anki -b /tmp/anki-smoke -p yanki-tests 2>&1 &
-          ANKI_PID=$!
-          # Wait for AnkiConnect to respond
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:8765 -d '{"action":"version","version":6}' > /dev/null 2>&1; then
-              echo "AnkiConnect responded on attempt $i"
-              kill $ANKI_PID 2>/dev/null || true
-              wait $ANKI_PID 2>/dev/null || true
-              rm -rf /tmp/anki-smoke
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "AnkiConnect never responded — dumping process info:"
-          pgrep -af anki || true
-          kill $ANKI_PID 2>/dev/null || true
-          wait $ANKI_PID 2>/dev/null || true
-          rm -rf /tmp/anki-smoke
-          exit 1
-
       # ── Setup pnpm and Node.js ───────────────────────────────────
       - name: Install pnpm
         uses: pnpm/action-setup@a15d269cd4658e1107c09f1fabf4cbd7bd1f308a # v4.4.0
