@@ -4,6 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
 
+const isCI = Boolean(process.env.CI)
 const isWindows = os.platform() === 'win32'
 
 export default defineConfig({
@@ -22,27 +23,31 @@ export default defineConfig({
 		maxConcurrency: 1,
 		maxWorkers: 1,
 		projects: [
-			{
-				// Browser project
-				test: {
-					browser: {
-						// Conflicts between VS Code extension and vitest CLI command...
-						api: {
-							port: 5180,
-							strictPort: true,
+			// Browser tests require a running Anki instance with AnkiConnect, skip in CI
+			...(isCI
+				? []
+				: [
+						{
+							test: {
+								browser: {
+									// Conflicts between VS Code extension and vitest CLI command...
+									api: {
+										port: 5180,
+										strictPort: true,
+									},
+									enabled: true,
+									headless: true,
+									instances: [{ browser: 'chromium' as const }],
+									provider: playwright(),
+									screenshotFailures: false,
+								},
+								exclude: ['test/**/*.node.test.ts'],
+								include: ['test/**/*.test.ts'],
+								name: 'browser',
+								testTimeout: isWindows ? 30_000 : 5000,
+							},
 						},
-						enabled: true,
-						headless: true,
-						instances: [{ browser: 'chromium' }],
-						provider: playwright(),
-						screenshotFailures: false,
-					},
-					exclude: ['test/**/*.node.test.ts'],
-					include: ['test/**/*.test.ts'],
-					name: 'browser',
-					testTimeout: isWindows ? 30_000 : 5000,
-				},
-			},
+					]),
 			// Node project
 			{
 				test: {
