@@ -187,7 +187,17 @@ export async function closeAnki(): Promise<void> {
 			}
 
 			case 'mac': {
-				if (ankiPid !== undefined) {
+				if (ankiPid === undefined) {
+					// .app bundle: use AppleScript
+					await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(async () => {
+						await execa('sh', [
+							'-c',
+							"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
+						]).catch(() => {
+							// Ignore
+						})
+					})
+				} else {
 					// Kill the entire process group (negative PID)
 					// so Qt/WebEngine child processes are also terminated
 					try {
@@ -197,18 +207,6 @@ export async function closeAnki(): Promise<void> {
 					}
 
 					ankiPid = undefined
-				} else {
-					// .app bundle: use AppleScript
-					await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(
-						async () => {
-							await execa('sh', [
-								'-c',
-								"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
-							]).catch(() => {
-								// Ignore
-							})
-						},
-					)
 				}
 
 				// Fallback for pip-installed Anki where ankiPid is unavailable
