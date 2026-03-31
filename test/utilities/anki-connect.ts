@@ -44,15 +44,56 @@ function findAnkiWindows(): string {
 }
 
 /**
+ * Finds the Anki executable on Linux by checking common installation locations.
+ */
+function findAnkiLinux(): string {
+	const candidates = [
+		'/usr/local/bin/anki',
+		'/usr/bin/anki',
+		path.join(os.homedir(), '.local', 'bin', 'anki'),
+	]
+
+	for (const candidate of candidates) {
+		if (fs.existsSync(candidate)) {
+			return candidate
+		}
+	}
+
+	// Fallback: hope it's on PATH
+	return 'anki'
+}
+
+/**
  * Launches Anki with a custom base directory.
  */
 export async function openAnki(basePath: string): Promise<void> {
 	switch (PLATFORM) {
 		case 'linux': {
-			// TODO: Launch `anki -b basePath -p TEST_PROFILE_NAME` detached so it
-			// doesn't block the test process. Ensure the child is unref'd.
-			// Example: execa('anki', ['-b', basePath, '-p', TEST_PROFILE_NAME], { detached: true, stdio: 'ignore' }).unref()
-			throw new Error('Not implemented yet: launching Anki on Linux')
+			const ankiPath = findAnkiLinux()
+			const child = execa(ankiPath, ['-b', basePath, '-p', TEST_PROFILE_NAME], {
+				detached: true,
+				stdio: 'ignore',
+			})
+
+			// Suppress the expected rejection when Anki is killed during teardown
+			child.catch(() => {
+				// Expected: process is killed during closeAnki
+			})
+			ankiPid = child.pid
+			child.unref()
+			break
+		}
+
+		case 'mac': {
+			await execa('open', [
+				'/Applications/Anki.app',
+				'--args',
+				'-b',
+				basePath,
+				'-p',
+				TEST_PROFILE_NAME,
+			])
+			break
 		}
 
 		case 'windows': {
@@ -69,18 +110,6 @@ export async function openAnki(basePath: string): Promise<void> {
 			})
 			ankiPid = child.pid
 			child.unref()
-			break
-		}
-
-		case 'mac': {
-			await execa('open', [
-				'/Applications/Anki.app',
-				'--args',
-				'-b',
-				basePath,
-				'-p',
-				TEST_PROFILE_NAME,
-			])
 			break
 		}
 
@@ -120,9 +149,32 @@ export async function closeAnki(): Promise<void> {
 	if (permissionStatus !== 'ankiUnreachable') {
 		switch (PLATFORM) {
 			case 'linux': {
-				// TODO: Send SIGTERM to the Anki process.
-				// Example: execa('pkill', ['-f', 'anki'])
-				throw new Error('Not implemented yet: closing Anki on Linux')
+				if (ankiPid !== undefined) {
+					await execa('kill', [String(ankiPid)]).catch(() => {
+						// Ignore if process already exited
+					})
+					ankiPid = undefined
+				}
+
+				// Fallback: kill any remaining anki processes by exact name
+				// Using -x for exact match to avoid killing unrelated processes
+				// (e.g. vitest workers in a directory path containing "anki")
+				await execa('pkill', ['-x', 'anki']).catch(() => {
+					// Ignore if no matching processes
+				})
+				break
+			}
+
+			case 'mac': {
+				await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(async () => {
+					await execa('sh', [
+						'-c',
+						"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
+					]).catch(() => {
+						// Ignore
+					})
+				})
+				break
 			}
 
 			case 'windows': {
@@ -137,18 +189,6 @@ export async function closeAnki(): Promise<void> {
 				// Also kill any remaining anki processes by name as a fallback
 				await execa('taskkill', ['/IM', 'anki.exe', '/T', '/F']).catch(() => {
 					// Ignore if no matching processes
-				})
-				break
-			}
-
-			case 'mac': {
-				await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(async () => {
-					await execa('sh', [
-						'-c',
-						"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
-					]).catch(() => {
-						// Ignore
-					})
 				})
 				break
 			}
