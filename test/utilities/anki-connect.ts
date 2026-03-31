@@ -120,7 +120,8 @@ export async function openAnki(basePath: string): Promise<void> {
 
 	// Poll until AnkiConnect is reachable
 	const client = new YankiConnect({ autoLaunch: false })
-	const maxWait = 30_000
+	// Allow CI to override the timeout (e.g. for launcher first-run download)
+	const maxWait = Number(process.env.ANKI_CONNECT_TIMEOUT) || 30_000
 	const start = Date.now()
 	while (Date.now() - start < maxWait) {
 		try {
@@ -133,7 +134,7 @@ export async function openAnki(basePath: string): Promise<void> {
 		}
 	}
 
-	throw new Error('Anki did not become reachable within 30s')
+	throw new Error(`Anki did not become reachable within ${String(maxWait / 1000)}s`)
 }
 
 /**

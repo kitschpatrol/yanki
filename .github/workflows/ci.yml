@@ -13,7 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  ANKI_VERSION: '25.02.7'
+  ANKI_VERSION: '25.09'
+  # Extra time for the Anki launcher to download the full app on first run
+  ANKI_CONNECT_TIMEOUT: '180000'
 
 jobs:
   test:
@@ -61,32 +63,82 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           curl -fsSL -o anki.tar.zst \
-            "https://github.com/ankitects/anki/releases/download/${ANKI_VERSION}/anki-${ANKI_VERSION}-linux-qt6.tar.zst"
+            "https://github.com/ankitects/anki/releases/download/${ANKI_VERSION}/anki-launcher-${ANKI_VERSION}-linux.tar.zst"
           tar xaf anki.tar.zst
-          cd "anki-${ANKI_VERSION}-linux-qt6"
-          sudo ./install.sh
+          echo "=== Extracted contents ==="
+          ls -la
+          ls -la anki-launcher-* 2>/dev/null || ls -la anki* 2>/dev/null || true
+          # Try install.sh if available, otherwise copy binary manually
+          if [ -d "anki-launcher-${ANKI_VERSION}-linux" ]; then
+            cd "anki-launcher-${ANKI_VERSION}-linux"
+          else
+            cd anki-launcher-* 2>/dev/null || cd anki* 2>/dev/null
+          fi
+          echo "=== Install directory contents ==="
+          ls -la
+          if [ -f install.sh ]; then
+            sudo ./install.sh
+          else
+            echo "No install.sh found, installing manually"
+            sudo install -m 755 anki /usr/local/bin/anki 2>/dev/null || \
+              sudo find . -name "anki" -type f -executable -exec install -m 755 {} /usr/local/bin/anki \;
+          fi
+
+      - name: Diagnose Anki installation (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "=== Binary type ==="
+          file /usr/local/bin/anki
+          echo "=== Try running ==="
+          xvfb-run timeout 10 /usr/local/bin/anki --help 2>&1 || echo "Exit code: $?"
 
       # ── Install Anki (macOS) ──────────────────────────────────────
       - name: Install Anki (macOS)
         if: runner.os == 'macOS'
         run: |
           curl -fsSL -o anki.dmg \
-            "https://github.com/ankitects/anki/releases/download/${ANKI_VERSION}/anki-${ANKI_VERSION}-mac-apple-qt6.dmg"
+            "https://github.com/ankitects/anki/releases/download/${ANKI_VERSION}/anki-launcher-${ANKI_VERSION}-mac.dmg"
           hdiutil attach anki.dmg -nobrowse -quiet
-          cp -R /Volumes/Anki/Anki.app /Applications/Anki.app
-          hdiutil detach /Volumes/Anki -quiet
+          echo "=== DMG volume contents ==="
+          ls -la /Volumes/Anki*/ 2>/dev/null || ls -la /Volumes/*nki*/ 2>/dev/null || true
+          cp -R /Volumes/Anki*/Anki.app /Applications/Anki.app 2>/dev/null || \
+            cp -R /Volumes/*nki*/*.app /Applications/Anki.app
+          hdiutil detach /Volumes/Anki* -quiet 2>/dev/null || true
 
       # ── Install Anki (Windows) ────────────────────────────────────
       - name: Install Anki (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $url = "https://github.com/ankitects/anki/releases/download/$env:ANKI_VERSION/anki-$env:ANKI_VERSION-windows-qt6.exe"
+          $url = "https://github.com/ankitects/anki/releases/download/$env:ANKI_VERSION/anki-launcher-$env:ANKI_VERSION-windows.exe"
           $installer = "$env:TEMP\anki-installer.exe"
           Invoke-WebRequest -Uri $url -OutFile $installer -UseBasicParsing
+
+          # Try NSIS silent flag
           Start-Process -FilePath $installer -ArgumentList '/S' -Wait
-          if (!(Test-Path 'C:\Program Files\Anki\anki.exe')) {
-            Write-Error 'Anki was not found at expected path after installation'
+
+          # Search for anki.exe to find where it was installed
+          Write-Host "=== Searching for anki.exe ==="
+          $found = @()
+          foreach ($searchPath in @("$env:ProgramFiles", "${env:ProgramFiles(x86)}", "$env:LOCALAPPDATA", "$env:APPDATA", "$env:USERPROFILE")) {
+            if ($searchPath -and (Test-Path $searchPath)) {
+              $results = Get-ChildItem -Path $searchPath -Recurse -Filter "anki.exe" -ErrorAction SilentlyContinue | Select-Object -First 5
+              foreach ($r in $results) {
+                Write-Host "  Found: $($r.FullName)"
+                $found += $r.FullName
+              }
+            }
+          }
+
+          # Also check PATH
+          $pathAnki = Get-Command anki -ErrorAction SilentlyContinue
+          if ($pathAnki) {
+            Write-Host "  Found on PATH: $($pathAnki.Source)"
+            $found += $pathAnki.Source
+          }
+
+          if ($found.Count -eq 0) {
+            Write-Error "anki.exe was not found anywhere after installation"
             exit 1
           }
 
@@ -99,7 +151,14 @@ jobs:
           elif [ "$RUNNER_OS" = "macOS" ]; then
             test -d /Applications/Anki.app && echo "Found: /Applications/Anki.app"
           elif [ "$RUNNER_OS" = "Windows" ]; then
-            test -f "C:/Program Files/Anki/anki.exe" && echo "Found: C:/Program Files/Anki/anki.exe"
+            # Check expected paths (matching test/utilities/anki-connect.ts findAnkiWindows)
+            if [ -f "C:/Program Files/Anki/anki.exe" ]; then
+              echo "Found: C:/Program Files/Anki/anki.exe"
+            elif command -v anki &> /dev/null; then
+              echo "Found on PATH: $(command -v anki)"
+            else
+              echo "WARNING: Anki not at expected path, but search step found it elsewhere"
+            fi
           fi
 
       # ── Setup pnpm and Node.js ───────────────────────────────────
@@ -124,6 +183,10 @@ jobs:
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum pnpm test
 
-      - name: Test (macOS / Windows)
-        if: runner.os != 'Linux'
+      - name: Test (macOS)
+        if: runner.os == 'macOS'
+        run: pnpm test
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
         run: pnpm test
