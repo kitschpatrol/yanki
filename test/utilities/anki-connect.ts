@@ -85,14 +85,29 @@ export async function openAnki(basePath: string): Promise<void> {
 		}
 
 		case 'mac': {
-			await execa('open', [
-				'/Applications/Anki.app',
-				'--args',
-				'-b',
-				basePath,
-				'-p',
-				TEST_PROFILE_NAME,
-			])
+			if (fs.existsSync('/Applications/Anki.app')) {
+				await execa('open', [
+					'/Applications/Anki.app',
+					'--args',
+					'-b',
+					basePath,
+					'-p',
+					TEST_PROFILE_NAME,
+				])
+			} else {
+				// Pip-installed Anki (no .app bundle), launch directly like Linux
+				const child = execa('anki', ['-b', basePath, '-p', TEST_PROFILE_NAME], {
+					detached: true,
+					stdio: 'ignore',
+				})
+
+				child.catch(() => {
+					// Expected: process is killed during closeAnki
+				})
+				ankiPid = child.pid
+				child.unref()
+			}
+
 			break
 		}
 
@@ -167,14 +182,29 @@ export async function closeAnki(): Promise<void> {
 			}
 
 			case 'mac': {
-				await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(async () => {
-					await execa('sh', [
-						'-c',
-						"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
-					]).catch(() => {
-						// Ignore
+				if (ankiPid !== undefined) {
+					// Pip-installed Anki: kill by PID like Linux
+					await execa('kill', [String(ankiPid)]).catch(() => {
+						// Ignore if process already exited
 					})
-				})
+					ankiPid = undefined
+					await execa('pkill', ['-x', 'anki']).catch(() => {
+						// Ignore if no matching processes
+					})
+				} else {
+					// .app bundle: use AppleScript
+					await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(
+						async () => {
+							await execa('sh', [
+								'-c',
+								"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
+							]).catch(() => {
+								// Ignore
+							})
+						},
+					)
+				}
+
 				break
 			}
 

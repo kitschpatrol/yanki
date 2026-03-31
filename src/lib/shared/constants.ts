@@ -6,11 +6,13 @@ import { css } from '../utilities/string'
 
 /**
  * The default CSS to use for cards. This matches Anki's default. Stored in the Yanki card models and shared across all Yanki-managed notes regardless of namespace.
+ * It does change occasionally, see https://github.com/ankitects/anki/blob/main/rslib/src/notetype/styling.css
  */
 export const CSS_DEFAULT_STYLE = css`
 	.card {
 		font-family: arial;
 		font-size: 20px;
+		line-height: 1.5;
 		text-align: center;
 		color: black;
 		background-color: white;
