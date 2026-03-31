@@ -43,12 +43,21 @@ jobs:
             xvfb \
             libegl1 \
             libgl1 \
+            libopengl0 \
             libnss3 \
             libxcomposite1 \
             libxdamage1 \
             libxrandr2 \
             libxtst6 \
             libxkbcommon0 \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
             libgbm1 \
             libasound2t64 \
             libatk1.0-0 \
@@ -64,6 +73,31 @@ jobs:
 
       - name: Verify Anki is importable
         run: python -c "from aqt import run; print('aqt OK')"
+
+      - name: Smoke-test Anki GUI (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p /tmp/anki-smoke
+          cp -r test/fixtures/anki-data-folder/* /tmp/anki-smoke/
+          timeout 20 xvfb-run anki -b /tmp/anki-smoke -p yanki-tests 2>&1 &
+          ANKI_PID=$!
+          # Wait for AnkiConnect to respond
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8765 -d '{"action":"version","version":6}' > /dev/null 2>&1; then
+              echo "AnkiConnect responded on attempt $i"
+              kill $ANKI_PID 2>/dev/null || true
+              wait $ANKI_PID 2>/dev/null || true
+              rm -rf /tmp/anki-smoke
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "AnkiConnect never responded — dumping process info:"
+          pgrep -af anki || true
+          kill $ANKI_PID 2>/dev/null || true
+          wait $ANKI_PID 2>/dev/null || true
+          rm -rf /tmp/anki-smoke
+          exit 1
 
       # ── Setup pnpm and Node.js ───────────────────────────────────
       - name: Install pnpm
