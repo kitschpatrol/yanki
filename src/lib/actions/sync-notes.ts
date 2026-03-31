@@ -262,15 +262,21 @@ export async function syncNotes(
 		)
 
 		if (updatedModelRemoteNotes.length > 0) {
-			const cardIdsToCheck: number[] = updatedModelRemoteNotes.flatMap(({ cards }) => cards ?? [])
+			// Model changes can leave orphaned cards in the database.
+			// Always run a database check to clean them up, since the
+			// behavior of cardsInfo on stale card IDs is platform-dependent?
+			// fixedDatabase = true
+			// await client.graphical.guiCheckDatabase()
 
-			// TODO: Is the miscellaneous.reloadCollection() a better option?
+			const cardIdsToCheck: number[] = updatedModelRemoteNotes.flatMap(({ cards }) => cards ?? [])
 			try {
 				// This will throw a template error if there are bad cards...
 				await client.card.cardsInfo({ cards: cardIdsToCheck })
 			} catch {
 				fixedDatabase = true
 				await client.graphical.guiCheckDatabase()
+				// Windows needed this as well
+				await client.miscellaneous.reloadCollection()
 			}
 		}
 	}

@@ -1,51 +1,16 @@
+import type { TestProject } from 'vitest/node'
 import fs from 'node:fs/promises'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
-import { TEST_PROFILE_NAME } from '../utilities/test-constants'
+import os from 'node:os'
+import path from 'node:path'
 import { closeAnki, openAnki } from './anki-connect'
 
-function getAnkiProfilePath(profileName: string): string {
-	const home = homedir()
-	switch (process.platform) {
-		case 'darwin': {
-			return join(home, 'Library', 'Application Support', 'Anki2', profileName)
-		}
-		case 'freebsd':
-		case 'linux': {
-			return join(process.env.XDG_DATA_HOME ?? join(home, '.local', 'share'), 'Anki2', profileName)
-		}
-		case 'win32': {
-			return join(process.env.APPDATA ?? join(home, 'AppData', 'Roaming'), 'Anki2', profileName)
-		}
-		case 'aix': {
-			throw new Error('Not implemented yet: "aix" case')
-		}
-		case 'android': {
-			throw new Error('Not implemented yet: "android" case')
-		}
-		case 'haiku': {
-			throw new Error('Not implemented yet: "haiku" case')
-		}
-		case 'openbsd': {
-			throw new Error('Not implemented yet: "openbsd" case')
-		}
-		case 'sunos': {
-			throw new Error('Not implemented yet: "sunos" case')
-		}
-		case 'cygwin': {
-			throw new Error('Not implemented yet: "cygwin" case')
-		}
-		case 'netbsd': {
-			throw new Error('Not implemented yet: "netbsd" case')
-		}
-	}
-}
+let ankiBasePath: string | undefined
 
 /**
- * Ensure Anki is running before tests run
+ * Ensure Anki is running before tests run, using the preconfigured fixture.
  */
-export async function setup() {
-	// Close Anki if running, then reset the test profile for repeatable tests
+export async function setup(project: TestProject) {
+	// Close Anki if running
 	await closeAnki()
 
 	// Sleep for a bit, some issues with file writing latency
@@ -53,16 +18,19 @@ export async function setup() {
 		setTimeout(resolve, 1000)
 	})
 
-	const profilePath = getAnkiProfilePath(TEST_PROFILE_NAME)
-	await fs.rm(profilePath, { force: true, recursive: true })
-	await fs.mkdir(profilePath, { recursive: true })
+	// Copy the fixture to a temp directory so Anki's writes don't mutate it
+	ankiBasePath = await fs.mkdtemp(path.join(os.tmpdir(), 'yanki-test-'))
+	// eslint-disable-next-line node/no-unsupported-features/node-builtins
+	await fs.cp(path.resolve('test/fixtures/anki-data-folder'), ankiBasePath, { recursive: true })
 
 	// Sleep for a bit, some issues with file writing latency
 	await new Promise((resolve) => {
 		setTimeout(resolve, 1000)
 	})
 
-	await openAnki()
+	project.provide('ankiBasePath', ankiBasePath)
+
+	await openAnki(ankiBasePath)
 }
 
 /**
@@ -70,4 +38,8 @@ export async function setup() {
  */
 export async function teardown() {
 	await closeAnki()
+
+	if (ankiBasePath) {
+		await fs.rm(ankiBasePath, { force: true, recursive: true })
+	}
 }

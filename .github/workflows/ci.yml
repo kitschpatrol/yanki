@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # PyPI version (no leading zero): aqt==25.9.2 corresponds to Anki 25.09.2
+  ANKI_VERSION: '25.9.2'
+  # Extra startup time for pip-installed Anki in CI
+  ANKI_CONNECT_TIMEOUT: '60000'
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      # ── Install Anki via pip ──────────────────────────────────────
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb \
+            libegl1 \
+            libgl1 \
+            libopengl0 \
+            libnss3 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2 \
+            libxtst6 \
+            libxkbcommon0 \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libgbm1 \
+            libasound2t64 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libdrm2 \
+            libpango-1.0-0 \
+            libcairo2 \
+            libatspi2.0-0
+
+      - name: Install Anki
+        run: pip install "aqt==${{ env.ANKI_VERSION }}"
+
+      - name: Verify Anki is importable
+        run: python -c "from aqt import run; print('aqt OK')"
+
+      # ── Setup pnpm and Node.js ───────────────────────────────────
+      - name: Install pnpm
+        uses: pnpm/action-setup@a15d269cd4658e1107c09f1fabf4cbd7bd1f308a # v4.4.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # ── Build ─────────────────────────────────────────────────────
+      - name: Build
+        run: pnpm run build
+
+      # ── Test ──────────────────────────────────────────────────────
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum pnpm test
+
+      - name: Test (macOS)
+        if: runner.os == 'macOS'
+        run: pnpm test
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        run: pnpm test
