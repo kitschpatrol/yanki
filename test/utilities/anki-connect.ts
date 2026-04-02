@@ -28,6 +28,8 @@ function findAnkiWindows(): string {
 			'Scripts',
 			'anki.exe',
 		),
+		// Per-user installer
+		path.join(userProfile, 'AppData', 'Local', 'Programs', 'Anki', 'anki.exe'),
 		// Regular installer
 		path.join('C:', 'Program Files', 'Anki', 'anki.exe'),
 	]
