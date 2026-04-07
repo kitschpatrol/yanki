@@ -41,8 +41,8 @@ export type GetNoteFromMarkdownOptions = Pick<
 	| 'syncMediaAssets'
 > & {
 	/**
- Needed for the public API, but optional for more efficient use internally
-when the namespace is already validated.
+	 * Needed for the public API, but optional for more efficient use internally
+	 * when the namespace is already validated.
 	 */
 	namespaceValidationAndSanitization: boolean
 }
@@ -273,12 +273,22 @@ export async function getNoteFromMarkdown(
 	return note
 }
 
-function obsidianTagsToAnkiTags(tags: string | string[] | undefined): string[] {
-	// Obsidian delimits nested tags with a `/`
-	// Anki delimits nested tags with `::`
-	// '\' and `:` are not permitted in Obsidian tags
-	// Also convert single-string tags to array
-	// Curiously, Obsidian allows just `/` and `this//////that` as valid tags, though `/` tags are broken.
-	// Fixes https://github.com/kitschpatrol/yanki-obsidian/issues/20
-	return (typeof tags === 'string' ? [tags] : (tags ?? [])).map((tag) => tag.replaceAll('/', '::'))
+/**
+ * Obsidian delimits nested tags with a `/`
+ *
+ * Anki delimits nested tags with `::`
+ *
+ * '' and `:` are not permitted in Obsidian tags
+ *
+ * Curiously, Obsidian allows just `/` and `this//////that` as valid tags,
+ * though `/` tags are broken. Fixes
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/20
+ *
+ * We also force coercion to an array of strings (even though non-string tag
+ * values shouldn't really be allowed in the first place) to handle edge cases
+ * like https://github.com/kitschpatrol/yanki/issues/12
+ */
+function obsidianTagsToAnkiTags(tags: unknown): string[] {
+	const normalized = Array.isArray(tags) ? tags : tags === undefined ? [] : [tags]
+	return normalized.map((tag) => String(tag).replaceAll('/', '::'))
 }
