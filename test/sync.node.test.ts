@@ -458,10 +458,12 @@ describeWithFileFixture(
 				absolute: true,
 				cwd: pathExtras.normalize(context.tempAssetPath),
 			})
+			newFileList.sort()
 			const newAllFileList = await globby('**/*', {
 				absolute: true,
 				cwd: pathExtras.normalize(context.tempAssetPath),
 			})
+			newAllFileList.sort()
 
 			const newModelResults = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
@@ -579,7 +581,7 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			const syncActions = [...new Set(results.synced.map((syncInfo) => syncInfo.action))]
+			const syncActions = [...new Set(results.synced.map((syncInfo) => syncInfo.action))].sort()
 
 			expect(syncActions).toMatchInlineSnapshot(`
 				[
@@ -600,7 +602,7 @@ describeWithFileFixture(
 
 			const secondSyncActions = [
 				...new Set(secondSyncResults.synced.map((syncInfo) => syncInfo.action)),
-			]
+			].sort()
 
 			expect(secondSyncActions).toMatchInlineSnapshot(`
 				[
@@ -653,6 +655,7 @@ describeWithFileFixture(
 				absolute: true,
 				cwd: path.posix.dirname(slash(filePathWithId)),
 			})
+			newFileList.sort()
 
 			const resultsWithDuplicates = await syncFiles(newFileList, {
 				ankiConnectOptions: {
@@ -802,15 +805,17 @@ describeWithFileFixture(
 
 			// Sync 2
 			// Do it again to check for stability
-			const tempPath = path.posix.dirname(context.markdownFiles[0])
+			const tempPath = context.tempAssetPath
 			const newFileList = await globby('**/*.md', {
 				absolute: true,
 				cwd: pathExtras.normalize(tempPath),
 			})
+			newFileList.sort()
 			const newAllFileList = await globby('**/*', {
 				absolute: true,
 				cwd: pathExtras.normalize(tempPath),
 			})
+			newAllFileList.sort()
 
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
@@ -882,15 +887,17 @@ describeWithFileFixture(
 			expect(stableResults(results)).toMatchSnapshot()
 
 			// Do it again to check for stability
-			const tempPath = path.posix.dirname(context.markdownFiles[0])
+			const tempPath = context.tempAssetPath
 			const newFileList = await globby('**/*.md', {
 				absolute: true,
 				cwd: pathExtras.normalize(tempPath),
 			})
+			newFileList.sort()
 			const newAllFileList = await globby('**/*', {
 				absolute: true,
 				cwd: pathExtras.normalize(tempPath),
 			})
+			newAllFileList.sort()
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
@@ -965,15 +972,17 @@ describeWithFileFixture(
 			expect(tags).toStrictEqual(['测试'])
 
 			// Do it again to check for stability
-			const tempPath = path.posix.dirname(context.markdownFiles[0])
+			const tempPath = context.tempAssetPath
 			const newFileList = await globby('**/*.md', {
 				absolute: true,
 				cwd: pathExtras.normalize(tempPath),
 			})
+			newFileList.sort()
 			const newAllFileList = await globby('**/*', {
 				absolute: true,
 				cwd: pathExtras.normalize(tempPath),
 			})
+			newAllFileList.sort()
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
 				ankiConnectOptions: {
@@ -1034,15 +1043,17 @@ describeWithFileFixture(
 			])
 
 			// Do it again to check for stability
-			const tempPath = path.posix.dirname(context.markdownFiles[0])
+			const tempPath = context.tempAssetPath
 			const newFileList = await globby('**/*.md', {
 				absolute: true,
 				cwd: pathExtras.normalize(tempPath),
 			})
+			newFileList.sort()
 			const newAllFileList = await globby('**/*', {
 				absolute: true,
 				cwd: pathExtras.normalize(tempPath),
 			})
+			newAllFileList.sort()
 			const results2 = await syncFiles(newFileList, {
 				allFilePaths: newAllFileList,
 				ankiConnectOptions: {

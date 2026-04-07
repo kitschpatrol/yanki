@@ -67,12 +67,14 @@ export function describeWithFileFixture(
 				absolute: true,
 				cwd: normalize(context.tempAssetPath),
 			})
+			context.markdownFiles.sort()
 
 			// Same as above
 			context.allFiles = await globby('**/*', {
 				absolute: true,
 				cwd: normalize(context.tempAssetPath),
 			})
+			context.allFiles.sort()
 
 			expect(context.markdownFiles.length).toBeGreaterThan(0)
 			expect(context.allFiles.length).toBeGreaterThan(0)

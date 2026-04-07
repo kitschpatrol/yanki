@@ -58,6 +58,7 @@ it('correctly resolves obsidian wiki links', async () => {
 		absolute: true,
 		cwd: './test/assets/test-obsidian-vault',
 	})
+	allFilePathsRaw.sort()
 	const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
 	const basePath = normalize(path.resolve('./test/assets/test-obsidian-vault'))
 

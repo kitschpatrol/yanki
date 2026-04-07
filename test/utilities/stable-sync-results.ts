@@ -80,8 +80,10 @@ export function stableResults(results: SyncResults): SyncResults {
 	sorted.deletedMedia = sorted.deletedMedia.sort()
 	sorted.synced = sorted.synced.sort((a, b) => {
 		// Glue everything together...
-		const aString = a.note.deckName + a.note.fields.Front + a.note.fields.Back + a.note.fields.Extra
-		const bString = b.note.deckName + b.note.fields.Front + b.note.fields.Back + b.note.fields.Extra
+		const aString =
+			a.note.deckName + a.note.fields.Front + a.note.fields.Back + (a.note.fields.Extra ?? '')
+		const bString =
+			b.note.deckName + b.note.fields.Front + b.note.fields.Back + (b.note.fields.Extra ?? '')
 		return aString.localeCompare(bString)
 	})
 
