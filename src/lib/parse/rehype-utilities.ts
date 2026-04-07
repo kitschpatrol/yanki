@@ -36,6 +36,8 @@ import { getSrcType, isUrl, safeDecodeURI } from '../utilities/url'
 import rehypeMathjaxAnki from './rehype-mathjax-anki'
 import remarkConditionalBreaks from './remark-conditional-breaks'
 
+const DIMENSION_CHARS_REGEX = /^[\dx]+$/
+
 // Significant performance improvement by reusing the processor
 const processor = unified()
 	.use(remarkConditionalBreaks)
@@ -494,7 +496,7 @@ function parseDimensions(dimensions: string): {
 	height: number | undefined
 } {
 	// Ensure all characters in the string are number or 'x':
-	if (!/^[\dx]+$/.test(dimensions)) {
+	if (!DIMENSION_CHARS_REGEX.test(dimensions)) {
 		return { width: undefined, height: undefined }
 	}
 

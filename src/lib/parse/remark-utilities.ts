@@ -28,6 +28,8 @@ type AstFromMarkdownOptions = Pick<
 	'allFilePaths' | 'basePath' | 'cwd' | 'obsidianVault' | 'resolveUrls'
 >
 
+const CLOZE_NUMBER_PREFIX_REGEX = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/
+
 const defaultAstFromMarkdownOptions: AstFromMarkdownOptions = {
 	...defaultGlobalOptions,
 }
@@ -104,13 +106,16 @@ export function deleteFirstNodeOfType(tree: Root, nodeType: string): Root {
 }
 
 /**
- * Trims all leading spaces from the first text node and all trailing spaces from
- * the last text node in an array of phrasing content nodes.
+ * Trims all leading spaces from the first text node and all trailing spaces
+ * from the last text node in an array of phrasing content nodes.
  *
  * This is useful in cases where surrounding white space in text nodes is not
  * necessary and should be removed to clean up the content.
+ *
  * @param nodes - An array of phrasing content nodes.
- * @returns The modified array of nodes with leading and trailing spaces trimmed.
+ *
+ * @returns The modified array of nodes with leading and trailing spaces
+ *   trimmed.
  */
 function trimLeadingAndTrailingSpaces(nodes: PhrasingContent[]): PhrasingContent[] {
 	// Trim leading spaces from the first text node
@@ -154,7 +159,7 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 			// Detect a bunch of number variations at the start of the cloze...
 			// But there must be extra content after the number, otherwise
 			// the leading number _is_ the cloze
-			const result = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/.exec(node.children[0].value)
+			const result = CLOZE_NUMBER_PREFIX_REGEX.exec(node.children[0].value)
 
 			if (
 				result !== null &&

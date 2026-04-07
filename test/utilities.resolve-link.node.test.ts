@@ -221,7 +221,7 @@ it('resolves relative file paths', () => {
 		['^34876', '#bla', '#bla#bla', '?foo=bar', '?foo=bar%20baz', ''],
 	)
 
-	const resolvedTestPaths = [...testPaths].map((testPath) =>
+	const resolvedTestPaths = Array.from(testPaths, (testPath) =>
 		resolveLink(testPath, {
 			allFilePaths,
 			cwd: '/base-path/cwd/',

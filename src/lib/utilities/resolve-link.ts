@@ -14,6 +14,8 @@ import {
 	safeParseUrl,
 } from './url'
 
+const MD_EXTENSION_REGEX = /\.md$/
+
 type ResolveLinkType =
 	// Via a `![[link]]` or `![alt](link)` syntax
 	| 'embed'
@@ -277,13 +279,13 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 
 	// To address https://github.com/kitschpatrol/yanki-obsidian/issues/42, ignore .md extensions when matching
 	// Obsidian is not case sensitive
-	const baseWithoutMd = base.replace(/\.md$/, '').toLowerCase()
+	const baseWithoutMd = base.replace(MD_EXTENSION_REGEX, '').toLowerCase()
 
 	const pathsToName = allFilePaths.filter((filePath) => {
 		// Strip .md extensions
 		// Name-only files with dots in the name won't match
 		// Since add extensionIfMissing won't have added .md to those files
-		const pathWithoutMd = filePath.replace(/\.md$/, '').toLowerCase()
+		const pathWithoutMd = filePath.replace(MD_EXTENSION_REGEX, '').toLowerCase()
 		return pathWithoutMd.endsWith(baseWithoutMd)
 	})
 
@@ -298,7 +300,7 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 	}
 
 	// Sort the paths to name to find the best match
-	const sortedPaths = [...pathsToName].sort((a, b) => {
+	const sortedPaths = pathsToName.toSorted((a, b) => {
 		// TODO pass type / mode instead instead of inferring resolution strategy
 		// from name extension? Images prioritize child paths, as do any names with
 		// separators?

@@ -14,6 +14,8 @@ import { describeWithFileFixture } from './fixtures/file-fixture'
 import { countLinesOfFrontmatter } from './utilities/frontmatter-counter'
 import { stableNoteIds, stablePrettyMs, stableResults } from './utilities/stable-sync-results'
 
+const NOTE_ID_REGEX = /noteId: \d+/
+
 describeWithFileFixture(
 	'model types',
 	{
@@ -794,7 +796,7 @@ describeWithFileFixture(
 			// Change all the note IDs to be invalid
 			for (const filePath of context.markdownFiles) {
 				const markdown = await fs.readFile(filePath, 'utf8')
-				const updatedMarkdown = markdown.replace(/noteId: \d+/, 'noteId: 0')
+				const updatedMarkdown = markdown.replace(NOTE_ID_REGEX, 'noteId: 0')
 				await fs.writeFile(filePath, updatedMarkdown)
 			}
 

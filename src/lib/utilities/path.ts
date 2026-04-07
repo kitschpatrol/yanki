@@ -5,6 +5,9 @@ import path from 'path-browserify-esm'
 import slash from 'slash'
 import { splitAtFirstMatch } from './string'
 
+const WINDOWS_DRIVE_LETTER_REGEX = /^[A-Z]:/i
+const QUERY_FRAGMENT_START_REGEX = /[#?^]/
+
 // Unused...
 // function stripLeadingSlash(filePath: string): string {
 // 	return filePath.startsWith('/') ? filePath.slice(1) : filePath
@@ -100,7 +103,7 @@ export function resolveWithBasePath(
 		// Path is absolute by drive letter on Windows, or there's not base path to prepend
 		if (
 			basePath === undefined ||
-			/^[A-Z]:/i.test(filePath) ||
+			WINDOWS_DRIVE_LETTER_REGEX.test(filePath) ||
 			(!compoundBase && filePath.startsWith(basePath))
 		) {
 			return filePath
@@ -133,7 +136,7 @@ export function stripBasePath(filePath: string, basePath: string): string {
 export function getBaseAndQueryParts(filePath: string): [string, string | undefined] {
 	const directoryPath = path.dirname(filePath)
 	const fileName = path.basename(filePath)
-	const [base, query] = splitAtFirstMatch(fileName, /[#?^]/)
+	const [base, query] = splitAtFirstMatch(fileName, QUERY_FRAGMENT_START_REGEX)
 	return [path.join(directoryPath, base), query]
 }
 

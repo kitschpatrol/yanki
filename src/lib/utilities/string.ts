@@ -92,17 +92,20 @@ export function css(strings: TemplateStringsArray, ...values: unknown[]): string
 	return trimLeadingIndentation(strings, ...values)
 }
 
+const NEWLINE_REGEX = /\r?\n/
+// eslint-disable-next-line regexp/no-unused-capturing-group
+const LEADING_WHITESPACE_REGEX = /^(\s+)/
+
 function trimLeadingIndentation(strings: TemplateStringsArray, ...values: unknown[]): string {
 	const lines = strings
 		// eslint-disable-next-line unicorn/no-array-reduce, ts/no-base-to-string
 		.reduce((result, text, i) => `${result}${text}${String(values[i] ?? '')}`, '')
-		.split(/\r?\n/)
+		.split(NEWLINE_REGEX)
 		.filter((line) => line.trim() !== '')
 
 	// Get leading white space of first line, and trim that much white space
 	// from subsequent lines
-	// eslint-disable-next-line regexp/no-unused-capturing-group
-	const leadingSpace = /^(\s+)/.exec(lines[0])?.[0] ?? ''
+	const leadingSpace = LEADING_WHITESPACE_REGEX.exec(lines[0])?.[0] ?? ''
 	const leadingSpaceRegex = new RegExp(`^${leadingSpace}`)
 	return lines.map((line) => line.replace(leadingSpaceRegex, '').trimEnd()).join('\n')
 }
@@ -126,6 +129,5 @@ export function splitAtFirstMatch(text: string, regex: RegExp): [string, string 
 }
 
 export function getUnicodeCodePoints(text: string): string[] {
-	// eslint-disable-next-line ts/no-misused-spread
-	return [...text].map((char) => char.codePointAt(0)!.toString(16))
+	return Array.from(text, (char) => char.codePointAt(0)!.toString(16))
 }

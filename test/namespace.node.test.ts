@@ -23,12 +23,12 @@ it('allows valid namespaces', () => {
 	}).not.toThrow()
 
 	expect(() => {
-		validateNamespace(Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH }, () => 'A').join(''))
+		validateNamespace(Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH }).fill('A').join(''))
 	}).not.toThrow()
 
 	expect(() => {
 		validateNamespace(
-			`   ${Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH }, () => 'A').join('')}   `,
+			`   ${Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH }).fill('A').join('')}   `,
 		)
 	}).not.toThrow()
 })
@@ -59,7 +59,11 @@ it('catches invalid namespaces', () => {
 			- Forbidden character: Asterisk: "*"]
 	`)
 	expect(() => {
-		validateNamespace(Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH + 1 }, () => 'A').join(''))
+		validateNamespace(
+			Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH + 1 })
+				.fill('A')
+				.join(''),
+		)
 	}).toThrowErrorMatchingInlineSnapshot(`
 		[Error: Invalid namespace "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA":
 			- Cannot be longer than 60 characters]

@@ -1,5 +1,7 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
 
+const NEWLINE_REGEX = /\r?\n/
+
 export type Frontmatter = {
 	deckName?: string
 	noteId?: number
@@ -26,7 +28,7 @@ export async function setNoteIdInFrontmatter(
 ): Promise<string> {
 	const [frontmatterStart, frontmatterEnd] = getFrontmatterRange(markdown)
 
-	const lines = markdown.split(/\r?\n/)
+	const lines = markdown.split(NEWLINE_REGEX)
 
 	if (frontmatterStart === undefined || frontmatterEnd === undefined) {
 		// No frontmatter if no noteId is provided
@@ -77,7 +79,7 @@ export async function setNoteIdInFrontmatter(
 function getFrontmatterRange(
 	markdown: string,
 ): [start: number | undefined, end: number | undefined] {
-	const lines = markdown.split(/\r?\n/)
+	const lines = markdown.split(NEWLINE_REGEX)
 
 	// Ensure that the frontmatter is at the top of the file
 	if (!lines.join('').trim().startsWith('---')) {
@@ -109,7 +111,7 @@ export async function getAllFrontmatter(markdown: string): Promise<Record<string
 
 	// TODO rejoin with same ending...
 	const frontmatter = markdown
-		.split(/\r?\n/)
+		.split(NEWLINE_REGEX)
 		.slice(frontmatterStart + 1, frontmatterEnd)
 		.join('\n')
 

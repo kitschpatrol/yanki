@@ -12,6 +12,9 @@ import { getFileExtensionForMimeType } from './mime'
 import { isAbsolute, normalize } from './path'
 import { getHash } from './string'
 
+const DRIVE_LETTER_REGEX = /^[a-z]:/i
+const FILE_PREFIX_REGEX = /^file:/i
+
 // Detect probably wiki-style name links
 // export function isNameUrl(text: string): boolean {
 // 	// Name links aren't absolute, aren't relative, and aren't URLs
@@ -49,11 +52,9 @@ export function safeParseUrl(text: string): undefined | URL {
 
 		// If a file url is detected, but wasn't explicitly passed via a protocol, then
 		// treat it as a file path and not a URL
-		const driveLetterPattern = /^[a-z]:/i
-		const filePrefixPattern = /^file:/i
 		if (
-			(filePrefixPattern.test(url.protocol) || driveLetterPattern.test(url.protocol)) &&
-			!filePrefixPattern.test(text)
+			(FILE_PREFIX_REGEX.test(url.protocol) || DRIVE_LETTER_REGEX.test(url.protocol)) &&
+			!FILE_PREFIX_REGEX.test(text)
 		) {
 			return undefined
 		}

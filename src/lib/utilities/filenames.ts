@@ -16,6 +16,9 @@ import {
 } from '../shared/constants'
 import { emptyIsUndefined, truncateOnWordBoundary } from './string'
 
+const CLOZE_CONTENT_REGEX = /\{\{\w\d*\s?:{0,2}([^:}]+)/
+const FILENAME_INCREMENT_SUFFIX_REGEX = /\s\(\d+\)$/
+
 // eslint-disable-next-line complexity
 export function getSafeTitleForNote(
 	note: YankiNote,
@@ -63,7 +66,7 @@ export function getSafeTitleForNote(
 			const cleanFront = getAllLinesOfHtmlAsPlainText(note.fields.Front)
 
 			const textBeforeCloze = emptyIsUndefined(cleanFront.split('{{').at(0) ?? '')
-			const firstClozeText = emptyIsUndefined(/\{\{\w\d*\s?:{0,2}([^:}]+)/.exec(cleanFront)?.at(1))
+			const firstClozeText = emptyIsUndefined(CLOZE_CONTENT_REGEX.exec(cleanFront)?.at(1))
 			const textAfterCloze = emptyIsUndefined(cleanFront.split('}}').at(1)?.split('{{').at(0) ?? '')
 
 			// Always try to provide some semantic value
@@ -157,7 +160,7 @@ function stripFilenameIncrement(filename: string): string {
 
 	const strippedBaseNameWithoutExtension = path
 		.basename(filename, validExtension)
-		.replace(/\s\(\d+\)$/, '')
+		.replace(FILENAME_INCREMENT_SUFFIX_REGEX, '')
 	return path.join(
 		path.dirname(filename),
 		`${strippedBaseNameWithoutExtension}${validExtension ?? ''}`,

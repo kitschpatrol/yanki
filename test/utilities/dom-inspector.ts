@@ -2,6 +2,8 @@
 
 import { parseHTML } from 'linkedom'
 
+const SOUND_TAG_REGEX = /^\[sound:(.*)\]$/
+
 // Export function getLinksAndEmbeds
 
 /**
@@ -46,6 +48,6 @@ export function getAnkiMediaTags(htmlFragment: string): string[] {
 }
 
 export function stripAnkiMediaTag(text: string): string {
-	const match = /^\[sound:(.*)\]$/.exec(text)
+	const match = SOUND_TAG_REGEX.exec(text)
 	return match ? match[1] : text
 }

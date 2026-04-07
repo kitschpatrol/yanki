@@ -40,7 +40,10 @@ export type GetNoteFromMarkdownOptions = Pick<
 	| 'strictLineBreaks'
 	| 'syncMediaAssets'
 > & {
-	/** Needed for the public API, but optional for more efficient use internally when the namespace is already validated. */
+	/**
+ Needed for the public API, but optional for more efficient use internally
+when the namespace is already validated.
+	 */
 	namespaceValidationAndSanitization: boolean
 }
 
