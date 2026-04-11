@@ -90,6 +90,10 @@ export async function getNoteFromMarkdown(
 	// Remove the frontmatter from the AST
 	ast = deleteFirstNodeOfType(ast, 'yaml')
 
+	// Quick check to skip rehypeShiki for notes without fenced code blocks,
+	// since Shiki has a significant performance cost even on plain text
+	const hasCodeBlocks = markdown.includes('```')
+
 	let front = ''
 	let back = ''
 	let extra: string | undefined
@@ -126,6 +130,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -140,6 +145,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -189,6 +195,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -205,6 +212,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -245,6 +253,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,

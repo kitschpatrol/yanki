@@ -39,24 +39,24 @@ import remarkConditionalBreaks from './remark-conditional-breaks'
 const DIMENSION_CHARS_REGEX = /^[\dx]+$/
 
 // Significant performance improvement by reusing the processor
-const processor = unified()
-	.use(remarkConditionalBreaks)
-	// Not needed?
-	.use(remarkRehype, { allowDangerousHtml: true })
-	// Re-parses any raw HTML in the Markdown into the HAST tree,
-	// otherwise it ends up as text in raw-typed nodes. This allows
-	// things like manual <img> tags to be managed as Anki assets, and protects
-	// inline style tags from removal.
-	.use(rehypeRaw)
-	.use(rehypeMathjaxAnki)
-	//  Not needed?
-	// .use(rehypeRemoveComments)
-	// Messes up obsidian links and we should trust ourselves (and probably our plugins, too)
-	// .use(rehypeSanitize)
-	// Super slow...
-	// Other syntax highlighting Rehype plugins:
-	// https://github.com/Microflash/rehype-starry-night
-	// https://github.com/rehypejs/rehype-highlight
+function createBaseProcessor() {
+	return unified()
+		.use(remarkConditionalBreaks)
+		// Not needed?
+		.use(remarkRehype, { allowDangerousHtml: true })
+		// Re-parses any raw HTML in the Markdown into the HAST tree,
+		// otherwise it ends up as text in raw-typed nodes. This allows
+		// things like manual <img> tags to be managed as Anki assets, and protects
+		// inline style tags from removal.
+		.use(rehypeRaw)
+		.use(rehypeMathjaxAnki)
+}
+
+// Super slow...
+// Other syntax highlighting Rehype plugins:
+// https://github.com/Microflash/rehype-starry-night
+// https://github.com/rehypejs/rehype-highlight
+const processor = createBaseProcessor()
 	.use(rehypeShiki, {
 		// See https://shiki.style/packages/rehype
 		defaultLanguage: 'plaintext',
@@ -70,6 +70,10 @@ const processor = unified()
 	.use(rehypeFormat)
 	.use(rehypeStringify)
 
+const processorWithoutShiki = createBaseProcessor()
+	.use(rehypeFormat)
+	.use(rehypeStringify)
+
 type MdastToHtmlOptions = Simplify<
 	Pick<
 		GlobalOptions,
@@ -77,6 +81,8 @@ type MdastToHtmlOptions = Simplify<
 	> & {
 		/** CSS class names to apply to the output HTML */
 		cssClassNames?: string[]
+		/** Whether the source markdown contains fenced code blocks, enabling Shiki syntax highlighting */
+		hasCodeBlocks?: boolean
 		/** Whether to use an empty placeholder if the output is empty */
 		useEmptyPlaceholder?: boolean
 	}
@@ -98,6 +104,7 @@ export async function mdastToHtml(
 		cssClassNames,
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
+		hasCodeBlocks,
 		namespace,
 		strictLineBreaks,
 		syncMediaAssets,
@@ -107,7 +114,8 @@ export async function mdastToHtml(
 	// Pass breaks setting through to the processor via file data...
 	// saves us from recreating the processor in case the setting changes per-file
 	// (though it basically never should)
-	const hast = await processor.run(mdast, { data: { strictLineBreaks } })
+	const activeProcessor = hasCodeBlocks ? processor : processorWithoutShiki
+	const hast = await activeProcessor.run(mdast, { data: { strictLineBreaks } })
 
 	// Add a wrapper div with a specific class to the HTML, this is hypothetically
 	// useful for styling the output via CSS
