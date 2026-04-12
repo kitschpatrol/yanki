@@ -397,3 +397,28 @@ it('handles strikethrough before and after a break', async () => {
 	expect(note.fields.Front).toContain('{{c1::cloze}}')
 	expect(note.fields.Back).toContain('<del>cloze</del>')
 })
+
+it('applies Shiki highlighting for triple-backtick fenced code blocks', async () => {
+	const markdown = 'What does this do?\n\n---\n\n```typescript\nconst x = 1\n```'
+	const note = await getNoteFromMarkdown(markdown)
+	expect(note.fields.Back).toContain('shiki')
+})
+
+it('applies Shiki highlighting for triple-tilde fenced code blocks', async () => {
+	const markdown = 'What does this do?\n\n---\n\n~~~javascript\nconst x = 1\n~~~'
+	const note = await getNoteFromMarkdown(markdown)
+	expect(note.fields.Back).toContain('shiki')
+})
+
+it('applies Shiki highlighting for indented code blocks', async () => {
+	const markdown = 'What does this do?\n\n---\n\n    const x = 1\n    const y = 2'
+	const note = await getNoteFromMarkdown(markdown)
+	expect(note.fields.Back).toContain('shiki')
+})
+
+it('applies Shiki highlighting for raw HTML code blocks', async () => {
+	const markdown =
+		'What does this do?\n\n---\n\n<pre><code class="language-ts">const x = 1</code></pre>'
+	const note = await getNoteFromMarkdown(markdown)
+	expect(note.fields.Back).toContain('shiki')
+})
