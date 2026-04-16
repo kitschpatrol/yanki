@@ -92,14 +92,19 @@ export async function getNoteFromMarkdown(
 	ast = deleteFirstNodeOfType(ast, 'yaml')
 
 	// Shiki has a notable performance cost even on plain text, so we skip it when
-	// there are no code blocks. We check the AST for fenced/indented code nodes
-	// and scan the raw markdown for HTML code tags. This approach may have false
-	// positives, but that only impacts performance, not correctness.
-	let hasCodeBlocks = markdown.includes('<code')
+	// there are no code blocks. Check the post-frontmatter AST for fenced/indented
+	// code nodes and raw HTML code tags.
+	let hasCodeBlocks = false
+	visit(ast, 'code', () => {
+		hasCodeBlocks = true
+		return EXIT
+	})
 	if (!hasCodeBlocks) {
-		visit(ast, 'code', () => {
-			hasCodeBlocks = true
-			return EXIT
+		visit(ast, 'html', (node) => {
+			if (/<code\b/i.test(node.value)) {
+				hasCodeBlocks = true
+				return EXIT
+			}
 		})
 	}
 
