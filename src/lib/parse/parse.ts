@@ -6,6 +6,7 @@
 
 import type { Root } from 'mdast'
 import { deepmerge } from 'deepmerge-ts'
+import { EXIT, visit } from 'unist-util-visit'
 import { u } from 'unist-builder'
 import type { YankiNote } from '../model/note'
 import type { GlobalOptions } from '../shared/types'
@@ -90,6 +91,23 @@ export async function getNoteFromMarkdown(
 	// Remove the frontmatter from the AST
 	ast = deleteFirstNodeOfType(ast, 'yaml')
 
+	// Shiki has a notable performance cost even on plain text, so we skip it when
+	// there are no code blocks. Check the post-frontmatter AST for fenced/indented
+	// code nodes and raw HTML code tags.
+	let hasCodeBlocks = false
+	visit(ast, 'code', () => {
+		hasCodeBlocks = true
+		return EXIT
+	})
+	if (!hasCodeBlocks) {
+		visit(ast, 'html', (node) => {
+			if (/<code\b/i.test(node.value)) {
+				hasCodeBlocks = true
+				return EXIT
+			}
+		})
+	}
+
 	let front = ''
 	let back = ''
 	let extra: string | undefined
@@ -126,6 +144,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -140,6 +159,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -156,6 +176,7 @@ export async function getNoteFromMarkdown(
 					],
 					fetchAdapter,
 					fileAdapter,
+					hasCodeBlocks,
 					namespace: sanitizedNamespace,
 					strictLineBreaks,
 					syncMediaAssets,
@@ -189,6 +210,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -205,6 +227,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -230,6 +253,7 @@ export async function getNoteFromMarkdown(
 					],
 					fetchAdapter,
 					fileAdapter,
+					hasCodeBlocks,
 					namespace: sanitizedNamespace,
 					strictLineBreaks,
 					syncMediaAssets,
@@ -245,6 +269,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
