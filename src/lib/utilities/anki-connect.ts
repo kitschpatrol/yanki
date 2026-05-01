@@ -24,6 +24,52 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 	await client.note.deleteNotes({ notes: noteIds })
 }
 
+/**
+ * Ensure that every required Yanki model and deck exists in Anki before any
+ * note add/update calls fire.
+ *
+ * Lifting this out of the per-note path lets the main sync pass skip the
+ * "missing model/deck" recovery branches and unblocks future batched calls.
+ *
+ * @throws {Error} If a required model name is not a known Yanki model, or if a
+ *   deck name is empty.
+ */
+export async function ensureModelsAndDecks(
+	client: YankiConnect,
+	modelNames: string[],
+	deckNames: string[],
+	dryRun: boolean,
+): Promise<void> {
+	const existingModels = new Set(await client.model.modelNames())
+	const existingDecks = new Set(await client.deck.deckNames())
+
+	const missingModels = [...new Set(modelNames)].filter((name) => !existingModels.has(name))
+	const missingDecks = [...new Set(deckNames)].filter(
+		(name) => name !== '' && !existingDecks.has(name),
+	)
+
+	if (deckNames.includes('')) {
+		throw new Error('Deck name is empty')
+	}
+
+	if (dryRun) {
+		return
+	}
+
+	for (const modelName of missingModels) {
+		const model = yankiModels.find((candidate) => candidate.modelName === modelName)
+		if (model === undefined) {
+			throw new Error(`Unknown model name: ${modelName}`)
+		}
+
+		await client.model.createModel(model)
+	}
+
+	for (const deckName of missingDecks) {
+		await client.deck.createDeck({ deck: deckName })
+	}
+}
+
 // export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun = false) {
 // 	if (note.noteId === undefined) {
 // 		throw new Error('Note ID is undefined')
