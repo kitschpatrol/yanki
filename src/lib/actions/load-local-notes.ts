@@ -104,29 +104,29 @@ const defaultDeckNamesFromFilePathsOptions: DeckNamesFromFilePathsOptions = {
 }
 
 /**
- * Helper function to infer deck names from file paths if `deckName` not defined in the note's frontmatter.
+ * Helper function to infer deck names from file paths if `deckName` not defined
+ * in the note's frontmatter.
  *
  * `deckName` will always override the inferred deck name.
  *
  * Depends on the context of _all_ file paths passed to `syncNoteFiles`.
  *
- * Example of paths -> deck names with `common-root`:
- * /base/foo/note.md -> foo
+ * Example of paths -> deck names with `common-root`: /base/foo/note.md -> foo
  * /base/foo/baz/note.md -> foo::baz
  *
- * Example of paths -> deck names with `common-root`:
- * /base/foo/note.md -> foo
+ * Example of paths -> deck names with `common-root`: /base/foo/note.md -> foo
  * /base/foo/note.md -> foo
  *
- * Example of paths -> deck names with `common-parent`:
- * /base/foo/note.md -> base::foo
- * /base/foo/baz/note.md -> base::foo::baz
+ * Example of paths -> deck names with `common-parent`: /base/foo/note.md ->
+ * base::foo /base/foo/baz/note.md -> base::foo::baz
  *
- * Example of paths -> deck names with `common-parent`:
+ * Example of paths -> deck names with `common-parent`: /base/foo/note.md -> foo
  * /base/foo/note.md -> foo
- * /base/foo/note.md -> foo
- * @param absoluteFilePaths Absolute paths to all markdown Anki note files. (Ensures proper resolution if path module is polyfilled.)
- * @returns array of ::-delimited deck paths
+ *
+ * @param absoluteFilePaths Absolute paths to all markdown Anki note files.
+ *   (Ensures proper resolution if path module is polyfilled.)
+ *
+ * @returns Array of ::-delimited deck paths
  */
 function getDeckNamesFromFilePaths(
 	absoluteFilePaths: string[],

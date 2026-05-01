@@ -43,9 +43,12 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
  *
  * Duplicates will be created if present in the source. It's up to the user to
  * manage their Markdown files as they like.
+ *
  * @param client An instance of YankiConnect
  * @param note The note to add
- * @param dryRun If true, the note will not be created and an ID of 0 will be returned
+ * @param dryRun If true, the note will not be created and an ID of 0 will be
+ *   returned
+ *
  * @returns The ID of the newly created note in Anki
  * @throws {Error}
  */
@@ -127,11 +130,14 @@ export async function addNote(
 
 /**
  * Updates a note in Anki.
+ *
  * @param client An instance of YankiConnect
  * @param localNote A note read from a markdown file
  * @param remoteNote A note loaded from Anki
+ *
  * @returns True if the note was updated, false otherwise.
- * @throws {Error} If the local note ID or remote note cards are undefined, or if model/deck errors occur.
+ * @throws {Error} If the local note ID or remote note cards are undefined, or
+ *   if model/deck errors occur.
  */
 export async function updateNote(
 	client: YankiConnect,
@@ -216,6 +222,7 @@ export async function updateNote(
 
 /**
  * Helper to compare local and remote field contents.
+ *
  * @returns True if the fields are equal, false otherwise.
  */
 function areFieldsEqual(
@@ -243,23 +250,38 @@ function areFieldsEqual(
 
 export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = true): boolean {
 	// Early exit on simple comparisons before expensive field/tag checks
-	if (includeId && noteA.noteId !== noteB.noteId) return false
-	if (noteA.deckName !== noteB.deckName) return false
-	if (noteA.modelName !== noteB.modelName) return false
-	if (!areFieldsEqual(noteA.fields, noteB.fields)) return false
-	if (!areTagsEqual(noteA.tags ?? [], noteB.tags ?? [])) return false
+	if (includeId && noteA.noteId !== noteB.noteId) {
+		return false
+	}
+
+	if (noteA.deckName !== noteB.deckName) {
+		return false
+	}
+
+	if (noteA.modelName !== noteB.modelName) {
+		return false
+	}
+
+	if (!areFieldsEqual(noteA.fields, noteB.fields)) {
+		return false
+	}
+
+	if (!areTagsEqual(noteA.tags ?? [], noteB.tags ?? [])) {
+		return false
+	}
+
 	return true
 }
 
 /**
- * Helper function to compare two arrays of tags.
- * Note some nuances around case insensitivity as discussed here:
- * https://github.com/kitschpatrol/yanki-obsidian/issues/44
- * Anki will alphabetically sort tags, so we sort as well.
- * Duplicate tags are ignored in Anki, so we ignore them here:
- * ['yes', 'yes'] is considered equal to ['yes'].
- * Tags in different orders are considered equal:
- * ['yes', 'no'] is considered equal to ['no', 'yes'].
+ * Helper function to compare two arrays of tags. Note some nuances around case
+ * insensitivity as discussed here:
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/44 Anki will
+ * alphabetically sort tags, so we sort as well. Duplicate tags are ignored in
+ * Anki, so we ignore them here: ['yes', 'yes'] is considered equal to ['yes'].
+ * Tags in different orders are considered equal: ['yes', 'no'] is considered
+ * equal to ['no', 'yes'].
+ *
  * @returns True if the tags are equal, false otherwise.
  */
 function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
@@ -274,8 +296,11 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 
 /**
  * Get all notes from Anki that match the model prefix.
+ *
  * @param client An instance of YankiConnect
- * @param namespace The value of the YankiNamespace field, or search with '*' to get all notes. Defaults to the global default namespace.
+ * @param namespace The value of the YankiNamespace field, or search with '*' to
+ *   get all notes. Defaults to the global default namespace.
+ *
  * @returns An array of YankiNote objects
  * @throws {Error}
  */
@@ -294,14 +319,19 @@ export async function getRemoteNotes(
  * Get all data from Anki required to populate the YankiNote type.
  *
  * Handles some extra footwork to identify the deck name and validate the model
- * name. There's no way to get everything we need in one shot from Anki-Connect.
+ * name. There's no way to get everything we need in one shot from
+ * Anki-Connect.
  *
  * Undefined elements in the returned array are subsequently used to identify
  * notes that need to be created.
+ *
  * @param client An instance of YankiConnect
  * @param noteIds An array of local note IDs to (attempt) to fetch
- * @returns Array of YankiNote objects, with undefined for notes that could not be found.
- * @throws {Error} If an unknown model name or multiple decks are found for a note, or if no deck is found.
+ *
+ * @returns Array of YankiNote objects, with undefined for notes that could not
+ *   be found.
+ * @throws {Error} If an unknown model name or multiple decks are found for a
+ *   note, or if no deck is found.
  */
 async function getRemoteNotesById(
 	client: YankiConnect,
@@ -341,9 +371,7 @@ async function getRemoteNotesById(
 			continue
 		}
 
-		if (
-			![...legacyYankiModelNames, ...yankiModelNames].includes(ankiNote.modelName as YankiModelName)
-		) {
+		if (![...legacyYankiModelNames, ...yankiModelNames].includes(ankiNote.modelName)) {
 			// Alternately, check if the model name is in the list of models and recreate by setting to undefined?
 			throw new Error(`Unknown model name ${ankiNote.modelName} for note ${ankiNote.noteId}`)
 		}
@@ -554,7 +582,8 @@ export async function deleteOrphanedDecks(
 }
 
 /**
- * Global! Does not respect namespace. You can write namespace checks into your css if you want.
+ * Global! Does not respect namespace. You can write namespace checks into your
+ * css if you want.
  */
 export async function updateModelStyle(
 	client: YankiConnect,
@@ -619,6 +648,7 @@ export async function getModelStyle(
 
 /**
  * Upload all media files for a note to Anki.
+ *
  * @returns Original source name of media files uploaded
  */
 async function uploadMediaForNote(
@@ -755,7 +785,9 @@ export async function reconcileMedia(
 
 /**
  * Request permission to access Anki through Anki-Connect.
- * @returns 'ankiUnreachable' if Anki is not open, or 'granted' if everything is copacetic
+ *
+ * @returns 'ankiUnreachable' if Anki is not open, or 'granted' if everything is
+ *   copacetic
  * @throws {Error} If access is denied
  */
 export async function requestPermission(

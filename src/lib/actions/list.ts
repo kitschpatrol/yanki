@@ -29,10 +29,7 @@ type ListResult = {
 export async function listNotes(options?: PartialDeep<ListOptions>): Promise<ListResult> {
 	const startTime = performance.now()
 
-	const { ankiConnectOptions, namespace } = deepmerge(
-		defaultListOptions,
-		options ?? {},
-	) as ListOptions
+	const { ankiConnectOptions, namespace } = deepmerge(defaultListOptions, options ?? {})
 
 	const sanitizedNamespace = validateAndSanitizeNamespace(namespace, true)
 

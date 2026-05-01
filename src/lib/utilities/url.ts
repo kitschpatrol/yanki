@@ -79,8 +79,9 @@ export function isUrl(text: string): boolean {
 }
 
 /**
- * Helper to "filter" file URLs into path strings so they're treated
- * correctly in mdastToHtml
+ * Helper to "filter" file URLs into path strings so they're treated correctly
+ * in mdastToHtml
+ *
  * @todo Need stuff from node's implementation, fileURLToPath?
  */
 export function fileUrlToPath(url: string): string {
@@ -139,9 +140,12 @@ export function getSrcType(
 
 /**
  * Supports both Header type and Record<string, string> type
+ *
  * @param headers Headers object or record from a fetch response
  * @param headerKeys Headers to include in the string
- * @returns a concatenated string of the header contents, suitable for hashing, or undefined if no matching headers are present
+ *
+ * @returns A concatenated string of the header contents, suitable for hashing,
+ *   or undefined if no matching headers are present
  */
 function getHeadersString(
 	headers: Headers | Record<string, string> | undefined,
@@ -252,11 +256,11 @@ export async function getFileExtensionFromUrl(
  *
  * - `filename`: Use the filename of the media asset, no network required.
  * - `metadata`: Use the metadata of the media asset, either fstat stuff for
- * files, or reading the headers for URLs... requires a network request for
- * remote urls. Falls through to `filename` if not available.
- * - `content`: Actually read the content of the media asset, requires reading
- * the file or fetching the URL. Not yet implemented. Falls through to
- * `metadata` if not available.
+ *   files, or reading the headers for URLs... requires a network request for
+ *   remote urls. Falls through to `filename` if not available.
+ * - `content`: Actually read the content of the media asset, requires reading the
+ *   file or fetching the URL. Not yet implemented. Falls through to `metadata`
+ *   if not available.
  */
 export async function getUrlContentHash(
 	url: string,

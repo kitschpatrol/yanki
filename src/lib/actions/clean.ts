@@ -42,8 +42,10 @@ export type CleanResult = Simplify<
  * Deletes all remote notes in Anki associated with the given namespace.
  *
  * Use with significant caution. Mostly useful for testing.
+ *
  * @returns The IDs of the notes that were deleted
- * @throws {Error} If Anki is unreachable or another error occurs during deletion.
+ * @throws {Error} If Anki is unreachable or another error occurs during
+ *   deletion.
  */
 export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<CleanResult> {
 	const startTime = performance.now()
@@ -52,7 +54,7 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	const { ankiConnectOptions, ankiWeb, dryRun, namespace } = deepmerge(
 		defaultCleanOptions,
 		options ?? {},
-	) as CleanOptions
+	)
 
 	const sanitizedNamespace = validateAndSanitizeNamespace(namespace, true)
 

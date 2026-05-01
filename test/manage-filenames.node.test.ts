@@ -1,5 +1,4 @@
 import { globby } from 'globby'
-import path from 'path-browserify-esm'
 import { expect, it } from 'vitest'
 import { syncFiles } from '../src/lib'
 import * as pathExtras from '../src/lib/utilities/path'

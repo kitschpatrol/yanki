@@ -1,22 +1,26 @@
 /**
- * Generates all possible permutations of the provided strings or arrays of strings,
- * without changing the order of the top-level strings argument.
- * @param strings - The input strings or arrays of strings.
- * @returns - An array of all possible permutations.
+ * Generates all possible permutations of the provided strings or arrays of
+ * strings, without changing the order of the top-level strings argument.
+ *
  * @example
- * const permutations = permute('b', ['a', 'e'], 't', ['s', 'n']);
- * console.log(permutations);
- * // Output:
- * // [
- * //   'bats', 'bans',
- * //   'bets', 'bens'
- * // ]
+ * 	const permutations = permute('b', ['a', 'e'], 't', ['s', 'n'])
+ * 	console.log(permutations)
+ * 	// Output:
+ * 	// [
+ * 	//   'bats', 'bans',
+ * 	//   'bets', 'bens'
+ * 	// ]
+ *
+ * @param strings - The input strings or arrays of strings.
+ *
+ * @returns - An array of all possible permutations.
  */
 export function permute(...strings: Array<string | string[]>): string[] {
 	const results: string[] = []
 
 	/**
 	 * Helper function to perform backtracking and generate permutations.
+	 *
 	 * @param index - The current index in the strings array.
 	 * @param part - The current part of the permutation being constructed.
 	 */

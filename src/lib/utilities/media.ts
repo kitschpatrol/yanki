@@ -14,8 +14,11 @@ import { getFileExtensionFromUrl, getUrlContentHash, isUrl, safeParseUrl, urlExi
 
 /**
  * Get the extension of a media file, if it's supported
- * @returns Extension without the `.`, possibly an extra string if no extension is found
+ *
+ * @returns Extension without the `.`, possibly an extra string if no extension
+ *   is found
  * @todo Check for how it handles query strings
+ *
  * @todo Clean up type casting
  */
 export async function getAnkiMediaFilenameExtension(
@@ -83,8 +86,8 @@ export async function mediaAssetExists(
 }
 
 /**
- * Get a safe filename for an Anki media asset
- * Anki truncates long file names... so we crush the complete path down to a hash
+ * Get a safe filename for an Anki media asset Anki truncates long file names...
+ * so we crush the complete path down to a hash
  */
 export async function getSafeAnkiMediaFilename(
 	absolutePathOrUrl: string,

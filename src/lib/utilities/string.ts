@@ -18,10 +18,13 @@ export function capitalize(text: string): string {
  * Truncates on word boundary and adds ellipsis. Does not give special treatment
  * to file extensions. If there are no spaces in the text, it will truncate at
  * `maxLength` without respect for word boundaries.
+ *
  * @param text Text to truncate
  * @param maxLength Maximum length excluding ellipsis
  * @param truncationString String to append to truncated text. Defaults to '...'
- * @param wordBoundary Character to consider a word boundary. Defaults to a space.
+ * @param wordBoundary Character to consider a word boundary. Defaults to a
+ *   space.
+ *
  * @returns Truncated string
  */
 export function truncateOnWordBoundary(
@@ -61,7 +64,9 @@ export function emptyIsUndefined(text: string | undefined): string | undefined {
 }
 
 /**
- * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ * Mainly for nice formatting with prettier. But the line wrapping means we have
+ * to strip surplus whitespace.
+ *
  * @public
  */
 export function markdown(strings: TemplateStringsArray, ...values: unknown[]): string {
@@ -69,7 +74,9 @@ export function markdown(strings: TemplateStringsArray, ...values: unknown[]): s
 }
 
 /**
- * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ * Mainly for nice formatting with prettier. But the line wrapping means we have
+ * to strip surplus whitespace.
+ *
  * @public
  */
 export function md(strings: TemplateStringsArray, ...values: unknown[]): string {
@@ -77,7 +84,9 @@ export function md(strings: TemplateStringsArray, ...values: unknown[]): string 
 }
 
 /**
- * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ * Mainly for nice formatting with prettier. But the line wrapping means we have
+ * to strip surplus whitespace.
+ *
  * @public
  */
 export function html(strings: TemplateStringsArray, ...values: unknown[]): string {
@@ -85,7 +94,9 @@ export function html(strings: TemplateStringsArray, ...values: unknown[]): strin
 }
 
 /**
- * Mainly for nice formatting with prettier. But the line wrapping means we have to strip surplus whitespace.
+ * Mainly for nice formatting with prettier. But the line wrapping means we have
+ * to strip surplus whitespace.
+ *
  * @public
  */
 export function css(strings: TemplateStringsArray, ...values: unknown[]): string {

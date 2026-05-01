@@ -61,8 +61,7 @@ async function getObsidianVaults(): Promise<ObsidianVault[]> {
 }
 
 /**
- * Assumes the vault has been opened at least once.
- * Searches up.
+ * Assumes the vault has been opened at least once. Searches up.
  */
 export async function detectVault(fileOrDirectoryPath: string): Promise<ObsidianVault | undefined> {
 	const obsidianVaults = await getObsidianVaults()

@@ -362,8 +362,7 @@ it('handles link aliases in tables and surplus pipes like in obsidian', async ()
 /**
  * Numeric tag values in YAML frontmatter (e.g. `tags: [2025]`) are parsed as
  * numbers by the YAML parser. These should be coerced to strings instead of
- * crashing.
- * Reproduces https://github.com/kitschpatrol/yanki/issues/12
+ * crashing. Reproduces https://github.com/kitschpatrol/yanki/issues/12
  */
 it('handles numeric tag values in frontmatter', async () => {
 	const markdownWithNumericTag = '---\ntags:\n  - 2025\n---\nFront content\n\n---\n\nBack content'
@@ -386,8 +385,9 @@ it('handles a single numeric tag value in frontmatter', async () => {
 
 /**
  * Make sure the back of cloze notes never have cloze markup.
- * Thanks \@metametapod for reporting.
- * Reproduces https://github.com/kitschpatrol/yanki-obsidian/issues/56
+ *
+ * Thanks `@metametapod` for reporting. Reproduces
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/56
  */
 it('handles strikethrough before and after a break', async () => {
 	const markdown = `~~cloze~~\n\n---\n\n~~cloze~~`

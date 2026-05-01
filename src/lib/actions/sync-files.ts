@@ -60,9 +60,11 @@ export type SyncFilesResult = Simplify<
  *
  * Most importantly, it updates the note IDs in the frontmatter of the local
  * files.
+ *
  * @param allLocalFilePaths Array of paths to the local markdown files
+ *
  * @returns The synced files (with new IDs where applicable), plus some stats
- * about the sync
+ *   about the sync
  * @throws {Error} If syncing fails or file operations encounter an error.
  */
 export async function syncFiles(

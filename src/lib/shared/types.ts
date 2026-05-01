@@ -37,22 +37,31 @@ export type GlobalOptions = {
 	 * button in the Anki app.
 	 */
 	ankiWeb: boolean
-	/** Override where "/" should resolve to... useful in Obsidian to set the vault path as the "root" */
+	/**
+	 * Override where "/" should resolve to... useful in Obsidian to set the vault
+	 * path as the "root"
+	 */
 	basePath: string | undefined
-	/** Run Anki's "Check Database" command after sync updates that might produce card corruption */
+	/**
+	 * Run Anki's "Check Database" command after sync updates that might produce
+	 * card corruption
+	 */
 	checkDatabase: boolean
 	cwd: string
 	dryRun: boolean
 	/**
 	 * Exposed for Obsidian, currently only used for getting URL content hashes
-	 * and inferring MIME types of URLs without extensions.
-	 * Note that ankiConnectOptions ALSO has a fetch adapter option specifically
-	 * for communicating with Anki-Connect.
+	 * and inferring MIME types of URLs without extensions. Note that
+	 * ankiConnectOptions ALSO has a fetch adapter option specifically for
+	 * communicating with Anki-Connect.
 	 */
 	fetchAdapter: FetchAdapter | undefined
 	fileAdapter: FileAdapter | undefined
 	manageFilenames: ManageFilenames
-	/** Only applies if manageFilenames is `true`. Will _not_ truncate user-specified file names in other cases. */
+	/**
+	 * Only applies if manageFilenames is `true`. Will _not_ truncate
+	 * user-specified file names in other cases.
+	 */
 	maxFilenameLength: number
 	namespace: string
 	/** Ensures that wiki-style links work correctly */
@@ -64,7 +73,11 @@ export type GlobalOptions = {
 	 * resulting HTML (Obsidian has an application-level setting for this)
 	 */
 	strictLineBreaks: boolean
-	/** Only consider exact noteId matches between the local and remote copies to be equivalent, don't match local notes with "orphaned" remote notes based on content */
+	/**
+	 * Only consider exact noteId matches between the local and remote copies to
+	 * be equivalent, don't match local notes with "orphaned" remote notes based
+	 * on content
+	 */
 	strictMatching: boolean
 	/** Sync image, video, and audio assets to Anki's media storage system */
 	syncMediaAssets: SyncMediaAssets

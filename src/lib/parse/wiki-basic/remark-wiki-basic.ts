@@ -13,11 +13,11 @@ import { wikiBasic } from './micromark-extension-wiki-basic'
  *
  * Obsidian also supports wiki links in Markdown-style image and link syntax, so
  * handling resolution here would miss those cases, so:
+ *
  * - Resolution of wiki link into absolute paths happens later in
  *   remark-resolve-links.ts
  * - Parsing of Obsidian-style image size from alias / alt text happens later in
  *   rehype-utilities.ts
- *
  *
  * Note that only wiki links support spaces in the src, regular markdown links
  * MUST be URI-encoded in the Markdown source Here, we URI-encode for

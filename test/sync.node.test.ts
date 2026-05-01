@@ -411,7 +411,8 @@ for (const targetType of ['basic', 'cloze', 'type', 'reverse']) {
 
 /**
  * https://github.com/kitschpatrol/yanki-obsidian/issues/34
- * Thank you to \@N-ISOGE for reporting.
+ *
+ * Thank you to `@N-ISOGE` for reporting.
  */
 describeWithFileFixture(
 	'update model and deck simultaneously',
@@ -766,7 +767,8 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/14
- * Thank you to \@BrianRonin for the test files.
+ *
+ * Thank you to `@BrianRonin` for the test files.
  *
  * Initially, there was an issue with decks being pruned despite containing
  * notes, due to unusual responses from the Anki-Connect deck stats method. this
@@ -836,7 +838,8 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/13
- * Thank you to \@aesculapa for the test cases.
+ *
+ * Thank you to `@aesculapa` for the test cases.
  */
 describeWithFileFixture(
 	'unicode deck contents',
@@ -941,7 +944,8 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/25
- * Thank you to \@zhuzhige123 for the test case.
+ *
+ * Thank you to `@zhuzhige123` for the test case.
  */
 describeWithFileFixture(
 	'single string tag',
@@ -1006,7 +1010,8 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/20
- * Thank you to \@Positron010 for the suggestion.
+ *
+ * Thank you to `@Positron010` for the suggestion.
  */
 describeWithFileFixture(
 	'nested tags',
@@ -1083,7 +1088,8 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/44
- * Thank you to \@99887 for identifying this issue.
+ *
+ * Thank you to `@99887` for identifying this issue.
  */
 describeWithFileFixture(
 	'mixed case tags',
@@ -1174,9 +1180,10 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/28
- * Thanks to \@fislysandi for reporting.
- * This bug was actually related to a missing RegEx escape in the Yanki Obsidian
- * plugin, but the test will remain here for avoidance of doubt.
+ *
+ * Thanks to `@fislysandi` for reporting. This bug was actually related to a
+ * missing RegEx escape in the Yanki Obsidian plugin, but the test will remain
+ * here for avoidance of doubt.
  */
 describeWithFileFixture(
 	'brackets in path',
@@ -1207,9 +1214,10 @@ describeWithFileFixture(
 
 /**
  * Related to https://github.com/kitschpatrol/yanki/issues/5
- * Thanks to \@l1mey112 for reporting.
- * Parentheses in directory paths are glob special characters (used in extglob
- * patterns) and must be escaped before being passed to globby.
+ *
+ * Thanks to `@l1mey112` for reporting. Parentheses in directory paths are glob
+ * special characters (used in extglob patterns) and must be escaped before
+ * being passed to globby.
  */
 describeWithFileFixture(
 	'parentheses in path',
@@ -1353,8 +1361,9 @@ describeWithFileFixture(
 )
 
 /**
- * Another attempt to reproduce https://github.com/kitschpatrol/yanki-obsidian/issues/46
- * based on https://github.com/kitschpatrol/yanki-obsidian/issues/46#issuecomment-3086363899
+ * Another attempt to reproduce
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/46 based on
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/46#issuecomment-3086363899
  */
 describeWithFileFixture(
 	'deep deck safety',
@@ -1466,8 +1475,9 @@ describeWithFileFixture(
 )
 
 /**
- * Another attempt to reproduce https://github.com/kitschpatrol/yanki-obsidian/issues/46
- * based on https://github.com/kitschpatrol/yanki-obsidian/issues/46#issuecomment-3088775586
+ * Another attempt to reproduce
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/46 based on
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/46#issuecomment-3088775586
  */
 describeWithFileFixture(
 	'deepest deck safety',
@@ -1656,10 +1666,10 @@ describeWithFileFixture(
 )
 
 /**
- * Reproduces https://github.com/kitschpatrol/yanki-obsidian/issues/51
- * There's no way to automate a fix through Anki Connect, so the user will just
- * have to run Tools --> Empty Cards... This seems preferable to destroying
- * progress on the retained clozes by deleting and recreating the note.
+ * Reproduces https://github.com/kitschpatrol/yanki-obsidian/issues/51 There's
+ * no way to automate a fix through Anki Connect, so the user will just have to
+ * run Tools --> Empty Cards... This seems preferable to destroying progress on
+ * the retained clozes by deleting and recreating the note.
  */
 describeWithFileFixture(
 	`handle cloze removal`,
@@ -1717,24 +1727,24 @@ describeWithFileFixture(
 )
 
 /**
- * Check Filtered / custom study decks
- * Related to https://github.com/kitschpatrol/yanki-obsidian/issues/52
- * Thanks \@edgarguo for reporting.
+ * Check Filtered / custom study decks Related to
+ * https://github.com/kitschpatrol/yanki-obsidian/issues/52
+ *
+ * Thanks `@edgarguo` for reporting.
  *
  * "I put tags in notes, and then manually created a filtered deck in Anki by
  * search results of the tag. Everything working so far. Now I sync, the
  * filtered deck is deleted. Tags are preserved, only the filtered deck is
  * gone."
  *
- * Tangentially related:
- * https://github.com/FooSoft/anki-connect/issues/147
+ * Tangentially related: https://github.com/FooSoft/anki-connect/issues/147
  * https://forums.ankiweb.net/t/ankiconnect-getting-unsupported-action-error-createfiltereddeck-command-not-working/59387
  *
- * Filtered decks are tagged with:
- * 'dyn': 1
- * 'conf': (absent if the deck is filtered)
+ * Filtered decks are tagged with: 'dyn': 1 'conf': (absent if the deck is
+ * filtered)
  *
- * Deck JSON via: https://github.com/ankidroid/Anki-Android/wiki/Database-Structure#decks-jsonobjects
+ * Deck JSON via:
+ * https://github.com/ankidroid/Anki-Android/wiki/Database-Structure#decks-jsonobjects
  */
 describeWithFileFixture(
 	'filtered decks',
@@ -1780,6 +1790,7 @@ describeWithFileFixture(
 				const { length: latestDeckCount } = await context.yankiConnect.deck.deckNames()
 				currentDeckCount = latestDeckCount
 			}
+
 			console.log('Continuing...')
 
 			// Second sync
@@ -1845,6 +1856,7 @@ describeWithFileFixture(
 				const { length: latestDeckCount } = await context.yankiConnect.deck.deckNames()
 				currentDeckCount = latestDeckCount
 			}
+
 			console.log('Continuing...')
 
 			// Second sync
@@ -2008,11 +2020,14 @@ describeWithFileFixture(
 )
 
 /**
- * Check for "cannot create note for unknown reason" error
- * when there are multiple frontmatter blocks in a single file.
- * Thanks \@metametapod for reporting.
- * Reproduces https://github.com/kitschpatrol/yanki-obsidian/issues/56
- * See also "handles strikethrough before and after a break" in
+ * Check for "cannot create note for unknown reason" error when there are
+ * multiple frontmatter blocks in a single file.
+ *
+ * Thanks `@metametapod` for reporting.
+ *
+ * Reproduces https://github.com/kitschpatrol/yanki-obsidian/issues/56 See also
+ * "handles strikethrough before and after a break" in
+ * get-note-from-markdown.node.test.ts.
  */
 describeWithFileFixture(
 	'never puts cloze markup on the back of cloze notes',

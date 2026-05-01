@@ -95,7 +95,8 @@ const FORBIDDEN_CHARACTERS: Array<[RegExp, string]> = [
 
 /**
  * Convenience
- * @returns sanitized valid namespace
+ *
+ * @returns Sanitized valid namespace
  * @throws {Error} If namespace is invalid
  */
 export function validateAndSanitizeNamespace(namespace: string, allowAsterisk = false): string {
@@ -105,7 +106,8 @@ export function validateAndSanitizeNamespace(namespace: string, allowAsterisk = 
 
 /**
  * Used internally before storing and searching
- * @returns sanitized namespace
+ *
+ * @returns Sanitized namespace
  */
 export function sanitizeNamespace(namespace: string): string {
 	// Forgive weird unicode and leading / trailing spaces
@@ -121,11 +123,13 @@ export function sanitizeNamespace(namespace: string): string {
  * about the letter of the namespace, otherwise there's a risk of data loss. For
  * this reason, validation is strict and throws errors, so that the user can
  * understand and correct their input so that they know the proper form for
- * subsequent uses of the namespace string — especially if they're using the CLI.
+ * subsequent uses of the namespace string — especially if they're using the
+ * CLI.
  *
  * Silently correcting the namespace would be a bad idea, because the user might
  * not realize that the namespace has been changed, and then they might not be
  * able to find their notes.
+ *
  * @throws {Error}
  */
 export function validateNamespace(namespace: string, allowAsterisk = false) {

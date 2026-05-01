@@ -5,8 +5,10 @@ import { css } from '../utilities/string'
 // Other defaults are defined in options.ts.
 
 /**
- * The default CSS to use for cards. This matches Anki's default. Stored in the Yanki card models and shared across all Yanki-managed notes regardless of namespace.
- * It does change occasionally, see https://github.com/ankitects/anki/blob/main/rslib/src/notetype/styling.css
+ * The default CSS to use for cards. This matches Anki's default. Stored in the
+ * Yanki card models and shared across all Yanki-managed notes regardless of
+ * namespace. It does change occasionally, see
+ * https://github.com/ankitects/anki/blob/main/rslib/src/notetype/styling.css
  */
 export const CSS_DEFAULT_STYLE = css`
 	.card {
@@ -20,7 +22,8 @@ export const CSS_DEFAULT_STYLE = css`
 `
 
 /**
- * CSS class to always include in a top-level div wrapper in the card template to allow for custom styling.
+ * CSS class to always include in a top-level div wrapper in the card template
+ * to allow for custom styling.
  */
 export const CSS_DEFAULT_CLASS_NAME = 'yanki'
 
@@ -50,13 +53,14 @@ export const NOTE_NAMESPACE_MAX_LENGTH = 60
 export const NOTE_DEFAULT_DECK_NAME = 'Yanki'
 
 /**
- * Text to show if a note 'Front' field is empty, and content is required for a semantically valid card.
+ * Text to show if a note 'Front' field is empty, and content is required for a
+ * semantically valid card.
  */
 export const NOTE_DEFAULT_EMPTY_TEXT = '(Empty)'
 
 /**
- * HTML element to use to present `NOTE_DEFAULT_EMPTY_TEXT`.
- * TODO consider hidden span?
+ * HTML element to use to present `NOTE_DEFAULT_EMPTY_TEXT`. TODO consider
+ * hidden span?
  */
 export const NOTE_DEFAULT_EMPTY_HAST = u(
 	'element',
@@ -89,27 +93,32 @@ export const MEDIA_INCLUDE_LEGIBLE_FILENAME = false
  * How to first attempt to infer the asset type behind a URL.
  *
  * - `metadata`: Fetch the head and hope for a `Content-Type` header.
- * - `name`: Infer the extension from the URL alone, won't work if there's nothing extension-like in the `pathname`.
+ * - `name`: Infer the extension from the URL alone, won't work if there's nothing
+ *   extension-like in the `pathname`.
  */
 export const MEDIA_URL_CONTENT_TYPE_MODE: 'metadata' | 'name' = 'metadata'
 
 /**
- * Anki enforces limits on media asset filenames. Older versions allowed up to 255, but it will be 120 moving forward.
+ * Anki enforces limits on media asset filenames. Older versions allowed up to
+ * 255, but it will be 120 moving forward.
  * https://github.com/ankitects/anki/blob/e41c4573d789afe8b020fab5d9d1eede50c3fa3d/rslib/src/sync/media/mod.rs#L20
  */
 export const MEDIA_FILENAME_MAX_LENGTH = 120
 
 /**
- * Filename to use when a media asset has no name. Will be appended with counter parenthetical as needed.
+ * Filename to use when a media asset has no name. Will be appended with counter
+ * parenthetical as needed.
  */
 export const MEDIA_DEFAULT_EMPTY_FILENAME = 'Untitled'
 
 /**
  * Supported image extensions for Anki media assets.
  *
- * Note that while officially "supported", some of these are not universally compatible across Anki platforms.
+ * Note that while officially "supported", some of these are not universally
+ * compatible across Anki platforms.
  *
- * Via https://github.com/ankitects/anki/blob/e41c4573d789afe8b020fab5d9d1eede50c3fa3d/qt/aqt/editor.py#L62
+ * Via
+ * https://github.com/ankitects/anki/blob/e41c4573d789afe8b020fab5d9d1eede50c3fa3d/qt/aqt/editor.py#L62
  */
 export const MEDIA_SUPPORTED_IMAGE_EXTENSIONS = [
 	'avif',

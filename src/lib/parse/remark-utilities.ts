@@ -304,7 +304,9 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 			return EXIT
 		}
 	})
-	if (probableType !== undefined) return probableType
+	if (probableType !== undefined) {
+		return probableType
+	}
 
 	// Type in the answer must not have a thematic break at all, and the emphasis
 	// must be the last node, but it also must have more than one line
@@ -318,7 +320,9 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 	// TODO next major: Don't traverse the tree, just look at the first level?
 	let lastNode: Node | undefined
 	visit(ast, (node, index, parent) => {
-		if (parent === null || index === null) return CONTINUE
+		if (parent === null || index === null) {
+			return CONTINUE
+		}
 
 		if (node.type === 'thematicBreak') {
 			// First thematic break means it could be basic

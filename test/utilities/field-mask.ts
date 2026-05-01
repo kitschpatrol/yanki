@@ -1,22 +1,26 @@
 /**
- * Takes an object and an array of dot-delimited key paths, returning a new object
- * that only includes the specified fields from the original object. Useful for test output.
+ * Takes an object and an array of dot-delimited key paths, returning a new
+ * object that only includes the specified fields from the original object.
+ * Useful for test output.
+ *
+ * @example
+ * 	const test = {
+ * 		bar: {
+ * 			bar: 'bar',
+ * 			baz: 'baz',
+ * 		},
+ * 		bla: 'bla',
+ * 		foo: 'foo',
+ * 	}
+ * 	const masked = fieldMask(test, ['bar.baz', 'foo'])
+ * 	console.log(masked)
+ * 	// Output: { bar: { baz: 'baz' }, foo: 'foo' }
+ *
  * @template T - The type of the input object.
  * @param object - The source object to extract fields from.
  * @param fields - An array of dot-delimited key paths to include in the result.
+ *
  * @returns A new object containing only the specified fields.
- * @example
- * const test = {
- *   bar: {
- *     bar: 'bar',
- *     baz: 'baz',
- *   },
- *   bla: 'bla',
- *   foo: 'foo',
- * };
- * const masked = fieldMask(test, ['bar.baz', 'foo']);
- * console.log(masked);
- * // Output: { bar: { baz: 'baz' }, foo: 'foo' }
  */
 export function fieldMask<T extends Record<string, unknown>>(
 	object: T,

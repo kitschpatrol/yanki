@@ -27,7 +27,10 @@ type RenameNotesOptions = Pick<
 	| 'fileAdapter'
 	| 'manageFilenames'
 	| 'maxFilenameLength'
-	/** Included because this can technically change the content of the "first line" of a card */
+	/**
+	 * Included because this can technically change the content of the "first
+	 * line" of a card
+	 */
 	| 'strictLineBreaks'
 >
 

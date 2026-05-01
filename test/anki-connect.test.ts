@@ -754,16 +754,28 @@ describe('getRemoteNotes', () => {
 			deck: {
 				deckNames: vi.fn().mockResolvedValue(['FilteredDeck', 'RealDeck', 'Default']),
 				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => {
-					if (deck === 'FilteredDeck') return { dyn: 1 }
+					if (deck === 'FilteredDeck') {
+						return { dyn: 1 }
+					}
+
 					return { dyn: 0 }
 				}),
 				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
 			},
 			note: {
 				findNotes: vi.fn().mockImplementation(({ query }: { query: string }) => {
-					if (query === '"YankiNamespace:test"') return [1]
-					if (query === '"deck:RealDeck"') return [1]
-					if (query === '"deck:Default"') return []
+					if (query === '"YankiNamespace:test"') {
+						return [1]
+					}
+
+					if (query === '"deck:RealDeck"') {
+						return [1]
+					}
+
+					if (query === '"deck:Default"') {
+						return []
+					}
+
 					return []
 				}),
 				notesInfo: vi.fn().mockResolvedValue([
@@ -791,14 +803,20 @@ describe('getRemoteNotes', () => {
 			deck: {
 				deckNames: vi.fn().mockResolvedValue(['FilteredDeck', 'Default']),
 				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => {
-					if (deck === 'FilteredDeck') return { dyn: 1 }
+					if (deck === 'FilteredDeck') {
+						return { dyn: 1 }
+					}
+
 					return { dyn: 0 }
 				}),
 				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
 			},
 			note: {
 				findNotes: vi.fn().mockImplementation(({ query }: { query: string }) => {
-					if (query === '"YankiNamespace:test"') return [1]
+					if (query === '"YankiNamespace:test"') {
+						return [1]
+					}
+
 					return []
 				}),
 				notesInfo: vi.fn().mockResolvedValue([

@@ -11,7 +11,8 @@ import { TEST_PROFILE_NAME } from './test-constants'
 let ankiPid: number | undefined
 
 /**
- * Finds the Anki executable on Windows by checking common installation locations.
+ * Finds the Anki executable on Windows by checking common installation
+ * locations.
  */
 function findAnkiWindows(): string {
 	const userProfile = os.homedir()
@@ -155,8 +156,8 @@ export async function openAnki(basePath: string): Promise<void> {
 }
 
 /**
- * Closes Anki by sending a quit command to the application.
- * Waits until AnkiConnect is unreachable before returning.
+ * Closes Anki by sending a quit command to the application. Waits until
+ * AnkiConnect is unreachable before returning.
  */
 export async function closeAnki(): Promise<void> {
 	const client = new YankiConnect({

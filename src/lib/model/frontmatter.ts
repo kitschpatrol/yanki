@@ -13,13 +13,14 @@ export type Frontmatter = {
  *
  * Used when a noteId is received from Anki after creating a note.
  *
- *
  * String manipulation is ugly, but it ensures that the markdown format is
  * preserved verbatim. Running it through the unified AST and then
  * remarkStringify would possibly change the format.
+ *
  * @param markdown Raw markdown string with frontmatter.
- * @param noteId  The value to set the noteId to. If undefined, the noteId will
- * be removed from the frontmatter. (Useful for testing.)
+ * @param noteId The value to set the noteId to. If undefined, the noteId will
+ *   be removed from the frontmatter. (Useful for testing.)
+ *
  * @returns Raw markdown string with updated frontmatter.
  */
 export async function setNoteIdInFrontmatter(
@@ -100,7 +101,9 @@ function getFrontmatterRange(
 
 /**
  * Currently used in testing only.
- * @returns All frontmatter in the markdown as an object, or an empty object if no frontmatter is found.
+ *
+ * @returns All frontmatter in the markdown as an object, or an empty object if
+ *   no frontmatter is found.
  */
 export async function getAllFrontmatter(markdown: string): Promise<Record<string, unknown>> {
 	const [frontmatterStart, frontmatterEnd] = getFrontmatterRange(markdown)

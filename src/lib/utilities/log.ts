@@ -11,7 +11,10 @@ const log = {
 
 	// Intended for temporary logging
 	log(...data: unknown[]): void {
-		if (!this.verbose) return
+		if (!this.verbose) {
+			return
+		}
+
 		const levelPrefix = pc.gray('[Log]')
 		if (isNode) {
 			// Log to stderr in node for ease of redirection
@@ -25,7 +28,10 @@ const log = {
 	},
 
 	info(...data: unknown[]): void {
-		if (!this.verbose) return
+		if (!this.verbose) {
+			return
+		}
+
 		const levelPrefix = pc.green('[Info]')
 		if (isNode) {
 			// Log info to stderr in node for ease of redirection

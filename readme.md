@@ -4,17 +4,10 @@
 
 <!-- /title -->
 
-<!-- badges ({ custom: {
-    "CI": {
-      image: "https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml/badge.svg",
-      link: "https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml",
-    },
-  }
-}
--->
+<!-- badges -->
 
 [![NPM Package yanki](https://img.shields.io/npm/v/yanki.svg)](https://npmjs.com/package/yanki)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
 [![CI](https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml)
 
 <!-- /badges -->
@@ -25,44 +18,18 @@
 
 <!-- /short-description -->
 
-<!-- table-of-contents { depth: 2 }) -->
+<!-- table-of-contents({ depth: 2 }) -->
 
 ## Table of contents
 
 - [Overview](#overview)
 - [Quick start](#quick-start)
 - [Features](#features)
-  - [One Markdown file = one Anki note](#one-markdown-file--one-anki-note)
-  - [Local folder hierarchy = Anki deck hierarchy](#local-folder-hierarchy--anki-deck-hierarchy)
-  - [Embrace of Anki's default note types](#embrace-of-ankis-default-note-types)
-  - [Infer Anki note type from Markdown structure](#infer-anki-note-type-from-markdown-structure)
-  - [Tags in frontmatter](#tags-in-frontmatter)
-  - [Intelligent synchronization](#intelligent-synchronization)
-  - [Existing notes are untouched](#existing-notes-are-untouched)
-  - [Fancy Markdown](#fancy-markdown)
-  - [Custom styles](#custom-styles)
-  - [Filename management](#filename-management)
-  - [Media asset synchronization](#media-asset-synchronization)
 - [Markdown note types](#markdown-note-types)
-  - [Basic](#basic)
-  - [Basic (and reversed card)](#basic-and-reversed-card)
-  - [Basic (type in the answer)](#basic-type-in-the-answer)
-  - [Cloze](#cloze)
 - [Getting started](#getting-started)
-  - [Dependencies](#dependencies)
-  - [Installation](#installation)
 - [Usage](#usage)
-  - [Basics](#basics)
-  - [CLI](#cli)
-  - [Library](#library)
 - [Advanced features](#advanced-features)
-  - [Namespaces](#namespaces)
-  - [Media asset synchronization](#media-asset-synchronization-1)
-  - [Styles](#styles)
-  - [Browser environments](#browser-environments)
 - [Background](#background)
-  - [Implementation notes](#implementation-notes)
-  - [Other projects](#other-projects)
 - [Known issues](#known-issues)
 - [Maintainers](#maintainers)
 - [Acknowledgments](#acknowledgments)
@@ -693,7 +660,11 @@ Thanks to the [unified team](https://github.com/orgs/unifiedjs/people) for their
 
 ## Contributing
 
-[Issues](https://github.com/kitschpatrol/yanki/issues) and pull requests are welcome.
+[Issues](https://github.com/kitschpatrol/yanki/issues) are welcome and appreciated.
+
+Please open an issue to discuss changes before submitting a pull request. Unsolicited PRs (especially AI-generated ones) are unlikely to be merged.
+
+This repository uses [@kitschpatrol/shared-config](https://github.com/kitschpatrol/shared-config) (via its `ksc` CLI) for linting and formatting, plus [MDAT](https://github.com/kitschpatrol/mdat) for readme placeholder expansion.
 
 <!-- /contributing -->
 
@@ -701,6 +672,6 @@ Thanks to the [unified team](https://github.com/orgs/unifiedjs/people) for their
 
 ## License
 
-[MIT](license.txt) © Eric Mika
+[MIT](license.txt) © [Eric Mika](https://ericmika.com)
 
 <!-- /license -->

@@ -183,9 +183,9 @@ export function wikiBasic(): Extension {
 		}
 
 		/**
-		 * When encountering a right square bracket, we must look ahead at the next character
-		 * to determine whether it indicates the end of the [[wikilink]] or is
-		 * simply part of the label text.
+		 * When encountering a right square bracket, we must look ahead at the next
+		 * character to determine whether it indicates the end of the [[wikilink]]
+		 * or is simply part of the label text.
 		 */
 		function lookaheadClosingMarker(code: Code): State | undefined {
 			// Invalid

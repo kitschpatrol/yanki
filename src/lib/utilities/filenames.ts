@@ -91,8 +91,11 @@ export function getSafeTitleForNote(
 
 /**
  * Get a safe filename for a media asset
+ *
  * @param text Text to be converted to a safe filename
- * @param maxLength If undefined, no truncation will take place. If defined, a maximum maximum length of the filename will be enforced.
+ * @param maxLength If undefined, no truncation will take place. If defined, a
+ *   maximum maximum length of the filename will be enforced.
+ *
  * @returns A safe filename
  */
 function getSafeFilename(text: string, maxLength?: number): string {
@@ -149,8 +152,11 @@ export function auditUniqueFilePath(filePath: string, existingFilenames: string[
 
 /**
  * Strip the trailing increment from a filename
- * @param filename File name with or without an extension, and possibly with a (1)
- * @returns filename without the increment
+ *
+ * @param filename File name with or without an extension, and possibly with a
+ *   (1)
+ *
+ * @returns Filename without the increment
  */
 function stripFilenameIncrement(filename: string): string {
 	// Don't mistake '... (1)' suffixes for extensions

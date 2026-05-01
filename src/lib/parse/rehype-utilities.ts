@@ -141,7 +141,9 @@ export async function mdastToHtml(
 
 	// All media embeds are initially in <img> tags
 	visit(hastWithClass, 'element', (node, index, parent) => {
-		if (parent === undefined || index === undefined || node.tagName !== 'img') return CONTINUE
+		if (parent === undefined || index === undefined || node.tagName !== 'img') {
+			return CONTINUE
+		}
 
 		// Ensure src is a string
 		if (typeof node.properties.src !== 'string' || node.properties?.src?.trim().length === 0) {
@@ -527,14 +529,18 @@ function parseDimensions(dimensions: string): {
 
 /**
  * Determine if a HAST tree is visually empty.
+ *
  * @param tree - The HAST tree to check.
+ *
  * @returns - True if the tree is visually empty, otherwise false.
  */
 function isVisuallyEmpty(tree: HastRoot): boolean {
 	let hasVisualContent = false
 
 	visit(tree, (node) => {
-		if (hasVisualContent) return // Early exit if visual content is found
+		if (hasVisualContent) {
+			return
+		} // Early exit if visual content is found
 
 		if (node.type === 'element') {
 			const element = node
@@ -576,10 +582,12 @@ function isVisuallyEmpty(tree: HastRoot): boolean {
 }
 
 /**
- * Add a first child to the first div element in a HAST tree.
- * Intended for use with the "div-wrapped" HAST tree generated early in `mdastToHtml`.
+ * Add a first child to the first div element in a HAST tree. Intended for use
+ * with the "div-wrapped" HAST tree generated early in `mdastToHtml`.
+ *
  * @param tree - The HAST tree to modify in place.
  * @param newChild - The new child node to add.
+ *
  * @returns - The modified-in-place HAST tree.
  */
 function addFirstChildToFirstDiv(tree: HastRoot, newChild: ElementContent): HastRoot {

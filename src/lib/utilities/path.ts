@@ -15,7 +15,9 @@ const QUERY_FRAGMENT_START_REGEX = /[#?^]/
 
 /**
  * The browserify polyfill doesn't implement win32 absolute path detection...
+ *
  * @param filePath Normalized path
+ *
  * @returns Whether the path is absolute
  */
 export function isAbsolute(filePath: string): boolean {
@@ -30,8 +32,10 @@ const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/
 /**
  * Converts all paths to cross-platform 'mixed' style with forward slashes.
  * Warns on unsupported Windows extended length paths.
+ *
  * @param filePath Path to normalize
- * @returns normalized path
+ *
+ * @returns Normalized path
  */
 export function normalize(filePath: string): string {
 	if (RE_WINDOWS_EXTENDED_LENGTH_PATH.test(filePath)) {
@@ -57,14 +61,15 @@ export function normalize(filePath: string): string {
 }
 
 /**
- * Special handling for `/absolute-path.md` style links in Obsidian
- * and static site generators, where absolute paths are relative to a base path
- * instead of the volume root.
+ * Special handling for `/absolute-path.md` style links in Obsidian and static
+ * site generators, where absolute paths are relative to a base path instead of
+ * the volume root.
  *
- 
+ * Paths starting with Windows drive letters, while technically absolute, are
+ * _not_ prepended with the base:
  *
- * Paths starting with Windows drive letters, while technically absolute, are _not_ prepended with the base:
- * - If no base path is provided, paths are resolved relative to the the provided CWD.
+ * - If no base path is provided, paths are resolved relative to the the provided
+ *   CWD.
  * - If paths are relative, the base paths are ignored and the CWD is used.
  *
  * All path values are normalized and in 'mixed' platform style.
@@ -72,11 +77,21 @@ export function normalize(filePath: string): string {
 export function resolveWithBasePath(
 	filePath: string,
 	options: {
-		/** Relative, absolute, or drive-letter absolute path. Normalized and in the 'mixed' platform style. */
+		/**
+		 * Relative, absolute, or drive-letter absolute path. Normalized and in the
+		 * 'mixed' platform style.
+		 */
 		basePath?: string | undefined
-		/** Whether to keep prepend the base if the file path already starts with it. Useful for pseudo-idempotence, but will get it wrong in some edge cases with duplicative path segments. Defaults to false. */
+		/**
+		 * Whether to keep prepend the base if the file path already starts with it.
+		 * Useful for pseudo-idempotence, but will get it wrong in some edge cases
+		 * with duplicative path segments. Defaults to false.
+		 */
 		compoundBase?: boolean | undefined
-		/** Relative to the volume root. Normalized and in the 'mixed' platform style. */
+		/**
+		 * Relative to the volume root. Normalized and in the 'mixed' platform
+		 * style.
+		 */
 		cwd: string
 	},
 ): string {

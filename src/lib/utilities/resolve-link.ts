@@ -24,24 +24,25 @@ type ResolveLinkType =
 
 type ResolveLinkOptions = {
 	/**
-	 * Array of all absolute file paths to consider when resolving wiki-style named links.
+	 * Array of all absolute file paths to consider when resolving wiki-style
+	 * named links.
 	 */
 	allFilePaths?: string[] | undefined
 	/**
-	 * How to treat file paths without a leading `/`, `./`, or `../`
-	 * Useful in Obsidian vaults where bare paths can be relative to the vault root
-	 * TODO evaluate if this makes sense
+	 * How to treat file paths without a leading `/`, `./`, or `../` Useful in
+	 * Obsidian vaults where bare paths can be relative to the vault root TODO
+	 * evaluate if this makes sense
 	 */
 	// barePathsAreRelativeTo: 'base' | 'cwd'
 	/**
-	 * Custom base path to resolve "absolute" paths against.
-	 * Useful in Obsidian vaults where "/" is the root of the vault, not the root of the filesystem.
+	 * Custom base path to resolve "absolute" paths against. Useful in Obsidian
+	 * vaults where "/" is the root of the vault, not the root of the filesystem.
 	 * Must be an absolute directory path.
 	 */
 	basePath?: string | undefined
 	/**
-	 * Turns a file path into a URL with a specific protocol.
-	 * Useful for converting markdown links to Obsidian vault links.
+	 * Turns a file path into a URL with a specific protocol. Useful for
+	 * converting markdown links to Obsidian vault links.
 	 */
 	convertFilePathsToProtocol?: 'file' | 'none' | 'obsidian'
 	/**
@@ -54,8 +55,8 @@ type ResolveLinkOptions = {
 	 */
 	obsidianVaultName?: string | undefined
 	/**
-	 * Whether we're dealing with a link (to be `<a>`-tagged) or an embed (to be `<img>`-tagged).
-	 * Affects how the resolved path is treated.
+	 * Whether we're dealing with a link (to be `<a>`-tagged) or an embed (to be
+	 * `<img>`-tagged). Affects how the resolved path is treated.
 	 */
 	type: ResolveLinkType
 }
@@ -72,27 +73,31 @@ const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
 /**
  * Resolve a file path, URL, or wiki-style named links to an absolute path.
  *
- * Warning:
- * Wiki name link resolution is CASE INSENSITIVE, like in Obsidian, though
- * the case of the matching file will be preserved in the returned path.
+ * Warning: Wiki name link resolution is CASE INSENSITIVE, like in Obsidian,
+ * though the case of the matching file will be preserved in the returned path.
+ *
  * @param filePathOrUrl May be one of:
- * - Wiki named link
- * - Relative file path
- * - Bare file path
- * - Absolute file path
- * - HTTP protocol URL string
- * - File protocol URL string
- * - Obsidian protocol URL string
- * (All file paths can be Windows or POSIX, with or without URI encoding, with
- * or without funky Obsidian-style post-extension block and heading anchor
- * additions.)
+ *
+ *   - Wiki named link
+ *   - Relative file path
+ *   - Bare file path
+ *   - Absolute file path
+ *   - HTTP protocol URL string
+ *   - File protocol URL string
+ *   - Obsidian protocol URL string (All file paths can be Windows or POSIX, with or
+ *       without URI encoding, with or without funky Obsidian-style
+ *       post-extension block and heading anchor additions.)
+ *
+ *
  * @returns Resolved absolute path or URL One of:
- * - Resolved absolute POSIX-style paths
+ *
+ *   - Resolved absolute POSIX-style paths
  *   - Removes any file path query parameters
  *   - Not URI-encoded
  *   - Retains original case
- * - HTTP protocol URL
- * - Obsidian protocol vault URL (Optionally, this will include file query parameters)
+ *   - HTTP protocol URL
+ *   - Obsidian protocol vault URL (Optionally, this will include file query
+ *       parameters)
  */
 export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions): string {
 	// Defaults
@@ -258,16 +263,19 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
  *
  * See Obsidian's `getFirstLinkpathDest()` for a roughly equivalent algorithm.
  *
- * Obsidian seems to treat note links slightly differently from image / asset links.
+ * Obsidian seems to treat note links slightly differently from image / asset
+ * links.
+ *
  * @param name Non-URI-encoded name of the file, may have file extension, if no
- * match with a non-.md extension is found, a match will be attempted with .md
- * regardless. (POSIX-style paths.)
+ *   match with a non-.md extension is found, a match will be attempted with .md
+ *   regardless. (POSIX-style paths.)
  * @param cwd Absolute path to the current working directory of the file from
- * which we're resolving the link. (POSIX-style paths)
+ *   which we're resolving the link. (POSIX-style paths)
  * @param allFilePaths Array of absolute paths to all other files in the paths
- * to be considered. (POSIX-style paths.)
+ *   to be considered. (POSIX-style paths.)
+ *
  * @returns Absolute path to the best matching file with the name provided, or
- * undefined if there's no valid match. (POSIX-style paths.)
+ *   undefined if there's no valid match. (POSIX-style paths.)
  */
 function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): string | undefined {
 	// Edge case, no file paths provided
@@ -378,10 +386,13 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 /**
  * Check for presence of a path in a list in a case- and query- agnostic manner.
  * Ignores .md extensions to simplify matching files
+ *
  * @param filePath File path with file extension. (POSIX-style path.)
- * @param allFilePaths Array of absolute file paths to check. (POSIX-style paths.)
+ * @param allFilePaths Array of absolute file paths to check. (POSIX-style
+ *   paths.)
+ *
  * @returns The file path if it is present in the list of all file paths, or
- * undefined if it is not.
+ *   undefined if it is not.
  */
 function pathExistsInAllFiles(filePath: string, allFilePaths: string[]): string | undefined {
 	const base = pathExtras.getBase(filePath)

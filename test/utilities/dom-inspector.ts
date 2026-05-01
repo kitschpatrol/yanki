@@ -9,8 +9,10 @@ const SOUND_TAG_REGEX = /^\[sound:(.*)\]$/
 /**
  * Test helper to get all attributes as an object for all instances of a
  * specific tag in an HTML fragments
+ *
  * @param htmlFragment - The HTML fragment to search
  * @param tag - The tag to search for
+ *
  * @returns Array of objects, each object representing the attributes of a tag
  * @public
  */
@@ -38,7 +40,9 @@ export function getAttributesOfAllNodes(
 
 /**
  * Test helper to get all links and embeds in an HTML fragment
+ *
  * @param htmlFragment - The HTML fragment to search
+ *
  * @returns Array of objects, each object representing the attributes of a tag
  * @public
  */

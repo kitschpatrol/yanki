@@ -51,9 +51,11 @@ export type SyncNotesResult = Simplify<
 
 /**
  * Syncs local notes to Anki.
+ *
  * @param allLocalNotes All the YankiNotes to sync
+ *
  * @returns The synced notes (with new IDs where applicable), plus some stats
- * about the sync
+ *   about the sync
  * @throws {Error} For various reasons...
  */
 // eslint-disable-next-line complexity
@@ -125,11 +127,15 @@ export async function syncNotes(
 	// that have already been synced as a shortcut to create new ones.
 	// Can't really think of a more sane thing to do without access to file metadata.
 	for (const localNote of allLocalNotesCopy) {
-		if (localNote.noteId === undefined) continue
+		if (localNote.noteId === undefined) {
+			continue
+		}
 
 		const duplicates = findNotesWithDuplicateIds(allLocalNotesCopy, localNote.noteId)
 
-		if (duplicates.length <= 1) continue
+		if (duplicates.length <= 1) {
+			continue
+		}
 
 		const remoteNote = remoteNotes.find((remote) => remote.noteId === localNote.noteId)
 

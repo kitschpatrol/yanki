@@ -5,8 +5,8 @@
  * The integration tests in sync.node.test.ts can't reliably exercise this bug
  * because the getDeckStats safety check catches the incorrect orphan candidates
  * in normal operation. The bug only manifests when getDeckStats returns
- * unreliable zero counts (an intermittent Anki issue). This test mocks the
- * Anki client to simulate that scenario.
+ * unreliable zero counts (an intermittent Anki issue). This test mocks the Anki
+ * client to simulate that scenario.
  */
 import { describe, expect, it } from 'vitest'
 import type { YankiNote } from '../src/lib/model/note'
