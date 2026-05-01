@@ -6,8 +6,8 @@
 
 import type { Root } from 'mdast'
 import { deepmerge } from 'deepmerge-ts'
-import { EXIT, visit } from 'unist-util-visit'
 import { u } from 'unist-builder'
+import { EXIT, visit } from 'unist-util-visit'
 import type { YankiNote } from '../model/note'
 import type { GlobalOptions } from '../shared/types'
 import { CSS_DEFAULT_CLASS_NAME } from '../shared/constants'
@@ -53,6 +53,8 @@ export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
 	...defaultGlobalOptions,
 }
 
+const HTML_CODE_TAG_REGEX = /<code\b/i
+
 export async function getNoteFromMarkdown(
 	markdown: string,
 	options?: Partial<GetNoteFromMarkdownOptions>,
@@ -93,15 +95,23 @@ export async function getNoteFromMarkdown(
 
 	// Shiki has a notable performance cost even on plain text, so we skip it when
 	// there are no code blocks. Check the post-frontmatter AST for fenced/indented
-	// code nodes and raw HTML code tags.
-	let hasCodeBlocks = false
+	// code nodes and raw HTML code tags. We do risk false-positives if code tags are
+	// escaped, but this should be rare and incurs only a small and rare performance cost
+	// and does not affect correctness.
+
+	// eslint-disable-next-line ts/no-inferrable-types
+	let hasCodeBlocks: boolean = false
+
 	visit(ast, 'code', () => {
 		hasCodeBlocks = true
 		return EXIT
 	})
+
+	// TypeScript doesn't know visit callback fires conditionally?
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (!hasCodeBlocks) {
 		visit(ast, 'html', (node) => {
-			if (/<code\b/i.test(node.value)) {
+			if (HTML_CODE_TAG_REGEX.test(node.value)) {
 				hasCodeBlocks = true
 				return EXIT
 			}

@@ -40,16 +40,18 @@ const DIMENSION_CHARS_REGEX = /^[\dx]+$/
 
 // Significant performance improvement by reusing the processor
 function createBaseProcessor() {
-	return unified()
-		.use(remarkConditionalBreaks)
-		// Not needed?
-		.use(remarkRehype, { allowDangerousHtml: true })
-		// Re-parses any raw HTML in the Markdown into the HAST tree,
-		// otherwise it ends up as text in raw-typed nodes. This allows
-		// things like manual <img> tags to be managed as Anki assets, and protects
-		// inline style tags from removal.
-		.use(rehypeRaw)
-		.use(rehypeMathjaxAnki)
+	return (
+		unified()
+			.use(remarkConditionalBreaks)
+			// Not needed?
+			.use(remarkRehype, { allowDangerousHtml: true })
+			// Re-parses any raw HTML in the Markdown into the HAST tree,
+			// otherwise it ends up as text in raw-typed nodes. This allows
+			// things like manual <img> tags to be managed as Anki assets, and protects
+			// inline style tags from removal.
+			.use(rehypeRaw)
+			.use(rehypeMathjaxAnki)
+	)
 }
 
 // Super slow...
@@ -70,9 +72,7 @@ const processor = createBaseProcessor()
 	.use(rehypeFormat)
 	.use(rehypeStringify)
 
-const processorWithoutShiki = createBaseProcessor()
-	.use(rehypeFormat)
-	.use(rehypeStringify)
+const processorWithoutShiki = createBaseProcessor().use(rehypeFormat).use(rehypeStringify)
 
 type MdastToHtmlOptions = Simplify<
 	Pick<
@@ -81,7 +81,10 @@ type MdastToHtmlOptions = Simplify<
 	> & {
 		/** CSS class names to apply to the output HTML */
 		cssClassNames?: string[]
-		/** Whether the source markdown contains any code blocks (fenced, indented, or raw HTML `<code>` blocks), enabling Shiki syntax highlighting */
+		/**
+		 * Whether the source markdown contains any code blocks (fenced, indented,
+		 * or raw HTML `<code>` blocks), enabling Shiki syntax highlighting
+		 */
 		hasCodeBlocks?: boolean
 		/** Whether to use an empty placeholder if the output is empty */
 		useEmptyPlaceholder?: boolean
