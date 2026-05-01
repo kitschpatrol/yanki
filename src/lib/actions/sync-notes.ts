@@ -165,18 +165,13 @@ export async function syncNotes(
 
 	// Single batched `addNotes` call — 5.85× faster than the sequential
 	// `addNote` loop on the established benchmark.
-	await executeCreates(client, plan.toCreate, dryRun, fileAdapter ?? undefined)
+	await executeCreates(client, plan.toCreate, dryRun)
 
 	// Bundle `changeDeck` and `updateNoteModel` actions into one `multi()`
 	// request, then surface any per-action errors. Returns the indices of
 	// notes that ended up unchanged so we can downgrade their placeholder
 	// `'updated'` action below.
-	const unchangedSyncedIndices = await executeUpdates(
-		client,
-		plan.toUpdate,
-		dryRun,
-		fileAdapter ?? undefined,
-	)
+	const unchangedSyncedIndices = await executeUpdates(client, plan.toUpdate, dryRun)
 
 	for (const syncedIndex of unchangedSyncedIndices) {
 		plan.synced[syncedIndex] = { action: 'unchanged', note: plan.synced[syncedIndex].note }
@@ -245,13 +240,28 @@ export async function syncNotes(
 		}
 	}
 
-	// Reconcile media: delete unused and re-upload missing
+	// Media: collect across all live notes, diff against what's in Anki, then
+	// upload missing and delete orphaned in batched `multi()` chunks. Notes
+	// that we just created or updated this sync go through the silent-upload
+	// path so the returned `reuploaded` list keeps its prior meaning ("media
+	// we restored for notes that should already have had it").
+	const freshWriteNoteIds = new Set<number>()
+	for (const entry of synced) {
+		if (
+			(entry.action === 'created' || entry.action === 'updated') &&
+			entry.note.noteId !== undefined
+		) {
+			freshWriteNoteIds.add(entry.note.noteId)
+		}
+	}
+
 	const { deleted: deletedMedia, reuploaded: reuploadedMedia } = await reconcileMedia(
 		client,
 		liveNotes,
 		sanitizedNamespace,
 		dryRun,
 		fileAdapter ?? undefined,
+		freshWriteNoteIds,
 	)
 
 	// AnkiWeb sync

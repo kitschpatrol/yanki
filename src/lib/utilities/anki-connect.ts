@@ -99,12 +99,12 @@ function toStringArray(value: unknown, actionName: string): string[] {
 }
 
 /**
- * Create a batch of notes in a single Anki-Connect roundtrip via `addNotes`,
- * then upload media one note at a time. Mutates `localNote.noteId` on each
- * entry as Anki assigns IDs.
+ * Create a batch of notes in a single Anki-Connect roundtrip via `addNotes`.
+ * Mutates `localNote.noteId` on each entry as Anki assigns IDs.
  *
  * Pre-flighted models/decks (see `ensureModelsAndDecks`) make this the only
  * write to Anki for note creation — no per-note retry on missing model/deck.
+ * Media is handled separately by `reconcileMedia` after the full sync pass.
  *
  * @throws {Error} If `addNotes` returns null entries for any note in the batch.
  */
@@ -112,7 +112,6 @@ export async function executeCreates(
 	client: YankiConnect,
 	toCreate: Array<{ localNote: YankiNote }>,
 	dryRun: boolean,
-	fileAdapter?: FileAdapter,
 ): Promise<void> {
 	if (toCreate.length === 0) {
 		return
@@ -162,10 +161,6 @@ export async function executeCreates(
 			`addNotes failed for ${failedIndices.length} note(s) at index(es): ${failedIndices.join(', ')}`,
 		)
 	}
-
-	for (const { localNote } of toCreate) {
-		await uploadMediaForNote(client, localNote, dryRun, fileAdapter)
-	}
 }
 
 type UpdateBucketEntry = {
@@ -178,8 +173,8 @@ type MultiAction = Parameters<YankiConnect['miscellaneous']['multi']>[0]['action
 
 /**
  * Apply a batch of note updates by bundling per-note actions (`changeDeck`,
- * `updateNoteModel`) into a single `multi()` request, then uploading media for
- * any note that touched fields/tags/model.
+ * `updateNoteModel`) into a single `multi()` request. Media uploads happen
+ * later in the consolidated `reconcileMedia` pass.
  *
  * @returns The set of `syncedIndex` values whose notes ended up unchanged (no
  *   diff against their remote) so the caller can downgrade the placeholder
@@ -190,10 +185,8 @@ export async function executeUpdates(
 	client: YankiConnect,
 	toUpdate: UpdateBucketEntry[],
 	dryRun: boolean,
-	fileAdapter?: FileAdapter,
 ): Promise<Set<number>> {
 	const actions: MultiAction[] = []
-	const updatesNeedingMedia: YankiNote[] = []
 	const unchangedSyncedIndices = new Set<number>()
 
 	for (const { localNote, remoteNote, syncedIndex } of toUpdate) {
@@ -238,7 +231,6 @@ export async function executeUpdates(
 				version: 6,
 			})
 			didChange = true
-			updatesNeedingMedia.push(localNote)
 		}
 
 		if (!didChange) {
@@ -246,29 +238,21 @@ export async function executeUpdates(
 		}
 	}
 
-	if (dryRun) {
+	if (dryRun || actions.length === 0) {
 		return unchangedSyncedIndices
 	}
 
-	if (actions.length > 0) {
-		const responses = await client.miscellaneous.multi({ actions })
-		const failures: string[] = []
-		for (const [i, response] of responses.entries()) {
-			if (response.error !== null) {
-				const action = actions[i]
-				failures.push(`${action?.action ?? `index ${i}`}: ${response.error}`)
-			}
-		}
-
-		if (failures.length > 0) {
-			throw new Error(
-				`Update batch had ${failures.length} failed action(s):\n${failures.join('\n')}`,
-			)
+	const responses = await client.miscellaneous.multi({ actions })
+	const failures: string[] = []
+	for (const [i, response] of responses.entries()) {
+		if (response.error !== null) {
+			const action = actions[i]
+			failures.push(`${action?.action ?? `index ${i}`}: ${response.error}`)
 		}
 	}
 
-	for (const localNote of updatesNeedingMedia) {
-		await uploadMediaForNote(client, localNote, dryRun, fileAdapter)
+	if (failures.length > 0) {
+		throw new Error(`Update batch had ${failures.length} failed action(s):\n${failures.join('\n')}`)
 	}
 
 	return unchangedSyncedIndices
@@ -959,12 +943,26 @@ async function uploadMediaForNote(
 	return uploadedMedia
 }
 
+const MEDIA_BATCH_CHUNK_SIZE = 25
+
+/**
+ * Reconcile the media files in Anki against the media referenced by the live
+ * notes for the given namespace. Missing media is uploaded; orphaned media is
+ * deleted. Both passes are bundled via `multi()` in chunks of 25 actions.
+ *
+ * `freshWriteNoteIds` (optional) lists the noteIds whose creation/update was
+ * the reason for this sync. Media for those notes uploads silently — only
+ * uploads triggered by media that _should_ already have been in Anki for
+ * matched/unchanged notes show up in the returned `reuploaded` list, matching
+ * the prior reporting semantics.
+ */
 export async function reconcileMedia(
 	client: YankiConnect,
 	liveNotes: YankiNote[],
 	namespace: string,
 	dryRun: boolean,
 	fileAdapter?: FileAdapter,
+	freshWriteNoteIds?: Set<number>,
 ): Promise<{ deleted: string[]; reuploaded: string[] }> {
 	if (dryRun) {
 		return { deleted: [], reuploaded: [] }
@@ -974,63 +972,145 @@ export async function reconcileMedia(
 	// in the Anki media asset manager UI
 	const slugifiedNamespace = getSlugifiedNamespace(namespace)
 
-	const expectedMedia: Media[] = []
+	type CollectedMedia = { filename: string; originalSrc: string; reuploadEligible: boolean }
+	const collected = new Map<string, CollectedMedia>()
 	for (const note of liveNotes) {
-		// Room for optimization to avoid re-parsing the HTML...
+		const isFreshWrite = note.noteId !== undefined && (freshWriteNoteIds?.has(note.noteId) ?? false)
+
 		const mediaPaths = extractMediaFromHtml(
 			`${note.fields.Front}\n${note.fields.Back}\n${note.fields.Extra}`,
 		)
-		for (const media of mediaPaths) {
-			expectedMedia.push(media)
-		}
-	}
 
-	const activeMediaFilenames = new Set(expectedMedia.map(({ filename }) => filename))
-
-	const allMediaInNamespace = await client.media.getMediaFilesNames({
-		pattern: `${slugifiedNamespace}-*`,
-	})
-
-	// Delete media in Anki but NOT in expected list
-	const deletedMediaFilenames: string[] = []
-	for (const remoteMediaFilename of allMediaInNamespace) {
-		if (!activeMediaFilenames.has(remoteMediaFilename)) {
-			await client.media.deleteMediaFile({ filename: remoteMediaFilename })
-			deletedMediaFilenames.push(remoteMediaFilename)
-		}
-	}
-
-	// Re-upload media in expected list but NOT in Anki
-	const reuploadedMediaFilenames: string[] = []
-	for (const { filename, originalSrc } of expectedMedia) {
-		if (!allMediaInNamespace.includes(filename)) {
-			try {
-				if (isUrl(originalSrc)) {
-					await client.media.storeMediaFile({
-						deleteExisting: true,
-						filename,
-						url: originalSrc,
-					})
-					reuploadedMediaFilenames.push(filename)
-				} else if (fileAdapter === undefined) {
-					console.warn(
-						`Could not re-upload local media file "${filename}": no file adapter provided`,
-					)
-				} else {
-					await client.media.storeMediaFile({
-						data: uint8ArrayToBase64(await fileAdapter.readFileBuffer(originalSrc)),
-						deleteExisting: true,
-						filename,
-					})
-					reuploadedMediaFilenames.push(filename)
-				}
-			} catch (error) {
-				console.warn(`Anki could not re-upload media file: "${filename}"\n${String(error)}`)
+		for (const { filename, originalSrc } of mediaPaths) {
+			const existing = collected.get(filename)
+			if (existing === undefined) {
+				collected.set(filename, { filename, originalSrc, reuploadEligible: !isFreshWrite })
+			} else if (isFreshWrite && existing.reuploadEligible) {
+				// A fresh-write reference for the same filename downgrades the entry
+				// to silent upload — matches old per-note upload behavior.
+				existing.reuploadEligible = false
 			}
 		}
 	}
 
-	return { deleted: deletedMediaFilenames, reuploaded: reuploadedMediaFilenames }
+	const presentMedia = new Set(
+		await client.media.getMediaFilesNames({ pattern: `${slugifiedNamespace}-*` }),
+	)
+
+	const toDelete: string[] = []
+	for (const filename of presentMedia) {
+		if (!collected.has(filename)) {
+			toDelete.push(filename)
+		}
+	}
+
+	const toUpload: CollectedMedia[] = []
+	for (const entry of collected.values()) {
+		if (!presentMedia.has(entry.filename)) {
+			toUpload.push(entry)
+		}
+	}
+
+	// Read every local file buffer in parallel up-front so the upload bundles
+	// can be sent back-to-back without intermediate I/O.
+	const buffers = await Promise.all(
+		toUpload.map(async (entry) => {
+			if (isUrl(entry.originalSrc)) {
+				return
+			}
+
+			if (fileAdapter === undefined) {
+				console.warn(
+					`Could not re-upload local media file "${entry.filename}": no file adapter provided`,
+				)
+				return
+			}
+
+			try {
+				return uint8ArrayToBase64(await fileAdapter.readFileBuffer(entry.originalSrc))
+			} catch (error) {
+				console.warn(`Could not read local media file "${entry.filename}": ${String(error)}`)
+			}
+		}),
+	)
+
+	const uploadActions: MultiAction[] = []
+	const uploadMeta: Array<{ filename: string; reuploadEligible: boolean }> = []
+	for (const [i, entry] of toUpload.entries()) {
+		if (isUrl(entry.originalSrc)) {
+			uploadActions.push({
+				action: 'storeMediaFile',
+				params: { deleteExisting: true, filename: entry.filename, url: entry.originalSrc },
+				version: 6,
+			})
+			uploadMeta.push({ filename: entry.filename, reuploadEligible: entry.reuploadEligible })
+		} else if (buffers[i] !== undefined) {
+			uploadActions.push({
+				action: 'storeMediaFile',
+				params: { data: buffers[i], deleteExisting: true, filename: entry.filename },
+				version: 6,
+			})
+			uploadMeta.push({ filename: entry.filename, reuploadEligible: entry.reuploadEligible })
+		}
+	}
+
+	const reuploaded: string[] = []
+	await runMultiInChunks(client, uploadActions, (index, response) => {
+		const meta = uploadMeta[index]
+		if (meta === undefined) {
+			return
+		}
+
+		if (response.error === null) {
+			if (meta.reuploadEligible) {
+				reuploaded.push(meta.filename)
+			}
+		} else {
+			console.warn(`Anki could not store media file "${meta.filename}": ${response.error}`)
+		}
+	})
+
+	const deleteActions: MultiAction[] = toDelete.map((filename) => ({
+		action: 'deleteMediaFile',
+		params: { filename },
+		version: 6,
+	}))
+
+	const deleted: string[] = []
+	await runMultiInChunks(client, deleteActions, (index, response) => {
+		const filename = toDelete[index]
+		if (filename === undefined) {
+			return
+		}
+
+		if (response.error === null) {
+			deleted.push(filename)
+		} else {
+			console.warn(`Anki could not delete media file "${filename}": ${response.error}`)
+		}
+	})
+
+	return { deleted, reuploaded }
+}
+
+// Mirrors the wire-level shape returned by Anki-Connect for each `multi()`
+// action. `error` is genuinely `null` (not `undefined`) on the wire, so the
+// `null` here is intentional rather than a stand-in for "absent".
+// eslint-disable-next-line ts/no-restricted-types
+type MultiActionResponse = { error: null | string; result: unknown }
+
+async function runMultiInChunks(
+	client: YankiConnect,
+	actions: MultiAction[],
+	handleResponse: (index: number, response: MultiActionResponse) => void,
+): Promise<void> {
+	for (let i = 0; i < actions.length; i += MEDIA_BATCH_CHUNK_SIZE) {
+		const chunk = actions.slice(i, i + MEDIA_BATCH_CHUNK_SIZE)
+		const responses = await client.miscellaneous.multi({ actions: chunk })
+		for (const [j, response] of responses.entries()) {
+			handleResponse(i + j, response)
+		}
+	}
 }
 
 /**

@@ -887,12 +887,17 @@ describe('reconcileMedia', () => {
 	})
 
 	it('deletes orphaned media and re-uploads missing media', async () => {
+		const multi = vi
+			.fn()
+			// eslint-disable-next-line unicorn/no-null
+			.mockResolvedValueOnce([{ error: null, result: 'yanki-test-new-file.png' }])
+			// eslint-disable-next-line unicorn/no-null
+			.mockResolvedValueOnce([{ error: null, result: undefined }])
 		const client = {
 			media: {
-				deleteMediaFile: vi.fn(),
 				getMediaFilesNames: vi.fn().mockResolvedValue(['yanki-test-old-file.png']),
-				storeMediaFile: vi.fn(),
 			},
+			miscellaneous: { multi },
 		}
 
 		const notes = [
@@ -907,9 +912,13 @@ describe('reconcileMedia', () => {
 
 		const result = await reconcileMedia(client as never, notes, 'test', false)
 		expect(result.deleted).toContain('yanki-test-old-file.png')
-		expect(client.media.deleteMediaFile).toHaveBeenCalledWith({
-			filename: 'yanki-test-old-file.png',
-		})
+
+		const deleteCall = multi.mock.calls.find((call) =>
+			(call[0] as { actions: Array<{ action: string }> }).actions.some(
+				(a) => a.action === 'deleteMediaFile',
+			),
+		)
+		expect(deleteCall).toBeDefined()
 	})
 
 	it('warns when no file adapter for local media re-upload', async () => {
@@ -917,8 +926,8 @@ describe('reconcileMedia', () => {
 		const client = {
 			media: {
 				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-				storeMediaFile: vi.fn(),
 			},
+			miscellaneous: { multi: vi.fn().mockResolvedValue([]) },
 		}
 
 		const notes = [
@@ -941,7 +950,9 @@ describe('reconcileMedia', () => {
 		const client = {
 			media: {
 				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-				storeMediaFile: vi.fn().mockRejectedValue(new Error('network error')),
+			},
+			miscellaneous: {
+				multi: vi.fn().mockResolvedValue([{ error: 'network error', result: undefined }]),
 			},
 		}
 
@@ -962,11 +973,13 @@ describe('reconcileMedia', () => {
 	})
 
 	it('re-uploads URL-based media successfully', async () => {
+		// eslint-disable-next-line unicorn/no-null
+		const multi = vi.fn().mockResolvedValue([{ error: null, result: 'yanki-test-file.png' }])
 		const client = {
 			media: {
 				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-				storeMediaFile: vi.fn(),
 			},
+			miscellaneous: { multi },
 		}
 
 		const notes = [
@@ -976,22 +989,35 @@ describe('reconcileMedia', () => {
 					Front: 'front',
 					YankiNamespace: 'test',
 				},
+				noteId: 42, // Not in freshWriteNoteIds — counts as reupload
 			}),
 		]
 
 		const result = await reconcileMedia(client as never, notes, 'test', false)
 		expect(result.reuploaded).toContain('yanki-test-file.png')
-		expect(client.media.storeMediaFile).toHaveBeenCalledWith(
-			expect.objectContaining({ url: 'http://example.com/img.png' }),
-		)
+		expect(multi).toHaveBeenCalledWith({
+			actions: [
+				{
+					action: 'storeMediaFile',
+					params: {
+						deleteExisting: true,
+						filename: 'yanki-test-file.png',
+						url: 'http://example.com/img.png',
+					},
+					version: 6,
+				},
+			],
+		})
 	})
 
 	it('re-uploads local media with file adapter', async () => {
+		// eslint-disable-next-line unicorn/no-null
+		const multi = vi.fn().mockResolvedValue([{ error: null, result: 'yanki-test-file.png' }])
 		const client = {
 			media: {
 				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-				storeMediaFile: vi.fn(),
 			},
+			miscellaneous: { multi },
 		}
 
 		const fileAdapter = {
@@ -1005,14 +1031,27 @@ describe('reconcileMedia', () => {
 					Front: 'front',
 					YankiNamespace: 'test',
 				},
+				noteId: 42, // Not in freshWriteNoteIds — counts as reupload
 			}),
 		]
 
 		const result = await reconcileMedia(client as never, notes, 'test', false, fileAdapter as never)
 		expect(result.reuploaded).toContain('yanki-test-file.png')
-		expect(client.media.storeMediaFile).toHaveBeenCalledWith(
-			// eslint-disable-next-line ts/no-unsafe-assignment
-			expect.objectContaining({ data: expect.any(String) }),
-		)
+		expect(multi).toHaveBeenCalledWith({
+			actions: [
+				{
+					action: 'storeMediaFile',
+					// eslint-disable-next-line ts/no-unsafe-assignment
+					params: expect.objectContaining({
+						// eslint-disable-next-line ts/no-unsafe-assignment
+						data: expect.any(String),
+						deleteExisting: true,
+						filename: 'yanki-test-file.png',
+					}),
+					version: 6,
+				},
+			],
+		})
+		expect(fileAdapter.readFileBuffer).toHaveBeenCalledWith('/local/file.png')
 	})
 })
