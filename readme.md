@@ -681,7 +681,7 @@ Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm
 
 ## Maintainers
 
-[@kitschpatrol](https://github.com/kitschpatrol)
+[kitschpatrol](https://github.com/kitschpatrol)
 
 ## Acknowledgments
 

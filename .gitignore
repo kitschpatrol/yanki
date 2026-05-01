@@ -2,12 +2,13 @@
 # Also used by CSpell, Stylelint, and ESLint
 
 # @kitschpatrol/repo-config boilerplate
+!.env.example
 .astro/
 .DS_Store
 .env
 .env.*
-!.env.example
 .eslint-config-inspector
+.pnpm-store/
 .svelte-kit/
 {tmp,temp}/
 **/*.min.js
@@ -25,5 +26,5 @@ vendor/
 /test/assets/test obsidian vault with spaces/.obsidian/plugins
 /test/assets/test-obsidian-vault/.obsidian/workspace.json
 /test/assets/test-obsidian-vault/.obsidian/plugins
-/.claude
+.claude/
 __pycache__
