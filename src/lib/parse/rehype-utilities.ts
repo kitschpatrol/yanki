@@ -38,7 +38,6 @@ import remarkConditionalBreaks from './remark-conditional-breaks'
 
 const DIMENSION_CHARS_REGEX = /^[\dx]+$/
 
-// Significant performance improvement by reusing the processor
 function createBaseProcessor() {
 	return (
 		unified()
@@ -54,7 +53,9 @@ function createBaseProcessor() {
 	)
 }
 
-// Super slow...
+// Module-level processors — reused across calls for a significant performance
+// improvement over rebuilding per invocation. Shiki is super slow, so we keep
+// a Shiki-free variant for notes with no code blocks.
 // Other syntax highlighting Rehype plugins:
 // https://github.com/Microflash/rehype-starry-night
 // https://github.com/rehypejs/rehype-highlight

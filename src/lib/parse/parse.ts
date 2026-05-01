@@ -94,29 +94,18 @@ export async function getNoteFromMarkdown(
 	ast = deleteFirstNodeOfType(ast, 'yaml')
 
 	// Shiki has a notable performance cost even on plain text, so we skip it when
-	// there are no code blocks. Check the post-frontmatter AST for fenced/indented
-	// code nodes and raw HTML code tags. We do risk false-positives if code tags are
-	// escaped, but this should be rare and incurs only a small and rare performance cost
-	// and does not affect correctness.
-
-	// eslint-disable-next-line ts/no-inferrable-types
-	let hasCodeBlocks: boolean = false
-
-	visit(ast, 'code', () => {
-		hasCodeBlocks = true
-		return EXIT
+	// there are no code blocks. Check the post-frontmatter AST for
+	// fenced/indented code nodes and raw HTML code tags. We do risk
+	// false-positives if we detect `<code>` tags in escaped HTML or without an
+	// adjacent `<pre>` that Shiki will still ultimately skip, but this should be
+	// rare and does not affect correctness.
+	let hasCodeBlocks = false
+	visit(ast, ['code', 'html'], (node) => {
+		if (node.type === 'code' || (node.type === 'html' && HTML_CODE_TAG_REGEX.test(node.value))) {
+			hasCodeBlocks = true
+			return EXIT
+		}
 	})
-
-	// TypeScript doesn't know visit callback fires conditionally?
-	// eslint-disable-next-line ts/no-unnecessary-condition
-	if (!hasCodeBlocks) {
-		visit(ast, 'html', (node) => {
-			if (HTML_CODE_TAG_REGEX.test(node.value)) {
-				hasCodeBlocks = true
-				return EXIT
-			}
-		})
-	}
 
 	let front = ''
 	let back = ''
@@ -140,8 +129,10 @@ export async function getNoteFromMarkdown(
 				extraPart = newExtraPart
 			}
 
-			// Anki won't create notes if the front field is blank, but we want parity between markdown files and notes at all costs,
-			// so we'll put in a placeholder if the front is empty. It's hard to know if the output is really empty without rendering, due to invisible elements.
+			// Anki won't create notes if the front field is blank, but we want parity
+			// between markdown files and notes at all costs, so we'll put in a
+			// placeholder if the front is empty. It's hard to know if the output is
+			// really empty without rendering, due to invisible elements.
 
 			// Basic and reverse always needs both sides to have content.
 			// Basic can technically have no back , but it's confusing so we throw in the placeholder.
