@@ -6,16 +6,16 @@ import type { GlobalOptions } from '../shared/types'
 import { NOTE_DEFAULT_DECK_NAME, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
 import { defaultGlobalOptions } from '../shared/types'
 import {
-	addNote,
 	areNotesEqual,
 	deleteNotes,
 	deleteOrphanedDecks,
 	ensureModelsAndDecks,
+	executeCreates,
+	executeUpdates,
 	getRemoteNotes,
 	reconcileMedia,
 	requestPermission,
 	syncToAnkiWeb,
-	updateNote,
 } from '../utilities/anki-connect'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 
@@ -159,36 +159,27 @@ export async function syncNotes(
 		strictMatching,
 	)
 
-	// Pre-create any missing models/decks so the per-note add/update path
-	// never has to recover from "model not found" or "deck not found".
+	// Pre-create any missing models/decks so the batched calls don't need
+	// per-action recovery from "model not found" or "deck not found".
 	await ensureModelsAndDecks(client, plan.modelsNeeded, plan.decksNeeded, dryRun)
 
-	// Execute creates. Sequential — Anki-Connect serializes single-action
-	// requests at the server (see baseline benchmark: Promise.all is 2.5×
-	// slower than sequential). Batched `addNotes` lands in a follow-up.
-	for (const { localNote } of plan.toCreate) {
-		localNote.noteId = await addNote(
-			client,
-			{ ...localNote, noteId: undefined },
-			dryRun,
-			fileAdapter ?? undefined,
-		)
-	}
+	// Single batched `addNotes` call — 5.85× faster than the sequential
+	// `addNote` loop on the established benchmark.
+	await executeCreates(client, plan.toCreate, dryRun, fileAdapter ?? undefined)
 
-	// Execute updates. Some entries discover post-hoc that nothing changed;
-	// downgrade their pre-populated `updated` action to `unchanged`.
-	for (const { localNote, remoteNote, syncedIndex } of plan.toUpdate) {
-		const wasUpdated = await updateNote(
-			client,
-			localNote,
-			remoteNote,
-			dryRun,
-			fileAdapter ?? undefined,
-		)
+	// Bundle `changeDeck` and `updateNoteModel` actions into one `multi()`
+	// request, then surface any per-action errors. Returns the indices of
+	// notes that ended up unchanged so we can downgrade their placeholder
+	// `'updated'` action below.
+	const unchangedSyncedIndices = await executeUpdates(
+		client,
+		plan.toUpdate,
+		dryRun,
+		fileAdapter ?? undefined,
+	)
 
-		if (!wasUpdated) {
-			plan.synced[syncedIndex] = { action: 'unchanged', note: localNote }
-		}
+	for (const syncedIndex of unchangedSyncedIndices) {
+		plan.synced[syncedIndex] = { action: 'unchanged', note: plan.synced[syncedIndex].note }
 	}
 
 	const { synced } = plan

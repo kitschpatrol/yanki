@@ -40,17 +40,32 @@ export async function ensureModelsAndDecks(
 	deckNames: string[],
 	dryRun: boolean,
 ): Promise<void> {
-	const existingModels = new Set(await client.model.modelNames())
-	const existingDecks = new Set(await client.deck.deckNames())
+	if (deckNames.includes('')) {
+		throw new Error('Deck name is empty')
+	}
+
+	const [modelsResponse, decksResponse] = await client.miscellaneous.multi({
+		actions: [
+			{ action: 'modelNames', version: 6 },
+			{ action: 'deckNames', version: 6 },
+		],
+	})
+
+	if (modelsResponse.error !== null) {
+		throw new Error(`modelNames failed: ${modelsResponse.error}`)
+	}
+
+	if (decksResponse.error !== null) {
+		throw new Error(`deckNames failed: ${decksResponse.error}`)
+	}
+
+	const existingModels = new Set(toStringArray(modelsResponse.result, 'modelNames'))
+	const existingDecks = new Set(toStringArray(decksResponse.result, 'deckNames'))
 
 	const missingModels = [...new Set(modelNames)].filter((name) => !existingModels.has(name))
 	const missingDecks = [...new Set(deckNames)].filter(
 		(name) => name !== '' && !existingDecks.has(name),
 	)
-
-	if (deckNames.includes('')) {
-		throw new Error('Deck name is empty')
-	}
 
 	if (dryRun) {
 		return
@@ -68,6 +83,195 @@ export async function ensureModelsAndDecks(
 	for (const deckName of missingDecks) {
 		await client.deck.createDeck({ deck: deckName })
 	}
+}
+
+/**
+ * Narrow a `multi()` action result to `string[]`. The yanki-connect typing
+ * leaves the result as a loose union of every possible response shape, so we
+ * verify at runtime that the action returned what we expect.
+ */
+function toStringArray(value: unknown, actionName: string): string[] {
+	if (!Array.isArray(value) || !value.every((entry) => typeof entry === 'string')) {
+		throw new TypeError(`Expected string[] from ${actionName}, got: ${JSON.stringify(value)}`)
+	}
+
+	return value
+}
+
+/**
+ * Create a batch of notes in a single Anki-Connect roundtrip via `addNotes`,
+ * then upload media one note at a time. Mutates `localNote.noteId` on each
+ * entry as Anki assigns IDs.
+ *
+ * Pre-flighted models/decks (see `ensureModelsAndDecks`) make this the only
+ * write to Anki for note creation — no per-note retry on missing model/deck.
+ *
+ * @throws {Error} If `addNotes` returns null entries for any note in the batch.
+ */
+export async function executeCreates(
+	client: YankiConnect,
+	toCreate: Array<{ localNote: YankiNote }>,
+	dryRun: boolean,
+	fileAdapter?: FileAdapter,
+): Promise<void> {
+	if (toCreate.length === 0) {
+		return
+	}
+
+	if (dryRun) {
+		for (const { localNote } of toCreate) {
+			localNote.noteId = 0
+		}
+
+		return
+	}
+
+	const ids = await client.note.addNotes({
+		notes: toCreate.map(({ localNote }) => ({
+			deckName: localNote.deckName,
+			fields: localNote.fields,
+			modelName: localNote.modelName,
+			options: { allowDuplicate: true },
+			tags: localNote.tags,
+		})),
+	})
+
+	if (ids === null) {
+		throw new Error('addNotes returned null for the entire batch')
+	}
+
+	const failedIndices: number[] = []
+	for (const [i, id] of ids.entries()) {
+		if (id === null) {
+			failedIndices.push(i)
+			continue
+		}
+
+		const entry = toCreate[i]
+		if (entry === undefined) {
+			throw new Error(
+				`addNotes returned more IDs (${ids.length}) than notes sent (${toCreate.length})`,
+			)
+		}
+
+		entry.localNote.noteId = Number(id)
+	}
+
+	if (failedIndices.length > 0) {
+		throw new Error(
+			`addNotes failed for ${failedIndices.length} note(s) at index(es): ${failedIndices.join(', ')}`,
+		)
+	}
+
+	for (const { localNote } of toCreate) {
+		await uploadMediaForNote(client, localNote, dryRun, fileAdapter)
+	}
+}
+
+type UpdateBucketEntry = {
+	localNote: YankiNote
+	remoteNote: YankiNote
+	syncedIndex: number
+}
+
+type MultiAction = Parameters<YankiConnect['miscellaneous']['multi']>[0]['actions'][number]
+
+/**
+ * Apply a batch of note updates by bundling per-note actions (`changeDeck`,
+ * `updateNoteModel`) into a single `multi()` request, then uploading media for
+ * any note that touched fields/tags/model.
+ *
+ * @returns The set of `syncedIndex` values whose notes ended up unchanged (no
+ *   diff against their remote) so the caller can downgrade the placeholder
+ *   `'updated'` action in `synced[]` to `'unchanged'`.
+ * @throws {Error} If any bundled action returned an Anki-Connect error.
+ */
+export async function executeUpdates(
+	client: YankiConnect,
+	toUpdate: UpdateBucketEntry[],
+	dryRun: boolean,
+	fileAdapter?: FileAdapter,
+): Promise<Set<number>> {
+	const actions: MultiAction[] = []
+	const updatesNeedingMedia: YankiNote[] = []
+	const unchangedSyncedIndices = new Set<number>()
+
+	for (const { localNote, remoteNote, syncedIndex } of toUpdate) {
+		if (localNote.noteId === undefined) {
+			throw new Error('Local note ID is undefined')
+		}
+
+		if (remoteNote.cards === undefined) {
+			throw new Error('Remote note cards are undefined')
+		}
+
+		let didChange = false
+
+		if (localNote.deckName !== remoteNote.deckName) {
+			if (localNote.deckName === '') {
+				throw new Error('Local deck name is empty')
+			}
+
+			actions.push({
+				action: 'changeDeck',
+				params: { cards: remoteNote.cards, deck: localNote.deckName },
+				version: 6,
+			})
+			didChange = true
+		}
+
+		if (
+			!areTagsEqual(localNote.tags ?? [], remoteNote.tags ?? []) ||
+			!areFieldsEqual(localNote.fields, remoteNote.fields) ||
+			localNote.modelName !== remoteNote.modelName
+		) {
+			actions.push({
+				action: 'updateNoteModel',
+				params: {
+					note: {
+						fields: localNote.fields,
+						id: localNote.noteId,
+						modelName: localNote.modelName,
+						tags: localNote.tags ?? [],
+					},
+				},
+				version: 6,
+			})
+			didChange = true
+			updatesNeedingMedia.push(localNote)
+		}
+
+		if (!didChange) {
+			unchangedSyncedIndices.add(syncedIndex)
+		}
+	}
+
+	if (dryRun) {
+		return unchangedSyncedIndices
+	}
+
+	if (actions.length > 0) {
+		const responses = await client.miscellaneous.multi({ actions })
+		const failures: string[] = []
+		for (const [i, response] of responses.entries()) {
+			if (response.error !== null) {
+				const action = actions[i]
+				failures.push(`${action?.action ?? `index ${i}`}: ${response.error}`)
+			}
+		}
+
+		if (failures.length > 0) {
+			throw new Error(
+				`Update batch had ${failures.length} failed action(s):\n${failures.join('\n')}`,
+			)
+		}
+	}
+
+	for (const localNote of updatesNeedingMedia) {
+		await uploadMediaForNote(client, localNote, dryRun, fileAdapter)
+	}
+
+	return unchangedSyncedIndices
 }
 
 // export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun = false) {
