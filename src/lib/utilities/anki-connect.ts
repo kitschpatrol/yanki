@@ -99,6 +99,38 @@ function toStringArray(value: unknown, actionName: string): string[] {
 }
 
 /**
+ * Narrow a `multi()` action result to `number[]`. Mirror of `toStringArray` for
+ * `findNotes`-style responses.
+ */
+function toNumberArray(value: unknown, actionName: string): number[] {
+	if (!Array.isArray(value) || !value.every((entry) => typeof entry === 'number')) {
+		throw new TypeError(`Expected number[] from ${actionName}, got: ${JSON.stringify(value)}`)
+	}
+
+	return value
+}
+
+/**
+ * Narrow a `getDeckConfig` `multi()` result to its `dyn` flag. The full
+ * yanki-connect `DeckConfig` shape is large; we only need `dyn`, which is
+ * either `1` (filtered) or `false` (regular).
+ */
+function toDeckDyn(value: unknown, actionName: string, deckName: string): boolean {
+	if (
+		typeof value !== 'object' ||
+		value === null ||
+		!('dyn' in value) ||
+		(value.dyn !== 1 && value.dyn !== false)
+	) {
+		throw new TypeError(
+			`Expected { dyn: 1 | false } from ${actionName} for deck "${deckName}", got: ${JSON.stringify(value)}`,
+		)
+	}
+
+	return Boolean(value.dyn)
+}
+
+/**
  * Create a batch of notes in a single Anki-Connect roundtrip via `addNotes`.
  * Mutates `localNote.noteId` on each entry as Anki assigns IDs.
  *
@@ -572,7 +604,6 @@ async function getRemoteNotesById(
 	noteIds: number[],
 ): Promise<Array<undefined | YankiNote>> {
 	const ankiNotes = await client.note.notesInfo({ notes: noteIds })
-	const yankiNotes: Array<undefined | YankiNote> = []
 
 	if (ankiNotes.every((ankiNote) => ankiNote.noteId === undefined)) {
 		// All undefined, return early
@@ -592,13 +623,97 @@ async function getRemoteNotesById(
 		}
 	}
 
-	// Figure out which decks are filtered, if any
-	// Have to search the whole collection, unfortunately
+	// Phase A — batch getDeckConfig for every deck this sync touches.
 	const deckFilteredStatusMap = new Map<string, boolean>()
+	const syncDeckNames = Object.keys(deckToCardMap)
+	const phaseAActions: MultiAction[] = syncDeckNames.map((deck) => ({
+		action: 'getDeckConfig',
+		params: { deck },
+		version: 6,
+	}))
+	await runMultiInChunks(client, phaseAActions, (index, response) => {
+		const deckName = syncDeckNames[index]
+		if (deckName === undefined) {
+			throw new Error(`getDeckConfig: unexpected response index ${index}`)
+		}
 
-	// Populated as needed with a list of all non-filtered decks in the collection (if we spot a filtered deck)
-	const unfilteredDeckNoteIdMap = new Map<string, number[] | undefined>()
+		if (response.error !== null) {
+			throw new Error(`getDeckConfig failed for deck "${deckName}": ${response.error}`)
+		}
 
+		deckFilteredStatusMap.set(deckName, toDeckDyn(response.result, 'getDeckConfig', deckName))
+	})
+
+	// Phases B + C only run when at least one deck in this sync is filtered.
+	const sortedUnfilteredDeckNames: string[] = []
+	const unfilteredDeckNoteIdMap = new Map<string, number[]>()
+	const anyFiltered = [...deckFilteredStatusMap.values()].some(Boolean)
+
+	if (anyFiltered) {
+		// Phase B — fan out to remaining decks. Default is treated as guaranteed
+		// unfiltered (matches the long-standing assumption baked into the sort
+		// below); skip the round trip unless Phase A already saw it.
+		const allDeckNames = await client.deck.deckNames()
+		const remainingDecks = allDeckNames.filter(
+			(name) => name !== 'Default' && !deckFilteredStatusMap.has(name),
+		)
+		const phaseBActions: MultiAction[] = remainingDecks.map((deck) => ({
+			action: 'getDeckConfig',
+			params: { deck },
+			version: 6,
+		}))
+		await runMultiInChunks(client, phaseBActions, (index, response) => {
+			const deckName = remainingDecks[index]
+			if (deckName === undefined) {
+				throw new Error(`getDeckConfig: unexpected response index ${index}`)
+			}
+
+			if (response.error !== null) {
+				throw new Error(`getDeckConfig failed for deck "${deckName}": ${response.error}`)
+			}
+
+			deckFilteredStatusMap.set(deckName, toDeckDyn(response.result, 'getDeckConfig', deckName))
+		})
+		if (!deckFilteredStatusMap.has('Default')) {
+			deckFilteredStatusMap.set('Default', false)
+		}
+
+		// Sort decks deep to shallow so a note in `A::B::C` resolves to `A::B::C`
+		// rather than the matching parent `A::B`. Default is the least likely
+		// home for a Yanki note, so it's appended last.
+		for (const [deck, isFiltered] of deckFilteredStatusMap) {
+			if (!isFiltered && deck !== 'Default') {
+				sortedUnfilteredDeckNames.push(deck)
+			}
+		}
+
+		sortedUnfilteredDeckNames.sort((a, b) => b.split('::').length - a.split('::').length)
+		sortedUnfilteredDeckNames.push('Default')
+
+		// Phase C — eagerly batch findNotes for every unfiltered deck so the
+		// main loop below can resolve filtered-deck notes synchronously.
+		const phaseCActions: MultiAction[] = sortedUnfilteredDeckNames.map((deck) => ({
+			action: 'findNotes',
+			params: { query: `"deck:${deck}"` },
+			version: 6,
+		}))
+		await runMultiInChunks(client, phaseCActions, (index, response) => {
+			const deckName = sortedUnfilteredDeckNames[index]
+			if (deckName === undefined) {
+				throw new Error(`findNotes: unexpected response index ${index}`)
+			}
+
+			if (response.error !== null) {
+				throw new Error(`findNotes failed for deck "${deckName}": ${response.error}`)
+			}
+
+			unfilteredDeckNoteIdMap.set(deckName, toNumberArray(response.result, 'findNotes'))
+		})
+	}
+
+	// Phase D — synchronous resolution loop. All deck/note lookups are now
+	// served from the maps populated above.
+	const yankiNotes: Array<undefined | YankiNote> = []
 	for (const ankiNote of ankiNotes) {
 		if (ankiNote.noteId === undefined) {
 			yankiNotes.push(undefined)
@@ -606,81 +721,22 @@ async function getRemoteNotesById(
 		}
 
 		if (![...legacyYankiModelNames, ...yankiModelNames].includes(ankiNote.modelName)) {
-			// Alternately, check if the model name is in the list of models and recreate by setting to undefined?
 			throw new Error(`Unknown model name ${ankiNote.modelName} for note ${ankiNote.noteId}`)
 		}
 
-		// Cards from the same technically can be moved to different decks in Anki
-		// GUI, but Yanki does not support this!
+		// Cards from the same note can technically be moved to different decks in
+		// the Anki GUI, but Yanki does not support this — silently take the first.
 		const deckNamesForNote = [...new Set(ankiNote.cards.map((card) => cardIdToDeckMap.get(card)))]
-
-		if (deckNamesForNote.length > 1) {
-			// No longer considering this an error
-			// Filtered decks sometimes seem to create a second note... sometimes not
-			// console.warn(
-			// 	`Multiple decks found for cards in note ${ankiNote.noteId}. Yanki does not support this.`,
-			// )
-		}
-
 		let deckName = deckNamesForNote.at(0)
 		if (deckName === undefined) {
 			throw new Error(`No deck found for cards in note ${ankiNote.noteId}`)
 		}
 
-		// Look up deck filter status
-		if (!deckFilteredStatusMap.has(deckName)) {
-			const deckConfig = await client.deck.getDeckConfig({ deck: deckName })
-
-			const isFiltered = Boolean(deckConfig.dyn)
-			deckFilteredStatusMap.set(deckName, isFiltered)
-
-			if (isFiltered) {
-				// Now we have to search all decks to find what non-filtered deck has this note
-				// ... so completely populate the filtered deck map now, and reuse it for future notes
-				const allDeckNames = await client.deck.deckNames()
-
-				for (const localName of allDeckNames) {
-					if (!deckFilteredStatusMap.has(localName)) {
-						const deckConfig = await client.deck.getDeckConfig({ deck: localName })
-
-						deckFilteredStatusMap.set(localName, Boolean(deckConfig.dyn))
-					}
-				}
-
-				// Sort decks deep to shallow, prevents deep child notes
-				// from ending up in a parent deck
-				const sortedUnfilteredDeckNames = [...deckFilteredStatusMap.entries()]
-					.filter(([deck, isFiltered]) => !isFiltered && deck !== 'Default')
-					.map(([deck]) => deck)
-					.sort((a, b) => b.split('::').length - a.split('::').length)
-				// Default always at the end, least likely to contain a Yanki note
-				sortedUnfilteredDeckNames.push('Default')
-
-				for (const localDeckName of sortedUnfilteredDeckNames) {
-					// Undefined will be populated with nodeIDs lazily as needed
-					unfilteredDeckNoteIdMap.set(localDeckName, undefined)
-				}
-			}
-		}
-
-		// Look up matching "real" non-filtered decks if the note is in a filtered deck
 		if (deckFilteredStatusMap.get(deckName)) {
-			const namesToCheck = unfilteredDeckNoteIdMap.keys()
-
 			let found = false
-			for (const nameToCheck of namesToCheck) {
-				// Populate and cache the unfiltered deck note IDs if needed
-				if (unfilteredDeckNoteIdMap.get(nameToCheck) === undefined) {
-					unfilteredDeckNoteIdMap.set(
-						nameToCheck,
-						await client.note.findNotes({ query: `"deck:${nameToCheck}"` }),
-					)
-				}
-
-				// Find the matching note in the unfiltered deck
-				if (unfilteredDeckNoteIdMap.get(nameToCheck)?.includes(ankiNote.noteId)) {
-					// Update deck name
-					deckName = nameToCheck
+			for (const candidate of sortedUnfilteredDeckNames) {
+				if (unfilteredDeckNoteIdMap.get(candidate)?.includes(ankiNote.noteId)) {
+					deckName = candidate
 					found = true
 					break
 				}
@@ -689,8 +745,6 @@ async function getRemoteNotesById(
 			if (!found) {
 				throw new Error(`No matching non-filtered deck found for note ${ankiNote.noteId}`)
 			}
-		} else {
-			// Deck is good, leave it alone
 		}
 
 		// Picture, sound, etc. fields are never provided
@@ -943,7 +997,7 @@ async function uploadMediaForNote(
 	return uploadedMedia
 }
 
-const MEDIA_BATCH_CHUNK_SIZE = 25
+const MULTI_BATCH_CHUNK_SIZE = 25
 
 /**
  * Reconcile the media files in Anki against the media referenced by the live
@@ -1103,9 +1157,10 @@ async function runMultiInChunks(
 	client: YankiConnect,
 	actions: MultiAction[],
 	handleResponse: (index: number, response: MultiActionResponse) => void,
+	chunkSize: number = MULTI_BATCH_CHUNK_SIZE,
 ): Promise<void> {
-	for (let i = 0; i < actions.length; i += MEDIA_BATCH_CHUNK_SIZE) {
-		const chunk = actions.slice(i, i + MEDIA_BATCH_CHUNK_SIZE)
+	for (let i = 0; i < actions.length; i += chunkSize) {
+		const chunk = actions.slice(i, i + chunkSize)
 		const responses = await client.miscellaneous.multi({ actions: chunk })
 		for (const [j, response] of responses.entries()) {
 			handleResponse(i + j, response)
