@@ -10,6 +10,10 @@ const isSlow = isCI || isWindows
 
 export default defineConfig({
 	test: {
+		benchmark: {
+			include: ['test/**/*.bench.ts'],
+			includeSamples: true,
+		},
 		coverage: {
 			include: ['src/**/*.ts'],
 			provider: 'v8',
@@ -30,6 +34,8 @@ export default defineConfig({
 				: [
 						{
 							test: {
+								// Bench suites are Node-only; opt the browser project out
+								benchmark: { include: [] },
 								browser: {
 									// Conflicts between VS Code extension and vitest CLI command...
 									api: {
@@ -52,6 +58,10 @@ export default defineConfig({
 			// Node project
 			{
 				test: {
+					benchmark: {
+						include: ['test/**/*.bench.ts'],
+						includeSamples: true,
+					},
 					environment: 'node',
 					exclude: ['test/**/*.browser.test.ts'],
 					include: ['test/**/*.test.ts'],

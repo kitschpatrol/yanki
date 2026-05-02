@@ -6,9 +6,10 @@ pnpm-lock.yaml
 package-lock.json
 
 # Customizations
+test/assets/test-cloze-back/
 test/assets/test-obsidian-vault/
 test/assets/test-tags/
 test/assets/test-unexpected-formatting/
 test/assets/test\ obsidian\ vault\ with\ spaces/
-test/assets/test-cloze-back/
+test/benchmarks/baseline.json
 test/fixtures/anki-data-folder/

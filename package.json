@@ -48,6 +48,8 @@
 		"dist/*"
 	],
 	"scripts": {
+		"bench": "vitest bench --run --compare test/benchmarks/baseline.json",
+		"bench:baseline": "vitest bench --run --outputJson test/benchmarks/baseline.json",
 		"build": "tsdown && attw -P --profile esm-only && publint",
 		"clean": "shx rm -f pnpm-lock.yaml && git clean -fdX -e !.claude/",
 		"coverage": "vitest run --coverage",
