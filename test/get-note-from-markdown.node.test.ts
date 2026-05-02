@@ -422,3 +422,48 @@ it('applies Shiki highlighting for raw HTML code blocks', async () => {
 	const note = await getNoteFromMarkdown(markdown)
 	expect(note.fields.Back).toContain('shiki')
 })
+
+/**
+ * Inline code (single backticks) should NOT load Shiki — the Shiki rehype
+ * plugin only processes block-level `<pre><code>` by default. Locks in the
+ * short-circuit's correctness for inline-only content.
+ */
+it('skips Shiki for notes with only inline code', async () => {
+	const markdown = 'Use the `console.log()` function\n\n---\n\nThat is all.'
+	const note = await getNoteFromMarkdown(markdown)
+	expect(note.fields.Front).not.toContain('shiki')
+	expect(note.fields.Back).not.toContain('shiki')
+})
+
+/**
+ * Documents the acknowledged false positive: a note that _describes_ HTML tags
+ * as prose still triggers the Shiki path because the bare `<code>` token
+ * appears in a raw-HTML mdast node. Output must remain correct regardless.
+ */
+it('produces correct output even when prose mentions a literal <code> tag', async () => {
+	const markdown = 'Use the <code> tag for inline code.\n\n---\n\nDone.'
+	const note = await getNoteFromMarkdown(markdown)
+	expect(note.fields.Front).toContain('Use the')
+	expect(note.fields.Back).toContain('Done')
+})
+
+it('detects code blocks nested inside a blockquote', async () => {
+	const markdown = '> ```js\n> const x = 1\n> ```\n\n---\n\nback'
+	const note = await getNoteFromMarkdown(markdown)
+	expect(note.fields.Front).toContain('shiki')
+})
+
+it('detects code blocks nested inside a list item', async () => {
+	const markdown = '- item with code:\n\n  ```js\n  const x = 1\n  ```\n\n---\n\nback'
+	const note = await getNoteFromMarkdown(markdown)
+	expect(note.fields.Front).toContain('shiki')
+})
+
+it('detects code blocks inside table cells', async () => {
+	const markdown =
+		'| col |\n| --- |\n| `inline only no shiki` |\n\n---\n\n<pre><code>real</code></pre>'
+	const note = await getNoteFromMarkdown(markdown)
+	// Inline code in the table cell stays unstyled; the back has a real
+	// pre/code block which must reach Shiki.
+	expect(note.fields.Back).toContain('shiki')
+})

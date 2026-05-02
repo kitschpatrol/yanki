@@ -28,6 +28,58 @@ function makeNote(overrides: Partial<YankiNote> = {}): YankiNote {
 	}
 }
 
+type MultiActionInput = { action: string; params?: Record<string, unknown> }
+type ActionHandler = (params: Record<string, unknown>) => unknown
+// eslint-disable-next-line ts/no-restricted-types
+type MultiResponse = { error: null | string; result: unknown }
+type MultiCall = [{ actions: MultiActionInput[] }]
+
+/**
+ * Dispatches incoming `multi()` action arrays to the per-action handlers.
+ * Returns one `{error, result}` entry per action — matching Anki-Connect's wire
+ * shape — so the production code's chunked dispatcher can be exercised.
+ *
+ * Handlers may throw to simulate a per-action error response; the thrown
+ * message becomes the response's `error` field.
+ */
+function makeMultiMock(handlers: Record<string, ActionHandler>) {
+	return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) => {
+		const responses: MultiResponse[] = actions.map(({ action, params = {} }) => {
+			if (!Object.hasOwn(handlers, action)) {
+				// eslint-disable-next-line unicorn/no-null
+				return { error: `unhandled action ${action}`, result: null }
+			}
+
+			const handler = handlers[action]
+			try {
+				// eslint-disable-next-line unicorn/no-null
+				return { error: null, result: handler(params) }
+			} catch (error) {
+				return {
+					error: error instanceof Error ? error.message : String(error),
+					// eslint-disable-next-line unicorn/no-null
+					result: null,
+				}
+			}
+		})
+		return responses
+	})
+}
+
+function makeAnkiNote(noteId: number, cards: number[]): Record<string, unknown> {
+	return {
+		cards,
+		fields: {
+			Back: { value: `back-${noteId}` },
+			Front: { value: `front-${noteId}` },
+			YankiNamespace: { value: 'test' },
+		},
+		modelName: 'Yanki - Basic',
+		noteId,
+		tags: [],
+	}
+}
+
 describe('areNotesEqual', () => {
 	it('returns true for identical notes', () => {
 		const note = makeNote()
@@ -616,58 +668,6 @@ describe('syncToAnkiWeb', () => {
 const DECK_QUERY_PATTERN = /^"deck:(.+)"$/
 
 describe('getRemoteNotes', () => {
-	type MultiActionInput = { action: string; params?: Record<string, unknown> }
-	type ActionHandler = (params: Record<string, unknown>) => unknown
-	// eslint-disable-next-line ts/no-restricted-types
-	type MultiResponse = { error: null | string; result: unknown }
-	type MultiCall = [{ actions: MultiActionInput[] }]
-
-	/**
-	 * Dispatches incoming `multi()` action arrays to the per-action handlers.
-	 * Returns one `{error, result}` entry per action — matching Anki-Connect's
-	 * wire shape — so the production code's chunked dispatcher can be exercised.
-	 *
-	 * Handlers may throw to simulate a per-action error response; the thrown
-	 * message becomes the response's `error` field.
-	 */
-	function makeMultiMock(handlers: Record<string, ActionHandler>) {
-		return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) => {
-			const responses: MultiResponse[] = actions.map(({ action, params = {} }) => {
-				if (!Object.hasOwn(handlers, action)) {
-					// eslint-disable-next-line unicorn/no-null
-					return { error: `unhandled action ${action}`, result: null }
-				}
-
-				const handler = handlers[action]
-				try {
-					// eslint-disable-next-line unicorn/no-null
-					return { error: null, result: handler(params) }
-				} catch (error) {
-					return {
-						error: error instanceof Error ? error.message : String(error),
-						// eslint-disable-next-line unicorn/no-null
-						result: null,
-					}
-				}
-			})
-			return responses
-		})
-	}
-
-	function makeAnkiNote(noteId: number, cards: number[]): Record<string, unknown> {
-		return {
-			cards,
-			fields: {
-				Back: { value: `back-${noteId}` },
-				Front: { value: `front-${noteId}` },
-				YankiNamespace: { value: 'test' },
-			},
-			modelName: 'Yanki - Basic',
-			noteId,
-			tags: [],
-		}
-	}
-
 	it('returns empty array when no notes found', async () => {
 		const client = {
 			note: {
@@ -959,6 +959,38 @@ describe('getRemoteNotes', () => {
 		)
 	})
 
+	it('probes the Default deck filter status alongside other decks', async () => {
+		// Locks in Hardening G: Default is no longer special-cased, so Phase B
+		// includes it in the getDeckConfig batch. If a future change reintroduces
+		// the "Default is always unfiltered" assumption, this test will fail.
+		const probedDecks: string[] = []
+		const multiMock = makeMultiMock({
+			findNotes() {
+				return []
+			},
+			getDeckConfig({ deck }) {
+				probedDecks.push(String(deck))
+				return { dyn: deck === 'Filtered' ? 1 : false }
+			},
+		})
+		const client = {
+			deck: {
+				deckNames: vi.fn().mockResolvedValue(['Filtered', 'RealDeck', 'Default']),
+				getDecks: vi.fn().mockResolvedValue({ Filtered: [100] }),
+			},
+			miscellaneous: { multi: multiMock },
+			note: {
+				findNotes: vi.fn().mockResolvedValue([1]),
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+			},
+		}
+
+		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+			'No matching non-filtered deck found for note 1',
+		)
+		expect(probedDecks).toContain('Default')
+	})
+
 	it('throws with deck context when getDeckConfig fails in Phase A', async () => {
 		const multiMock = makeMultiMock({
 			getDeckConfig({ deck }) {
@@ -1115,7 +1147,12 @@ describe('deleteOrphanedDecks edge cases', () => {
 describe('reconcileMedia', () => {
 	it('returns empty results in dry run mode', async () => {
 		const result = await reconcileMedia({} as never, [], 'test', true)
-		expect(result).toEqual({ deleted: [], reuploaded: [] })
+		expect(result).toEqual({
+			deleted: [],
+			failedDeletes: [],
+			failedUploads: [],
+			reuploaded: [],
+		})
 	})
 
 	it('deletes orphaned media and re-uploads missing media', async () => {
@@ -1285,5 +1322,186 @@ describe('reconcileMedia', () => {
 			],
 		})
 		expect(fileAdapter.readFileBuffer).toHaveBeenCalledWith('/local/file.png')
+	})
+
+	it('omits failed uploads from the reuploaded list (silent partial failure)', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const multi = vi.fn().mockResolvedValue([
+			// eslint-disable-next-line unicorn/no-null
+			{ error: null, result: 'yanki-test-good.png' },
+			{ error: 'disk full', result: undefined },
+		])
+		const client = {
+			media: {
+				getMediaFilesNames: vi.fn().mockResolvedValue([]),
+			},
+			miscellaneous: { multi },
+		}
+		const notes = [
+			makeNote({
+				fields: {
+					Back: '<img src="yanki-test-good.png" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/good.png"><img src="yanki-test-bad.png" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/bad.png">',
+					Front: 'front',
+					YankiNamespace: 'test',
+				},
+				noteId: 42,
+			}),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+		expect(result.reuploaded).toEqual(['yanki-test-good.png'])
+		expect(result.failedUploads).toEqual([{ filename: 'yanki-test-bad.png', reason: 'disk full' }])
+		expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('yanki-test-bad.png'))
+		spyWarn.mockRestore()
+	})
+
+	it('drops files that fail to read from disk; warns once', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		// eslint-disable-next-line unicorn/no-null
+		const multi = vi.fn().mockResolvedValue([{ error: null, result: undefined }])
+		const fileAdapter = {
+			readFileBuffer: vi.fn().mockImplementation(async (src: string): Promise<Uint8Array> => {
+				await Promise.resolve()
+				if (src === '/local/broken.png') {
+					throw new Error('EACCES: permission denied')
+				}
+
+				return new Uint8Array([1, 2, 3])
+			}),
+		}
+		const client = {
+			media: {
+				getMediaFilesNames: vi.fn().mockResolvedValue([]),
+			},
+			miscellaneous: { multi },
+		}
+		const notes = [
+			makeNote({
+				fields: {
+					Back: '<img src="yanki-test-ok.png" data-yanki-media-sync="true" data-yanki-media-src="/local/ok.png"><img src="yanki-test-broken.png" data-yanki-media-sync="true" data-yanki-media-src="/local/broken.png">',
+					Front: 'front',
+					YankiNamespace: 'test',
+				},
+				noteId: 42,
+			}),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false, fileAdapter as never)
+		// Only the readable file is uploaded
+		expect(result.reuploaded).toEqual(['yanki-test-ok.png'])
+		// Hardening B: the broken file is now visible in failedUploads instead of
+		// being a console.warn-only signal.
+		expect(result.failedUploads).toHaveLength(1)
+		expect(result.failedUploads[0]?.filename).toBe('yanki-test-broken.png')
+		expect(result.failedUploads[0]?.reason).toContain('EACCES')
+		expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('yanki-test-broken.png'))
+		spyWarn.mockRestore()
+	})
+
+	it('dedupes a media filename referenced by multiple fresh notes', async () => {
+		// eslint-disable-next-line unicorn/no-null
+		const multi = vi.fn().mockResolvedValue([{ error: null, result: 'yanki-test-shared.png' }])
+		const client = {
+			media: {
+				getMediaFilesNames: vi.fn().mockResolvedValue([]),
+			},
+			miscellaneous: { multi },
+		}
+		const sharedHtml =
+			'<img src="yanki-test-shared.png" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/shared.png">'
+		const notes = [
+			makeNote({
+				fields: { Back: sharedHtml, Front: 'a', YankiNamespace: 'test' },
+				noteId: 1,
+			}),
+			makeNote({
+				fields: { Back: sharedHtml, Front: 'b', YankiNamespace: 'test' },
+				noteId: 2,
+			}),
+		]
+
+		const result = await reconcileMedia(
+			client as never,
+			notes,
+			'test',
+			false,
+			undefined,
+			new Set([1, 2]),
+		)
+		// Single multi() call with one storeMediaFile action
+		const call = multi.mock.calls[0]?.[0] as { actions: MultiActionInput[] }
+		expect(call.actions).toHaveLength(1)
+		// Both notes are fresh writes → silent upload, not in reuploaded
+		expect(result.reuploaded).toEqual([])
+	})
+
+	it('chunks media uploads at the chunk-size boundary (>25 actions)', async () => {
+		const fileCount = 26
+		const filenames = Array.from(
+			{ length: fileCount },
+			(_, i) => `yanki-test-${i.toString().padStart(2, '0')}.png`,
+		)
+		const imgTags = filenames
+			.map(
+				(name, i) =>
+					`<img src="${name}" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/${i}.png">`,
+			)
+			.join('')
+
+		const multi = vi
+			.fn()
+			.mockImplementation(async ({ actions }: { actions: MultiActionInput[] }) => {
+				await Promise.resolve()
+				return actions.map((action) => ({
+					// eslint-disable-next-line unicorn/no-null
+					error: null,
+					result: (action.params as { filename?: string }).filename ?? '',
+				}))
+			})
+		const client = {
+			media: {
+				getMediaFilesNames: vi.fn().mockResolvedValue([]),
+			},
+			miscellaneous: { multi },
+		}
+		const notes = [
+			makeNote({
+				fields: { Back: imgTags, Front: 'front', YankiNamespace: 'test' },
+				noteId: 42,
+			}),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+		expect(result.reuploaded).toHaveLength(fileCount)
+		expect(multi).toHaveBeenCalledTimes(2)
+		const sizes = (multi.mock.calls as MultiCall[]).map((call) => call[0].actions.length)
+		expect(sizes).toEqual([25, 1])
+	})
+
+	it('deletes orphaned media in chunks when count exceeds chunk size', async () => {
+		const orphanedCount = 30
+		const orphaned = Array.from(
+			{ length: orphanedCount },
+			(_, i) => `yanki-test-orphan-${i.toString().padStart(2, '0')}.png`,
+		)
+		const multi = vi
+			.fn()
+			.mockImplementation(async ({ actions }: { actions: MultiActionInput[] }) => {
+				await Promise.resolve()
+				// eslint-disable-next-line unicorn/no-null
+				return actions.map(() => ({ error: null, result: undefined }))
+			})
+		const client = {
+			media: {
+				getMediaFilesNames: vi.fn().mockResolvedValue(orphaned),
+			},
+			miscellaneous: { multi },
+		}
+
+		const result = await reconcileMedia(client as never, [], 'test', false)
+		expect(result.deleted).toHaveLength(orphanedCount)
+		// 30 deletes split as 25 + 5
+		const sizes = (multi.mock.calls as MultiCall[]).map((call) => call[0].actions.length)
+		expect(sizes).toEqual([25, 5])
 	})
 })

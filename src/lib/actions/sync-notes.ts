@@ -3,6 +3,7 @@ import { deepmerge } from 'deepmerge-ts'
 import { YankiConnect } from 'yanki-connect'
 import type { YankiNote } from '../model/note'
 import type { GlobalOptions } from '../shared/types'
+import type { MediaFailure } from '../utilities/anki-connect'
 import { NOTE_DEFAULT_DECK_NAME, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
 import { defaultGlobalOptions } from '../shared/types'
 import {
@@ -44,6 +45,8 @@ export type SyncNotesResult = Simplify<
 		deletedDecks: string[]
 		deletedMedia: string[]
 		duration: number
+		failedDeletedMedia: MediaFailure[]
+		failedReuploadedMedia: MediaFailure[]
 		fixedDatabase: boolean
 		reuploadedMedia: string[]
 		synced: SyncedNote[]
@@ -93,6 +96,8 @@ export async function syncNotes(
 			deletedMedia: [],
 			dryRun,
 			duration: performance.now() - startTime,
+			failedDeletedMedia: [],
+			failedReuploadedMedia: [],
 			fixedDatabase: false,
 			namespace: sanitizedNamespace,
 			reuploadedMedia: [],
@@ -160,8 +165,12 @@ export async function syncNotes(
 	)
 
 	// Pre-create any missing models/decks so the batched calls don't need
-	// per-action recovery from "model not found" or "deck not found".
-	await ensureModelsAndDecks(client, plan.modelsNeeded, plan.decksNeeded, dryRun)
+	// per-action recovery from "model not found" or "deck not found". Skip the
+	// probe entirely when there's nothing to create or update — saves one
+	// `multi()` round-trip on no-op syncs.
+	if (plan.toCreate.length > 0 || plan.toUpdate.length > 0) {
+		await ensureModelsAndDecks(client, plan.modelsNeeded, plan.decksNeeded, dryRun)
+	}
 
 	// Single batched `addNotes` call — 5.85× faster than the sequential
 	// `addNote` loop on the established benchmark.
@@ -255,7 +264,12 @@ export async function syncNotes(
 		}
 	}
 
-	const { deleted: deletedMedia, reuploaded: reuploadedMedia } = await reconcileMedia(
+	const {
+		deleted: deletedMedia,
+		failedDeletes: failedDeletedMedia,
+		failedUploads: failedReuploadedMedia,
+		reuploaded: reuploadedMedia,
+	} = await reconcileMedia(
 		client,
 		liveNotes,
 		sanitizedNamespace,
@@ -277,6 +291,8 @@ export async function syncNotes(
 		deletedMedia,
 		dryRun,
 		duration: performance.now() - startTime,
+		failedDeletedMedia,
+		failedReuploadedMedia,
 		fixedDatabase,
 		namespace: sanitizedNamespace,
 		reuploadedMedia,

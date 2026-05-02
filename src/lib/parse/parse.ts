@@ -99,6 +99,11 @@ export async function getNoteFromMarkdown(
 	// false-positives if we detect `<code>` tags in escaped HTML or without an
 	// adjacent `<pre>` that Shiki will still ultimately skip, but this should be
 	// rare and does not affect correctness.
+	//
+	// `inlineCode` mdast nodes are intentionally not in the visit types: the
+	// Shiki rehype plugin only highlights block-level `<pre><code>`, not bare
+	// `<code>`, so inline backticks have no Shiki output to short-circuit. If
+	// `inline: true` is ever passed to `rehypeShiki`, add `inlineCode` here.
 	let hasCodeBlocks = false
 	visit(ast, ['code', 'html'], (node) => {
 		if (node.type === 'code' || (node.type === 'html' && HTML_CODE_TAG_REGEX.test(node.value))) {

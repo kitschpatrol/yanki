@@ -131,6 +131,22 @@ function toDeckDyn(value: unknown, actionName: string, deckName: string): boolea
 }
 
 /**
+ * Short, user-readable identifier for a note in error messages — preferring
+ * `noteId` when present (updates), falling back to a Front-field preview
+ * (creates). Lets users map a batch failure back to a source file without
+ * counting indices.
+ */
+function describeNote(note: YankiNote): string {
+	if (note.noteId !== undefined) {
+		return `noteId ${note.noteId}`
+	}
+
+	const front = note.fields.Front.replaceAll(/\s+/g, ' ').trim()
+	const preview = front.length > 60 ? `${front.slice(0, 57)}...` : front
+	return preview === '' ? '(empty Front field)' : `front "${preview}"`
+}
+
+/**
  * Create a batch of notes in a single Anki-Connect roundtrip via `addNotes`.
  * Mutates `localNote.noteId` on each entry as Anki assigns IDs.
  *
@@ -171,13 +187,8 @@ export async function executeCreates(
 		throw new Error('addNotes returned null for the entire batch')
 	}
 
-	const failedIndices: number[] = []
+	const failedDescriptions: string[] = []
 	for (const [i, id] of ids.entries()) {
-		if (id === null) {
-			failedIndices.push(i)
-			continue
-		}
-
 		const entry = toCreate[i]
 		if (entry === undefined) {
 			throw new Error(
@@ -185,12 +196,17 @@ export async function executeCreates(
 			)
 		}
 
+		if (id === null) {
+			failedDescriptions.push(`[${i}] ${describeNote(entry.localNote)}`)
+			continue
+		}
+
 		entry.localNote.noteId = Number(id)
 	}
 
-	if (failedIndices.length > 0) {
+	if (failedDescriptions.length > 0) {
 		throw new Error(
-			`addNotes failed for ${failedIndices.length} note(s) at index(es): ${failedIndices.join(', ')}`,
+			`addNotes failed for ${failedDescriptions.length} note(s):\n  ${failedDescriptions.join('\n  ')}`,
 		)
 	}
 }
@@ -219,6 +235,9 @@ export async function executeUpdates(
 	dryRun: boolean,
 ): Promise<Set<number>> {
 	const actions: MultiAction[] = []
+	// Parallel array — one entry per pushed action — that maps a multi() response
+	// index back to the note it touched so per-action errors can name the note.
+	const actionNotes: YankiNote[] = []
 	const unchangedSyncedIndices = new Set<number>()
 
 	for (const { localNote, remoteNote, syncedIndex } of toUpdate) {
@@ -242,6 +261,7 @@ export async function executeUpdates(
 				params: { cards: remoteNote.cards, deck: localNote.deckName },
 				version: 6,
 			})
+			actionNotes.push(localNote)
 			didChange = true
 		}
 
@@ -262,6 +282,7 @@ export async function executeUpdates(
 				},
 				version: 6,
 			})
+			actionNotes.push(localNote)
 			didChange = true
 		}
 
@@ -279,12 +300,16 @@ export async function executeUpdates(
 	for (const [i, response] of responses.entries()) {
 		if (response.error !== null) {
 			const action = actions[i]
-			failures.push(`${action?.action ?? `index ${i}`}: ${response.error}`)
+			const note = actionNotes[i]
+			const noteContext = note === undefined ? '' : ` (${describeNote(note)})`
+			failures.push(`${action?.action ?? `index ${i}`}${noteContext}: ${response.error}`)
 		}
 	}
 
 	if (failures.length > 0) {
-		throw new Error(`Update batch had ${failures.length} failed action(s):\n${failures.join('\n')}`)
+		throw new Error(
+			`Update batch had ${failures.length} failed action(s):\n  ${failures.join('\n  ')}`,
+		)
 	}
 
 	return unchangedSyncedIndices
@@ -309,6 +334,12 @@ export async function executeUpdates(
  *
  * Duplicates will be created if present in the source. It's up to the user to
  * manage their Markdown files as they like.
+ *
+ * Note: `syncNotes` no longer hits this path — it pre-flights models/decks via
+ * `ensureModelsAndDecks` and then batches via `executeCreates`. The "just in
+ * time" recovery branches below are kept as defense-in-depth for direct-API
+ * consumers (e.g. downstream packages deep-importing from `dist/lib`) and to
+ * survive races with the Anki UI deleting a model/deck mid-sync.
  *
  * @param client An instance of YankiConnect
  * @param note The note to add
@@ -396,6 +427,10 @@ export async function addNote(
 
 /**
  * Updates a note in Anki.
+ *
+ * Like `addNote`, the per-note recovery branches below are no longer hit by
+ * `syncNotes` (replaced by `executeUpdates`); they're retained as
+ * defense-in-depth for direct-API consumers and Anki-UI races.
  *
  * @param client An instance of YankiConnect
  * @param localNote A note read from a markdown file
@@ -631,18 +666,15 @@ async function getRemoteNotesById(
 		params: { deck },
 		version: 6,
 	}))
-	await runMultiInChunks(client, phaseAActions, (index, response) => {
-		const deckName = syncDeckNames[index]
-		if (deckName === undefined) {
-			throw new Error(`getDeckConfig: unexpected response index ${index}`)
-		}
-
-		if (response.error !== null) {
-			throw new Error(`getDeckConfig failed for deck "${deckName}": ${response.error}`)
-		}
-
-		deckFilteredStatusMap.set(deckName, toDeckDyn(response.result, 'getDeckConfig', deckName))
-	})
+	await runMultiOrThrow(
+		client,
+		phaseAActions,
+		(index) => `deck "${syncDeckNames[index] ?? `index ${index}`}"`,
+		(index, result) => {
+			const deckName = syncDeckNames[index]
+			deckFilteredStatusMap.set(deckName, toDeckDyn(result, 'getDeckConfig', deckName))
+		},
+	)
 
 	// Phases B + C only run when at least one deck in this sync is filtered.
 	const sortedUnfilteredDeckNames: string[] = []
@@ -650,33 +682,26 @@ async function getRemoteNotesById(
 	const anyFiltered = [...deckFilteredStatusMap.values()].some(Boolean)
 
 	if (anyFiltered) {
-		// Phase B — fan out to remaining decks. Default is treated as guaranteed
-		// unfiltered (matches the long-standing assumption baked into the sort
-		// below); skip the round trip unless Phase A already saw it.
+		// Phase B — fan out to every remaining deck, including Default. Probing
+		// one extra deck is cheap (it rides in the same multi() chunks) and
+		// avoids silently mis-resolving filtered notes if a user has somehow
+		// turned Default into a filtered deck.
 		const allDeckNames = await client.deck.deckNames()
-		const remainingDecks = allDeckNames.filter(
-			(name) => name !== 'Default' && !deckFilteredStatusMap.has(name),
-		)
+		const remainingDecks = allDeckNames.filter((name) => !deckFilteredStatusMap.has(name))
 		const phaseBActions: MultiAction[] = remainingDecks.map((deck) => ({
 			action: 'getDeckConfig',
 			params: { deck },
 			version: 6,
 		}))
-		await runMultiInChunks(client, phaseBActions, (index, response) => {
-			const deckName = remainingDecks[index]
-			if (deckName === undefined) {
-				throw new Error(`getDeckConfig: unexpected response index ${index}`)
-			}
-
-			if (response.error !== null) {
-				throw new Error(`getDeckConfig failed for deck "${deckName}": ${response.error}`)
-			}
-
-			deckFilteredStatusMap.set(deckName, toDeckDyn(response.result, 'getDeckConfig', deckName))
-		})
-		if (!deckFilteredStatusMap.has('Default')) {
-			deckFilteredStatusMap.set('Default', false)
-		}
+		await runMultiOrThrow(
+			client,
+			phaseBActions,
+			(index) => `deck "${remainingDecks[index] ?? `index ${index}`}"`,
+			(index, result) => {
+				const deckName = remainingDecks[index]
+				deckFilteredStatusMap.set(deckName, toDeckDyn(result, 'getDeckConfig', deckName))
+			},
+		)
 
 		// Sort decks deep to shallow so a note in `A::B::C` resolves to `A::B::C`
 		// rather than the matching parent `A::B`. Default is the least likely
@@ -688,7 +713,11 @@ async function getRemoteNotesById(
 		}
 
 		sortedUnfilteredDeckNames.sort((a, b) => b.split('::').length - a.split('::').length)
-		sortedUnfilteredDeckNames.push('Default')
+		// Default goes last (least likely to host a Yanki note) — only if it's
+		// actually unfiltered. Probed in Phase B, no longer assumed.
+		if (deckFilteredStatusMap.get('Default') === false) {
+			sortedUnfilteredDeckNames.push('Default')
+		}
 
 		// Phase C — eagerly batch findNotes for every unfiltered deck so the
 		// main loop below can resolve filtered-deck notes synchronously.
@@ -697,18 +726,15 @@ async function getRemoteNotesById(
 			params: { query: `"deck:${deck}"` },
 			version: 6,
 		}))
-		await runMultiInChunks(client, phaseCActions, (index, response) => {
-			const deckName = sortedUnfilteredDeckNames[index]
-			if (deckName === undefined) {
-				throw new Error(`findNotes: unexpected response index ${index}`)
-			}
-
-			if (response.error !== null) {
-				throw new Error(`findNotes failed for deck "${deckName}": ${response.error}`)
-			}
-
-			unfilteredDeckNoteIdMap.set(deckName, toNumberArray(response.result, 'findNotes'))
-		})
+		await runMultiOrThrow(
+			client,
+			phaseCActions,
+			(index) => `deck "${sortedUnfilteredDeckNames[index] ?? `index ${index}`}"`,
+			(index, result) => {
+				const deckName = sortedUnfilteredDeckNames[index]
+				unfilteredDeckNoteIdMap.set(deckName, toNumberArray(result, 'findNotes'))
+			},
+		)
 	}
 
 	// Phase D — synchronous resolution loop. All deck/note lookups are now
@@ -1000,6 +1026,56 @@ async function uploadMediaForNote(
 const MULTI_BATCH_CHUNK_SIZE = 25
 
 /**
+ * Cap on simultaneous file reads in `reconcileMedia`. Bigger values shorten
+ * cold-sync wall time on small vaults; smaller values keep peak memory bounded
+ * on first syncs of large vaults (each read is base64-encoded in memory).
+ */
+const MEDIA_READ_CONCURRENCY = 8
+
+/**
+ * Run an async per-item worker over `items` with at most `concurrency`
+ * outstanding promises. Workers receive the source index so they can write back
+ * into a parallel result array without relying on the iteration order of the
+ * worker pool.
+ *
+ * Worker rejections propagate immediately, matching `Promise.all` semantics.
+ */
+async function runWithConcurrency<T>(
+	items: T[],
+	concurrency: number,
+	worker: (item: T, index: number) => Promise<void>,
+): Promise<void> {
+	if (items.length === 0) {
+		return
+	}
+
+	let cursor = 0
+	const lanes: Array<Promise<void>> = []
+	const next = async (): Promise<void> => {
+		while (cursor < items.length) {
+			const index = cursor++
+
+			await worker(items[index], index)
+		}
+	}
+
+	for (let i = 0; i < Math.min(concurrency, items.length); i++) {
+		lanes.push(next())
+	}
+
+	await Promise.all(lanes)
+}
+
+export type MediaFailure = { filename: string; reason: string }
+
+type ReconcileMediaResult = {
+	deleted: string[]
+	failedDeletes: MediaFailure[]
+	failedUploads: MediaFailure[]
+	reuploaded: string[]
+}
+
+/**
  * Reconcile the media files in Anki against the media referenced by the live
  * notes for the given namespace. Missing media is uploaded; orphaned media is
  * deleted. Both passes are bundled via `multi()` in chunks of 25 actions.
@@ -1009,6 +1085,11 @@ const MULTI_BATCH_CHUNK_SIZE = 25
  * uploads triggered by media that _should_ already have been in Anki for
  * matched/unchanged notes show up in the returned `reuploaded` list, matching
  * the prior reporting semantics.
+ *
+ * Per-file failures (missing file adapter, unreadable local file, Anki-Connect
+ * error during upload/delete) are surfaced via `failedUploads` /
+ * `failedDeletes` rather than aborting the whole pass — partial-success media
+ * is recoverable on the next sync, but callers can warn the user explicitly.
  */
 export async function reconcileMedia(
 	client: YankiConnect,
@@ -1017,9 +1098,9 @@ export async function reconcileMedia(
 	dryRun: boolean,
 	fileAdapter?: FileAdapter,
 	freshWriteNoteIds?: Set<number>,
-): Promise<{ deleted: string[]; reuploaded: string[] }> {
+): Promise<ReconcileMediaResult> {
 	if (dryRun) {
-		return { deleted: [], reuploaded: [] }
+		return { deleted: [], failedDeletes: [], failedUploads: [], reuploaded: [] }
 	}
 
 	// Note this always includes a `yanki-` prefix for ease of identification
@@ -1065,28 +1146,36 @@ export async function reconcileMedia(
 		}
 	}
 
+	const failedUploads: MediaFailure[] = []
+	const failedDeletes: MediaFailure[] = []
+
 	// Read every local file buffer in parallel up-front so the upload bundles
-	// can be sent back-to-back without intermediate I/O.
-	const buffers = await Promise.all(
-		toUpload.map(async (entry) => {
-			if (isUrl(entry.originalSrc)) {
-				return
-			}
+	// can be sent back-to-back without intermediate I/O. Bounded concurrency so
+	// large media collections don't read every file into memory simultaneously
+	// — peak memory is O(MEDIA_READ_CONCURRENCY × largest file).
+	const buffers: Array<string | undefined> = Array.from<string | undefined>({
+		length: toUpload.length,
+	})
+	await runWithConcurrency(toUpload, MEDIA_READ_CONCURRENCY, async (entry, index) => {
+		if (isUrl(entry.originalSrc)) {
+			return
+		}
 
-			if (fileAdapter === undefined) {
-				console.warn(
-					`Could not re-upload local media file "${entry.filename}": no file adapter provided`,
-				)
-				return
-			}
+		if (fileAdapter === undefined) {
+			const reason = 'no file adapter provided'
+			console.warn(`Could not re-upload local media file "${entry.filename}": ${reason}`)
+			failedUploads.push({ filename: entry.filename, reason })
+			return
+		}
 
-			try {
-				return uint8ArrayToBase64(await fileAdapter.readFileBuffer(entry.originalSrc))
-			} catch (error) {
-				console.warn(`Could not read local media file "${entry.filename}": ${String(error)}`)
-			}
-		}),
-	)
+		try {
+			buffers[index] = uint8ArrayToBase64(await fileAdapter.readFileBuffer(entry.originalSrc))
+		} catch (error) {
+			const reason = String(error)
+			console.warn(`Could not read local media file "${entry.filename}": ${reason}`)
+			failedUploads.push({ filename: entry.filename, reason })
+		}
+	})
 
 	const uploadActions: MultiAction[] = []
 	const uploadMeta: Array<{ filename: string; reuploadEligible: boolean }> = []
@@ -1121,6 +1210,7 @@ export async function reconcileMedia(
 			}
 		} else {
 			console.warn(`Anki could not store media file "${meta.filename}": ${response.error}`)
+			failedUploads.push({ filename: meta.filename, reason: response.error })
 		}
 	})
 
@@ -1141,10 +1231,11 @@ export async function reconcileMedia(
 			deleted.push(filename)
 		} else {
 			console.warn(`Anki could not delete media file "${filename}": ${response.error}`)
+			failedDeletes.push({ filename, reason: response.error })
 		}
 	})
 
-	return { deleted, reuploaded }
+	return { deleted, failedDeletes, failedUploads, reuploaded }
 }
 
 // Mirrors the wire-level shape returned by Anki-Connect for each `multi()`
@@ -1153,6 +1244,12 @@ export async function reconcileMedia(
 // eslint-disable-next-line ts/no-restricted-types
 type MultiActionResponse = { error: null | string; result: unknown }
 
+/**
+ * Generic chunked dispatcher for Anki-Connect's `multi()`. The handler sees the
+ * raw response, including per-action errors — caller decides whether to throw,
+ * log, or recover. For the common throw-on-error case prefer `runMultiOrThrow`,
+ * which centralizes the failure path.
+ */
 async function runMultiInChunks(
 	client: YankiConnect,
 	actions: MultiAction[],
@@ -1166,6 +1263,33 @@ async function runMultiInChunks(
 			handleResponse(i + j, response)
 		}
 	}
+}
+
+/**
+ * Throw-on-error wrapper around `runMultiInChunks`. The handler is only called
+ * for successful actions; per-action errors are converted into a thrown Error
+ * tagged with the action name and the caller-provided context.
+ *
+ * Use this for probes that must succeed (e.g. `getDeckConfig`, `findNotes`
+ * lookups during note resolution). For best-effort batches that should keep
+ * going on partial failure (e.g. media uploads), call `runMultiInChunks`
+ * directly and pick a logging policy.
+ */
+async function runMultiOrThrow(
+	client: YankiConnect,
+	actions: MultiAction[],
+	contextFor: (index: number) => string,
+	onSuccess: (index: number, result: unknown) => void,
+): Promise<void> {
+	await runMultiInChunks(client, actions, (index, response) => {
+		const context = contextFor(index)
+		const action = actions[index]?.action ?? `action ${index}`
+		if (response.error !== null) {
+			throw new Error(`${action} failed for ${context}: ${response.error}`)
+		}
+
+		onSuccess(index, response.result)
+	})
 }
 
 /**
