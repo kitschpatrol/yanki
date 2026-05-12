@@ -2,6 +2,17 @@ import type { Root } from 'hast'
 import type { Plugin } from 'unified'
 import { CONTINUE, visit } from 'unist-util-visit'
 
+// Runs of consecutive `{` or `}` collide with Anki's cloze syntax (`{{c1::…}}`),
+// causing its non-greedy cloze regex to terminate the cloze inside the math.
+// MathJax tolerates whitespace between braces, so breaking up the runs keeps
+// rendering identical while making the math safe to embed in a cloze.
+// See https://github.com/kitschpatrol/yanki/issues/15
+const CONSECUTIVE_BRACES_REGEX = /([{}])(?=[{}])/g
+
+function sanitizeBraces(value: string): string {
+	return value.replaceAll(CONSECUTIVE_BRACES_REGEX, '$1 ')
+}
+
 /**
  * Non-rendering replacement for the `rehype-mathjax` plugin, which takes output
  * from `remark-math` and wraps it in Anki-specific syntax.
@@ -51,6 +62,12 @@ const plugin: Plugin<unknown[], Root> = function () {
 
 				const isBlock = node.properties.className.includes('math-display') || fenced
 				fenced = false
+
+				for (const child of node.children) {
+					if (child.type === 'text') {
+						child.value = sanitizeBraces(child.value)
+					}
+				}
 
 				node.tagName = isBlock ? 'div' : 'span'
 				node.children = [
