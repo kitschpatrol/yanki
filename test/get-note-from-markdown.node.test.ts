@@ -397,3 +397,51 @@ it('handles strikethrough before and after a break', async () => {
 	expect(note.fields.Front).toContain('{{c1::cloze}}')
 	expect(note.fields.Back).toContain('<del>cloze</del>')
 })
+
+/**
+ * MathJax inside a cloze deletion must not contain a literal `}}` substring,
+ * which would cause Anki's non-greedy cloze regex (`\{\{c\d+::(.*?)\}\}`) to
+ * terminate the cloze prematurely.
+ *
+ * Math like `\mathbb{F}_{p^{n}}` ends with `}}` (closing both the inner `{n}`
+ * and the outer `{p^{n}}` brace groups), so when wrapped in a cloze the math
+ * both renders broken and the cloze structure collapses.
+ *
+ * Thanks `@l1mey112` for reporting. Reproduces
+ * https://github.com/kitschpatrol/yanki/issues/15
+ */
+it('handles MathJax with nested braces inside cloze deletions', async () => {
+	// Use String.raw to preserve backslashes (e.g. `\rangle` would otherwise be
+	// interpreted as a carriage return)
+	const markdown = String.raw`(32.99 Finite) Let $f \in \mathbb{F}_{p}[x]$ be a monic irreducible polynomial of degree $n$. Prove that $\mathbb{F}_{p^{n}}$ is a splitting field of $f$.
+
+$$
+\mathbb{F}_{p^{n}} \supset \mathbb{F}_{p}
+$$
+
+1) ~~We know $\mathbb{F}_{p^{n}} \cong \mathbb{F}_{p}[x] / \langle f \rangle$. Hence $f$ has a root in $\alpha \in \mathbb{F}_{p^{n}}$.~~
+2) ~~Let $\alpha_{i} = \alpha^{p^{i}}$. We have that $f(\alpha_{i}) = f(\alpha^{p^{i}}) = f(\alpha)^{p^{i}} = 0$ by Frobenius.~~
+3) Hence $f$ has $n$ roots $\alpha_{1}, \alpha_{2}, \dots, \alpha_{n-1}$ and splits into linear factors.`
+	const note = await getNoteFromMarkdown(markdown)
+
+	expect(note.modelName).toBe('Yanki - Cloze')
+
+	// Cloze openers and a matching number of cloze terminators should be present
+	expect(note.fields.Front).toContain('{{c1::')
+	expect(note.fields.Front).toContain('{{c2::')
+
+	// Math content should still be present
+	expect(note.fields.Front).toContain(String.raw`\mathbb{F}`)
+	expect(note.fields.Front).toContain(String.raw`\langle f \rangle`)
+
+	// No math segment (`\(...\)` or `\[...\]`) should contain a literal `}}`,
+	// which would collide with Anki's cloze terminator
+	const mathSegments = note.fields.Front.match(/\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]/g) ?? []
+	expect(mathSegments.length).toBeGreaterThan(0)
+	for (const segment of mathSegments) {
+		expect(segment).not.toContain('}}')
+	}
+
+	expect(note.fields.Front).toMatchSnapshot()
+	expect(note.fields.Back).toMatchSnapshot()
+})
