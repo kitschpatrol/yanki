@@ -10,15 +10,19 @@ const isSlow = isCI || isWindows
 
 export default defineConfig({
 	test: {
+		benchmark: {
+			include: ['test/**/*.bench.ts'],
+			includeSamples: true,
+		},
 		coverage: {
 			include: ['src/**/*.ts'],
 			provider: 'v8',
 		},
-		// Disable concurrent test execution across files
-		// Yanki's tests count total file counts, irrespective of namespace, before
-		// and after each test to ensure the integrity of pre-existing Anki notes.
-		// Running tests concurrently across files can create race conditions in
-		// total note counts that will cause assertions to fail.
+		// Disable concurrent test execution across files Yanki's tests count total
+		// file counts, irrespective of namespace, before and after each test to
+		// ensure the integrity of pre-existing Anki notes. Running tests
+		// concurrently across files can create race conditions in total note counts
+		// that will cause assertions to fail.
 		fileParallelism: false,
 		globalSetup: './test/utilities/global-setup.ts',
 		maxConcurrency: 1,
@@ -30,6 +34,8 @@ export default defineConfig({
 				: [
 						{
 							test: {
+								// Bench suites are Node-only; opt the browser project out
+								benchmark: { include: [] },
 								browser: {
 									// Conflicts between VS Code extension and vitest CLI command...
 									api: {
@@ -38,7 +44,12 @@ export default defineConfig({
 									},
 									enabled: true,
 									headless: true,
-									instances: [{ browser: 'chromium' as const }],
+									// FileParallelism: false at the instance level — top-level
+									// fileParallelism only gates node workers, not browser pages.
+									// Without this, files run concurrently in the single browser and
+									// race against the shared Anki backend (e.g. two syncNotes calls
+									// both trying to createModel for the same model).
+									instances: [{ browser: 'chromium' as const, fileParallelism: false }],
 									provider: playwright(),
 									screenshotFailures: false,
 								},
@@ -52,6 +63,10 @@ export default defineConfig({
 			// Node project
 			{
 				test: {
+					benchmark: {
+						include: ['test/**/*.bench.ts'],
+						includeSamples: true,
+					},
 					environment: 'node',
 					exclude: ['test/**/*.browser.test.ts'],
 					include: ['test/**/*.test.ts'],

@@ -8,6 +8,7 @@ export default cspellConfig({
 		'test/fixtures/anki-data-folder/**/*',
 	],
 	words: [
+		'bottlenecked',
 		'extglob',
 		'Fpandas',
 		'mathbf',

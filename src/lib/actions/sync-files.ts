@@ -5,6 +5,7 @@ import { deepmerge } from 'deepmerge-ts'
 import plur from 'plur'
 import prettyMilliseconds from 'pretty-ms'
 import type { GlobalOptions } from '../shared/types'
+import type { MediaFailure } from '../utilities/anki-connect'
 import type { SyncedNote, SyncNotesOptions, SyncNotesResult } from './sync-notes'
 import { setNoteIdInFrontmatter } from '../model/frontmatter'
 import {
@@ -158,18 +159,23 @@ export async function syncFiles(
 
 	const allLocalNotes = renamedLocalNotes.map((note) => note.note)
 
-	const { deletedDecks, deletedMedia, fixedDatabase, reuploadedMedia, synced } = await syncNotes(
-		allLocalNotes,
-		{
-			ankiConnectOptions,
-			ankiWeb,
-			checkDatabase,
-			dryRun,
-			fileAdapter,
-			namespace,
-			strictMatching,
-		},
-	)
+	const {
+		deletedDecks,
+		deletedMedia,
+		failedDeletedMedia,
+		failedReuploadedMedia,
+		fixedDatabase,
+		reuploadedMedia,
+		synced,
+	} = await syncNotes(allLocalNotes, {
+		ankiConnectOptions,
+		ankiWeb,
+		checkDatabase,
+		dryRun,
+		fileAdapter,
+		namespace,
+		strictMatching,
+	})
 
 	// Write Anki note IDs to the local files as necessary
 	// Can't just get markdown from the note because there might be extra
@@ -220,6 +226,8 @@ export async function syncFiles(
 		deletedMedia,
 		dryRun,
 		duration: performance.now() - startTime,
+		failedDeletedMedia,
+		failedReuploadedMedia,
 		fixedDatabase,
 		namespace,
 		reuploadedMedia,
@@ -268,6 +276,9 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 			lines.push('', `Media assets re-uploaded: ${result.reuploadedMedia.length}`)
 		}
 
+		appendMediaFailures(lines, 'upload', result.failedReuploadedMedia)
+		appendMediaFailures(lines, 'delete', result.failedDeletedMedia)
+
 		// Will never apply to a dry run since the Anki database is not mutated, and
 		// therefore no corruption is possible
 		if (!result.dryRun) {
@@ -285,4 +296,19 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 	}
 
 	return lines.join('\n')
+}
+
+function appendMediaFailures(
+	lines: string[],
+	verb: 'delete' | 'upload',
+	failures: MediaFailure[],
+): void {
+	if (failures.length === 0) {
+		return
+	}
+
+	lines.push('', `Media assets that failed to ${verb}: ${failures.length}`)
+	for (const { filename, reason } of failures) {
+		lines.push(`  ${filename}: ${reason}`)
+	}
 }
