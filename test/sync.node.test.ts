@@ -771,7 +771,7 @@ describeWithFileFixture(
  * Thank you to `@BrianRonin` for the test files.
  *
  * Initially, there was an issue with decks being pruned despite containing
- * notes, due to unusual responses from the Anki-Connect deck stats method. this
+ * notes, due to unusual responses from the AnkiConnect deck stats method. this
  * was preventing notes from being created in a single pass.
  */
 describeWithFileFixture(

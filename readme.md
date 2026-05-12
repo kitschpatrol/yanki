@@ -60,7 +60,7 @@ The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Ank
 
 Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 20.11 or newer.)
 
-Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on installed:
+Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on installed:
 
 ```sh
 npx yanki ./folder-of-markdown
@@ -299,13 +299,13 @@ _Linux users should note that the Flatpak / Flathub version of Anki is not recom
 #### Prerequisites:
 
 - The [Anki desktop app](https://apps.ankiweb.net)
-- The [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on
+- The [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on
 
-  If you need to install it, select _Tools → Add-ons_ from the menu, click _Get Add-ons..._, and then enter the code `2055492159` in the field to get Anki-Connect.
+  If you need to install it, select _Tools → Add-ons_ from the menu, click _Get Add-ons..._, and then enter the code `2055492159` in the field to get AnkiConnect.
 
-  Anki-Connect may ask for your permission in the Anki application to allow the connection on the first sync.
+  AnkiConnect may ask for your permission in the Anki application to allow the connection on the first sync.
 
-  If the automatic permission request fails, you might need to configure Anki-Connect to accept connections from your origin.
+  If the automatic permission request fails, you might need to configure AnkiConnect to accept connections from your origin.
 
   In Anki, select _Tools → Add-ons_ from the menu, then select _AnkiConnect_ from the list, and click the _Config_ button in the lower right. In the ensuing modal, add the host and port from which you're attempting to connect to to the `webCorsOriginList` array.
 
@@ -337,7 +337,7 @@ npm install --save-dev yanki
 
 Create a folder of Markdown files that you'd like to use as Anki notes. (See the [section on Markdown notes](#markdown-note-types) for details on how to structure your document to create different card types in Anki.)
 
-Launch the Anki desktop app. Ensure that the [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on is installed and set up.
+Launch the Anki desktop app. Ensure that the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on is installed and set up.
 
 #### Create
 
@@ -404,7 +404,7 @@ yanki sync <directory> [options]
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------- |
 | `--dry-run`<br>`-d`            | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                                                                                                                                                                                                                                                                                                     | `boolean`                            | `false`                   |
 | `--namespace`<br>`-n`          | Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.                                                                                                                                                                                                                                                                                                                                                                                                          | `string`                             | `"Yanki"`                 |
-| `--anki-connect`               | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                                                                                                                                                                                                                                                                                                     | `string`                             | `"http://127.0.0.1:8765"` |
+| `--anki-connect`               | Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.                                                                                                                                                                                                                                                                                                                                                                                                       | `string`                             | `"http://127.0.0.1:8765"` |
 | `--anki-auto-launch`<br>`-l`   | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                                                                                                                                                                                                                                                                                                                                                       | `boolean`                            | `false`                   |
 | `--anki-web`<br>`-w`           | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app.                                                                                                                                                                                                                                                                                  | `boolean`                            | `true`                    |
 | `--manage-filenames`<br>`-m`   | Rename local note files to match their content. Useful if you want to have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of.                                                                                                                  | `"off"` `"prompt"` `"response"`      | `"off"`                   |
@@ -431,7 +431,7 @@ yanki list [options]
 | Option                       | Description                                                                                                                                                                                                | Type      | Default                   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
 | `--namespace`<br>`-n`        | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to list all Yanki-created notes in the Anki database. | `string`  | `"Yanki"`                 |
-| `--anki-connect`             | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                            | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-connect`             | Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.                                                                              | `string`  | `"http://127.0.0.1:8765"` |
 | `--anki-auto-launch`<br>`-l` | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                              | `boolean` | `false`                   |
 | `--json`                     | Output the list of notes as JSON to stdout.                                                                                                                                                                | `boolean` | `false`                   |
 | `--help`<br>`-h`             | Show help                                                                                                                                                                                                  | `boolean` |                           |
@@ -451,7 +451,7 @@ yanki delete [options]
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
 | `--dry-run`<br>`-d`          | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                             | `boolean` | `false`                   |
 | `--namespace`<br>`-n`        | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. If you've synced notes to multiple namespaces, Pass `'*'` to delete all Yanki-created notes in the Anki database. | `string`  | `"Yanki"`                 |
-| `--anki-connect`             | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                             | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-connect`             | Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.                                                                                                                               | `string`  | `"http://127.0.0.1:8765"` |
 | `--anki-auto-launch`<br>`-l` | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                                                                               | `boolean` | `false`                   |
 | `--anki-web`<br>`-w`         | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app.          | `boolean` | `true`                    |
 | `--json`                     | Output the list of deleted notes as JSON to stdout.                                                                                                                                                                                                         | `boolean` | `false`                   |
@@ -473,7 +473,7 @@ yanki style [options]
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
 | `--dry-run`<br>`-d`          | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                    | `boolean` | `false`                   |
 | `--css`<br>`-c`              | Path to the CSS stylesheet to set for all Yanki-created notes. If not provided, the default Anki stylesheet is used.                                                                                                                               | `string`  |                           |
-| `--anki-connect`             | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                    | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-connect`             | Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.                                                                                                                      | `string`  | `"http://127.0.0.1:8765"` |
 | `--anki-auto-launch`<br>`-l` | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                                                                      | `boolean` | `false`                   |
 | `--anki-web`<br>`-w`         | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app. | `boolean` | `true`                    |
 | `--json`                     | Output the list of updated note types / models as JSON to stdout.                                                                                                                                                                                  | `boolean` | `false`                   |
@@ -621,9 +621,9 @@ The rest of the library should work fine in both contexts without special measur
 
 The excellent [unified](https://unifiedjs.com) / [remark](https://remark.js.org) / [rehype](https://github.com/rehypejs/rehype) libraries are used extensively to traverse and render the underlying Markdown ASTs.
 
-[Anki-Connect](https://ankiweb.net/shared/info/2055492159) provides access to Anki's database.
+[AnkiConnect](https://ankiweb.net/shared/info/2055492159) provides access to Anki's database.
 
-For type safety, access to Anki-Connect is managed through my wrapper library, [yanki-connect](https://github.com/kitschpatrol/yanki-connect).
+For type safety, access to AnkiConnect is managed through my wrapper library, [yanki-connect](https://github.com/kitschpatrol/yanki-connect).
 
 Behind the scenes, Yanki creates new note type models to match the four default Anki types. It keeps track of the notes it has ownership of via a hidden `YankiNamespace` field in each note.
 
@@ -652,7 +652,7 @@ Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm
 
 ## Acknowledgments
 
-Thanks to Alex Yatskov for creating [Anki-Connect](https://ankiweb.net/shared/info/2055492159).
+Thanks to Alex Yatskov for creating [AnkiConnect](https://ankiweb.net/shared/info/2055492159).
 
 Thanks to the [unified team](https://github.com/orgs/unifiedjs/people) for their superb ecosystem of AST tools.
 

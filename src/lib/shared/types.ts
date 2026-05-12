@@ -53,7 +53,7 @@ export type GlobalOptions = {
 	 * Exposed for Obsidian, currently only used for getting URL content hashes
 	 * and inferring MIME types of URLs without extensions. Note that
 	 * ankiConnectOptions ALSO has a fetch adapter option specifically for
-	 * communicating with Anki-Connect.
+	 * communicating with AnkiConnect.
 	 */
 	fetchAdapter: FetchAdapter | undefined
 	fileAdapter: FileAdapter | undefined

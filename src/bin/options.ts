@@ -25,7 +25,7 @@ export const ankiConnectOption = {
 	'anki-connect': {
 		default: 'http://127.0.0.1:8765',
 		describe:
-			'Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.',
+			'Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.',
 		type: 'string',
 	},
 } as const satisfies Record<string, Options>

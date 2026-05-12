@@ -319,8 +319,7 @@ export async function getRemoteNotes(
  * Get all data from Anki required to populate the YankiNote type.
  *
  * Handles some extra footwork to identify the deck name and validate the model
- * name. There's no way to get everything we need in one shot from
- * Anki-Connect.
+ * name. There's no way to get everything we need in one shot from AnkiConnect.
  *
  * Undefined elements in the returned array are subsequently used to identify
  * notes that need to be created.
@@ -784,7 +783,7 @@ export async function reconcileMedia(
 }
 
 /**
- * Request permission to access Anki through Anki-Connect.
+ * Request permission to access Anki through AnkiConnect.
  *
  * @returns 'ankiUnreachable' if Anki is not open, or 'granted' if everything is
  *   copacetic
@@ -798,7 +797,7 @@ export async function requestPermission(
 
 		if (permission === 'denied') {
 			throw new Error(
-				'Permission denied, please add this source to the "webCorsOriginList" in the Anki-Connect add-on configuration options.',
+				'Permission denied, please add this source to the "webCorsOriginList" in the AnkiConnect add-on configuration options.',
 			)
 		} else {
 			return 'granted'
