@@ -10,6 +10,7 @@ export default cspellConfig({
 	words: [
 		'extglob',
 		'Fpandas',
+		'mathbb',
 		'mathbf',
 		'matroska',
 		'mdank',

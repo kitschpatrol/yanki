@@ -413,6 +413,9 @@ it('handles strikethrough before and after a break', async () => {
 it('handles MathJax with nested braces inside cloze deletions', async () => {
 	// Use String.raw to preserve backslashes (e.g. `\rangle` would otherwise be
 	// interpreted as a carriage return)
+
+	/* Spell-checker: disable */
+
 	const markdown = String.raw`(32.99 Finite) Let $f \in \mathbb{F}_{p}[x]$ be a monic irreducible polynomial of degree $n$. Prove that $\mathbb{F}_{p^{n}}$ is a splitting field of $f$.
 
 $$
@@ -422,6 +425,9 @@ $$
 1) ~~We know $\mathbb{F}_{p^{n}} \cong \mathbb{F}_{p}[x] / \langle f \rangle$. Hence $f$ has a root in $\alpha \in \mathbb{F}_{p^{n}}$.~~
 2) ~~Let $\alpha_{i} = \alpha^{p^{i}}$. We have that $f(\alpha_{i}) = f(\alpha^{p^{i}}) = f(\alpha)^{p^{i}} = 0$ by Frobenius.~~
 3) Hence $f$ has $n$ roots $\alpha_{1}, \alpha_{2}, \dots, \alpha_{n-1}$ and splits into linear factors.`
+
+	/* Spell-checker: enable */
+
 	const note = await getNoteFromMarkdown(markdown)
 
 	expect(note.modelName).toBe('Yanki - Cloze')
