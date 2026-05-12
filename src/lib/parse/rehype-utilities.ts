@@ -45,7 +45,7 @@ import rehypeParse from 'rehype-parse'
 import rehypeRaw from 'rehype-raw'
 import rehypeStringify from 'rehype-stringify'
 import remarkRehype from 'remark-rehype'
-import { createHighlighterCore } from 'shiki/core'
+import { createHighlighterCoreSync } from 'shiki/core'
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
@@ -74,7 +74,9 @@ const DIMENSION_CHARS_REGEX = /^[\dx]+$/
 // Fine-grained Shiki bundle: only the langs/themes listed below ship in the
 // build. Unknown languages fall back to plaintext via `fallbackLanguage`. See
 // https://shiki.style/packages/rehype#fine-grained-bundle
-const highlighter = await createHighlighterCore({
+// Sync variant avoids a top-level await in the bundled output, which would
+// otherwise force consumers (e.g. yanki-obsidian) to target ES2022+.
+const highlighter = createHighlighterCoreSync({
 	engine: createJavaScriptRegexEngine(),
 	langs: [
 		bash,
