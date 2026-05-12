@@ -5,8 +5,39 @@
 
 import type { Element, ElementContent, Root as HastRoot } from 'hast'
 import type { Root as MdastRoot } from 'mdast'
+import type { HighlighterGeneric } from 'shiki/core'
 import type { Simplify } from 'type-fest'
-import rehypeShiki from '@shikijs/rehype'
+import bash from '@shikijs/langs/bash'
+import c from '@shikijs/langs/c'
+import cpp from '@shikijs/langs/cpp'
+import css from '@shikijs/langs/css'
+import diff from '@shikijs/langs/diff'
+import dockerfile from '@shikijs/langs/dockerfile'
+import go from '@shikijs/langs/go'
+import html from '@shikijs/langs/html'
+import java from '@shikijs/langs/java'
+import javascript from '@shikijs/langs/javascript'
+import json from '@shikijs/langs/json'
+import jsx from '@shikijs/langs/jsx'
+import kotlin from '@shikijs/langs/kotlin'
+import markdown from '@shikijs/langs/markdown'
+import php from '@shikijs/langs/php'
+import python from '@shikijs/langs/python'
+import regex from '@shikijs/langs/regex'
+import ruby from '@shikijs/langs/ruby'
+import rust from '@shikijs/langs/rust'
+import scss from '@shikijs/langs/scss'
+import shellscript from '@shikijs/langs/shellscript'
+import sql from '@shikijs/langs/sql'
+import swift from '@shikijs/langs/swift'
+import toml from '@shikijs/langs/toml'
+import tsx from '@shikijs/langs/tsx'
+import typescript from '@shikijs/langs/typescript'
+import xml from '@shikijs/langs/xml'
+import yaml from '@shikijs/langs/yaml'
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
+import githubDark from '@shikijs/themes/github-dark'
+import githubLight from '@shikijs/themes/github-light'
 import { deepmerge } from 'deepmerge-ts'
 import { toText } from 'hast-util-to-text'
 import rehypeFormat from 'rehype-format'
@@ -14,6 +45,8 @@ import rehypeParse from 'rehype-parse'
 import rehypeRaw from 'rehype-raw'
 import rehypeStringify from 'rehype-stringify'
 import remarkRehype from 'remark-rehype'
+import { createHighlighterCore } from 'shiki/core'
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
 import { CONTINUE, EXIT, visit } from 'unist-util-visit'
@@ -38,6 +71,44 @@ import remarkConditionalBreaks from './remark-conditional-breaks'
 
 const DIMENSION_CHARS_REGEX = /^[\dx]+$/
 
+// Fine-grained Shiki bundle: only the langs/themes listed below ship in the
+// build. Unknown languages fall back to plaintext via `fallbackLanguage`. See
+// https://shiki.style/packages/rehype#fine-grained-bundle
+const highlighter = await createHighlighterCore({
+	engine: createJavaScriptRegexEngine(),
+	langs: [
+		bash,
+		c,
+		cpp,
+		css,
+		diff,
+		dockerfile,
+		go,
+		html,
+		java,
+		javascript,
+		json,
+		jsx,
+		kotlin,
+		markdown,
+		php,
+		python,
+		regex,
+		ruby,
+		rust,
+		scss,
+		shellscript,
+		sql,
+		swift,
+		toml,
+		tsx,
+		typescript,
+		xml,
+		yaml,
+	],
+	themes: [githubDark, githubLight],
+})
+
 // Significant performance improvement by reusing the processor
 const processor = unified()
 	.use(remarkConditionalBreaks)
@@ -57,7 +128,7 @@ const processor = unified()
 	// Other syntax highlighting Rehype plugins:
 	// https://github.com/Microflash/rehype-starry-night
 	// https://github.com/rehypejs/rehype-highlight
-	.use(rehypeShiki, {
+	.use(rehypeShikiFromHighlighter, highlighter as HighlighterGeneric<string, string>, {
 		// See https://shiki.style/packages/rehype
 		defaultLanguage: 'plaintext',
 		fallbackLanguage: 'plaintext',

@@ -131,7 +131,7 @@ Yanki keeps track the notes it manages with a hidden field in the Anki note mode
 An extended palette of Markdown syntax is available out of the box:
 
 - [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-through~~`, `- [x] task lists`, and auto-links.
-- Syntax highlighting via [Shiki](https://shiki.style).
+- Syntax highlighting via [Shiki](https://shiki.style) for 30 common languages.
 - GitHub-style [Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
 - The aforementioned [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md).
 - [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via Anki's built-in [MathJax](https://www.mathjax.org) rendering support.

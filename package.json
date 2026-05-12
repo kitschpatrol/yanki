@@ -57,7 +57,9 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
+		"@shikijs/langs": "^4.0.2",
 		"@shikijs/rehype": "^4.0.2",
+		"@shikijs/themes": "^4.0.2",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^3.0.0",
 		"@stdlib/assert-is-absolute-path": "^0.2.3",
@@ -95,6 +97,7 @@
 		"remark-math": "^6.0.0",
 		"remark-parse": "^11.0.0",
 		"remark-rehype": "^11.1.2",
+		"shiki": "^4.0.2",
 		"slash": "^5.1.0",
 		"sort-keys": "^6.0.0",
 		"strip-ansi": "^7.2.0",
