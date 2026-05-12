@@ -15,6 +15,21 @@ import { defaultGlobalOptions } from '../shared/types'
 import { getSlugifiedNamespace } from './namespace'
 import { isUrl } from './url'
 
+async function ensureModelExists(
+	client: YankiConnect,
+	model: (typeof yankiModels)[number],
+): Promise<void> {
+	try {
+		await client.model.createModel(model)
+	} catch (error) {
+		if (error instanceof Error && error.message === 'Model name already exists') {
+			return
+		}
+
+		throw error
+	}
+}
+
 export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryRun = false) {
 	if (dryRun) {
 		return
@@ -84,7 +99,7 @@ export async function addNote(
 						throw new Error(`Model not found: ${note.modelName}`)
 					}
 
-					await client.model.createModel(model)
+					await ensureModelExists(client, model)
 
 					return addNote(client, note, dryRun, fileAdapter)
 				}
@@ -196,7 +211,7 @@ export async function updateNote(
 								throw new Error(`Model not found: ${localNote.modelName}`)
 							}
 
-							await client.model.createModel(model)
+							await ensureModelExists(client, model)
 
 							return updateNote(client, localNote, remoteNote, dryRun, fileAdapter)
 						}
@@ -610,7 +625,7 @@ export async function updateModelStyle(
 					return false
 				}
 
-				await client.model.createModel(model)
+				await ensureModelExists(client, model)
 
 				return updateModelStyle(client, model.modelName, css, dryRun)
 			}
