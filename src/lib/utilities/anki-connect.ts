@@ -325,9 +325,12 @@ export async function getRemoteNotes(
 ): Promise<YankiNote[]> {
 	const noteIds = await client.note.findNotes({ query: `"YankiNamespace:${namespace}"` })
 
-	// We can trust that these are defined, since the list of notes is coming
-	// straight from Anki
-	return (await getRemoteNotesById(client, noteIds)) as YankiNote[]
+	// The findNotes function can return IDs for notes that notesInfo no longer
+	// resolves — e.g. transient phantoms left behind when addNote retried after a
+	// missing model/deck error. Drop those undefined entries so callers can rely
+	// on every returned note being fully populated.
+	const notes = await getRemoteNotesById(client, noteIds)
+	return notes.filter((note): note is YankiNote => note !== undefined)
 }
 
 /**
@@ -336,14 +339,13 @@ export async function getRemoteNotes(
  * Handles some extra footwork to identify the deck name and validate the model
  * name. There's no way to get everything we need in one shot from AnkiConnect.
  *
- * Undefined elements in the returned array are subsequently used to identify
- * notes that need to be created.
- *
  * @param client An instance of YankiConnect
- * @param noteIds An array of local note IDs to (attempt) to fetch
+ * @param noteIds An array of note IDs (from `findNotes`) to fetch
  *
- * @returns Array of YankiNote objects, with undefined for notes that could not
- *   be found.
+ * @returns Array positionally aligned with `noteIds`. Entries are `undefined`
+ *   when `notesInfo` does not resolve the corresponding ID — `findNotes` can
+ *   return phantom IDs (e.g. left behind by `addNote` retries) that no longer
+ *   exist as notes.
  * @throws {Error} If an unknown model name or multiple decks are found for a
  *   note, or if no deck is found.
  */

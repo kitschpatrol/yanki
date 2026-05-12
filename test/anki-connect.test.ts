@@ -624,7 +624,7 @@ describe('getRemoteNotes', () => {
 		expect(result).toEqual([])
 	})
 
-	it('returns undefined for all-undefined notes', async () => {
+	it('drops phantom IDs when notesInfo resolves nothing', async () => {
 		const client = {
 			note: {
 				findNotes: vi.fn().mockResolvedValue([1, 2]),
@@ -633,7 +633,7 @@ describe('getRemoteNotes', () => {
 		}
 
 		const result = await getRemoteNotes(client as never, 'test-namespace')
-		expect(result).toEqual([undefined, undefined])
+		expect(result).toEqual([])
 	})
 
 	it('maps notes with deck info correctly', async () => {
@@ -670,7 +670,7 @@ describe('getRemoteNotes', () => {
 		})
 	})
 
-	it('handles undefined noteId in mixed results', async () => {
+	it('drops phantom IDs while keeping resolvable notes', async () => {
 		const client = {
 			deck: {
 				getDeckConfig: vi.fn().mockResolvedValue({ dyn: 0 }),
@@ -696,9 +696,8 @@ describe('getRemoteNotes', () => {
 		}
 
 		const result = await getRemoteNotes(client as never, 'test')
-		expect(result).toHaveLength(2)
-		expect(result[0]).toBeDefined()
-		expect(result[1]).toBeUndefined()
+		expect(result).toHaveLength(1)
+		expect(result[0]?.noteId).toBe(1)
 	})
 
 	it('throws for unknown model name', async () => {
