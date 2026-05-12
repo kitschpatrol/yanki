@@ -177,7 +177,7 @@ it('gets content type extension from url metadata', { timeout: 60_000 }, async (
 		  "yanki.swf: mp4",
 		  "yanki.wav: wav",
 		  "yanki.webm: webm",
-		  "yanki.md: undefined",
+		  "yanki.md: md",
 		  "yanki.pdf: mp4",
 		  "yanki.avif: avif",
 		  "yanki.gif: gif",

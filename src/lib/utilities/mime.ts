@@ -43,17 +43,12 @@ export function getFileExtensionForMimeType(mimeType: string): MediaSupportedExt
 		'video/x-msvideo': 'avi',
 	}
 
-	// TMI
-	// if (!(mimeType in mimeToExtension)) {
-	// 	console.log(`Unknown MIME type: ${mimeType}`)
-	// }
-
-	const result = mimeToExtension[mimeType]
-
-	// eslint-disable-next-line ts/no-unnecessary-condition
-	if (result === undefined) {
+	// Strip parameters (e.g. "image/gif; charset=binary") and normalize case —
+	// Content-Type type/subtype is case-insensitive per RFC 9110.
+	const normalizedMimeType = mimeType.split(';')[0].trim().toLowerCase()
+	if (normalizedMimeType === '') {
 		return undefined
 	}
 
-	return result
+	return mimeToExtension[normalizedMimeType]
 }

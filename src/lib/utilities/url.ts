@@ -215,7 +215,13 @@ export async function getFileExtensionFromUrl(
 					throw new Error('No content-type header found')
 				}
 
-				return getFileExtensionForMimeType(contentTypeHeaderValue)
+				const extension = getFileExtensionForMimeType(contentTypeHeaderValue)
+				if (extension !== undefined) {
+					return extension
+				}
+
+				// Unknown mime type, fall through to name mode
+				return await getFileExtensionFromUrl(url, fetchAdapter, 'name')
 			} catch {
 				// Fall through to name mode
 				return getFileExtensionFromUrl(url, fetchAdapter, 'name')
