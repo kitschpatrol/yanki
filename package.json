@@ -54,7 +54,7 @@
 		"coverage": "vitest run --coverage",
 		"fix": "ksc fix",
 		"lint": "ksc lint",
-		"release": "bumpp --commit 'Release: %s' && pnpm build && NPM_AUTH_TOKEN=$(op read 'op://Personal/npm/token') && pnpm publish",
+		"release": "bumpp --commit 'Release: %s' && pnpm build && NPM_AUTH_TOKEN=$(op read 'op://Personal/npm/token') pnpm publish",
 		"test": "vitest run"
 	},
 	"dependencies": {
@@ -109,26 +109,26 @@
 		"unist-util-visit": "^5.1.0",
 		"untildify": "^6.0.0",
 		"yaml": "^2.9.0",
-		"yanki-connect": "^4.0.4",
+		"yanki-connect": "^4.0.5",
 		"yargs": "^18.0.0"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.2",
-		"@kitschpatrol/shared-config": "^7.5.3",
+		"@kitschpatrol/shared-config": "^7.6.0",
 		"@vitest/browser-playwright": "^4.1.6",
 		"@vitest/coverage-v8": "^4.1.6",
 		"bumpp": "^11.1.0",
 		"execa": "^9.6.1",
 		"mdat-plugin-cli-help": "^3.0.0",
 		"playwright": "^1.60.0",
-		"publint": "^0.3.20",
+		"publint": "^0.3.21",
 		"shx": "^0.4.0",
 		"tsdown": "^0.22.0",
-		"tsx": "^4.21.0",
+		"tsx": "^4.22.0",
 		"typescript": "~5.9.3",
 		"vitest": "^4.1.6"
 	},
-	"packageManager": "pnpm@10.33.4",
+	"packageManager": "pnpm@11.1.2",
 	"engines": {
 		"node": ">=20.19.0"
 	},
