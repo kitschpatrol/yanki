@@ -58,7 +58,7 @@ The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Ank
 
 ## Quick start
 
-Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 20.11 or newer.)
+Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 20.19 or newer.)
 
 Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on installed:
 
@@ -292,7 +292,7 @@ _If you delete one of several implicitly numbered clozes (e.g. `~~hidden~~`) fro
 
 ### Dependencies
 
-The `yanki` CLI tool requires Node 20.11+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
+The `yanki` CLI tool requires Node 20.19+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
 
 The tool has been tested on Windows, macOS, and Linux.
 

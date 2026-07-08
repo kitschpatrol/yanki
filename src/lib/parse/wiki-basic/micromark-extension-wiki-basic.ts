@@ -73,7 +73,7 @@ export function wikiBasic(): Extension {
 
 		function startUrl(code: Code): State | undefined {
 			// Check for invalid characters immediately
-			if (code === -5 || code === -4 || code === -3 || code === null) {
+			if (code === null || [-5, -4, -3].includes(code)) {
 				return nok(code)
 			}
 
@@ -100,7 +100,7 @@ export function wikiBasic(): Extension {
 
 		function insideUrl(code: Code): State | undefined {
 			// Check for invalid characters
-			if (code === -5 || code === -4 || code === -3 || code === null) {
+			if (code === null || [-5, -4, -3].includes(code)) {
 				return nok(code)
 			}
 
@@ -144,7 +144,7 @@ export function wikiBasic(): Extension {
 
 		function startLabel(code: Code): State | undefined {
 			// Check for invalid characters immediately
-			if (code === -5 || code === -4 || code === -3 || code === null) {
+			if (code === null || [-5, -4, -3].includes(code)) {
 				return nok(code)
 			}
 
@@ -166,7 +166,7 @@ export function wikiBasic(): Extension {
 
 		function insideLabel(code: Code): State | undefined {
 			// Check for invalid characters
-			if (code === -5 || code === -4 || code === -3 || code === null) {
+			if (code === null || [-5, -4, -3].includes(code)) {
 				return nok(code)
 			}
 
@@ -275,48 +275,48 @@ export function wikiBasic(): Extension {
 		}
 
 		/** If the next character is also `]`, run `ok`, else `nok`. */
-		function closingMarkerLookahead(effects: Effects, ok: State, nok: State): State {
+		function closingMarkerLookahead(checkEffects: Effects, checkOk: State, checkNok: State): State {
 			return start
 
 			function start(code: Code) {
 				// ']'
 				if (code !== 93) {
-					return nok(code)
+					return checkNok(code)
 				}
 
-				effects.enter('wikiMarkerTemp' as keyof TokenTypeMap)
-				effects.consume(code)
-				effects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
-				return ok(code)
+				checkEffects.enter('wikiMarkerTemp' as keyof TokenTypeMap)
+				checkEffects.consume(code)
+				checkEffects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
+				return checkOk(code)
 			}
 		}
 
 		/** Check if backslash is followed by pipe. */
-		function backslashPipeLookahead(effects: Effects, ok: State, nok: State): State {
+		function backslashPipeLookahead(checkEffects: Effects, checkOk: State, checkNok: State): State {
 			return start
 
 			function start(code: Code) {
 				// Backslash (should already be consumed in the temp token)
 				if (code !== 92) {
-					return nok(code)
+					return checkNok(code)
 				}
 
-				effects.enter('wikiMarkerTemp' as keyof TokenTypeMap)
-				effects.consume(code)
+				checkEffects.enter('wikiMarkerTemp' as keyof TokenTypeMap)
+				checkEffects.consume(code)
 				return checkNext
 			}
 
 			function checkNext(code: Code) {
 				// '|' after backslash
 				if (code === 124) {
-					effects.consume(code)
-					effects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
-					return ok(code)
+					checkEffects.consume(code)
+					checkEffects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
+					return checkOk(code)
 				}
 
 				// Not a pipe after backslash
-				effects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
-				return nok(code)
+				checkEffects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
+				return checkNok(code)
 			}
 		}
 
@@ -351,19 +351,23 @@ export function wikiBasic(): Extension {
 		}
 
 		/** Check if next character is a closing bracket. */
-		function closingBracketLookahead(effects: Effects, ok: State, nok: State): State {
+		function closingBracketLookahead(
+			checkEffects: Effects,
+			checkOk: State,
+			checkNok: State,
+		): State {
 			return start
 
 			function start(code: Code) {
 				// ']'
 				if (code === 93) {
-					effects.enter('wikiMarkerTemp' as keyof TokenTypeMap)
-					effects.consume(code)
-					effects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
-					return ok(code)
+					checkEffects.enter('wikiMarkerTemp' as keyof TokenTypeMap)
+					checkEffects.consume(code)
+					checkEffects.exit('wikiMarkerTemp' as keyof TokenTypeMap)
+					return checkOk(code)
 				}
 
-				return nok(code)
+				return checkNok(code)
 			}
 		}
 

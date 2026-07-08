@@ -105,12 +105,14 @@ describeWithFileFixture(
 			// Valid wiki links
 			for (const result of results.synced) {
 				if (
-					result.filePathOriginal?.includes('/Wiki Links/') &&
-					result.filePathOriginal.endsWith('test card.md')
+					!result.filePathOriginal?.includes('/Wiki Links/') ||
+					!result.filePathOriginal.endsWith('test card.md')
 				) {
-					const html = `${result.note.fields.Front}${result.note.fields.Back}${result.note.fields.Extra}`
-					checkWikiLinkResolution(html, normalize(context.tempAssetPath))
+					continue
 				}
+
+				const html = `${result.note.fields.Front}${result.note.fields.Back}${result.note.fields.Extra}`
+				checkWikiLinkResolution(html, normalize(context.tempAssetPath))
 			}
 
 			// Basic stability

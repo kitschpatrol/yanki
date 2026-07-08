@@ -14,7 +14,7 @@ import { describeWithFileFixture } from './fixtures/file-fixture'
 import { countLinesOfFrontmatter } from './utilities/frontmatter-counter'
 import { stableNoteIds, stablePrettyMs, stableResults } from './utilities/stable-sync-results'
 
-const NOTE_ID_REGEX = /noteId: \d+/
+const NOTE_ID_REGEX = /noteId: \d+/v
 
 describeWithFileFixture(
 	'model types',
@@ -382,8 +382,9 @@ for (const targetType of ['basic', 'cloze', 'type', 'reverse']) {
 				for (const { filePath } of results.synced) {
 					const markdown = await fs.readFile(filePath!, 'utf8')
 					const key = path.basename(filePath!, path.extname(filePath!))
-					const updatedMarkdown = markdown.replace(
-						originalFileContents.get(key)!,
+					// Replacer function prevents `$` patterns in the note content from
+					// being interpreted as replacement patterns
+					const updatedMarkdown = markdown.replace(originalFileContents.get(key)!, () =>
 						originalFileContents.get(targetType)!,
 					)
 					await fs.writeFile(filePath!, updatedMarkdown)
@@ -582,7 +583,7 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			const syncActions = [...new Set(results.synced.map((syncInfo) => syncInfo.action))].sort()
+			const syncActions = [...new Set(results.synced.map((syncInfo) => syncInfo.action))].toSorted()
 
 			expect(syncActions).toMatchInlineSnapshot(`
 				[
@@ -603,7 +604,7 @@ describeWithFileFixture(
 
 			const secondSyncActions = [
 				...new Set(secondSyncResults.synced.map((syncInfo) => syncInfo.action)),
-			].sort()
+			].toSorted()
 
 			expect(secondSyncActions).toMatchInlineSnapshot(`
 				[
@@ -1039,7 +1040,7 @@ describeWithFileFixture(
 			expect(stableResults(results)).toMatchSnapshot()
 
 			const tags = await context.yankiConnect.note.getTags()
-			expect(tags.sort()).toStrictEqual([
+			expect(tags.toSorted()).toStrictEqual([
 				'one::two::three::four',
 				'other',
 				'yes::maybe::no',
@@ -1075,7 +1076,7 @@ describeWithFileFixture(
 			expect(stableResults(results2)).toMatchSnapshot()
 
 			const tags2 = await context.yankiConnect.note.getTags()
-			expect(tags2.sort()).toStrictEqual([
+			expect(tags2.toSorted()).toStrictEqual([
 				'one::two::three::four',
 				'other',
 				'yes::maybe::no',
@@ -1334,8 +1335,8 @@ describeWithFileFixture(
 
 			// Now delete the Yanki-managed note from the file system and sync again
 			await fs.unlink(context.markdownFiles[0])
-			context.markdownFiles.splice(0, 1)
-			context.allFiles.splice(0, 1)
+			context.markdownFiles.shift()
+			context.allFiles.shift()
 
 			const results2 = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,

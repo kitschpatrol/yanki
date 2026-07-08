@@ -210,7 +210,7 @@ export async function syncFiles(
 			note: note.note,
 		}))
 
-	const syncedAndSorted = [...deletedNotes, ...liveNotes].sort((a, b) =>
+	const syncedAndSorted = [...deletedNotes, ...liveNotes].toSorted((a, b) =>
 		(a.filePath ?? '').localeCompare(b.filePath ?? ''),
 	)
 
@@ -234,7 +234,7 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 	// Aggregate the counts of each action:
 	// eslint-disable-next-line unicorn/no-array-reduce
 	const actionCounts = synced.reduce<Record<string, number>>((acc, note) => {
-		acc[note.action] = (acc[note.action] || 0) + 1
+		acc[note.action] = (acc[note.action] ?? 0) + 1
 		return acc
 	}, {})
 

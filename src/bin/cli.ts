@@ -18,27 +18,28 @@ import {
 	ankiAutoLaunchOption,
 	ankiConnectOption,
 	ankiWebOption,
-	dryRun,
+	dryRun as dryRunOption,
 	jsonOption,
 	namespaceOption,
-	strictLineBreaks,
+	strictLineBreaks as strictLineBreaksOption,
 	verboseOption,
 } from './options'
 import { urlToHostAndPortValidated } from './utilities/validation'
 
 // Helper for nice errors in the most common case where Anki is not running
-// Must be constant function expression to help TS infer that it exits
-const ankiNotRunningErrorHandler = (error: unknown) => {
+// Must be a constant function expression with an explicit `never` return type
+// so TS knows code after a call to it is unreachable
+const ankiNotRunningErrorHandler = (error: unknown): never => {
 	if (error instanceof Error) {
 		// Destructuring here can throws runtime errors if code is undefined...
-		const code = (error.cause as { code?: string })?.code
+		const code = (error.cause as undefined | { code?: string })?.code
 
 		if (code === 'ECONNREFUSED') {
 			log.error(
 				'Failed to connect to Anki. Make sure Anki is running and AnkiConnect is installed.',
 			)
 			process.exitCode = 1
-			// eslint-disable-next-line unicorn/no-process-exit
+
 			process.exit()
 		}
 
@@ -57,8 +58,8 @@ await yargsInstance
 	.command(
 		['$0 <directory> [options]', 'sync <directory> [options]'],
 		'Perform a one-way synchronization from a local directory of Markdown files to the Anki database. Any Markdown files in subdirectories are included as well.',
-		(yargs) =>
-			yargs
+		(commandYargs) =>
+			commandYargs
 				.positional('directory', {
 					demandOption: true,
 					describe: 'The path to the local directory of Markdown files to sync.',
@@ -70,7 +71,7 @@ await yargsInstance
 				// 	describe: 'Include Markdown files in subdirectories of <directory>.',
 				// 	type: 'boolean',
 				// })
-				.option(dryRun)
+				.option(dryRunOption)
 				.option(
 					namespaceOption(
 						'Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.',
@@ -115,7 +116,7 @@ await yargsInstance
 						'Automatically run Anki\'s "Check Database" command after note model updates that might produce database corruption. In Yanki 1.0.2 and earlier, `--check-database false` was the default behavior. Starting with version 1.1.0, it is enabled by default.',
 					type: 'boolean',
 				})
-				.option(strictLineBreaks)
+				.option(strictLineBreaksOption)
 				.option(jsonOption('Output the sync report as JSON.'))
 				.option(verboseOption),
 		async ({
@@ -138,19 +139,12 @@ await yargsInstance
 		}) => {
 			log.verbose = verbose
 			const expandedDirectory = normalize(untildify(directory))
-			const globPattern = recursive ? '**/*.md' : '*.md'
+			const globPattern = recursive === true ? '**/*.md' : '*.md'
 			const markdownFilePathsRaw = await globby(globPattern, {
 				absolute: true,
 				cwd: expandedDirectory,
 			})
-			const markdownFilePaths = markdownFilePathsRaw.map((path) => normalize(path))
-
-			// Get a list of all files for name-only wiki link resolution
-			const allFilePathsRaw = await globby('**/*', {
-				absolute: true,
-				cwd: expandedDirectory,
-			})
-			const allFilePaths = allFilePathsRaw.map((path) => normalize(path))
+			const markdownFilePaths = markdownFilePathsRaw.map((filePath) => normalize(filePath))
 
 			if (markdownFilePaths.length === 0) {
 				log.error(`No Markdown files found in "${directory}".`)
@@ -158,29 +152,42 @@ await yargsInstance
 				return
 			}
 
+			// Get a list of all files for name-only wiki link resolution
+			const allFilePathsRaw = await globby('**/*', {
+				absolute: true,
+				cwd: expandedDirectory,
+			})
+			const allFilePaths = allFilePathsRaw.map((filePath) => normalize(filePath))
+
 			if (manageFilenames === 'off' && maxFilenameLength !== undefined) {
 				log.warn('Ignoring `max-filename-length` option because `manage-filenames` is not enabled.')
 			}
 
 			const { host, port } = urlToHostAndPortValidated(ankiConnect)
 
-			const result = await syncFiles(markdownFilePaths, {
-				allFilePaths,
-				ankiConnectOptions: {
-					autoLaunch: ankiAutoLaunch,
-					host,
-					port,
-				},
-				ankiWeb,
-				checkDatabase,
-				dryRun,
-				manageFilenames,
-				maxFilenameLength,
-				namespace,
-				strictLineBreaks,
-				strictMatching,
-				syncMediaAssets: syncMedia,
-			}).catch(ankiNotRunningErrorHandler)
+			let result
+			try {
+				result = await syncFiles(markdownFilePaths, {
+					allFilePaths,
+					ankiConnectOptions: {
+						autoLaunch: ankiAutoLaunch,
+						host,
+						port,
+					},
+					ankiWeb,
+					checkDatabase,
+					dryRun,
+					manageFilenames,
+					maxFilenameLength,
+					namespace,
+					strictLineBreaks,
+					strictMatching,
+					syncMediaAssets: syncMedia,
+				})
+			} catch (error) {
+				// Never returns, satisfies definite assignment of `result`
+				return ankiNotRunningErrorHandler(error)
+			}
 
 			if (json) {
 				process.stdout.write(JSON.stringify(result, undefined, 2))
@@ -195,8 +202,8 @@ await yargsInstance
 	.command(
 		'list [options]',
 		'Utility command to list Yanki-created notes in the Anki database.',
-		(yargs) =>
-			yargs
+		(commandYargs) =>
+			commandYargs
 				.option(
 					namespaceOption(
 						"Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to list all Yanki-created notes in the Anki database.",
@@ -208,31 +215,37 @@ await yargsInstance
 		async ({ ankiAutoLaunch, ankiConnect, json, namespace }) => {
 			const { host, port } = urlToHostAndPortValidated(ankiConnect)
 
-			const result = await listNotes({
-				ankiConnectOptions: {
-					autoLaunch: ankiAutoLaunch,
-					host,
-					port,
-				},
-				namespace,
-			}).catch(ankiNotRunningErrorHandler)
+			let result
+			try {
+				result = await listNotes({
+					ankiConnectOptions: {
+						autoLaunch: ankiAutoLaunch,
+						host,
+						port,
+					},
+					namespace,
+				})
+			} catch (error) {
+				// Never returns, satisfies definite assignment of `result`
+				return ankiNotRunningErrorHandler(error)
+			}
 
 			if (json) {
 				process.stdout.write(JSON.stringify(result, undefined, 2))
-				process.stdout.write('\n')
 			} else {
 				process.stdout.write(formatListResult(result))
-				process.stdout.write('\n')
 			}
+
+			process.stdout.write('\n')
 		},
 	)
 	// `yanki delete`
 	.command(
 		'delete [options]',
 		"Utility command to manually delete Yanki-created notes in the Anki database. This is for advanced use cases, usually the `sync` command takes care of deleting files from Anki Database once they're removed from the local file system.",
-		(yargs) =>
-			yargs
-				.option(dryRun)
+		(commandYargs) =>
+			commandYargs
+				.option(dryRunOption)
 				.option(
 					namespaceOption(
 						"Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. If you've synced notes to multiple namespaces, Pass `'*'` to delete all Yanki-created notes in the Anki database.",
@@ -246,16 +259,22 @@ await yargsInstance
 		async ({ ankiAutoLaunch, ankiConnect, ankiWeb, dryRun, json, namespace, verbose }) => {
 			const { host, port } = urlToHostAndPortValidated(ankiConnect)
 
-			const result = await cleanNotes({
-				ankiConnectOptions: {
-					autoLaunch: ankiAutoLaunch,
-					host,
-					port,
-				},
-				ankiWeb,
-				dryRun,
-				namespace,
-			}).catch(ankiNotRunningErrorHandler)
+			let result
+			try {
+				result = await cleanNotes({
+					ankiConnectOptions: {
+						autoLaunch: ankiAutoLaunch,
+						host,
+						port,
+					},
+					ankiWeb,
+					dryRun,
+					namespace,
+				})
+			} catch (error) {
+				// Never returns, satisfies definite assignment of `result`
+				return ankiNotRunningErrorHandler(error)
+			}
 
 			if (json) {
 				process.stdout.write(JSON.stringify(result, undefined, 2))
@@ -270,9 +289,9 @@ await yargsInstance
 	.command(
 		'style [options]',
 		'Utility command to set the CSS stylesheet for all present and future Yanki-created notes.',
-		(yargs) =>
-			yargs
-				.option(dryRun)
+		(commandYargs) =>
+			commandYargs
+				.option(dryRunOption)
 				.option('css', {
 					alias: 'c',
 					default: undefined,
@@ -310,16 +329,22 @@ await yargsInstance
 				}
 			}
 
-			const result = await setStyle({
-				ankiConnectOptions: {
-					autoLaunch: ankiAutoLaunch,
-					host,
-					port,
-				},
-				ankiWeb,
-				css: loadedCss ?? undefined,
-				dryRun,
-			}).catch(ankiNotRunningErrorHandler)
+			let result
+			try {
+				result = await setStyle({
+					ankiConnectOptions: {
+						autoLaunch: ankiAutoLaunch,
+						host,
+						port,
+					},
+					ankiWeb,
+					css: loadedCss ?? undefined,
+					dryRun,
+				})
+			} catch (error) {
+				// Never returns, satisfies definite assignment of `result`
+				return ankiNotRunningErrorHandler(error)
+			}
 
 			if (json) {
 				process.stdout.write(JSON.stringify(result, undefined, 2))

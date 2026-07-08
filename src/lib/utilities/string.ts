@@ -48,11 +48,15 @@ export function truncateOnWordBoundary(
 }
 
 export function cleanClassName(className: string): string {
-	return className
-		.toLowerCase()
-		.replaceAll(/[^\da-z]/gi, ' ')
-		.trim()
-		.replaceAll(/ +/g, '-')
+	return (
+		className
+			.toLowerCase()
+			// Not using the `i` flag because with the `v` flag it would also spare
+			// case-folded characters like `ſ` (U+017F) and `K` (U+212A)
+			.replaceAll(/[^\dA-Za-z]/gv, ' ')
+			.trim()
+			.replaceAll(/ +/gv, '-')
+	)
 }
 
 export function emptyIsUndefined(text: string | undefined): string | undefined {
@@ -103,13 +107,13 @@ export function css(strings: TemplateStringsArray, ...values: unknown[]): string
 	return trimLeadingIndentation(strings, ...values)
 }
 
-const NEWLINE_REGEX = /\r?\n/
+const NEWLINE_REGEX = /\r?\n/v
 // eslint-disable-next-line regexp/no-unused-capturing-group
-const LEADING_WHITESPACE_REGEX = /^(\s+)/
+const LEADING_WHITESPACE_REGEX = /^(\s+)/v
 
 function trimLeadingIndentation(strings: TemplateStringsArray, ...values: unknown[]): string {
 	const lines = strings
-		// eslint-disable-next-line unicorn/no-array-reduce, ts/no-base-to-string
+		// eslint-disable-next-line ts/no-base-to-string
 		.reduce((result, text, i) => `${result}${text}${String(values[i] ?? '')}`, '')
 		.split(NEWLINE_REGEX)
 		.filter((line) => line.trim() !== '')
@@ -117,7 +121,7 @@ function trimLeadingIndentation(strings: TemplateStringsArray, ...values: unknow
 	// Get leading white space of first line, and trim that much white space
 	// from subsequent lines
 	const leadingSpace = LEADING_WHITESPACE_REGEX.exec(lines[0])?.[0] ?? ''
-	const leadingSpaceRegex = new RegExp(`^${leadingSpace}`)
+	const leadingSpaceRegex = new RegExp(`^${leadingSpace}`, 'v')
 	return lines.map((line) => line.replace(leadingSpaceRegex, '').trimEnd()).join('\n')
 }
 

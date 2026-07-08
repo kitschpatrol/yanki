@@ -3,10 +3,10 @@ import { urlToHostAndPort } from '../../lib/utilities/url'
 /**
  * Get host and port components of a URL
  *
- * @param url
+ * @param url The AnkiConnect server URL to parse.
  *
  * @returns Host and port
- * @throws If URL can't be parsed
+ * @throws {Error} If URL can't be parsed
  */
 export function urlToHostAndPortValidated(url: string): { host: string; port: number } {
 	const parsedUrl = urlToHostAndPort(url)

@@ -5,8 +5,8 @@ import path from 'path-browserify-esm'
 import slash from 'slash'
 import { splitAtFirstMatch } from './string'
 
-const WINDOWS_DRIVE_LETTER_REGEX = /^[A-Z]:/i
-const QUERY_FRAGMENT_START_REGEX = /[#?^]/
+const WINDOWS_DRIVE_LETTER_REGEX = /^[A-Z]:/iv
+const QUERY_FRAGMENT_START_REGEX = /[#?^]/v
 
 // Unused...
 // function stripLeadingSlash(filePath: string): string {
@@ -24,7 +24,7 @@ export function isAbsolute(filePath: string): boolean {
 	return isAbsolutePath.posix(filePath) || isAbsolutePath.win32(filePath)
 }
 
-const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/
+const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/v
 
 // Unused
 // const RE_WINDOWS_UNC_PATH = /^\\\\[^\\]+\\[^\\]+/

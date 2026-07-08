@@ -28,7 +28,7 @@ type AstFromMarkdownOptions = Pick<
 	'allFilePaths' | 'basePath' | 'cwd' | 'obsidianVault' | 'resolveUrls'
 >
 
-const CLOZE_NUMBER_PREFIX_REGEX = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/
+const CLOZE_NUMBER_PREFIX_REGEX = /^[\(\|]?(\d{1,2})(?:[\s\).\|]|$)(.*)$/v
 
 const defaultAstFromMarkdownOptions: AstFromMarkdownOptions = {
 	...defaultGlobalOptions,
@@ -96,10 +96,12 @@ function isText(node: Node): node is Text {
 
 export function deleteFirstNodeOfType(tree: Root, nodeType: string): Root {
 	visit(tree, nodeType, (_, index, parent) => {
-		if (parent && index !== undefined) {
-			parent.children.splice(index, 1)
-			return EXIT
+		if (!parent || index === undefined) {
+			return
 		}
+
+		parent.children.splice(index, 1)
+		return EXIT
 	})
 
 	return tree
@@ -155,26 +157,29 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 
 		// If the first node is a text node with a number in it, we treat it as the
 		// cloze number
-		if (node.children.length > 0 && isText(node.children[0])) {
+		const [firstChild] = node.children
+		if (node.children.length > 0 && isText(firstChild)) {
 			// Detect a bunch of number variations at the start of the cloze...
 			// But there must be extra content after the number, otherwise
 			// the leading number _is_ the cloze
-			const result = CLOZE_NUMBER_PREFIX_REGEX.exec(node.children[0].value)
+			const result = CLOZE_NUMBER_PREFIX_REGEX.exec(firstChild.value)
 
 			if (
 				result !== null &&
 				// Edge case if cloze is just a number with no extra content
 				(node.children.length > 1 || (result.at(2) ?? '').length > 0)
 			) {
-				const possibleClozeIndex = Number.parseInt(result.at(1) ?? '', 10)
+				// Capture group 1 always matches when the regex does, so `at(1)` is
+				// never undefined in practice, but `Number(undefined)` is NaN just like
+				// `Number.parseInt('', 10)` was
+				const possibleClozeIndex = Number(result.at(1))
 
 				if (!Number.isNaN(possibleClozeIndex)) {
 					// Cloze index comes from the first node
 					clozeIndex = possibleClozeIndex
 					// Any leftovers become part of the cloze
 
-					node.children[0].value =
-						(result.at(2)?.trim().length ?? 0) > 0 ? (result.at(2) ?? '') : ''
+					firstChild.value = (result.at(2)?.trim().length ?? 0) > 0 ? (result.at(2) ?? '') : ''
 				}
 			}
 		}
@@ -357,15 +362,16 @@ export function getFrontmatterFromTree(ast: Root): Frontmatter {
 		return EXIT
 	})
 
-	if (!rawYaml) {
+	if (rawYaml === undefined || rawYaml === '') {
 		// Unremarkable
 		// console.warn('No frontmatter found')
 		return {}
 	}
 
-	const parsedYaml = yamlParse(rawYaml) as Frontmatter
+	// The yaml parser returns null for empty documents
+	const parsedYaml = (yamlParse(rawYaml) ?? undefined) as Frontmatter | undefined
 
-	if (!parsedYaml) {
+	if (parsedYaml === undefined) {
 		throw new Error('Could not parse frontmatter')
 	}
 
@@ -373,14 +379,14 @@ export function getFrontmatterFromTree(ast: Root): Frontmatter {
 }
 
 function hasThematicBreak(ast: Root): boolean {
-	let hasThematicBreak = false
+	let foundThematicBreak = false
 
 	visit(ast, 'thematicBreak', () => {
-		hasThematicBreak = true
+		foundThematicBreak = true
 		return EXIT
 	})
 
-	return hasThematicBreak
+	return foundThematicBreak
 }
 
 function isLastVisibleNodeEmphasisWithOthers(ast: Root): boolean {

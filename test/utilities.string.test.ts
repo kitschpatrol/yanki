@@ -66,13 +66,12 @@ it('formats md without excessive white space', () => {
 })
 
 it('returns undefined for undefined input in emptyIsUndefined', () => {
-	// eslint-disable-next-line unicorn/no-useless-undefined
 	expect(emptyIsUndefined(undefined)).toBeUndefined()
 })
 
 it('returns undefined for empty or whitespace-only strings in emptyIsUndefined', () => {
 	expect(emptyIsUndefined('')).toBeUndefined()
-	expect(emptyIsUndefined('   ')).toBeUndefined()
+	expect(emptyIsUndefined(' '.repeat(3))).toBeUndefined()
 	expect(emptyIsUndefined('\t')).toBeUndefined()
 })
 

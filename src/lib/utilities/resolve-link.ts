@@ -1,5 +1,4 @@
 /* eslint-disable jsdoc/require-jsdoc */
-/* eslint-disable complexity */
 
 // TODO move this into its own package?
 
@@ -14,7 +13,7 @@ import {
 	safeParseUrl,
 } from './url'
 
-const MD_EXTENSION_REGEX = /\.md$/
+const MD_EXTENSION_REGEX = /\.md$/v
 
 type ResolveLinkType =
 	// Via a `![[link]]` or `![alt](link)` syntax
@@ -110,12 +109,16 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 		console.warn(`convertFilePathsToProtocol is 'obsidian', but no obsidianVaultName provided`)
 	}
 
-	const decodedUrl = safeDecodeURI(filePathOrUrl) ?? filePathOrUrl
+	// Wiki-style names and file URLs resolve to file paths that are run through
+	// the loop again as localFilePaths, which never loop again themselves
+	let currentPathOrUrl = filePathOrUrl
 
-	const sourceType = getSrcType(decodedUrl)
+	for (;;) {
+		const decodedUrl = safeDecodeURI(currentPathOrUrl) ?? currentPathOrUrl
 
-	switch (sourceType) {
-		case 'localFileName': {
+		const sourceType = getSrcType(decodedUrl)
+
+		if (sourceType === 'localFileName') {
 			let resolvedUrl = pathExtras.addExtensionIfMissing(pathExtras.normalize(decodedUrl), 'md')
 
 			// Fall back to base path resolution if there's no path
@@ -130,103 +133,38 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 
 			// Run it through again as a relative localFilePath
 
-			// Prevent infinite recursion
+			// Prevent an infinite loop
 			if (getSrcType(resolvedUrl) === 'localFilePath') {
-				return resolveLink(resolvedUrl, {
-					allFilePaths,
-					basePath,
-					convertFilePathsToProtocol,
-					cwd,
-					obsidianVaultName,
-					type,
-				})
+				currentPathOrUrl = resolvedUrl
+				continue
 			}
 
 			console.warn(
-				`Failed to convert local file wiki-style name to path: ${filePathOrUrl} --> ${resolvedUrl}`,
+				`Failed to convert local file wiki-style name to path: ${currentPathOrUrl} --> ${resolvedUrl}`,
 			)
 			return resolvedUrl
 		}
 
-		case 'localFilePath': {
-			// Make it absolute
-			const resolvedUrl = pathExtras.resolveWithBasePath(pathExtras.normalize(decodedUrl), {
-				basePath,
-				cwd,
-			})
-
-			// If undefined, there was no match in the list of all file paths
-			const resolvedUrlWithMatchedExtension: string | undefined =
-				// Assume extension-less files are .md
-				// in Obsidian, ![[these links]] and ![](<these links>) without an extension are always to an MD file
-				pathExistsInAllFiles(
-					pathExtras.addExtensionIfMissing(resolvedUrl, 'md'),
-					allFilePaths ?? [],
-				) ??
-				// Add an .md extension even if we already have an extension.
-				// This handles cases with dots in the name.
-				pathExistsInAllFiles(pathExtras.addExtension(resolvedUrl, 'md'), allFilePaths ?? []) ??
-				undefined
-
-			if (resolvedUrlWithMatchedExtension !== undefined) {
-				// Perform obsidian vault link protocol conversion if requested
-				// For links, anything that exists should become an obsidian link
-				// For embeds, only markdown files should become obsidian links
-				if (
-					convertFilePathsToProtocol !== 'none' &&
-					(type === 'link' ||
-						// eslint-disable-next-line ts/no-unnecessary-condition
-						(type === 'embed' &&
-							// https://help.obsidian.md/Files+and+folders/Accepted+file+formats
-							['.md', '.pdf'].includes(pathExtras.getExtension(resolvedUrlWithMatchedExtension))))
-				) {
-					if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName !== undefined) {
-						return createObsidianVaultLink(
-							resolvedUrlWithMatchedExtension,
-							basePath ?? '',
-							obsidianVaultName,
-						)
-					}
-
-					// This doesn't work in the Anki desktop application or the AnkiWeb browser version...
-					// Not really worth it
-					if (convertFilePathsToProtocol === 'file') {
-						return createFileLink(resolvedUrlWithMatchedExtension)
-					}
-				}
-
-				return pathExtras.getBase(resolvedUrlWithMatchedExtension)
-			}
-
-			// TODO good idea?
-			// Some kind of "assume exists" flag?
-			// Linked file was not found, but give up and treat relative links as
-			// obsidian vault links if the context suggests it
-			// if (
-			// 	type === 'link' &&
-			// 	convertFilePathsToProtocol === 'obsidian' &&
-			// 	obsidianVaultName !== undefined
-			// ) {
-			// 	return createObsidianVaultLink(
-			// 		resolvedUrlWithDefaultExtension,
-			// 		basePath ?? '',
-			// 		obsidianVaultName,
-			// 	)
-			// }
-
-			return pathExtras.getBase(resolvedUrl)
-		}
-
-		case 'localFileUrl': {
+		if (sourceType === 'localFileUrl') {
 			// Convert file:// url to path (file:// paths are already always absolute)
 			// Anki can't open them
-			const resolvedUrl = pathExtras.normalize(fileUrlToPath(filePathOrUrl))
+			const resolvedUrl = pathExtras.normalize(fileUrlToPath(currentPathOrUrl))
 
 			// Run it through again as a localFilePath
 
-			// Prevent infinite recursion
+			// Prevent an infinite loop
 			if (getSrcType(resolvedUrl) === 'localFilePath') {
-				return resolveLink(resolvedUrl, {
+				currentPathOrUrl = resolvedUrl
+				continue
+			}
+
+			console.warn(`Failed to convert file URL to path: ${currentPathOrUrl} --> ${resolvedUrl}`)
+			return resolvedUrl
+		}
+
+		switch (sourceType) {
+			case 'localFilePath': {
+				return resolveLocalFilePath(decodedUrl, {
 					allFilePaths,
 					basePath,
 					convertFilePathsToProtocol,
@@ -236,25 +174,96 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 				})
 			}
 
-			console.warn(`Failed to convert file URL to path: ${filePathOrUrl} --> ${resolvedUrl}`)
-			return resolvedUrl
-		}
+			case 'obsidianVaultUrl': {
+				// Do nothing
+				return currentPathOrUrl
+			}
 
-		case 'obsidianVaultUrl': {
-			// Do nothing
-			return filePathOrUrl
-		}
+			case 'remoteHttpUrl': {
+				// Do nothing
+				return currentPathOrUrl
+			}
 
-		case 'remoteHttpUrl': {
-			// Do nothing
-			return filePathOrUrl
-		}
-
-		case 'unsupportedProtocolUrl': {
-			console.warn(`Unsupported URL protocol: ${filePathOrUrl}`)
-			return filePathOrUrl
+			case 'unsupportedProtocolUrl': {
+				console.warn(`Unsupported URL protocol: ${currentPathOrUrl}`)
+				return currentPathOrUrl
+			}
 		}
 	}
+}
+
+/**
+ * Resolve a decoded local file path to an absolute path or protocol URL.
+ * Extracted from `resolveLink` for the benefit of readability (and the
+ * `max-depth` lint rule).
+ */
+function resolveLocalFilePath(decodedUrl: string, options: ResolveLinkOptions): string {
+	const { allFilePaths, basePath, convertFilePathsToProtocol, cwd, obsidianVaultName, type } =
+		options
+
+	// Make it absolute
+	const resolvedUrl = pathExtras.resolveWithBasePath(pathExtras.normalize(decodedUrl), {
+		basePath,
+		cwd,
+	})
+
+	// If undefined, there was no match in the list of all file paths
+	const resolvedUrlWithMatchedExtension: string | undefined =
+		// Assume extension-less files are .md
+		// in Obsidian, ![[these links]] and ![](<these links>) without an extension are always to an MD file
+		pathExistsInAllFiles(pathExtras.addExtensionIfMissing(resolvedUrl, 'md'), allFilePaths ?? []) ??
+		// Add an .md extension even if we already have an extension.
+		// This handles cases with dots in the name.
+		pathExistsInAllFiles(pathExtras.addExtension(resolvedUrl, 'md'), allFilePaths ?? []) ??
+		undefined
+
+	if (resolvedUrlWithMatchedExtension !== undefined) {
+		// Perform obsidian vault link protocol conversion if requested
+		// For links, anything that exists should become an obsidian link
+		// For embeds, only markdown files should become obsidian links
+		if (
+			convertFilePathsToProtocol !== 'none' &&
+			(type === 'link' ||
+				// eslint-disable-next-line ts/no-unnecessary-condition
+				(type === 'embed' &&
+					// https://help.obsidian.md/Files+and+folders/Accepted+file+formats
+					['.md', '.pdf'].includes(pathExtras.getExtension(resolvedUrlWithMatchedExtension))))
+		) {
+			if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName !== undefined) {
+				return createObsidianVaultLink(
+					resolvedUrlWithMatchedExtension,
+					basePath ?? '',
+					obsidianVaultName,
+				)
+			}
+
+			// This doesn't work in the Anki desktop application or the AnkiWeb browser version...
+			// Not really worth it
+			if (convertFilePathsToProtocol === 'file') {
+				return createFileLink(resolvedUrlWithMatchedExtension)
+			}
+		}
+
+		return pathExtras.getBase(resolvedUrlWithMatchedExtension)
+	}
+
+	// TODO good idea?
+	// Some kind of "assume exists" flag?
+	// Linked file was not found, but give up and treat relative links as
+	// obsidian vault links if the context suggests it
+	// if (
+	// 	type === 'link' &&
+	// 	convertFilePathsToProtocol === 'obsidian' &&
+	// 	obsidianVaultName !== undefined
+	// ) {
+	// 	return createObsidianVaultLink(
+	// 		resolvedUrlWithDefaultExtension,
+	// 		basePath ?? '',
+	// 		obsidianVaultName,
+	// 	)
+	// }
+
+	return pathExtras.getBase(resolvedUrl)
 }
 
 /**
@@ -435,7 +444,8 @@ export function parseObsidianVaultLink(url: string):
 	const vault = urlObject.searchParams.get('vault')
 	const file = urlObject.searchParams.get('file')
 
-	if (!vault || !file) {
+	// Null when the parameter is absent, treat empty strings as missing too
+	if (vault === null || vault === '' || file === null || file === '') {
 		console.warn('Missing required parameters')
 		return undefined
 	}

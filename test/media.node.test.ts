@@ -9,7 +9,7 @@ import { describeWithFileFixture } from './fixtures/file-fixture'
 import { stableResults } from './utilities/stable-sync-results'
 
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
-const fetchAdapter = globalThis.fetch.bind(globalThis)
+const fetchAdapter = fetch.bind(globalThis)
 
 const allLocalMediaPaths = [
 	'./test/assets/test-media/audio/yanki.3gp',
@@ -127,7 +127,7 @@ it('correctly detects existence or non-existence of media files', { timeout: 60_
 
 	expect(
 		await mediaAssetExists(
-			'http://6C9CFA9A-5D1A-4B55-A404-64DBFA034B93.com/example.jpg',
+			'https://6C9CFA9A-5D1A-4B55-A404-64DBFA034B93.com/example.jpg',
 			fileAdapter,
 			fetchAdapter,
 		),
@@ -583,7 +583,7 @@ it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
 	// Not stable across checkouts
 	const compactResults = results.map(
 		(entry) =>
-			`${Object.keys(entry)[0]}: ${Object.values(entry)[0].replaceAll(/[\da-f]{16}/g, 'XXXXXXXXXXXXXXXX')}`,
+			`${Object.keys(entry)[0]}: ${Object.values(entry)[0].replaceAll(/[\da-f]{16}/gv, 'XXXXXXXXXXXXXXXX')}`,
 	)
 
 	expect(compactResults).toMatchInlineSnapshot(`

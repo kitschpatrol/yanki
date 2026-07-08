@@ -7,7 +7,7 @@ import { CONTINUE, visit } from 'unist-util-visit'
 // MathJax tolerates whitespace between braces, so breaking up the runs keeps
 // rendering identical while making the math safe to embed in a cloze.
 // See https://github.com/kitschpatrol/yanki/issues/15
-const CONSECUTIVE_BRACES_REGEX = /([{}])(?=[{}])/g
+const CONSECUTIVE_BRACES_REGEX = /([\{\}])(?=[\{\}])/gv
 
 function sanitizeBraces(value: string): string {
 	return value.replaceAll(CONSECUTIVE_BRACES_REGEX, '$1 ')
@@ -31,16 +31,17 @@ const plugin: Plugin<unknown[], Root> = function () {
 
 			// Handle fenced, ```math...``` blocks, which end up inside a `<pre>` element
 			// TODO... clean up
+			const [preChild] = node.children
 			if (
 				node.tagName === 'pre' &&
 				node.children.length === 1 &&
-				node.children[0].type === 'element' &&
-				node.children[0].tagName === 'code' &&
-				Array.isArray(node.children[0].properties.className) &&
-				node.children[0].properties.className.includes('language-math')
+				preChild.type === 'element' &&
+				preChild.tagName === 'code' &&
+				Array.isArray(preChild.properties.className) &&
+				preChild.properties.className.includes('language-math')
 			) {
 				fenced = true
-				parent.children.splice(index, 1, node.children[0])
+				parent.children[index] = preChild
 			}
 
 			// Handle direct

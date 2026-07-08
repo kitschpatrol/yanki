@@ -40,7 +40,7 @@ export async function getFileContentHash(
 
 			if (stringToHash === '') {
 				// Fall through to name mode
-				return getFileContentHash(absoluteFilePath, fileAdapter, 'name')
+				return getHash(absoluteFilePath, 16)
 			}
 
 			return getHash(stringToHash, 16)

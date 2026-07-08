@@ -3,7 +3,7 @@ import { defineConfig } from 'tsdown'
 export default defineConfig([
 	// CLI
 	{
-		deps: { alwaysBundle: /.+/ },
+		deps: { alwaysBundle: /.+/v },
 		dts: false,
 		entry: 'src/bin/cli.ts',
 		fixedExtension: false,
@@ -14,17 +14,17 @@ export default defineConfig([
 	},
 	// Bundlers
 	{
-		deps: { neverBundle: [/^node:/] },
+		deps: { neverBundle: [/^node:/v] },
 		entry: 'src/lib/index.ts',
 		fixedExtension: false,
 		outDir: 'dist/lib',
 		platform: 'neutral',
-		target: ['node20.11.0', 'chrome100', 'safari18', 'firefox110'],
+		target: ['node20.19.0', 'chrome100', 'safari18', 'firefox110'],
 		tsconfig: 'tsconfig.build.json',
 	},
 	// Standalone browser / CDN
 	{
-		deps: { alwaysBundle: /.+/, neverBundle: [/^node:/] },
+		deps: { alwaysBundle: /.+/v, neverBundle: [/^node:/v] },
 		entry: 'src/lib/index.ts',
 		fixedExtension: false,
 		minify: true,

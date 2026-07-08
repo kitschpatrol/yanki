@@ -12,8 +12,8 @@ import { getFileExtensionForMimeType } from './mime'
 import { isAbsolute, normalize } from './path'
 import { getHash } from './string'
 
-const DRIVE_LETTER_REGEX = /^[a-z]:/i
-const FILE_PREFIX_REGEX = /^file:/i
+const DRIVE_LETTER_REGEX = /^[a-z]:/iv
+const FILE_PREFIX_REGEX = /^file:/iv
 
 // Detect probably wiki-style name links
 // export function isNameUrl(text: string): boolean {
@@ -200,60 +200,50 @@ export async function getFileExtensionFromUrl(
 	fetchAdapter: FetchAdapter | undefined,
 	mode = MEDIA_URL_CONTENT_TYPE_MODE,
 ): Promise<MediaSupportedExtension | undefined> {
-	switch (mode) {
-		case 'metadata': {
-			if (fetchAdapter === undefined) {
-				// Fall through to name mode
-				return getFileExtensionFromUrl(url, fetchAdapter, 'name')
+	if (mode === 'metadata' && fetchAdapter !== undefined) {
+		try {
+			const response = await fetchAdapter(url, { method: 'HEAD' })
+			const contentTypeHeaderValue = getHeadersString(response?.headers, ['content-type'])
+
+			if (contentTypeHeaderValue === undefined) {
+				throw new Error('No content-type header found')
 			}
 
-			try {
-				const response = await fetchAdapter(url, { method: 'HEAD' })
-				const contentTypeHeaderValue = getHeadersString(response?.headers, ['content-type'])
-
-				if (contentTypeHeaderValue === undefined) {
-					throw new Error('No content-type header found')
-				}
-
-				const extension = getFileExtensionForMimeType(contentTypeHeaderValue)
-				if (extension !== undefined) {
-					return extension
-				}
-
-				// Unknown mime type, fall through to name mode
-				return await getFileExtensionFromUrl(url, fetchAdapter, 'name')
-			} catch {
-				// Fall through to name mode
-				return getFileExtensionFromUrl(url, fetchAdapter, 'name')
-			}
-		}
-
-		case 'name': {
-			let extensionInUrl: string | undefined
-			const parsedUrl = safeParseUrl(url)
-
-			if (parsedUrl === undefined) {
-				console.warn(`Could not parse URL: ${url}`)
-				return undefined
+			const extension = getFileExtensionForMimeType(contentTypeHeaderValue)
+			if (extension !== undefined) {
+				return extension
 			}
 
-			const pathnameParts = parsedUrl.pathname.split('.')
-			if (pathnameParts.length > 1) {
-				extensionInUrl = pathnameParts.at(-1)
-			} else {
-				// Look in the query string if we must...
-				const searchParts = parsedUrl.search.split('.')
-				extensionInUrl = searchParts.at(-1)
-			}
-
-			// TODO get rid of type cast
-			if (MEDIA_SUPPORTED_EXTENSIONS.includes((extensionInUrl ?? '') as MediaSupportedExtension)) {
-				return extensionInUrl as MediaSupportedExtension
-			}
-
-			return undefined
+			// Unknown mime type, fall through to name mode
+		} catch {
+			// Fall through to name mode
 		}
 	}
+
+	// Name mode, also the fallback if metadata mode is unavailable or fails
+	const parsedUrl = safeParseUrl(url)
+
+	if (parsedUrl === undefined) {
+		console.warn(`Could not parse URL: ${url}`)
+		return undefined
+	}
+
+	let extensionInUrl: string | undefined
+	const pathnameParts = parsedUrl.pathname.split('.')
+	if (pathnameParts.length > 1) {
+		extensionInUrl = pathnameParts.at(-1)
+	} else {
+		// Look in the query string if we must...
+		const searchParts = parsedUrl.search.split('.')
+		extensionInUrl = searchParts.at(-1)
+	}
+
+	// TODO get rid of type cast
+	if (MEDIA_SUPPORTED_EXTENSIONS.includes((extensionInUrl ?? '') as MediaSupportedExtension)) {
+		return extensionInUrl as MediaSupportedExtension
+	}
+
+	return undefined
 }
 
 /**
@@ -273,39 +263,32 @@ export async function getUrlContentHash(
 	fetchAdapter: FetchAdapter,
 	mode = MEDIA_DEFAULT_HASH_MODE_URL,
 ): Promise<string> {
-	// Obliging the no-fallthrough lint rule, but this effectively falls through
-	// via recursion instead...
-	switch (mode) {
-		case 'content': {
-			console.warn('`content` hash mode is not yet implemented for URLs')
-			// Use metadata mode
-			return getUrlContentHash(url, fetchAdapter, 'metadata')
-		}
+	if (mode === 'content') {
+		console.warn('`content` hash mode is not yet implemented for URLs')
+		// Use metadata mode instead
+	}
 
-		case 'metadata': {
-			try {
-				const response = await fetchAdapter(url, { method: 'HEAD' })
-				const stringToHash = getHeadersString(response?.headers, [
-					'etag',
-					'last-modified',
-					'content-length',
-				])
+	if (mode !== 'name') {
+		try {
+			const response = await fetchAdapter(url, { method: 'HEAD' })
+			const stringToHash = getHeadersString(response?.headers, [
+				'etag',
+				'last-modified',
+				'content-length',
+			])
 
-				if (stringToHash === undefined) {
-					throw new Error('No headers found')
-				}
-
-				return getHash(stringToHash, 16)
-			} catch {
-				// Fall through to name mode
-				return getUrlContentHash(url, fetchAdapter, 'name')
+			if (stringToHash === undefined) {
+				throw new Error('No headers found')
 			}
-		}
 
-		case 'name': {
-			return getHash(url, 16)
+			return getHash(stringToHash, 16)
+		} catch {
+			// Fall through to name mode
 		}
 	}
+
+	// Name mode, also the fallback if metadata mode fails
+	return getHash(url, 16)
 }
 
 export function urlToHostAndPort(url: string): undefined | { host: string; port: number } {
@@ -314,6 +297,7 @@ export function urlToHostAndPort(url: string): undefined | { host: string; port:
 		? undefined
 		: {
 				host: `${parsedUrl.protocol}//${parsedUrl.hostname}`,
+				// eslint-disable-next-line unicorn/prefer-number-coercion -- URL port may be an empty string, which must yield NaN here, but Number('') is 0
 				port: Number.parseInt(parsedUrl.port, 10),
 			}
 }

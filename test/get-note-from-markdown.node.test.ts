@@ -27,8 +27,8 @@ async function getNotesFromMarkdown(
 		original?: string
 		type: string
 	}> = []
-	for (const markdown of markdownVariations) {
-		const note = await getNoteFromMarkdown(markdown)
+	for (const markdownVariation of markdownVariations) {
+		const note = await getNoteFromMarkdown(markdownVariation)
 		results.push(
 			stripUndefinedFields({
 				back:
@@ -36,7 +36,7 @@ async function getNotesFromMarkdown(
 						? note.fields.Back.split('\n').slice(2, -1).join('\n')
 						: undefined,
 				front: note.fields.Front.split('\n').slice(2, -1).join('\n'),
-				original: showOriginal ? markdown : undefined,
+				original: showOriginal ? markdownVariation : undefined,
 				type: note.modelName,
 			}),
 		)
@@ -390,8 +390,8 @@ it('handles a single numeric tag value in frontmatter', async () => {
  * https://github.com/kitschpatrol/yanki-obsidian/issues/56
  */
 it('handles strikethrough before and after a break', async () => {
-	const markdown = `~~cloze~~\n\n---\n\n~~cloze~~`
-	const note = await getNoteFromMarkdown(markdown)
+	const markdownWithStrikethrough = `~~cloze~~\n\n---\n\n~~cloze~~`
+	const note = await getNoteFromMarkdown(markdownWithStrikethrough)
 
 	// Back of card should NOT have Anki cloze markup
 	expect(note.fields.Front).toContain('{{c1::cloze}}')
@@ -416,7 +416,7 @@ it('handles MathJax with nested braces inside cloze deletions', async () => {
 
 	/* Spell-checker: disable */
 
-	const markdown = String.raw`(32.99 Finite) Let $f \in \mathbb{F}_{p}[x]$ be a monic irreducible polynomial of degree $n$. Prove that $\mathbb{F}_{p^{n}}$ is a splitting field of $f$.
+	const markdownWithMathCloze = String.raw`(32.99 Finite) Let $f \in \mathbb{F}_{p}[x]$ be a monic irreducible polynomial of degree $n$. Prove that $\mathbb{F}_{p^{n}}$ is a splitting field of $f$.
 
 $$
 \mathbb{F}_{p^{n}} \supset \mathbb{F}_{p}
@@ -428,7 +428,7 @@ $$
 
 	/* Spell-checker: enable */
 
-	const note = await getNoteFromMarkdown(markdown)
+	const note = await getNoteFromMarkdown(markdownWithMathCloze)
 
 	expect(note.modelName).toBe('Yanki - Cloze')
 
@@ -442,7 +442,7 @@ $$
 
 	// No math segment (`\(...\)` or `\[...\]`) should contain a literal `}}`,
 	// which would collide with Anki's cloze terminator
-	const mathSegments = note.fields.Front.match(/\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]/g) ?? []
+	const mathSegments = note.fields.Front.match(/\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]/gv) ?? []
 	expect(mathSegments.length).toBeGreaterThan(0)
 	for (const segment of mathSegments) {
 		expect(segment).not.toContain('}}')

@@ -8,11 +8,11 @@ import { normalize } from '../../src/lib/utilities/path'
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T
 
 export function stablePrettyMs(text: string): string {
-	return text.replaceAll(/\s[\d.]+[ms]+/g, ' XXX')
+	return text.replaceAll(/\s[\d.]+[ms]+/gv, ' XXX')
 }
 
 export function sortMultiline(text: string): string {
-	return text.split('\n').sort().join('\n')
+	return text.split('\n').toSorted().join('\n')
 }
 
 export function cleanUpTempPath(filePath: string | undefined): string | undefined {
@@ -20,20 +20,20 @@ export function cleanUpTempPath(filePath: string | undefined): string | undefine
 		return undefined
 	}
 
-	return filePath.replaceAll(normalize(os.tmpdir()), '/').replaceAll(/\/\d{13}\//g, '')
+	return filePath.replaceAll(normalize(os.tmpdir()), '/').replaceAll(/\/\d{13}\//gv, '')
 }
 
 function stripNewlines(input: string): string {
 	// eslint-disable-next-line regexp/no-unused-capturing-group
-	return input.replaceAll(/(\r\n|\n|\r)/g, '')
+	return input.replaceAll(/(\r\n|\n|\r)/gv, '')
 }
 
 function cleanUpHashes(text: string): string {
-	return text.replaceAll(/-[\da-f]{16}/g, '-HASH')
+	return text.replaceAll(/-[\da-f]{16}/gv, '-HASH')
 }
 
 export function stableNoteIds(text: string): string {
-	return text.replaceAll(/\d{13}/g, 'XXXXXXXXXXXXX')
+	return text.replaceAll(/\d{13}/gv, 'XXXXXXXXXXXXX')
 }
 
 type SyncResults = UnwrapPromise<ReturnType<typeof syncFiles>>
@@ -76,9 +76,9 @@ export function stableResults(results: SyncResults): SyncResults {
 	}
 
 	// Extra sorting after seeing some cross-platform differences
-	sorted.deletedDecks = sorted.deletedDecks.sort()
-	sorted.deletedMedia = sorted.deletedMedia.sort()
-	sorted.synced = sorted.synced.sort((a, b) => {
+	sorted.deletedDecks = sorted.deletedDecks.toSorted()
+	sorted.deletedMedia = sorted.deletedMedia.toSorted()
+	sorted.synced = sorted.synced.toSorted((a, b) => {
 		// Glue everything together...
 		const aString =
 			a.note.deckName + a.note.fields.Front + a.note.fields.Back + (a.note.fields.Extra ?? '')

@@ -290,11 +290,11 @@ it('returns obsidian URLs unchanged', () => {
 
 it('returns remote HTTP URLs unchanged', () => {
 	expect(
-		resolveLink('http://example.com/page', {
+		resolveLink('https://example.com/page', {
 			cwd: '/base-path/cwd/',
 			type: 'link',
 		}),
-	).toBe('http://example.com/page')
+	).toBe('https://example.com/page')
 
 	expect(
 		resolveLink('https://example.com/page', {
@@ -328,7 +328,7 @@ it('parses valid obsidian vault links', () => {
 })
 
 it('returns undefined for non-obsidian URLs in parseObsidianVaultLink', () => {
-	expect(parseObsidianVaultLink('http://example.com')).toBeUndefined()
+	expect(parseObsidianVaultLink('https://example.com')).toBeUndefined()
 	expect(parseObsidianVaultLink('not a url')).toBeUndefined()
 })
 
@@ -352,13 +352,15 @@ function allCorrect(testPaths: string[], resolvedTestPaths: string[], test: stri
 		return false
 	}
 
-	let allCorrect = true
+	let allResolvedCorrectly = true
 	for (const [i, resolvedTestPath] of resolvedTestPaths.entries()) {
-		if (resolvedTestPath !== test) {
-			allCorrect = false
-			console.error(`Error resolving: ${testPaths[i]} --> ${resolvedTestPath}`)
+		if (resolvedTestPath === test) {
+			continue
 		}
+
+		allResolvedCorrectly = false
+		console.error(`Error resolving: ${testPaths[i]} --> ${resolvedTestPath}`)
 	}
 
-	return allCorrect
+	return allResolvedCorrectly
 }

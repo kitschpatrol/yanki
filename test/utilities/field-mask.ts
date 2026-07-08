@@ -29,29 +29,44 @@ export function fieldMask<T extends Record<string, unknown>>(
 	const result: Partial<T> = {}
 
 	for (const field of fields) {
-		const keys = field.split('.')
-		let current: Record<string, unknown> = result
-		let src: unknown = object
-
-		for (let i = 0; i < keys.length; i++) {
-			const key = keys[i] as keyof typeof src
-
-			if (i === keys.length - 1) {
-				if (typeof src === 'object' && src !== null && key in src) {
-					current[key] = (src as Record<string, unknown>)[key]
-				}
-			} else if (typeof src === 'object' && src !== null && key in src) {
-				if (!(key in current)) {
-					current[key] = {}
-				}
-
-				current = current[key] as Record<string, unknown>
-				src = src[key]
-			} else {
-				break
-			}
-		}
+		copyFieldPath(object, result, field.split('.'))
 	}
 
 	return result
+}
+
+/**
+ * Copies a single dot-delimited key path from the source object into the
+ * destination object, creating intermediate objects as needed.
+ *
+ * @param source - The object to read the value from.
+ * @param destination - The object to write the value into.
+ * @param keys - The key path, already split on dots.
+ */
+function copyFieldPath(
+	source: Record<string, unknown>,
+	destination: Record<string, unknown>,
+	keys: string[],
+): void {
+	let current = destination
+	let src: unknown = source
+
+	for (let i = 0; i < keys.length; i++) {
+		const key = keys[i] as keyof typeof src
+
+		if (i === keys.length - 1) {
+			if (typeof src === 'object' && src !== null && Object.hasOwn(src, key)) {
+				current[key] = (src as Record<string, unknown>)[key]
+			}
+		} else if (typeof src === 'object' && src !== null && Object.hasOwn(src, key)) {
+			if (!Object.hasOwn(current, key)) {
+				current[key] = {}
+			}
+
+			current = current[key] as Record<string, unknown>
+			src = src[key]
+		} else {
+			return
+		}
+	}
 }

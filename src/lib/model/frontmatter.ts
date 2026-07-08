@@ -1,6 +1,6 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
 
-const NEWLINE_REGEX = /\r?\n/
+const NEWLINE_REGEX = /\r?\n/v
 
 export type Frontmatter = {
 	deckName?: string

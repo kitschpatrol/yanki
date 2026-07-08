@@ -1,5 +1,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 /* eslint-disable unicorn/consistent-function-scoping */
+/* eslint-disable unicorn/no-this-outside-of-class -- `this` is the mdast-util-from-markdown CompileContext per the extension API */
 
 import type { Image, Link } from 'mdast'
 import type { CompileContext, Extension, Token } from 'mdast-util-from-markdown'

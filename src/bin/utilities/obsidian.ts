@@ -30,7 +30,7 @@ function getObsidianGlobalSettingsDirectory(): string {
 		}
 
 		case 'windows': {
-			return normalize(`${process.env.APPDATA}\\Obsidian`)
+			return normalize(String.raw`${process.env.APPDATA}\Obsidian`)
 		}
 	}
 }

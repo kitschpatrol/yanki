@@ -100,9 +100,9 @@ describe('areNotesEqual', () => {
 
 	it('handles unicode normalization in fields', () => {
 		// É as single codepoint vs. e + combining accent
-		const noteA = makeNote({ fields: { Back: '\u00E9', Front: 'f', YankiNamespace: 'test' } })
+		const noteA = makeNote({ fields: { Back: '\u{E9}', Front: 'f', YankiNamespace: 'test' } })
 		const noteB = makeNote({
-			fields: { Back: '\u0065\u0301', Front: 'f', YankiNamespace: 'test' },
+			fields: { Back: '\u{65}\u{301}', Front: 'f', YankiNamespace: 'test' },
 		})
 		expect(areNotesEqual(noteA, noteB)).toBe(true)
 	})
@@ -314,7 +314,6 @@ describe('updateNote', () => {
 	it('updates fields and tags via updateNoteModel', async () => {
 		const client = {
 			media: { getMediaFilesNames: vi.fn().mockResolvedValue(['existing.png']) },
-			// eslint-disable-next-line unicorn/no-useless-undefined
 			note: { updateNoteModel: vi.fn().mockResolvedValue(undefined) },
 		}
 
@@ -341,7 +340,7 @@ describe('updateNote', () => {
 				updateNoteModel: vi
 					.fn()
 					.mockRejectedValueOnce(new Error("Model 'Yanki - Basic' not found"))
-					// eslint-disable-next-line unicorn/no-useless-undefined
+
 					.mockResolvedValueOnce(undefined),
 			},
 		}
@@ -897,7 +896,7 @@ describe('reconcileMedia', () => {
 		const notes = [
 			makeNote({
 				fields: {
-					Back: '<img src="yanki-test-new-file.png" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/img.png">',
+					Back: '<img src="yanki-test-new-file.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/img.png">',
 					Front: 'front',
 					YankiNamespace: 'test',
 				},
@@ -947,7 +946,7 @@ describe('reconcileMedia', () => {
 		const notes = [
 			makeNote({
 				fields: {
-					Back: '<img src="yanki-test-file.png" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/img.png">',
+					Back: '<img src="yanki-test-file.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/img.png">',
 					Front: 'front',
 					YankiNamespace: 'test',
 				},
@@ -971,7 +970,7 @@ describe('reconcileMedia', () => {
 		const notes = [
 			makeNote({
 				fields: {
-					Back: '<img src="yanki-test-file.png" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/img.png">',
+					Back: '<img src="yanki-test-file.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/img.png">',
 					Front: 'front',
 					YankiNamespace: 'test',
 				},
@@ -981,7 +980,7 @@ describe('reconcileMedia', () => {
 		const result = await reconcileMedia(client as never, notes, 'test', false)
 		expect(result.reuploaded).toContain('yanki-test-file.png')
 		expect(client.media.storeMediaFile).toHaveBeenCalledWith(
-			expect.objectContaining({ url: 'http://example.com/img.png' }),
+			expect.objectContaining({ url: 'https://example.com/img.png' }),
 		)
 	})
 

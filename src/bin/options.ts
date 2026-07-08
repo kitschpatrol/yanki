@@ -1,4 +1,4 @@
-import { type Options } from 'yargs'
+import type { Options } from 'yargs'
 import { defaultGlobalOptions } from '../lib/shared/types'
 
 export const ankiAutoLaunchOption = {
@@ -38,6 +38,10 @@ export const verboseOption = {
 	},
 } as const satisfies Record<string, Options>
 
+/**
+ * Creates a yargs option that enables JSON output, with a command-specific
+ * description.
+ */
 export function jsonOption(describe: string) {
 	return {
 		json: {
@@ -58,6 +62,10 @@ export const dryRun = {
 	},
 } as const satisfies Record<string, Options>
 
+/**
+ * Creates a yargs option that sets the Yanki namespace, with a command-specific
+ * description.
+ */
 export function namespaceOption(describe: string) {
 	return {
 		namespace: {

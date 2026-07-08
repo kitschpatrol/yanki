@@ -63,7 +63,7 @@ function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
 
 	// Slugify without double-dashes, temporarily convert to spaces for truncation on word boundaries
 	return truncateOnWordBoundary(
-		slugify(legibleFilename.trim()).replaceAll(/-+/g, '-'),
+		slugify(legibleFilename.trim()).replaceAll(/-+/gv, '-'),
 		maxLength,
 		'...',
 		'-',

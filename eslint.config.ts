@@ -33,9 +33,7 @@ export default eslintConfig({
 					types: ['boolean', 'string', 'number', 'array'],
 				},
 			],
-			'ts/no-unsafe-type-assertion': 'off',
-			// Next major...
-			'unicorn/no-array-sort': 'off',
+			'unicorn/max-nested-calls': 'off', // Remove when ksc > 8.0.0
 		},
 	},
 	type: 'lib',

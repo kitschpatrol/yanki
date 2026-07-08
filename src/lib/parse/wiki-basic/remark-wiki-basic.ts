@@ -27,6 +27,7 @@ import { wikiBasic } from './micromark-extension-wiki-basic'
  * Images are also used for audio, and video, and other embeds in Obsidian...
  */
 const plugin: Plugin<unknown[], Root> = function (this: Processor) {
+	// eslint-disable-next-line unicorn/no-this-outside-of-class -- `this` is the unified Processor per the plugin API
 	const data = this.data() as {
 		fromMarkdownExtensions: FromMarkdownExtension[] | undefined
 		micromarkExtensions: MicromarkExtension[] | undefined

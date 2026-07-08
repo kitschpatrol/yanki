@@ -1,4 +1,4 @@
-/* eslint-disable node/no-unsupported-features/node-builtins, unicorn/no-useless-undefined */
+/* eslint-disable node/no-unsupported-features/node-builtins */
 import { expect, it, vi } from 'vitest'
 import type { FileAdapter } from '../src/lib/shared/types'
 import {
@@ -68,7 +68,7 @@ it('gets extension from URL via metadata', async () => {
 		status: 200,
 	})
 
-	const result = await getAnkiMediaFilenameExtension('http://example.com/image', fetchAdapter)
+	const result = await getAnkiMediaFilenameExtension('https://example.com/image', fetchAdapter)
 	expect(result).toBe('jpg')
 })
 
@@ -95,7 +95,7 @@ it('checks if remote URL exists', async () => {
 	const fileAdapter = createMockFileAdapter()
 	const fetchAdapter = vi.fn().mockResolvedValue({ status: 200 })
 
-	expect(await mediaAssetExists('http://example.com/image.png', fileAdapter, fetchAdapter)).toBe(
+	expect(await mediaAssetExists('https://example.com/image.png', fileAdapter, fetchAdapter)).toBe(
 		true,
 	)
 })
@@ -104,7 +104,7 @@ it('checks if remote URL does not exist', async () => {
 	const fileAdapter = createMockFileAdapter()
 	const fetchAdapter = vi.fn().mockResolvedValue({ status: 404 })
 
-	expect(await mediaAssetExists('http://example.com/missing.png', fileAdapter, fetchAdapter)).toBe(
+	expect(await mediaAssetExists('https://example.com/missing.png', fileAdapter, fetchAdapter)).toBe(
 		false,
 	)
 })

@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-global-this */
 /* eslint-disable node/no-unsupported-features/node-builtins */
 
 export const ENVIRONMENT =
@@ -6,11 +5,11 @@ export const ENVIRONMENT =
 
 export const PLATFORM =
 	ENVIRONMENT === 'browser'
-		? /windows/i.test(navigator.userAgent)
+		? /windows/iv.test(navigator.userAgent)
 			? 'windows'
-			: /mac/i.test(navigator.userAgent)
+			: /mac/iv.test(navigator.userAgent)
 				? 'mac'
-				: /linux/i.test(navigator.userAgent) || /ubuntu/i.test(navigator.userAgent)
+				: /linux/iv.test(navigator.userAgent) || /ubuntu/iv.test(navigator.userAgent)
 					? 'linux'
 					: 'other'
 		: ENVIRONMENT === 'node'
