@@ -2052,3 +2052,39 @@ describeWithFileFixture(
 		})
 	},
 )
+
+/**
+ * Confirm AnkiConnect error when native Anki cloze markup is used in a
+ * non-cloze Yanki note type.
+ *
+ * Reproduces https://github.com/kitschpatrol/yanki/issues/18
+ *
+ * Thanks `@Splintdewolfcry` for reporting.
+ *
+ * This is a "won't fix" because even in the Anki desktop, it's invalid to put
+ * any cloze markup in a non-cloze note type, and there is no reasonable means
+ * to escape the syntax.
+ */
+describeWithFileFixture(
+	'invalid cloze literal',
+	{
+		assetPath: './test/assets/test-invalid-cloze-literal/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('throws error when native Anki cloze markup is used in a non-cloze note type', async () => {
+			await expect(
+				syncFiles(context.markdownFiles, {
+					ankiConnectOptions: {
+						autoLaunch: false,
+					},
+					ankiWeb: false,
+					dryRun: false,
+					namespace: context.namespace,
+					syncMediaAssets: 'off',
+				}),
+			).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: cannot create note for unknown reason]`)
+		})
+	},
+)

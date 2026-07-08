@@ -16,6 +16,7 @@ export default cspellConfig({
 		'mdank',
 		'mdanki',
 		'metametapod',
+		'Splintdewolfcry',
 		'msvideo',
 		'namespac',
 		'pkill',

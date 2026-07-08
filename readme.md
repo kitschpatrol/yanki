@@ -170,6 +170,8 @@ The most minimal examples to "trigger" different note types are shown below, but
 
 You're free to use additional Markdown in your note files to style and structure the front and back of your flashcards.
 
+Note that you _can not_ mix Anki's native syntax (e.g. `{{c1::...` cloze markup) alongside your Yanki Markdown.
+
 ### Basic
 
 A **basic** card is created from any file with a `---`:
@@ -645,6 +647,8 @@ Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm
 - Removing one or more clozes from a note with multiple clozes can result in empty cards after syncing. The only way around this is to run the "Tools → Empty Cards..." command from Anki desktop application menu bar.
 
 - The Anki application lets you split the cards from a single note across multiple decks. (E.g. you might have a card with dozens of clozes, some of which you want to study under a different deck.) Yanki does _not_ support this scenario in the notes / cards it manages — it maintains a strict hierarchical relationship in which a note and its cards always live in a single deck. Notes may be deleted / recreated and study progress might be lost if this is attempted.
+
+- Anki does not let you use cloze syntax in note types that aren't explicitly configured to handle them. For this reason, don't [mix and match native Anki syntax](https://github.com/kitschpatrol/yanki/issues/18) alongside Yanki's Markdown syntax. If you do this, you risk receiving cryptic "cannot create note for unknown reason" errors from AnkiConnect.
 
 ## Maintainers
 
