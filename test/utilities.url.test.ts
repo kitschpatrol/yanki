@@ -49,6 +49,13 @@ it('recovers a protocol default port that the URL parser drops', () => {
 		host: 'https://ankiconnect.example.com',
 		port: 443,
 	})
+	expect(urlToHostAndPort('http://localhost')).toStrictEqual({
+		host: 'http://localhost',
+		port: 80,
+	})
+
+	// Protocols without a known default port still yield NaN.
+	expect(urlToHostAndPort('gopher://example.com')?.port).toBeNaN()
 
 	const roundTrip = urlToHostAndPort('https://ankiconnect.example.com:443')!
 	expect(hostAndPortToUrl(roundTrip.host, roundTrip.port)).toBe(

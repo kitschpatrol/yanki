@@ -293,10 +293,14 @@ export async function getUrlContentHash(
 
 // The WHATWG URL parser leaves `URL.port` empty when the port matches the
 // protocol's default, so an explicitly-typed default port (e.g. `:443` on
-// https) is otherwise silently dropped.
+// https) is otherwise silently dropped. Covers all "special schemes" with a
+// default port: https://url.spec.whatwg.org/#special-scheme
 const DEFAULT_PORT_BY_PROTOCOL: Record<string, number> = {
+	'ftp:': 21,
 	'http:': 80,
 	'https:': 443,
+	'ws:': 80,
+	'wss:': 443,
 }
 
 export function urlToHostAndPort(url: string): undefined | { host: string; port: number } {
@@ -312,7 +316,7 @@ export function urlToHostAndPort(url: string): undefined | { host: string; port:
 		// yield NaN, preserving the prior behavior for those.
 		port:
 			parsedUrl.port === ''
-				? (DEFAULT_PORT_BY_PROTOCOL[parsedUrl.protocol] ?? Number.NaN)
+				? (DEFAULT_PORT_BY_PROTOCOL[parsedUrl.protocol] ?? NaN)
 				: Number(parsedUrl.port),
 	}
 }
