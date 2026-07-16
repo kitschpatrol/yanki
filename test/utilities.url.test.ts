@@ -32,6 +32,37 @@ it('converts from url to host and port and back', () => {
 	expect(url).toBe('http://localhost:8765')
 })
 
+it('recovers a protocol default port that the URL parser drops', () => {
+	// The WHATWG URL parser normalizes away default ports, so an explicit
+	// `:443`/`:80` must still round-trip rather than becoming NaN.
+	expect(urlToHostAndPort('https://ankiconnect.example.com:443')).toStrictEqual({
+		host: 'https://ankiconnect.example.com',
+		port: 443,
+	})
+	expect(urlToHostAndPort('http://localhost:80')).toStrictEqual({
+		host: 'http://localhost',
+		port: 80,
+	})
+
+	// The same defaults apply when no port is given at all.
+	expect(urlToHostAndPort('https://ankiconnect.example.com')).toStrictEqual({
+		host: 'https://ankiconnect.example.com',
+		port: 443,
+	})
+	expect(urlToHostAndPort('http://localhost')).toStrictEqual({
+		host: 'http://localhost',
+		port: 80,
+	})
+
+	// Protocols without a known default port still yield NaN.
+	expect(urlToHostAndPort('gopher://example.com')?.port).toBeNaN()
+
+	const roundTrip = urlToHostAndPort('https://ankiconnect.example.com:443')!
+	expect(hostAndPortToUrl(roundTrip.host, roundTrip.port)).toBe(
+		'https://ankiconnect.example.com:443',
+	)
+})
+
 it('detects URLs correctly', () => {
 	// Unsupported Windows paths will throw warnings
 	const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
