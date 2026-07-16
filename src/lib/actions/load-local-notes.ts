@@ -80,7 +80,7 @@ export async function loadLocalNotes(
 
 			if (note.deckName === '') {
 				// TODO normalization?
-				note.deckName = deckNamesFromFilePaths[index]
+				note.deckName = deckNamesFromFilePaths[index] ?? ''
 			}
 
 			return {

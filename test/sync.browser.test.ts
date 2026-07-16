@@ -57,7 +57,7 @@ it('syncs notes', async () => {
 
 	// Stable results
 	syncResult.duration = 0
-	syncResult.synced[0].note.noteId = 0
+	syncResult.synced[0]!.note.noteId = 0
 
 	expect(syncResult).toMatchInlineSnapshot(`
 		{

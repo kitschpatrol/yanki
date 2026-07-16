@@ -437,7 +437,7 @@ describeWithFileFixture(
 			})
 
 			// Now change the synced note in a way that would require a model and deck update
-			const note = results.synced[0]
+			const note = results.synced[0]!
 			expect(note.filePath).toBeDefined()
 			const markdown = await fs.readFile(note.filePath!, 'utf8')
 			const updatedMarkdown = markdown.replace(
@@ -479,7 +479,7 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			const newNote = newModelResults.synced[0]
+			const newNote = newModelResults.synced[0]!
 
 			expect(newNote.note.noteId).toEqual(note.note.noteId)
 			expect(newNote.action).toEqual('updated')
@@ -540,7 +540,7 @@ describeWithFileFixture(
 	(context) => {
 		it('handles long frontmatter non-destructively', async () => {
 			// Saw some issues with frontmatter getting split into multiple lines after sync...
-			const initialLinesOfFrontmatter = await countLinesOfFrontmatter(context.markdownFiles[0])
+			const initialLinesOfFrontmatter = await countLinesOfFrontmatter(context.markdownFiles[0]!)
 
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
@@ -553,8 +553,8 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			expect(results.synced[0].filePath).toBeDefined()
-			const postSyncLinesOfFrontmatter = await countLinesOfFrontmatter(results.synced[0].filePath!)
+			expect(results.synced[0]!.filePath).toBeDefined()
+			const postSyncLinesOfFrontmatter = await countLinesOfFrontmatter(results.synced[0]!.filePath!)
 
 			// Make sure the number of frontmatter lines in the output matches the input
 			expect(initialLinesOfFrontmatter).toEqual(postSyncLinesOfFrontmatter)
@@ -640,7 +640,7 @@ describeWithFileFixture(
 			expect(stableResults(results)).toMatchSnapshot()
 
 			// Create a duplicate note with the same ID but different content
-			const filePathWithId = context.markdownFiles[0]
+			const filePathWithId = context.markdownFiles[0]!
 			const originalFileContent = await fs.readFile(filePathWithId, 'utf8')
 			const duplicateModifiedFileContent = originalFileContent.replace(
 				'Replace me',
@@ -1330,11 +1330,11 @@ describeWithFileFixture(
 			expect(stableResults(results)).toMatchSnapshot()
 
 			const deckStats = await context.yankiConnect.deck.getDeckStats({ decks: ['Test Deck'] })
-			const totalInDeck = Object.entries(deckStats)[0][1].total_in_deck
+			const totalInDeck = Object.entries(deckStats)[0]![1].total_in_deck
 			expect(totalInDeck).toBe(2)
 
 			// Now delete the Yanki-managed note from the file system and sync again
-			await fs.unlink(context.markdownFiles[0])
+			await fs.unlink(context.markdownFiles[0]!)
 			context.markdownFiles.shift()
 			context.allFiles.shift()
 
@@ -1355,7 +1355,7 @@ describeWithFileFixture(
 
 			// The existing note in the eponymous deck should still be there
 			const deckStats2 = await context.yankiConnect.deck.getDeckStats({ decks: ['Test Deck'] })
-			const totalInDeck2 = Object.entries(deckStats2)[0][1].total_in_deck
+			const totalInDeck2 = Object.entries(deckStats2)[0]![1].total_in_deck
 			expect(totalInDeck2).toBe(1)
 		})
 	},
@@ -1582,13 +1582,13 @@ describeWithFileFixture(
 			})
 
 			// Change to basic
-			const { filePath } = results.synced[0]
-			const markdown = await fs.readFile(filePath!, 'utf8')
+			const filePath = results.synced[0]!.filePath!
+			const markdown = await fs.readFile(filePath, 'utf8')
 			const updatedMarkdown = markdown
 				.replace('~~Cloze One~~\n', 'Front of card')
 				.replace('~~Cloze Two~~\n', '---')
 				.replace('~~Cloze Three~~\n', 'Back of card')
-			await fs.writeFile(filePath!, updatedMarkdown)
+			await fs.writeFile(filePath, updatedMarkdown)
 
 			expect(stableResults(results)).toMatchSnapshot()
 			const cards = await context.yankiConnect.card.findCards({ query: '*' })
@@ -1636,11 +1636,11 @@ describeWithFileFixture(
 			})
 
 			// Change to basic
-			const { filePath } = results.synced[0]
+			const filePath = results.synced[0]!.filePath!
 
-			const markdown = await fs.readFile(filePath!, 'utf8')
+			const markdown = await fs.readFile(filePath, 'utf8')
 			const updatedMarkdown = `${markdown}\n~~Cloze Four~~\n`
-			await fs.writeFile(filePath!, updatedMarkdown)
+			await fs.writeFile(filePath, updatedMarkdown)
 
 			expect(stableResults(results)).toMatchSnapshot()
 			const cards = await context.yankiConnect.card.findCards({ query: '*' })
@@ -1695,10 +1695,10 @@ describeWithFileFixture(
 			})
 
 			// Remove one of the clozes
-			const { filePath } = results.synced[0]
-			const markdown = await fs.readFile(filePath!, 'utf8')
+			const filePath = results.synced[0]!.filePath!
+			const markdown = await fs.readFile(filePath, 'utf8')
 			const updatedMarkdown = markdown.replace('~~Cloze Two~~\n', '')
-			await fs.writeFile(filePath!, updatedMarkdown)
+			await fs.writeFile(filePath, updatedMarkdown)
 
 			expect(stableResults(results)).toMatchSnapshot()
 
@@ -1909,7 +1909,7 @@ describeWithFileFixture(
 			})
 
 			expect(results.synced.length).toBe(1)
-			expect(results.synced[0].action).toBe('created')
+			expect(results.synced[0]!.action).toBe('created')
 
 			// Verify media was uploaded by finding it in Anki
 			const slugifiedNamespace = getSlugifiedNamespace(context.namespace)
@@ -1918,7 +1918,7 @@ describeWithFileFixture(
 			})
 
 			expect(mediaFiles.length).toBeGreaterThan(0)
-			const uploadedMediaFilename = mediaFiles[0]
+			const uploadedMediaFilename = mediaFiles[0]!
 
 			// Simulate user manually deleting the media file in Anki
 			await context.yankiConnect.media.deleteMediaFile({
@@ -1945,7 +1945,7 @@ describeWithFileFixture(
 
 			// The note itself is unchanged
 			expect(results2.synced.length).toBe(1)
-			expect(results2.synced[0].action).toBe('unchanged')
+			expect(results2.synced[0]!.action).toBe('unchanged')
 
 			// But the media should have been re-uploaded
 			const mediaFilesAfterResync = await context.yankiConnect.media.getMediaFilesNames({

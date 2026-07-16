@@ -164,7 +164,7 @@ function getHeadersString(
 			? headerKeys.map((key) => headers.get(key))
 			: headerKeys.map((key) => headers[key])
 	)
-		// eslint-disable-next-line ts/no-unnecessary-condition
+
 		.filter((value) => value !== null && value !== undefined)
 		.join('')
 

@@ -53,5 +53,5 @@ export function getAnkiMediaTags(htmlFragment: string): string[] {
 
 export function stripAnkiMediaTag(text: string): string {
 	const match = SOUND_TAG_REGEX.exec(text)
-	return match ? match[1] : text
+	return match?.[1] ?? text
 }

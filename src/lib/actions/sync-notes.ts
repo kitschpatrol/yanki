@@ -329,7 +329,7 @@ function selectNoteToKeep(duplicates: YankiNote[], remoteNote: undefined | Yanki
 				duplicate.fields.Front === remoteNote?.fields.Front &&
 				duplicate.fields.Back === remoteNote.fields.Back &&
 				duplicate.fields.Extra === remoteNote.fields.Extra,
-		) ?? duplicates[0] // Default to the first note if no content match is found
+		) ?? duplicates[0]! // Default to the first note if no content match is found
 	)
 }
 

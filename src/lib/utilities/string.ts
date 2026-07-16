@@ -120,7 +120,7 @@ function trimLeadingIndentation(strings: TemplateStringsArray, ...values: unknow
 
 	// Get leading white space of first line, and trim that much white space
 	// from subsequent lines
-	const leadingSpace = LEADING_WHITESPACE_REGEX.exec(lines[0])?.[0] ?? ''
+	const leadingSpace = LEADING_WHITESPACE_REGEX.exec(lines[0] ?? '')?.[0] ?? ''
 	const leadingSpaceRegex = new RegExp(`^${leadingSpace}`, 'v')
 	return lines.map((line) => line.replace(leadingSpaceRegex, '').trimEnd()).join('\n')
 }

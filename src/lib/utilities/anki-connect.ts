@@ -336,6 +336,10 @@ export async function getRemoteNotes(
 	return notes.filter((note): note is YankiNote => note !== undefined)
 }
 
+function getFieldValue(field: undefined | { value: string }): string {
+	return field?.value ?? ''
+}
+
 /**
  * Get all data from Anki required to populate the YankiNote type.
  *
@@ -449,10 +453,10 @@ async function getRemoteNotesById(
 			cards: ankiNote.cards,
 			deckName,
 			fields: {
-				Back: ankiNote.fields.Back.value ?? '',
-				...(ankiNote.fields.Extra !== undefined && { Extra: ankiNote.fields.Extra.value ?? '' }),
-				Front: ankiNote.fields.Front.value ?? '',
-				YankiNamespace: ankiNote.fields.YankiNamespace.value ?? '',
+				Back: getFieldValue(ankiNote.fields.Back),
+				...(ankiNote.fields.Extra !== undefined && { Extra: getFieldValue(ankiNote.fields.Extra) }),
+				Front: getFieldValue(ankiNote.fields.Front),
+				YankiNamespace: getFieldValue(ankiNote.fields.YankiNamespace),
 			},
 			modelName: ankiNote.modelName as YankiModelName, // Checked above
 			noteId: ankiNote.noteId,
@@ -706,7 +710,7 @@ export async function updateModelStyle(
 
 export async function getModelStyle(
 	client: YankiConnect,
-	modelName: string = yankiModelNames[0],
+	modelName: string = yankiModelNames[0]!,
 ): Promise<string> {
 	const { css } = await client.model.modelStyling({ modelName })
 	return css

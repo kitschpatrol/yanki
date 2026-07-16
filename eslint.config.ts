@@ -33,7 +33,6 @@ export default eslintConfig({
 					types: ['boolean', 'string', 'number', 'array'],
 				},
 			],
-			'unicorn/max-nested-calls': 'off', // Remove when ksc > 8.0.0
 		},
 	},
 	type: 'lib',

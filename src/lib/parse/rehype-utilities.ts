@@ -392,6 +392,8 @@ export async function mdastToHtml(
 				)
 			}
 		})
+
+		return CONTINUE
 	})
 
 	// Run the tree mutation promises over the <img> nodes
@@ -414,7 +416,7 @@ export async function mdastToHtml(
 		}
 
 		// Get dimensions from the alt text
-		const originalAltText = String(node.properties.alt ?? '')
+		const originalAltText = node.properties.alt ?? ''
 		const { alt, height, width } = parseDimensionsFromAltText(originalAltText)
 
 		if (alt === undefined) {
@@ -430,6 +432,8 @@ export async function mdastToHtml(
 		if (width !== undefined) {
 			node.properties.width = width
 		}
+
+		return CONTINUE
 	})
 
 	// Check for emptiness...
@@ -604,7 +608,7 @@ function isVisuallyEmpty(tree: HastRoot): boolean {
 
 	visit(tree, (node) => {
 		if (hasVisualContent) {
-			return
+			return EXIT
 		} // Early exit if visual content is found
 
 		if (node.type === 'element') {
@@ -641,6 +645,8 @@ function isVisuallyEmpty(tree: HastRoot): boolean {
 			hasVisualContent = true
 			return EXIT
 		}
+
+		return CONTINUE
 	})
 
 	return !hasVisualContent

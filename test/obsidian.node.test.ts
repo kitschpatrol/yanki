@@ -185,6 +185,7 @@ function checkWikiLinkResolution(html: string, basePath: string): void {
 
 		const resolvedSrc =
 			dataset.yankiMediaSrc ?? element.getAttribute('href') ?? element.getAttribute('src') ?? ''
+		// eslint-disable-next-line unicorn/prefer-dom-node-html-methods
 		const expectedSrc = element.getAttribute('alt') ?? dataset.yankiAltText ?? element.innerHTML
 
 		// Clean up for comparison, handling Obsidian vault links if present

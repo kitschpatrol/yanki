@@ -59,7 +59,9 @@ export async function getStyle(options: PartialDeep<GetStyleOptions>): Promise<s
 		cssSet.add(css)
 	}
 
-	if (cssSet.size === 0) {
+	const [firstCss] = cssSet
+
+	if (firstCss === undefined) {
 		throw new Error('No CSS found in any Yanki model.')
 	}
 
@@ -67,7 +69,7 @@ export async function getStyle(options: PartialDeep<GetStyleOptions>): Promise<s
 		throw new Error('Expected all Yanki models to have identical CSS.')
 	}
 
-	return [...cssSet][0]
+	return firstCss
 }
 
 export async function setStyle(options?: PartialDeep<SetStyleOptions>): Promise<SetStyleResult> {

@@ -166,7 +166,7 @@ export async function openAnki(basePath: string): Promise<void> {
 	// Allow CI to override the timeout (e.g. for launcher first-run download)
 	const timeoutFromEnvironment = Number(process.env.ANKI_CONNECT_TIMEOUT)
 	const maxWait =
-		Number.isNaN(timeoutFromEnvironment) || timeoutFromEnvironment === 0
+		timeoutFromEnvironment === 0 || Number.isNaN(timeoutFromEnvironment)
 			? 30_000
 			: timeoutFromEnvironment
 	const start = Date.now()

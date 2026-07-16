@@ -117,9 +117,9 @@ const allRemoteMediaUrls = [
 it('correctly detects existence or non-existence of media files', { timeout: 60_000 }, async () => {
 	const fileAdapter = await getDefaultFileAdapter()
 
-	expect(await mediaAssetExists(allLocalMediaPaths[0], fileAdapter, fetchAdapter)).toBe(true)
+	expect(await mediaAssetExists(allLocalMediaPaths[0]!, fileAdapter, fetchAdapter)).toBe(true)
 
-	expect(await mediaAssetExists(allRemoteMediaUrls[0], fileAdapter, fetchAdapter)).toBe(true)
+	expect(await mediaAssetExists(allRemoteMediaUrls[0]!, fileAdapter, fetchAdapter)).toBe(true)
 
 	expect(
 		await mediaAssetExists('./6C9CFA9A-5D1A-4B55-A404-64DBFA034B93.jpg', fileAdapter, fetchAdapter),
@@ -583,7 +583,7 @@ it('gets content hash from file metadata', { timeout: 60_000 }, async () => {
 	// Not stable across checkouts
 	const compactResults = results.map(
 		(entry) =>
-			`${Object.keys(entry)[0]}: ${Object.values(entry)[0].replaceAll(/[\da-f]{16}/gv, 'XXXXXXXXXXXXXXXX')}`,
+			`${Object.keys(entry)[0]}: ${Object.values(entry)[0]!.replaceAll(/[\da-f]{16}/gv, 'XXXXXXXXXXXXXXXX')}`,
 	)
 
 	expect(compactResults).toMatchInlineSnapshot(`

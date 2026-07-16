@@ -56,7 +56,7 @@ export async function setNoteIdInFrontmatter(
 
 			// Strip leading empty line if present
 			// (This is a common artifact of formatting Markdown files with frontmatter)
-			if (markdownWithoutFrontmatter[0].trim() === '') {
+			if (markdownWithoutFrontmatter[0]?.trim() === '') {
 				return markdownWithoutFrontmatter.slice(1).join('\n')
 			}
 
@@ -83,7 +83,7 @@ function getFrontmatterRange(
 	const lines = markdown.split(NEWLINE_REGEX)
 
 	// Ensure that the frontmatter is at the top of the file
-	if (!lines.join('').trim().startsWith('---')) {
+	if (!lines.join('').trimStart().startsWith('---')) {
 		return [undefined, undefined]
 	}
 

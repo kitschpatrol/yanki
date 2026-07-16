@@ -30,7 +30,7 @@ export function permute(...strings: Array<string | string[]>): string[] {
 			return
 		}
 
-		const current = strings[index]
+		const current = strings[index]!
 		if (Array.isArray(current)) {
 			for (const aString of current) {
 				backtrack(index + 1, [...part, aString])

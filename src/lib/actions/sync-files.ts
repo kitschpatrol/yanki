@@ -151,7 +151,7 @@ export async function syncFiles(
 
 			// Replace the renamed notes with the reloaded notes
 			for (const [index, renamedNote] of renamedLocalNotes.entries()) {
-				renamedNote.note = reloadedLocalNotes[index].note
+				renamedNote.note = reloadedLocalNotes[index]!.note
 			}
 		}
 	}
@@ -178,7 +178,7 @@ export async function syncFiles(
 	const liveNotes = synced.filter((note) => note.action !== 'deleted') as SyncedFile[]
 
 	for (const [index, loadedAndRenamedNote] of renamedLocalNotes.entries()) {
-		const liveNote = liveNotes[index]
+		const liveNote = liveNotes[index]!
 
 		if (
 			(loadedAndRenamedNote.note.noteId === undefined ||
@@ -240,7 +240,7 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 
 	const totalSynced = synced.filter((note) => note.action !== 'deleted').length
 	const totalRenamed = synced.filter((note) => note.filePath !== note.filePathOriginal).length
-	const ankiUnreachable = actionCounts.ankiUnreachable > 0
+	const ankiUnreachable = (actionCounts.ankiUnreachable ?? 0) > 0
 
 	lines.push(
 		`${result.dryRun ? 'Will sync' : ankiUnreachable ? 'Failed to sync' : 'Successfully synced'} ${totalSynced} ${plur('note', totalSynced)} to Anki${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,

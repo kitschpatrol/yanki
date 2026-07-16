@@ -158,7 +158,7 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 		// If the first node is a text node with a number in it, we treat it as the
 		// cloze number
 		const [firstChild] = node.children
-		if (node.children.length > 0 && isText(firstChild)) {
+		if (firstChild !== undefined && isText(firstChild)) {
 			// Detect a bunch of number variations at the start of the cloze...
 			// But there must be extra content after the number, otherwise
 			// the leading number _is_ the cloze
@@ -205,6 +205,8 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 		parent.children.splice(index, 1, ...clozeNodes)
 
 		clozeIndex += 1
+
+		return CONTINUE
 	})
 
 	return ast
@@ -308,6 +310,8 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 			probableType = `Yanki - Cloze`
 			return EXIT
 		}
+
+		return CONTINUE
 	})
 	if (probableType !== undefined) {
 		return probableType
@@ -342,6 +346,8 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 		}
 
 		lastNode = node
+
+		return CONTINUE
 	})
 
 	// Not noteworthy... if (probableType === undefined) { Console.warn('Could not
@@ -409,6 +415,8 @@ function isLastVisibleNodeEmphasisWithOthers(ast: Root): boolean {
 			visibleCount++ // Increment count for every visible node
 			return SKIP
 		}
+
+		return CONTINUE
 	})
 
 	return lastVisibleNode?.type === 'emphasis' && visibleCount > 1
@@ -468,6 +476,8 @@ export function removeLastEmphasis(ast: Root): Emphasis | undefined {
 		lastEmphasisNode = node
 		lastEmphasisParent = parent
 		lastEmphasisIndex = index
+
+		return CONTINUE
 	})
 
 	// Remove the last emphasis node if it exists

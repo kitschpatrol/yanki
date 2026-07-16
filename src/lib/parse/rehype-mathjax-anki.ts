@@ -35,7 +35,7 @@ const plugin: Plugin<unknown[], Root> = function () {
 			if (
 				node.tagName === 'pre' &&
 				node.children.length === 1 &&
-				preChild.type === 'element' &&
+				preChild?.type === 'element' &&
 				preChild.tagName === 'code' &&
 				Array.isArray(preChild.properties.className) &&
 				preChild.properties.className.includes('language-math')
@@ -77,6 +77,8 @@ const plugin: Plugin<unknown[], Root> = function () {
 					{ type: 'text', value: isBlock ? String.raw`\]` : String.raw`\)` },
 				]
 			}
+
+			return CONTINUE
 		})
 	}
 }

@@ -1,45 +1,23 @@
-export {
-	cleanNotes,
-	type CleanOptions,
-	type CleanResult,
-	defaultCleanOptions,
-	formatCleanResult,
-} from './actions/clean'
-export { defaultListOptions, formatListResult, listNotes, type ListOptions } from './actions/list'
-export {
-	defaultRenameFilesOptions,
-	renameFiles,
-	type RenameFilesOptions,
-	type RenameFilesResult,
-} from './actions/rename'
+export type { CleanOptions, CleanResult } from './actions/clean'
+export { cleanNotes, defaultCleanOptions, formatCleanResult } from './actions/clean'
+export type { ListOptions } from './actions/list'
+export { defaultListOptions, formatListResult, listNotes } from './actions/list'
+export type { RenameFilesOptions, RenameFilesResult } from './actions/rename'
+export { defaultRenameFilesOptions, renameFiles } from './actions/rename'
+export type { GetStyleOptions, SetStyleOptions, SetStyleResult } from './actions/style'
 export {
 	defaultGetStyleOptions,
 	defaultSetStyleOptions,
 	formatSetStyleResult,
 	getStyle,
-	type GetStyleOptions,
 	setStyle,
-	type SetStyleOptions,
-	type SetStyleResult,
 } from './actions/style'
-export {
-	defaultSyncFilesOptions,
-	formatSyncFilesResult,
-	syncFiles,
-	type SyncFilesOptions,
-	type SyncFilesResult,
-} from './actions/sync-files'
-export {
-	defaultSyncNotesOptions,
-	syncNotes,
-	type SyncNotesOptions,
-	type SyncNotesResult,
-} from './actions/sync-notes'
-export { type YankiNote } from './model/note'
-export {
-	defaultGetNoteFromMarkdownOptions,
-	getNoteFromMarkdown,
-	type GetNoteFromMarkdownOptions,
-} from './parse/parse'
-export { type FetchAdapter, type FileAdapter } from './shared/types'
+export type { SyncFilesOptions, SyncFilesResult } from './actions/sync-files'
+export { defaultSyncFilesOptions, formatSyncFilesResult, syncFiles } from './actions/sync-files'
+export type { SyncNotesOptions, SyncNotesResult } from './actions/sync-notes'
+export { defaultSyncNotesOptions, syncNotes } from './actions/sync-notes'
+export type { YankiNote } from './model/note'
+export type { GetNoteFromMarkdownOptions } from './parse/parse'
+export { defaultGetNoteFromMarkdownOptions, getNoteFromMarkdown } from './parse/parse'
+export type { FetchAdapter, FileAdapter } from './shared/types'
 export { hostAndPortToUrl, urlToHostAndPort } from './utilities/url'

@@ -45,7 +45,7 @@ export function getFileExtensionForMimeType(mimeType: string): MediaSupportedExt
 
 	// Strip parameters (e.g. "image/gif; charset=binary") and normalize case —
 	// Content-Type type/subtype is case-insensitive per RFC 9110.
-	const normalizedMimeType = mimeType.split(';', 1)[0].trim().toLowerCase()
+	const normalizedMimeType = (mimeType.split(';', 1)[0] ?? '').trim().toLowerCase()
 	if (normalizedMimeType === '') {
 		return undefined
 	}
