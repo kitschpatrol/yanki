@@ -119,8 +119,9 @@ export async function syncFiles(
 
 	// In Obsidian, note contents might change if the file name changes
 	// because intra-note links might have been updates, so we have to check
-	// for this and reload the notes
-	if (obsidianVault !== undefined) {
+	// for this and reload the notes. Skipped during dry runs, since no files
+	// are actually renamed and the new file paths don't exist on disk.
+	if (obsidianVault !== undefined && !dryRun) {
 		// Check to see if any notes were renamed
 		const notesWereRenamed = renamedLocalNotes.some(
 			(renamedNote) => renamedNote.filePath !== renamedNote.filePathOriginal,

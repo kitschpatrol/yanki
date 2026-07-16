@@ -168,6 +168,97 @@ describeWithFileFixture(
 	},
 )
 
+// The two notes in this fixture are named so that managed renaming inverts
+// their sort order: 'aa first.md' → 'Zebra prompt.md' and 'zz last.md' →
+// 'Apple prompt.md'. The Obsidian note reload in syncFiles pairs reloaded
+// notes with renamed notes by index, which is only safe if renameNotes and
+// loadLocalNotes agree on sort order.
+describeWithFileFixture(
+	'obsidian reload pairing when renames change sort order',
+	{
+		assetPath: './test/assets/test-rename-order/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it(
+			'pairs reloaded notes with the correct files when renames invert file sort order',
+			{ timeout: 60_000 },
+			async () => {
+				const results = await syncFiles(context.markdownFiles, {
+					allFilePaths: context.allFiles,
+					ankiConnectOptions: {
+						autoLaunch: false,
+					},
+					ankiWeb: false,
+					basePath: context.tempAssetPath,
+					dryRun: false,
+					manageFilenames: 'prompt',
+					namespace: context.namespace,
+					obsidianVault: 'test-rename-order',
+					syncMediaAssets: 'off',
+				})
+
+				const zebra = results.synced.find((result) =>
+					result.filePathOriginal?.endsWith('aa first.md'),
+				)
+				const apple = results.synced.find((result) =>
+					result.filePathOriginal?.endsWith('zz last.md'),
+				)
+
+				// Sanity: the renames happened and inverted the files' sort order
+				expect(zebra?.filePath?.endsWith('Zebra prompt.md')).toBe(true)
+				expect(apple?.filePath?.endsWith('Apple prompt.md')).toBe(true)
+
+				// Each synced entry's note must be the note parsed from its own
+				// file, not from the neighbor that swapped sort positions with it
+				expect(zebra?.note.fields.Front).toContain('Zebra prompt')
+				expect(apple?.note.fields.Front).toContain('Apple prompt')
+
+				// And on disk, each renamed file must still hold its own content
+				const zebraMarkdown = await fs.readFile(zebra!.filePath!, 'utf8')
+				const appleMarkdown = await fs.readFile(apple!.filePath!, 'utf8')
+				expect(zebraMarkdown).toContain('Zebra prompt')
+				expect(appleMarkdown).toContain('Apple prompt')
+			},
+		)
+	},
+)
+
+describeWithFileFixture(
+	'obsidian dry-run rename reload',
+	{
+		assetPath: './test/assets/test-rename-order/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it(
+			'reloads notes without reading renamed paths that were never created during a dry run',
+			{ timeout: 60_000 },
+			async () => {
+				// A dry run skips the on-disk renames, but still reports the new
+				// file paths, so the Obsidian note reload must not read from them
+				const results = await syncFiles(context.markdownFiles, {
+					allFilePaths: context.allFiles,
+					ankiConnectOptions: {
+						autoLaunch: false,
+					},
+					ankiWeb: false,
+					basePath: context.tempAssetPath,
+					dryRun: true,
+					manageFilenames: 'prompt',
+					namespace: context.namespace,
+					obsidianVault: 'test-rename-order',
+					syncMediaAssets: 'off',
+				})
+
+				expect(results.synced).toHaveLength(2)
+			},
+		)
+	},
+)
+
 function checkWikiLinkResolution(html: string, basePath: string): void {
 	const { document } = parseHTML(html)
 	const elements = document.querySelectorAll('[data-yanki-src-original]')
