@@ -19,6 +19,12 @@ it('parses an https URL with explicit port', () => {
 	expect(result.port).toBe(8443)
 })
 
+it('parses an https URL with an implicit default port', () => {
+	const result = urlToHostAndPortValidated('https://example.com:443')
+	expect(result.host).toBe('https://example.com')
+	expect(result.port).toBe(443)
+})
+
 it('throws for an invalid URL', () => {
 	expect(() => urlToHostAndPortValidated('not a url')).toThrowErrorMatchingInlineSnapshot(
 		`[Error: Invalid AnkiConnect URL: "not a url"]`,
