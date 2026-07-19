@@ -2,6 +2,7 @@ import { globby } from 'globby'
 import { HTMLElement, parseHTML } from 'linkedom'
 import nodeFs from 'node:fs'
 import fs from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 import { expect, it } from 'vitest'
 import { detectVault } from '../src/bin/utilities/obsidian'
@@ -78,6 +79,65 @@ it('correctly resolves obsidian wiki links', async () => {
 		checkWikiLinkResolution(noteHtml, basePath)
 	}
 })
+
+// Question marks are valid in note file names on macOS and Linux, but not on
+// Windows, so the "?" file name is created by renaming at test time — a
+// committed "?" in a path would break git checkout on Windows CI runners.
+// https://github.com/kitschpatrol/yanki-obsidian/issues/75
+it.skipIf(PLATFORM === 'windows')(
+	'resolves links to notes with question marks in their file names',
+	async () => {
+		const tempAssetPath = normalize(
+			path.join(os.tmpdir(), `yanki-test-${Date.now()}`, 'test-question-mark'),
+		)
+		// eslint-disable-next-line node/no-unsupported-features/node-builtins
+		await fs.cp('./test/assets/test-question-mark', tempAssetPath, {
+			preserveTimestamps: true,
+			recursive: true,
+		})
+		await fs.rename(
+			path.join(tempAssetPath, 'Cards/How much is 2+2=.md'),
+			path.join(tempAssetPath, 'Cards/How much is 2+2=?.md'),
+		)
+
+		try {
+			const noteFile = path.join(tempAssetPath, 'Cards/How much is 2+2=?.md')
+
+			const allFilePathsRaw = await globby('**/*', {
+				absolute: true,
+				cwd: tempAssetPath,
+			})
+			allFilePathsRaw.sort()
+			const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
+
+			const markdown = await fs.readFile(noteFile, 'utf8')
+
+			const note = await getNoteFromMarkdown(markdown, {
+				allFilePaths,
+				basePath: tempAssetPath,
+				cwd: normalize(path.dirname(noteFile)),
+				namespace: 'test',
+				obsidianVault: 'test-question-mark',
+				syncMediaAssets: 'off',
+			})
+
+			const html = `${note.fields.Front}${note.fields.Back}${note.fields.Extra}`
+			const { document } = parseHTML(html)
+			const links = [...document.querySelectorAll('a[data-yanki-src-original]')]
+
+			// The note links to itself twice, once by vault-root-relative path and
+			// once by bare wiki name
+			expect(links).toHaveLength(2)
+
+			const expectedHref = `obsidian://open?vault=test-question-mark&file=${encodeURIComponent('/Cards/How much is 2+2=?.md')}`
+			for (const link of links) {
+				expect(link.getAttribute('href')).toBe(expectedHref)
+			}
+		} finally {
+			await fs.rm(path.dirname(tempAssetPath), { force: true, recursive: true })
+		}
+	},
+)
 
 describeWithFileFixture(
 	'obsidian vault sync',

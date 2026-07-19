@@ -82,6 +82,47 @@ it('resolves wiki links with many dots and a weird extension', () => {
 	)
 })
 
+// Question marks are valid in note file names on macOS and Linux
+// https://github.com/kitschpatrol/yanki-obsidian/issues/75
+it('resolves file paths with question marks in their names', () => {
+	expect(
+		resolveLink('Cards/How much is 2+2=?.md', {
+			allFilePaths: ['/base-path/vault/Cards/How much is 2+2=?.md'],
+			basePath: '/base-path/vault',
+			cwd: '/base-path/vault/Cards',
+			type: 'link',
+		}),
+	).toBe('/base-path/vault/Cards/How much is 2+2=?.md')
+})
+
+// https://github.com/kitschpatrol/yanki-obsidian/issues/75
+it('resolves file paths with question marks in their names to obsidian URLs', () => {
+	expect(
+		resolveLink('Cards/How much is 2+2=?.md', {
+			allFilePaths: ['/base-path/vault/Cards/How much is 2+2=?.md'],
+			basePath: '/base-path/vault',
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/vault/Cards',
+			obsidianVaultName: 'test-vault',
+			type: 'link',
+		}),
+	).toBe('obsidian://open?vault=test-vault&file=%2FCards%2FHow%20much%20is%202%2B2%3D%3F.md')
+})
+
+// https://github.com/kitschpatrol/yanki-obsidian/issues/75
+it('resolves wiki name links with question marks in their names', () => {
+	expect(
+		resolveLink('How much is 2+2=?', {
+			allFilePaths: ['/base-path/vault/Cards/How much is 2+2=?.md'],
+			basePath: '/base-path/vault',
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/vault/Cards',
+			obsidianVaultName: 'test-vault',
+			type: 'link',
+		}),
+	).toBe('obsidian://open?vault=test-vault&file=%2FCards%2FHow%20much%20is%202%2B2%3D%3F.md')
+})
+
 it('resolves a named file link with a space in the vault name', () => {
 	expect(
 		resolveLink('test pdf.pdf', {
