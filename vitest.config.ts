@@ -45,6 +45,12 @@ export default defineConfig({
 								exclude: ['test/**/*.node.test.ts'],
 								include: ['test/**/*.test.ts'],
 								name: 'browser',
+								// Run after the node project, never concurrently with it, since
+								// both projects share Anki state and get their own scheduling
+								// pools that fileParallelism / maxWorkers do not serialize
+								sequence: {
+									groupOrder: 1,
+								},
 								testTimeout: isSlow ? 30_000 : 5000,
 							},
 						},
@@ -57,6 +63,9 @@ export default defineConfig({
 					include: ['test/**/*.test.ts'],
 					name: 'node',
 					root: path.resolve(path.dirname(fileURLToPath(import.meta.url))),
+					sequence: {
+						groupOrder: 0,
+					},
 					testTimeout: isSlow ? 30_000 : 5000,
 				},
 			},
