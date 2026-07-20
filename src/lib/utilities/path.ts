@@ -6,7 +6,12 @@ import slash from 'slash'
 import { splitAtFirstMatch } from './string'
 
 const WINDOWS_DRIVE_LETTER_REGEX = /^[A-Z]:/iv
-const QUERY_FRAGMENT_START_REGEX = /[#?^]/v
+// Obsidian anchor delimiters: `#heading` and `#^block` (and bare `^block`).
+// `?` is deliberately absent: it has no meaning in Obsidian links or local
+// markdown links, and is a legal file name character on macOS and Linux.
+// Remote URLs (where `?` queries are real) never reach this code.
+// https://github.com/kitschpatrol/yanki/issues/20
+const QUERY_FRAGMENT_START_REGEX = /[#^]/v
 
 // Unused...
 // function stripLeadingSlash(filePath: string): string {
@@ -155,33 +160,46 @@ export function getBaseAndQueryParts(filePath: string): [string, string | undefi
 	return [path.join(directoryPath, base), query]
 }
 
+/**
+ * Get every plausible base and anchor interpretation of a file path whose name
+ * may contain anchor delimiter characters (`#`, `^`), ordered from the longest
+ * literal file name (no anchor at all) to the shortest (anchor starts at the
+ * first delimiter in the file name, matching Obsidian's anchor syntax).
+ * Delimiters in directory names are never treated as anchor starts.
+ *
+ * File names may legitimately contain these characters, so callers should try
+ * candidates in order against a list of real files instead of assuming the
+ * first delimiter starts an anchor.
+ * https://github.com/kitschpatrol/yanki/issues/20
+ */
+export function getBaseAndQueryCandidates(
+	filePath: string,
+): Array<{ base: string; query: string | undefined }> {
+	const directoryPath = path.dirname(filePath)
+	const fileName = path.basename(filePath)
+
+	const candidates: Array<{ base: string; query: string | undefined }> = [
+		{ base: path.join(directoryPath, fileName), query: undefined },
+	]
+
+	for (let index = fileName.length - 1; index >= 0; index--) {
+		if (QUERY_FRAGMENT_START_REGEX.test(fileName.charAt(index))) {
+			candidates.push({
+				base: path.join(directoryPath, fileName.slice(0, index)),
+				query: fileName.slice(index),
+			})
+		}
+	}
+
+	return candidates
+}
+
 export function getBase(filePath: string): string {
 	return getBaseAndQueryParts(filePath)[0]
 }
 
 export function getQuery(filePath: string): string {
 	return getBaseAndQueryParts(filePath).at(1) ?? ''
-}
-
-function hasExtension(filePath: string): boolean {
-	return getExtension(filePath) !== ''
-}
-
-export function getExtension(filePath: string): string {
-	return path.extname(getBase(filePath))
-}
-
-export function addExtensionIfMissing(filePath: string, extension: string): string {
-	if (hasExtension(filePath)) {
-		return filePath
-	}
-
-	return addExtension(filePath, extension)
-}
-
-export function addExtension(filePath: string, extension: string): string {
-	const [base, query] = getBaseAndQueryParts(filePath)
-	return `${base}.${extension}${query ?? ''}`
 }
 
 // Function quantifyPathDistance(relativePath: string): { down: number; up: number } {

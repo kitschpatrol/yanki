@@ -2,6 +2,7 @@ import { globby } from 'globby'
 import { HTMLElement, parseHTML } from 'linkedom'
 import nodeFs from 'node:fs'
 import fs from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 import { expect, it } from 'vitest'
 import { detectVault } from '../src/bin/utilities/obsidian'
@@ -78,6 +79,139 @@ it('correctly resolves obsidian wiki links', async () => {
 		checkWikiLinkResolution(noteHtml, basePath)
 	}
 })
+
+// Question marks are valid in note file names on macOS and Linux, but not on
+// Windows, so the "?" file name is created by renaming at test time — a
+// committed "?" in a path would break git checkout on Windows CI runners.
+//https://github.com/kitschpatrol/yanki/issues/20
+it.skipIf(PLATFORM === 'windows')(
+	'resolves links to notes with question marks in their file names',
+	async () => {
+		const tempAssetPath = normalize(
+			path.join(os.tmpdir(), `yanki-test-${Date.now()}`, 'test-question-mark'),
+		)
+		// eslint-disable-next-line node/no-unsupported-features/node-builtins
+		await fs.cp('./test/assets/test-question-mark', tempAssetPath, {
+			preserveTimestamps: true,
+			recursive: true,
+		})
+		await fs.rename(
+			path.join(tempAssetPath, 'Cards/How much is 2+2=.md'),
+			path.join(tempAssetPath, 'Cards/How much is 2+2=?.md'),
+		)
+		await fs.copyFile(
+			'./test/assets/test-obsidian-vault/yanki image.jpg',
+			path.join(tempAssetPath, 'Cards/question mark image?.jpg'),
+		)
+
+		try {
+			const noteFile = path.join(tempAssetPath, 'Cards/How much is 2+2=?.md')
+
+			const allFilePathsRaw = await globby('**/*', {
+				absolute: true,
+				cwd: tempAssetPath,
+			})
+			allFilePathsRaw.sort()
+			const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
+
+			const markdown = await fs.readFile(noteFile, 'utf8')
+
+			const note = await getNoteFromMarkdown(markdown, {
+				allFilePaths,
+				basePath: tempAssetPath,
+				cwd: normalize(path.dirname(noteFile)),
+				namespace: 'test',
+				obsidianVault: 'test-question-mark',
+				syncMediaAssets: 'off',
+			})
+
+			const html = `${note.fields.Front}${note.fields.Back}${note.fields.Extra}`
+			const { document } = parseHTML(html)
+			const links = [...document.querySelectorAll('a[data-yanki-src-original]')]
+
+			// The note links to itself twice, once by vault-root-relative path and
+			// once by bare wiki name
+			expect(links).toHaveLength(2)
+
+			const expectedHref = `obsidian://open?vault=test-question-mark&file=${encodeURIComponent('/Cards/How much is 2+2=?.md')}`
+			for (const link of links) {
+				expect(link.getAttribute('href')).toBe(expectedHref)
+			}
+
+			// Media embeds of files with question marks in their names must keep
+			// the literal path in their media src
+			const images = [...document.querySelectorAll('img[data-yanki-media-src]')]
+			expect(images).toHaveLength(1)
+			const [image] = images
+			if (!(image instanceof HTMLElement)) {
+				throw new TypeError('Expected image embed to be an HTMLElement')
+			}
+
+			expect((image.dataset as DOMStringMap).yankiMediaSrc).toBe(
+				path.join(tempAssetPath, 'Cards/question mark image?.jpg'),
+			)
+
+			// With media syncing enabled, the question-mark asset must be found on
+			// disk, hashed, and assigned a safe Anki media filename
+			const noteSyncedMedia = await getNoteFromMarkdown(markdown, {
+				allFilePaths,
+				basePath: tempAssetPath,
+				cwd: normalize(path.dirname(noteFile)),
+				namespace: 'test',
+				obsidianVault: 'test-question-mark',
+				syncMediaAssets: 'local',
+			})
+
+			const htmlSyncedMedia = `${noteSyncedMedia.fields.Front}${noteSyncedMedia.fields.Back}${noteSyncedMedia.fields.Extra}`
+			const { document: documentSyncedMedia } = parseHTML(htmlSyncedMedia)
+			const syncedImages = [...documentSyncedMedia.querySelectorAll('img[data-yanki-media-src]')]
+			expect(syncedImages).toHaveLength(1)
+			const [syncedImage] = syncedImages
+			if (!(syncedImage instanceof HTMLElement)) {
+				throw new TypeError('Expected image embed to be an HTMLElement')
+			}
+
+			const syncedImageDataset = syncedImage.dataset as DOMStringMap
+
+			// Sync is only marked true if the file at the literal "?" path was
+			// actually found and content-hashed through the file adapter
+			expect(syncedImageDataset.yankiMediaSync).toBe('true')
+
+			// Anki fetches the asset from the literal path
+			expect(syncedImageDataset.yankiMediaSrc).toBe(
+				path.join(tempAssetPath, 'Cards/question mark image?.jpg'),
+			)
+
+			// The stored media filename is a hashed slug with no question mark
+			const syncedImageSrc = syncedImage.getAttribute('src') ?? ''
+			expect(syncedImageSrc.endsWith('.jpg')).toBe(true)
+			expect(syncedImageSrc).not.toContain('?')
+			expect(syncedImageSrc).not.toBe(syncedImageDataset.yankiMediaSrc)
+
+			// Without a vault, links resolve to plain absolute paths, and the
+			// question mark must be percent-encoded so the href parses as a path
+			const notePlain = await getNoteFromMarkdown(markdown, {
+				allFilePaths,
+				basePath: tempAssetPath,
+				cwd: normalize(path.dirname(noteFile)),
+				namespace: 'test',
+				syncMediaAssets: 'off',
+			})
+
+			const htmlPlain = `${notePlain.fields.Front}${notePlain.fields.Back}${notePlain.fields.Extra}`
+			const { document: documentPlain } = parseHTML(htmlPlain)
+			const linksPlain = [...documentPlain.querySelectorAll('a[data-yanki-src-original]')]
+			expect(linksPlain).toHaveLength(2)
+
+			const expectedPlainHref = encodeURI(normalize(noteFile)).replaceAll('?', '%3F')
+			for (const link of linksPlain) {
+				expect(link.getAttribute('href')).toBe(expectedPlainHref)
+			}
+		} finally {
+			await fs.rm(path.dirname(tempAssetPath), { force: true, recursive: true })
+		}
+	},
+)
 
 describeWithFileFixture(
 	'obsidian vault sync',
