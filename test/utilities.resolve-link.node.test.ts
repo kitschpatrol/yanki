@@ -83,7 +83,7 @@ it('resolves wiki links with many dots and a weird extension', () => {
 })
 
 // Question marks are valid in note file names on macOS and Linux
-// https://github.com/kitschpatrol/yanki-obsidian/issues/75
+//https://github.com/kitschpatrol/yanki/issues/20
 it('resolves file paths with question marks in their names', () => {
 	expect(
 		resolveLink('Cards/How much is 2+2=?.md', {
@@ -95,7 +95,7 @@ it('resolves file paths with question marks in their names', () => {
 	).toBe('/base-path/vault/Cards/How much is 2+2=?.md')
 })
 
-// https://github.com/kitschpatrol/yanki-obsidian/issues/75
+//https://github.com/kitschpatrol/yanki/issues/20
 it('resolves file paths with question marks in their names to obsidian URLs', () => {
 	expect(
 		resolveLink('Cards/How much is 2+2=?.md', {
@@ -109,7 +109,7 @@ it('resolves file paths with question marks in their names to obsidian URLs', ()
 	).toBe('obsidian://open?vault=test-vault&file=%2FCards%2FHow%20much%20is%202%2B2%3D%3F.md')
 })
 
-// https://github.com/kitschpatrol/yanki-obsidian/issues/75
+//https://github.com/kitschpatrol/yanki/issues/20
 it('resolves wiki name links with question marks in their names', () => {
 	expect(
 		resolveLink('How much is 2+2=?', {
@@ -121,6 +121,36 @@ it('resolves wiki name links with question marks in their names', () => {
 			type: 'link',
 		}),
 	).toBe('obsidian://open?vault=test-vault&file=%2FCards%2FHow%20much%20is%202%2B2%3D%3F.md')
+})
+
+//https://github.com/kitschpatrol/yanki/issues/20
+it('resolves relative file paths with question marks in their names', () => {
+	expect(
+		resolveLink('./How much is 2+2=?.md', {
+			allFilePaths: ['/base-path/vault/Cards/How much is 2+2=?.md'],
+			basePath: '/base-path/vault',
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/vault/Cards',
+			obsidianVaultName: 'test-vault',
+			type: 'link',
+		}),
+	).toBe('obsidian://open?vault=test-vault&file=%2FCards%2FHow%20much%20is%202%2B2%3D%3F.md')
+})
+
+//https://github.com/kitschpatrol/yanki/issues/20
+it('resolves heading anchors on wiki name links with question marks in their names', () => {
+	expect(
+		resolveLink('How much is 2+2=?#Some heading', {
+			allFilePaths: ['/base-path/vault/Cards/How much is 2+2=?.md'],
+			basePath: '/base-path/vault',
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/vault/Cards',
+			obsidianVaultName: 'test-vault',
+			type: 'link',
+		}),
+	).toBe(
+		'obsidian://open?vault=test-vault&file=%2FCards%2FHow%20much%20is%202%2B2%3D%3F.md%23Some%20heading',
+	)
 })
 
 it('resolves a named file link with a space in the vault name', () => {
@@ -259,7 +289,7 @@ it('resolves relative file paths', () => {
 		],
 		['test card', 'test%20card'],
 		['.md', ''],
-		['^34876', '#bla', '#bla#bla', '?foo=bar', '?foo=bar%20baz', ''],
+		['^34876', '#bla', '#bla#bla', ''],
 	)
 
 	const resolvedTestPaths = Array.from(testPaths, (testPath) =>
@@ -343,6 +373,44 @@ it('returns remote HTTP URLs unchanged', () => {
 			type: 'link',
 		}),
 	).toBe('https://example.com/page')
+})
+
+//https://github.com/kitschpatrol/yanki/issues/20
+it('resolves file paths with question marks literally even without a file list', () => {
+	// `?` is not an anchor delimiter, so it survives resolution even when
+	// there's no list of real files to disambiguate against
+	expect(
+		resolveLink('./How much is 2+2=?.md', {
+			allFilePaths: [],
+			cwd: '/base-path/vault/Cards',
+			type: 'link',
+		}),
+	).toBe('/base-path/vault/Cards/How much is 2+2=?.md')
+})
+
+it('returns remote HTTP URLs with queries and fragments unchanged', () => {
+	// Remote URLs must never be subject to local path query / anchor handling
+	const urlsWithQueries = [
+		'https://example.com/page?foo=bar',
+		'https://example.com/page?foo=bar&baz=qux',
+		'https://example.com/page?foo=bar#fragment',
+		'https://example.com/search?q=how%20much%20is%202%2B2%3D%3F',
+		// eslint-disable-next-line unicorn/prefer-https -- Intentionally testing the http: protocol branch
+		'http://example.com/page?foo=bar',
+	]
+
+	for (const url of urlsWithQueries) {
+		expect(
+			resolveLink(url, {
+				allFilePaths: ['/base-path/cwd/test card.md'],
+				basePath: '/base-path/cwd',
+				convertFilePathsToProtocol: 'obsidian',
+				cwd: '/base-path/cwd/',
+				obsidianVaultName: 'test-vault',
+				type: 'link',
+			}),
+		).toBe(url)
+	}
 })
 
 it('warns for unsupported protocol URLs', () => {

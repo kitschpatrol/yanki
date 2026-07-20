@@ -4,6 +4,8 @@ How much is 2+2=?
 
 [[How much is 2+2=?]]
 
+![[question mark image?.jpg]]
+
 ---
 
 4

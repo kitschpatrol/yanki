@@ -39,7 +39,13 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				type: 'link',
 			})
 
-			node.url = isUrl(resolvedLink) ? resolvedLink : encodeURI(resolvedLink)
+			// Any `?` or `#` remaining in a resolved file path is a literal part of
+			// a file name, since resolveLink strips legitimate anchor suffixes from
+			// plain paths and `?` has no query meaning in local paths, so encode
+			// them to keep the href intact
+			node.url = isUrl(resolvedLink)
+				? resolvedLink
+				: encodeURI(resolvedLink).replaceAll('?', '%3F').replaceAll('#', '%23')
 
 			// TMI
 			// node.data.hProperties['data-yanki-src-resolved'] = node.url

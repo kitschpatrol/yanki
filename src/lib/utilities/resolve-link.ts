@@ -91,7 +91,9 @@ const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
  * @returns Resolved absolute path or URL One of:
  *
  *   - Resolved absolute POSIX-style paths
- *   - Removes any file path query parameters
+ *   - Removes any Obsidian-style heading and block anchors, unless the anchor
+ *       characters are a literal part of a matched file's name (`?` is always
+ *       treated as a literal file name character in local paths)
  *   - Not URI-encoded
  *   - Retains original case
  *   - HTTP protocol URL
@@ -119,12 +121,14 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 		const sourceType = getSrcType(decodedUrl)
 
 		if (sourceType === 'localFileName') {
-			let resolvedUrl = pathExtras.addExtensionIfMissing(pathExtras.normalize(decodedUrl), 'md')
+			const resolvedNameLink = resolveNameLink(
+				pathExtras.normalize(decodedUrl),
+				cwd,
+				allFilePaths ?? [],
+			)
 
-			// Fall back to base path resolution if there's no path
-			const resolvedNameLink = resolveNameLink(resolvedUrl, cwd, allFilePaths ?? [])
-
-			resolvedUrl =
+			// Fall back to base path resolution if there's no match
+			const resolvedUrl =
 				resolvedNameLink ??
 				pathExtras.resolveWithBasePath(decodedUrl, {
 					basePath,
@@ -207,17 +211,30 @@ function resolveLocalFilePath(decodedUrl: string, options: ResolveLinkOptions): 
 		cwd,
 	})
 
-	// If undefined, there was no match in the list of all file paths
-	const resolvedUrlWithMatchedExtension: string | undefined =
+	// File names may contain anchor delimiter characters, so try the longest
+	// literal file name interpretation first, and only treat those characters as
+	// anchor delimiters when no real file matches
+	let matchedPath: string | undefined
+	let matchedQuery: string | undefined
+
+	for (const { base, query } of pathExtras.getBaseAndQueryCandidates(resolvedUrl)) {
 		// Assume extension-less files are .md
 		// in Obsidian, ![[these links]] and ![](<these links>) without an extension are always to an MD file
-		pathExistsInAllFiles(pathExtras.addExtensionIfMissing(resolvedUrl, 'md'), allFilePaths ?? []) ??
-		// Add an .md extension even if we already have an extension.
-		// This handles cases with dots in the name.
-		pathExistsInAllFiles(pathExtras.addExtension(resolvedUrl, 'md'), allFilePaths ?? []) ??
-		undefined
+		// Also try adding .md even when there's already an extension, to handle
+		// file names with dots in them
+		const extensionCandidates = path.extname(base) === '' ? [`${base}.md`] : [base, `${base}.md`]
 
-	if (resolvedUrlWithMatchedExtension !== undefined) {
+		matchedPath = extensionCandidates.find((candidate) =>
+			pathExistsInAllFiles(candidate, allFilePaths ?? []),
+		)
+
+		if (matchedPath !== undefined) {
+			matchedQuery = query
+			break
+		}
+	}
+
+	if (matchedPath !== undefined) {
 		// Perform obsidian vault link protocol conversion if requested
 		// For links, anything that exists should become an obsidian link
 		// For embeds, only markdown files should become obsidian links
@@ -227,11 +244,11 @@ function resolveLocalFilePath(decodedUrl: string, options: ResolveLinkOptions): 
 				// eslint-disable-next-line ts/no-unnecessary-condition
 				(type === 'embed' &&
 					// https://help.obsidian.md/Files+and+folders/Accepted+file+formats
-					['.md', '.pdf'].includes(pathExtras.getExtension(resolvedUrlWithMatchedExtension))))
+					['.md', '.pdf'].includes(path.extname(matchedPath))))
 		) {
 			if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName !== undefined) {
 				return createObsidianVaultLink(
-					resolvedUrlWithMatchedExtension,
+					`${matchedPath}${matchedQuery ?? ''}`,
 					basePath ?? '',
 					obsidianVaultName,
 				)
@@ -240,11 +257,11 @@ function resolveLocalFilePath(decodedUrl: string, options: ResolveLinkOptions): 
 			// This doesn't work in the Anki desktop application or the AnkiWeb browser version...
 			// Not really worth it
 			if (convertFilePathsToProtocol === 'file') {
-				return createFileLink(resolvedUrlWithMatchedExtension)
+				return createFileLink(`${matchedPath}${matchedQuery ?? ''}`)
 			}
 		}
 
-		return pathExtras.getBase(resolvedUrlWithMatchedExtension)
+		return matchedPath
 	}
 
 	// TODO good idea?
@@ -275,9 +292,10 @@ function resolveLocalFilePath(decodedUrl: string, options: ResolveLinkOptions): 
  * Obsidian seems to treat note links slightly differently from image / asset
  * links.
  *
- * @param name Non-URI-encoded name of the file, may have file extension, if no
- *   match with a non-.md extension is found, a match will be attempted with .md
- *   regardless. (POSIX-style paths.)
+ * @param name Non-URI-encoded, normalized name of the file, with or without a
+ *   file extension. Extension-less names are assumed to be .md files. May
+ *   include an anchor suffix, or anchor delimiter characters that are a literal
+ *   part of the file name. (POSIX-style paths.)
  * @param cwd Absolute path to the current working directory of the file from
  *   which we're resolving the link. (POSIX-style paths)
  * @param allFilePaths Array of absolute paths to all other files in the paths
@@ -292,8 +310,38 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 		return undefined
 	}
 
-	const [base, query] = pathExtras.getBaseAndQueryParts(name)
+	// File names may contain anchor delimiter characters, so try the longest
+	// literal file name interpretation first, and only treat those characters as
+	// anchor delimiters when no real file matches
+	for (const { base, query } of pathExtras.getBaseAndQueryCandidates(name)) {
+		// Assume extension-less files are .md, as Obsidian does
+		const baseWithExtension = path.extname(base) === '' ? `${base}.md` : base
+		const match = findBestNameMatch(baseWithExtension, cwd, allFilePaths)
 
+		if (match !== undefined) {
+			return `${match}${query ?? ''}`
+		}
+	}
+
+	return undefined
+}
+
+/**
+ * Find the best matching file for a name in the list of all file paths.
+ * Extracted from `resolveNameLink` so each base and anchor interpretation of
+ * the name can be attempted in turn.
+ *
+ * @param base Non-URI-encoded name of the file with a file extension and no
+ *   anchor suffix. (POSIX-style paths.)
+ * @param cwd Absolute path to the current working directory of the file from
+ *   which we're resolving the link. (POSIX-style paths)
+ * @param allFilePaths Array of absolute paths to all other files in the paths
+ *   to be considered. (POSIX-style paths.)
+ *
+ * @returns Absolute path to the best matching file, or undefined if there's no
+ *   valid match. (POSIX-style paths.)
+ */
+function findBestNameMatch(base: string, cwd: string, allFilePaths: string[]): string | undefined {
 	// To address https://github.com/kitschpatrol/yanki-obsidian/issues/42, ignore .md extensions when matching
 	// Obsidian is not case sensitive
 	const baseWithoutMd = base.replace(MD_EXTENSION_REGEX, '').toLowerCase()
@@ -313,7 +361,7 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 
 	// Fast path, there's only one file with that name
 	if (pathsToName.length === 1) {
-		return `${pathsToName[0]}${query ?? ''}`
+		return pathsToName[0]
 	}
 
 	// Sort the paths to name to find the best match
@@ -339,79 +387,27 @@ function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): str
 			return aDepth - bDepth
 		}
 
-		// Markdown files prioritize depth
-		// if (base.endsWith('.md')) {
-		// 	// Then sort by whether the path contains the cwd
-		// 	const aHasCwd = a.startsWith(cwd)
-		// 	const bHasCwd = b.startsWith(cwd)
-
-		// 	if (aHasCwd !== bHasCwd) {
-		// 		return aHasCwd ? -1 : 1
-		// 	}
-		// }
-
 		// Then sort by name alphabetically
 		return a.localeCompare(b)
 	})
 
-	return `${sortedPaths[0]}${query ?? ''}`
-
-	// Fast path, perfect match
-	// for (const filePath of pathsToName) {
-	// 	if (filePath.toLowerCase() === path.join(cwd, `${base}`).toLowerCase()) {
-	// 		return path.join(cwd, name)
-	// 	}
-	// }
-
-	// Not needed?
-	// const storedCwd = path.process_cwd
-	// path.setCWD(cwd)
-	// const relativePathsToName = pathsToName.map((filePath) => path.relative(cwd, filePath))
-	// path.setCWD(storedCwd)
-	//
-	// relativePathsToName.sort((a, b) => {
-	// 	// Prefer fewest number of up-traversals
-	// 	const { down: aStepsDown, up: aStepsUp } = pathExtras.quantifyPathDistance(a)
-	// 	const { down: bStepsDown, up: bStepsUp } = pathExtras.quantifyPathDistance(b)
-	//
-	// 	// Sort first by shortest number of steps "down"
-	// 	if (aStepsDown !== bStepsDown) {
-	// 		return aStepsDown - bStepsDown
-	// 	}
-	//
-	// 	// Then sort by shortest number of steps "up"
-	// 	if (aStepsUp !== bStepsUp) {
-	// 		// Doesn't help
-	// 		// return aStepsUp - bStepsUp
-	// 	}
-	//
-	// 	// Sort second by name alphabetically
-	// 	return 0 // A.localeCompare(b)
-	// })
-	//
-	// return path.join(cwd, `${relativePathsToName[0]}${query ?? ''}`)
+	return sortedPaths[0]
 }
 
 /**
- * Check for presence of a path in a list in a case- and query- agnostic manner.
- * Ignores .md extensions to simplify matching files
+ * Check for presence of a path in a list in a case-agnostic manner, since
+ * Obsidian is not case sensitive.
  *
- * @param filePath File path with file extension. (POSIX-style path.)
+ * @param filePath Literal file path with file extension and no anchor suffix.
+ *   (POSIX-style path.)
  * @param allFilePaths Array of absolute file paths to check. (POSIX-style
  *   paths.)
  *
- * @returns The file path if it is present in the list of all file paths, or
- *   undefined if it is not.
+ * @returns Whether the file path is present in the list of all file paths.
  */
-function pathExistsInAllFiles(filePath: string, allFilePaths: string[]): string | undefined {
-	const base = pathExtras.getBase(filePath)
-
-	// Obsidian is not case sensitive
-	if (allFilePaths.some((file) => file.toLowerCase().endsWith(base.toLowerCase()))) {
-		return filePath
-	}
-
-	return undefined
+function pathExistsInAllFiles(filePath: string, allFilePaths: string[]): boolean {
+	const filePathLowerCase = filePath.toLowerCase()
+	return allFilePaths.some((file) => file.toLowerCase().endsWith(filePathLowerCase))
 }
 
 function createFileLink(absolutePath: string): string {

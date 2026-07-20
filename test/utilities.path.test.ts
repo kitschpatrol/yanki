@@ -159,19 +159,19 @@ it('gets base and query', () => {
 		  "C:/Bla bla bla/some file.txt --> C:/Bla bla bla/some file.txt,",
 		  "d:/Bla bla bla --> d:/Bla bla bla,",
 		  "z:/Bla bla bla --> z:/Bla bla bla,",
-		  "\\\\?\\Volume{abc123-abc123-abc123}\\\\ --> \\\\,?\\Volume{abc123-abc123-abc123}\\\\",
+		  "\\\\?\\Volume{abc123-abc123-abc123}\\\\ --> \\\\?\\Volume{abc123-abc123-abc123}\\\\,",
 		  "/Server/Share/folder --> /Server/Share/folder,",
 		  "C:/Bla bla bla#some#stuff --> C:/Bla bla bla,#some#stuff",
 		  "/Bla bla bla#stuff --> /Bla bla bla,#stuff",
 		  "Bla bla bla#stuff --> Bla bla bla,#stuff",
 		  "./Bla bla bla#stuff --> Bla bla bla,#stuff",
 		  "../Bla bla bla^block --> ../Bla bla bla,^block",
-		  "./Bla bla bla?query=yes --> Bla bla bla,?query=yes",
+		  "./Bla bla bla?query=yes --> Bla bla bla?query=yes,",
 		  "/path/Bla bla bla#stuff --> /path/Bla bla bla,#stuff",
 		  "/Bla bla bla#stuff --> /Bla bla bla,#stuff",
 		  "./more/Bla bla bla.config.yes#stuff --> more/Bla bla bla.config.yes,#stuff",
 		  "../Bla bla bla.txt^block --> ../Bla bla bla.txt,^block",
-		  "./Bla bla bla?query=yes --> Bla bla bla,?query=yes",
+		  "./Bla bla bla?query=yes --> Bla bla bla?query=yes,",
 		]
 	`)
 })
