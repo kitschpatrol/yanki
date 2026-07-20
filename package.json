@@ -64,7 +64,7 @@
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^3.0.0",
 		"@stdlib/assert-is-absolute-path": "^0.2.3",
-		"@types/hast": "^3.0.4",
+		"@types/hast": "^3.0.5",
 		"@types/lodash-es": "^4.17.12",
 		"@types/mdast": "^4.0.4",
 		"@types/node": "~20.19.43",
@@ -113,7 +113,7 @@
 		"yargs": "^18.0.0"
 	},
 	"devDependencies": {
-		"@arethetypeswrong/cli": "^0.18.4",
+		"@arethetypeswrong/cli": "^0.18.5",
 		"@kitschpatrol/shared-config": "^8.2.0",
 		"@vitest/browser-playwright": "^4.1.10",
 		"@vitest/coverage-v8": "^4.1.10",
@@ -123,7 +123,7 @@
 		"playwright": "^1.61.1",
 		"publint": "^0.3.21",
 		"shx": "^0.4.0",
-		"tsdown": "^0.22.4",
+		"tsdown": "^0.22.5",
 		"tsx": "^4.23.0",
 		"typescript": "~6.0.3",
 		"vitest": "^4.1.10"

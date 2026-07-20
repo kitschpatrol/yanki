@@ -17,3 +17,6 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@kitschpatrol/*'
   - 'yanki-connect'
+# 1100.1.12 was published to npm with only lib/index.js — remove once a fixed version ships
+overrides:
+  '@pnpm/lockfile.fs': 1100.1.11
