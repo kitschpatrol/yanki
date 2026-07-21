@@ -6,6 +6,7 @@ export default eslintConfig({
 		'test/assets/test-cloze-back/**/*',
 		'test/assets/test-deck-pruning/**/*',
 		'test/assets/test-fancy-markdown/**/*',
+		'test/assets/test-link-encoding/**/*',
 		'test/assets/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md',
 		'test/assets/test-obsidian-vault/**/*',
 		'test/assets/test-question-mark/**/*',

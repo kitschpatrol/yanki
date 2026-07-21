@@ -69,7 +69,9 @@ Obsidian anchor suffixes are supported on all local link forms:
 - `[[Note#Heading]]`, `[[Note#Heading#Subheading]]` — heading anchors
 - `[[Note#^abc123]]`, `[[Note^abc123]]` — block anchors
 
-`#` and `^` are legal file name characters, so a file named `E = mc^2.md` is ambiguous with an anchor on a file named `E = mc.md`. Yanki resolves the ambiguity against the real file list: the longest literal file name interpretation is tried first, and anchor splitting only applies when no real file matches the literal reading (`getBaseAndQueryCandidates` in `src/lib/utilities/path.ts`).
+`#` and `^` are legal file name characters, so a file named `E = mc^2.md` is ambiguous with an anchor on a file named `E = mc.md`. Yanki resolves the ambiguity against the real file list: the longest literal file name interpretation is tried first, and anchor splitting only applies when no real file matches the literal reading (`getLocalPathCandidates` in `src/lib/utilities/path.ts`).
+
+Anchor text is separated before filesystem normalization. Slashes, dot segments, backslashes, and Unicode characters in headings therefore remain anchor text and are encoded as part of the final Obsidian URL rather than being interpreted as path syntax.
 
 Anchors are preserved in Obsidian vault URLs (encoded into the `file` parameter) and stripped from plain path output.
 

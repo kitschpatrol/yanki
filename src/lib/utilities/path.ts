@@ -161,32 +161,30 @@ export function getBaseAndQueryParts(filePath: string): [string, string | undefi
 }
 
 /**
- * Get every plausible base and anchor interpretation of a file path whose name
- * may contain anchor delimiter characters (`#`, `^`), ordered from the longest
- * literal file name (no anchor at all) to the shortest (anchor starts at the
- * first delimiter in the file name, matching Obsidian's anchor syntax).
- * Delimiters in directory names are never treated as anchor starts.
+ * Get every plausible base and anchor interpretation of a local link target
+ * that may contain anchor delimiter characters (`#`, `^`), ordered from the
+ * longest literal path (no anchor at all) to the shortest (anchor starts at the
+ * first delimiter, matching Obsidian's anchor syntax).
  *
- * File names may legitimately contain these characters, so callers should try
- * candidates in order against a list of real files instead of assuming the
- * first delimiter starts an anchor.
+ * This operates on the unnormalized link target and deliberately considers
+ * delimiters before slashes. A slash after a delimiter belongs to the anchor,
+ * not the file path. File and directory names may also legitimately contain
+ * these characters, so callers must normalize only each candidate's `filePath`
+ * and try candidates in order against a list of real files.
  * https://github.com/kitschpatrol/yanki/issues/20
  */
-export function getBaseAndQueryCandidates(
-	filePath: string,
-): Array<{ base: string; query: string | undefined }> {
-	const directoryPath = path.dirname(filePath)
-	const fileName = path.basename(filePath)
-
-	const candidates: Array<{ base: string; query: string | undefined }> = [
-		{ base: path.join(directoryPath, fileName), query: undefined },
+export function getLocalPathCandidates(
+	linkTarget: string,
+): Array<{ anchor: string | undefined; filePath: string }> {
+	const candidates: Array<{ anchor: string | undefined; filePath: string }> = [
+		{ anchor: undefined, filePath: linkTarget },
 	]
 
-	for (let index = fileName.length - 1; index >= 0; index--) {
-		if (QUERY_FRAGMENT_START_REGEX.test(fileName.charAt(index))) {
+	for (let index = linkTarget.length - 1; index >= 0; index--) {
+		if (QUERY_FRAGMENT_START_REGEX.test(linkTarget.charAt(index))) {
 			candidates.push({
-				base: path.join(directoryPath, fileName.slice(0, index)),
-				query: fileName.slice(index),
+				anchor: linkTarget.slice(index),
+				filePath: linkTarget.slice(0, index),
 			})
 		}
 	}

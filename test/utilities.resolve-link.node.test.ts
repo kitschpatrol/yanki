@@ -153,6 +153,120 @@ it('resolves heading anchors on wiki name links with question marks in their nam
 	)
 })
 
+it('resolves heading anchors containing slashes and Unicode', () => {
+	const allFilePaths = [
+		'/base-path/vault/Cards/✓Test Card 1 ?.md',
+		'/base-path/vault/Notes/Mobile Communication Protocols (Monolith Note).md',
+	]
+	const links = [
+		{
+			source: 'Mobile Communication Protocols (Monolith Note)#2G/EDGE Heading',
+			target: '/Notes/Mobile Communication Protocols (Monolith Note).md#2G/EDGE Heading',
+		},
+		{
+			source: 'Mobile Communication Protocols (Monolith Note)#✓ 5G/LTE Heading',
+			target: '/Notes/Mobile Communication Protocols (Monolith Note).md#✓ 5G/LTE Heading',
+		},
+		{
+			source: '✓Test Card 1 ?#Pareto Principle (80/20 Rule)',
+			target: '/Cards/✓Test Card 1 ?.md#Pareto Principle (80/20 Rule)',
+		},
+		{
+			source: "✓Test Card 1 ?#✓ ISP's Gray IP/NAT Bypassing for self-hosting",
+			target: "/Cards/✓Test Card 1 ?.md#✓ ISP's Gray IP/NAT Bypassing for self-hosting",
+		},
+	]
+
+	const resolvedLinks = links.map(({ source }) =>
+		resolveLink(source, {
+			allFilePaths,
+			basePath: '/base-path/vault',
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/vault/Cards',
+			obsidianVaultName: 'test-vault',
+			type: 'link',
+		}),
+	)
+	const expectedLinks = links.map(
+		({ target }) => `obsidian://open?vault=test-vault&file=${encodeURIComponent(target)}`,
+	)
+
+	expect(resolvedLinks).toEqual(expectedLinks)
+})
+
+it('encodes non-ASCII symbols around slashes in headings and paths', () => {
+	const symbols = '✓✘●○✅⛔️≠±⌥⌘^⎋▶︎▷❗️⚠️'
+	const filePath = `/base-path/vault/${symbols} Notes/${symbols} Reference.md`
+	const links = [
+		{
+			source: `../${symbols} Notes/${symbols} Reference#${symbols}/Heading`,
+			target: `/${symbols} Notes/${symbols} Reference.md#${symbols}/Heading`,
+		},
+		{
+			source: `../${symbols} Notes/${symbols} Reference#Heading/${symbols}`,
+			target: `/${symbols} Notes/${symbols} Reference.md#Heading/${symbols}`,
+		},
+		{
+			source: `../${symbols} Notes/${symbols} Reference#Before ${symbols}/After ${symbols}`,
+			target: `/${symbols} Notes/${symbols} Reference.md#Before ${symbols}/After ${symbols}`,
+		},
+	]
+
+	for (const { source, target } of links) {
+		expect(
+			resolveLink(source, {
+				allFilePaths: [filePath],
+				basePath: '/base-path/vault',
+				convertFilePathsToProtocol: 'obsidian',
+				cwd: '/base-path/vault/Cards',
+				obsidianVaultName: 'test-vault',
+				type: 'link',
+			}),
+		).toBe(`obsidian://open?vault=test-vault&file=${encodeURIComponent(target)}`)
+	}
+})
+
+it('keeps path and anchor syntax separate while resolving ambiguous delimiters', () => {
+	const allFilePaths = [
+		'/base-path/vault/Cards/E = mc^2.md',
+		'/base-path/vault/Notes#Archive/Protocol.md',
+	]
+	const links = [
+		{
+			source: 'Notes#Archive/Protocol',
+			target: '/Notes#Archive/Protocol.md',
+		},
+		{
+			source: '../Notes#Archive/Protocol#TCP/IP/../Details',
+			target: '/Notes#Archive/Protocol.md#TCP/IP/../Details',
+		},
+		{
+			source: './E = mc^2#Proof/Sketch',
+			target: '/Cards/E = mc^2.md#Proof/Sketch',
+		},
+		{
+			source: './E = mc^2^block/part',
+			target: '/Cards/E = mc^2.md^block/part',
+		},
+	]
+
+	const resolvedLinks = links.map(({ source }) =>
+		resolveLink(source, {
+			allFilePaths,
+			basePath: '/base-path/vault',
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/vault/Cards',
+			obsidianVaultName: 'test-vault',
+			type: 'link',
+		}),
+	)
+	const expectedLinks = links.map(
+		({ target }) => `obsidian://open?vault=test-vault&file=${encodeURIComponent(target)}`,
+	)
+
+	expect(resolvedLinks).toEqual(expectedLinks)
+})
+
 it('resolves a named file link with a space in the vault name', () => {
 	expect(
 		resolveLink('test pdf.pdf', {
