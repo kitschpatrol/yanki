@@ -80,6 +80,38 @@ it('correctly resolves obsidian wiki links', async () => {
 	}
 })
 
+it('resolves slash and Unicode heading links', async () => {
+	const vaultPath = normalize(path.resolve('./test/assets/test-link-encoding'))
+	const noteFile = normalize(path.join(vaultPath, 'Cards/✓Test Card 1.md'))
+	const allFilePathsRaw = await globby('**/*', {
+		absolute: true,
+		cwd: vaultPath,
+	})
+	const allFilePaths = allFilePathsRaw.toSorted().map((file) => normalize(file))
+	const markdown = await fs.readFile(noteFile, 'utf8')
+	const note = await getNoteFromMarkdown(markdown, {
+		allFilePaths,
+		basePath: vaultPath,
+		cwd: normalize(path.dirname(noteFile)),
+		namespace: 'test',
+		obsidianVault: 'test-link-encoding',
+		syncMediaAssets: 'off',
+	})
+	const { document } = parseHTML(`${note.fields.Front}${note.fields.Back}${note.fields.Extra}`)
+	const links = Array.from(document.querySelectorAll('a'), (node) => node.href)
+
+	/* Spell-checker:disable */
+	expect(links).toMatchInlineSnapshot(`
+		[
+		  "obsidian://open?vault=test-link-encoding&file=%252FNotes%252FMobile%20Communication%20Protocols%20(Monolith%20Note).md%25232G%252FEDGE%20Heading",
+		  "obsidian://open?vault=test-link-encoding&file=%252FNotes%252FMobile%20Communication%20Protocols%20(Monolith%20Note).md%2523%E2%9C%93%205G%252FLTE%20Heading",
+		  "obsidian://open?vault=test-link-encoding&file=%252FCards%252F%E2%9C%93Test%20Card%201.md%2523Pareto%20Principle%20(80%252F20%20Rule)",
+		  "obsidian://open?vault=test-link-encoding&file=%252FCards%252F%E2%9C%93Test%20Card%201.md%2523%E2%9C%93%20ISP's%20Gray%20IP%252FNAT%20Bypassing%20for%20self-hosting",
+		]
+	`)
+	/* Spell-checker:enable */
+})
+
 // Question marks are valid in note file names on macOS and Linux, but not on
 // Windows, so the "?" file name is created by renaming at test time — a
 // committed "?" in a path would break git checkout on Windows CI runners.
