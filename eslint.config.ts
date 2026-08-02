@@ -16,7 +16,6 @@ export default eslintConfig({
 		'test/assets/test-unexpected-formatting/basic-with-tight-spacing-and-frontmatter.md',
 		'test/assets/test-unexpected-formatting/basic-with-tight-spacing.md',
 		'test/assets/test-unicode/**/*',
-		'test/fixtures/anki-data-folder/**/*',
 	],
 	ts: {
 		overrides: {

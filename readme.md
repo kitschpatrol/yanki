@@ -6,8 +6,8 @@
 
 <!-- badges -->
 
-[![NPM Package yanki](https://img.shields.io/npm/v/yanki.svg)](https://npmjs.com/package/yanki)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
+[![NPM Package yanki](https://img.shields.io/npm/v/yanki.svg)](https://www.npmjs.com/package/yanki)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit)
 [![CI](https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml)
 
 <!-- /badges -->
@@ -54,7 +54,7 @@ This package provides both a stand-alone CLI tool and a TypeScript library for e
 
 The library powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) Obsidian plugin. For lower-level access to Anki, please take a look at the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) TypeScript library.
 
-The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
+The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://commons.wikimedia.org/wiki/File:ヤンキー.jpg).)
 
 ## Quick start
 
@@ -137,8 +137,8 @@ An extended palette of Markdown syntax is available out of the box:
 - [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via Anki's built-in [MathJax](https://www.mathjax.org) rendering support.
 - The [`==highlights==`](https://github.com/ipikuka/remark-flexible-markers) syntax.
 - Compact [furigana](https://en.wikipedia.org/wiki/Furigana) / [Ruby](https://en.wikipedia.org/wiki/Ruby_character) syntax specified by [DenDen Markdown](https://conv.denshochan.com/markdown#ruby), for example: `{東京|とうきょう}` renders as `<ruby>東京<rp>(</rp><rt>とうきょう</rt><rp>)</rp></ruby>`. This matches support in Obsidian provided by the [Markdown Furigana](https://github.com/steven-kraft/obsidian-markdown-furigana) plugin.
-- Obsidian-style [block links](https://help.obsidian.md/links#Link+to+a+block+in+a+note), e.g. `[[Some Note#^37066d]]`
-- Obsidian-style [heading links](https://help.obsidian.md/links#Link+to+a+heading+in+a+note), e.g. `[[Some Note#Heading]]`
+- Obsidian-style [block links](https://obsidian.md/help/links#Link+to+a+block+in+a+note), e.g. `[[Some Note#^37066d]]`
+- Obsidian-style [heading links](https://obsidian.md/help/links#Link+to+a+heading+in+a+note), e.g. `[[Some Note#Heading]]`
 
 ### Custom styles
 

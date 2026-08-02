@@ -1568,7 +1568,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		// TODO this works on macOS but is not stable on Windows...
-		it.skip(`cleans up database when a multi cloze note changes model type`, async () => {
+		it.todo(`cleans up database when a multi cloze note changes model type`, async () => {
 			// First sync
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
@@ -1681,7 +1681,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		// Skipped until there's a way to handle this automatically
-		it.skip(`cleans up orphaned cards when one of several clozes is removed`, async () => {
+		it.todo(`cleans up orphaned cards when one of several clozes is removed`, async () => {
 			// First sync
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
@@ -1756,7 +1756,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		// Skipped until there's a way to handle this without manual user action
-		it.skip('tests filtered decks', { timeout: 30_000 }, async () => {
+		it.todo('tests filtered decks', { timeout: 30_000 }, async () => {
 			// Sync
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
@@ -1825,7 +1825,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		// Skipped until there's a way to handle this without manual user action
-		it.skip('tests filtered decks alongside deep nesting', { timeout: 60_000 }, async () => {
+		it.todo('tests filtered decks alongside deep nesting', { timeout: 60_000 }, async () => {
 			// Sync
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,

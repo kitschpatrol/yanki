@@ -1,0 +1,25 @@
+# Picked up automatically by lychee (the default value of --config).
+# Single-quoted TOML literal strings, since all values are regular expressions.
+
+# URLs and mail addresses to skip.
+exclude = [
+  # Fragment resolution detection issues
+  'https://github\.com/ankitects/anki/issues/2302#issuecomment-1374374155',
+  'https://obsidian\.md/help/links#Link\+to\+a\+block\+in\+a\+note',
+  'https://obsidian\.md/help/links#Link\+to\+a\+heading\+in\+a\+note',
+
+  # Lingers in test/fixtures/anki-data-folder/addons21/2055492159/config.md
+  'https://foosoft\.net/projects/anki-connect/',
+
+  # File links
+  '^file:',
+
+  # Overzealous redirects
+  'https://nodejs\.org',
+]
+
+# Files to skip entirely. Root-relative links in the Obsidian test vault (e.g.
+# /Assets/yanki audio.mp3) only resolve against a vault root, which lychee has
+# no way to know about. They fail before `exclude` applies, so they can only be
+# silenced by skipping the files.
+exclude_path = ["test/assets/test-obsidian-vault"]

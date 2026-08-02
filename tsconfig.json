@@ -4,5 +4,5 @@
 		"types": ["node"]
 	},
 	"include": ["**/**.*"],
-	"exclude": ["**/dist/"]
+	"exclude": ["dist/"]
 }

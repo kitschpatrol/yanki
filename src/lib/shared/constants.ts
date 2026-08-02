@@ -168,8 +168,7 @@ export const MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS = [
 
 /**
  * Anki seems happy to open PDF files and download markdown files that have been
- * added to the assets folder...
- * https://help.obsidian.md/Files+and+folders/Accepted+file+formats
+ * added to the assets folder... https://obsidian.md/help/file-formats
  */
 export const MEDIA_SUPPORTED_FILE_EXTENSIONS = ['md', 'pdf'] as const
 

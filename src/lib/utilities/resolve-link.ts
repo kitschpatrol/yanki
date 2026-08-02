@@ -227,7 +227,7 @@ function resolveMatchedLocalLink(link: ResolvedLocalLink, options: ResolveLinkOp
 		(type === 'link' ||
 			// eslint-disable-next-line ts/no-unnecessary-condition
 			(type === 'embed' &&
-				// https://help.obsidian.md/Files+and+folders/Accepted+file+formats
+				// https://obsidian.md/help/file-formats
 				['.md', '.pdf'].includes(path.extname(filePath))))
 	) {
 		if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName !== undefined) {

@@ -1,7 +1,7 @@
 // Node-only helpers for CLI
 
 // Obsidian global settings:
-// https://help.obsidian.md/Files+and+folders/How+Obsidian+stores+data#Global+settings
+// https://obsidian.md/help/data-storage#Global+settings
 
 import fs from 'node:fs/promises'
 import path from 'node:path'

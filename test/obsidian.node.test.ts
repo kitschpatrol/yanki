@@ -76,7 +76,8 @@ it('correctly resolves obsidian wiki links', async () => {
 		})
 
 		const noteHtml = `${noteResolved.fields.Front}${noteResolved.fields.Back}${noteResolved.fields.Extra}`
-		checkWikiLinkResolution(noteHtml, basePath)
+		// Guard against vacuous passes if a prepared note has no links at all
+		expect(checkWikiLinkResolution(noteHtml, basePath)).toBeGreaterThan(0)
 	}
 })
 
@@ -425,9 +426,15 @@ describeWithFileFixture(
 	},
 )
 
-function checkWikiLinkResolution(html: string, basePath: string): void {
+/**
+ * Asserts that every resolved link in the HTML matches the expected path
+ * prepared in the element's alt text or innerHTML. Returns the number of links
+ * checked so callers can assert the notes weren't empty of links.
+ */
+function checkWikiLinkResolution(html: string, basePath: string): number {
 	const { document } = parseHTML(html)
 	const elements = document.querySelectorAll('[data-yanki-src-original]')
+	let checkedCount = 0
 
 	for (const element of elements) {
 		// Ensure element is an instance of Element
@@ -465,5 +472,8 @@ function checkWikiLinkResolution(html: string, basePath: string): void {
 		)
 
 		expect(resolvedSrcClean, `Original link source: "${originalSrc}"`).toEqual(expectedSrcClean)
+		checkedCount++
 	}
+
+	return checkedCount
 }

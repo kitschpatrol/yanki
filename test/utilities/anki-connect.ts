@@ -112,7 +112,7 @@ export async function openAnki(basePath: string): Promise<void> {
 			// Suppress the expected rejection when Anki is killed during teardown
 			void suppressExpectedRejection(child)
 			ankiPid = child.pid
-			child.unref()
+			child.nodeChildProcess.unref()
 			break
 		}
 
@@ -135,7 +135,7 @@ export async function openAnki(basePath: string): Promise<void> {
 
 				void suppressExpectedRejection(child)
 				ankiPid = child.pid
-				child.unref()
+				child.nodeChildProcess.unref()
 			}
 
 			break
@@ -152,7 +152,7 @@ export async function openAnki(basePath: string): Promise<void> {
 			// Suppress the expected rejection when Anki is killed via taskkill during teardown
 			void suppressExpectedRejection(child)
 			ankiPid = child.pid
-			child.unref()
+			child.nodeChildProcess.unref()
 			break
 		}
 
