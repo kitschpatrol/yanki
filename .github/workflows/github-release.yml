@@ -54,14 +54,3 @@ jobs:
             CHANGELOG
             CHANGELOG.md
             changelog.md
-
-      - name: Log Release Details
-        env:
-          TAG: ${{ github.ref_name }}
-          RELEASE_URL: ${{ steps.release.outputs.url }}
-          RELEASE_ID: ${{ steps.release.outputs.id }}
-        run: |
-          echo "🏷️ Successfully released: $TAG"
-          echo "🔗 Release URL: $RELEASE_URL"
-          echo "🪪 Release ID: $RELEASE_ID"
-          echo "📦 Released [\`$TAG\`]($RELEASE_URL)" >> "$GITHUB_STEP_SUMMARY"

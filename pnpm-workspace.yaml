@@ -16,5 +16,5 @@ allowBuilds:
   unrs-resolver: true
 minimumReleaseAgeExclude:
   - '@kitschpatrol/*'
-  - 'yanki-connect'
-  - tsx@4.23.5
+  - mdat-plugin-cli-help@3.2.0
+  - yanki-connect@4.0.10
