@@ -84,7 +84,7 @@ export const NOTE_DEFAULT_EMPTY_HAST = u(
  * How / where to get a hash to determine if media assets have changes.
  */
 type MediaHashMode = 'content' | 'metadata' | 'name'
-export const MEDIA_DEFAULT_HASH_MODE_FILE: MediaHashMode = 'metadata'
+export const MEDIA_DEFAULT_HASH_MODE_FILE: MediaHashMode = 'content'
 export const MEDIA_DEFAULT_HASH_MODE_URL: MediaHashMode = 'metadata'
 
 export const MEDIA_INCLUDE_LEGIBLE_FILENAME = false
