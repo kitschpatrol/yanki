@@ -278,6 +278,21 @@ it('gets URL content hash in metadata mode', async () => {
 	expect(hash).toHaveLength(16)
 })
 
+it('produces different metadata-mode hashes for different URLs with identical headers', async () => {
+	// Two URLs on the same server can share last-modified and content-length
+	// (with no etag), but distinct URLs must still get distinct hashes
+	const fetchAdapter = vi.fn().mockResolvedValue({
+		headers: new Headers({
+			'content-length': '12345',
+			'last-modified': 'Wed, 01 Jan 2025 00:00:00 GMT',
+		}),
+	})
+
+	const hash1 = await getUrlContentHash('https://example.com/clip-1.mp3', fetchAdapter, 'metadata')
+	const hash2 = await getUrlContentHash('https://example.com/clip-2.mp3', fetchAdapter, 'metadata')
+	expect(hash1).not.toBe(hash2)
+})
+
 it('falls through from metadata to name mode for URL content hash when headers missing', async () => {
 	const fetchAdapter = vi.fn().mockResolvedValue({
 		headers: new Headers(),

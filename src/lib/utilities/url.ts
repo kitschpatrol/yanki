@@ -281,7 +281,9 @@ export async function getUrlContentHash(
 				throw new Error('No headers found')
 			}
 
-			return getHash(stringToHash, 16)
+			// Include the URL so distinct URLs that serve identical headers
+			// (e.g. same last-modified and content-length, no etag) don't collide
+			return getHash(`${url}${stringToHash}`, 16)
 		} catch {
 			// Fall through to name mode
 		}
