@@ -183,6 +183,36 @@ it('generates consistent filenames for the same file', async () => {
 	expect(result1).toBe(result2)
 })
 
+it('generates different filenames for different files with identical size and mtime', async () => {
+	// Files copied into a vault in the same millisecond share size and mtimeMs,
+	// but distinct assets must still get distinct Anki media filenames
+	const fileAdapter = createMockFileAdapter({
+		// eslint-disable-next-line ts/require-await
+		async readFileBuffer(filePath: string) {
+			return filePath.includes('clip-1') ? new Uint8Array([1, 2, 3]) : new Uint8Array([4, 5, 6])
+		},
+	})
+	const fetchAdapter = vi.fn()
+
+	const result1 = await getSafeAnkiMediaFilename(
+		'/vault/media/clip-1.mp3',
+		'test-namespace',
+		'mp3',
+		fileAdapter,
+		fetchAdapter,
+	)
+	const result2 = await getSafeAnkiMediaFilename(
+		'/vault/media/clip-2.mp3',
+		'test-namespace',
+		'mp3',
+		fileAdapter,
+		fetchAdapter,
+	)
+	expect(result1).toBeDefined()
+	expect(result2).toBeDefined()
+	expect(result1).not.toBe(result2)
+})
+
 it('generates different filenames for different namespaces', async () => {
 	const fileAdapter = createMockFileAdapter()
 	const fetchAdapter = vi.fn()
