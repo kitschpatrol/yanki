@@ -36,14 +36,16 @@ export async function getFileContentHash(
 
 			// Ctime not stable?
 			// eslint-disable-next-line ts/no-unnecessary-condition
-			const stringToHash = `${mtimeMs ?? ''}${size ?? ''}`
+			const metadataString = `${mtimeMs ?? ''}${size ?? ''}`
 
-			if (stringToHash === '') {
+			if (metadataString === '') {
 				// Fall through to name mode
 				return getHash(absoluteFilePath, 16)
 			}
 
-			return getHash(stringToHash, 16)
+			// Include the path so distinct files that happen to share size and
+			// mtime (e.g. batch-copied within the same millisecond) don't collide
+			return getHash(`${absoluteFilePath}${metadataString}`, 16)
 		}
 
 		case 'name': {
