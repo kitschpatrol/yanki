@@ -50,7 +50,7 @@
 	],
 	"scripts": {
 		"build": "tsdown && attw -P --profile esm-only && publint",
-		"clean": "shx rm -f pnpm-lock.yaml && git clean -fdX -e !.claude/",
+		"clean-deep": "shx rm -f pnpm-lock.yaml && git clean -fdX -e !.claude/",
 		"coverage": "vitest run --coverage",
 		"fix": "ksc fix",
 		"lint": "ksc lint",
