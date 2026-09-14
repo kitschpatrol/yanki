@@ -11,6 +11,7 @@ export default eslintConfig({
 		'test/assets/test-obsidian-vault/**/*',
 		'test/assets/test-question-mark/**/*',
 		'test/assets/test-rename-order/**/*',
+		'test/assets/test-sync-set-union/**/*',
 		'test/assets/test-unexpected-formatting/basic-and-reversed-card-with-confusing-setext-headline.md',
 		'test/assets/test-unexpected-formatting/basic-with-confusing-setext-headline.md',
 		'test/assets/test-unexpected-formatting/basic-with-tight-spacing-and-frontmatter.md',
