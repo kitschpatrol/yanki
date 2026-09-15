@@ -30,12 +30,12 @@ export default defineConfig({
 				: [
 						{
 							test: {
+								// Avoid port conflicts between the VS Code extension and the Vitest CLI.
+								api: {
+									port: 5180,
+									strictPort: true,
+								},
 								browser: {
-									// Conflicts between VS Code extension and vitest CLI command...
-									api: {
-										port: 5180,
-										strictPort: true,
-									},
 									enabled: true,
 									headless: true,
 									instances: [{ browser: 'chromium' as const }],

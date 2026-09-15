@@ -1,5 +1,3 @@
-/* eslint-disable node/no-unsupported-features/node-builtins */
-
 import stripAnsi from 'strip-ansi'
 import { expect, it, vi } from 'vitest'
 import { normalize } from '../src/lib/utilities/path'

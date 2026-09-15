@@ -20,7 +20,7 @@ export async function setup(project: TestProject) {
 
 	// Copy the fixture to a temp directory so Anki's writes don't mutate it
 	ankiBasePath = await fs.mkdtemp(path.join(os.tmpdir(), 'yanki-test-'))
-	// eslint-disable-next-line node/no-unsupported-features/node-builtins
+
 	await fs.cp(path.resolve('test/fixtures/anki-data-folder'), ankiBasePath, { recursive: true })
 
 	// Sleep for a bit, some issues with file writing latency

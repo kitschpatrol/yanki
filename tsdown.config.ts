@@ -19,7 +19,7 @@ export default defineConfig([
 		fixedExtension: false,
 		outDir: 'dist/lib',
 		platform: 'neutral',
-		target: ['node20.19.0', 'chrome100', 'safari18', 'firefox110'],
+		target: ['node22.18.0', 'chrome100', 'safari18', 'firefox110'],
 		tsconfig: 'tsconfig.build.json',
 	},
 	// Standalone browser / CDN

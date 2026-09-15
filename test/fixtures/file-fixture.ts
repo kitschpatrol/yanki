@@ -54,7 +54,7 @@ export function describeWithFileFixture(
 			)
 
 			// Copy the asset path to a temp directory
-			// eslint-disable-next-line node/no-unsupported-features/node-builtins
+
 			await fs.cp(context.assetPath, context.tempAssetPath, {
 				force: true,
 				preserveTimestamps: true,

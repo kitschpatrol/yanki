@@ -123,7 +123,7 @@ it.skipIf(PLATFORM === 'windows')(
 		const tempAssetPath = normalize(
 			path.join(os.tmpdir(), `yanki-test-${Date.now()}`, 'test-question-mark'),
 		)
-		// eslint-disable-next-line node/no-unsupported-features/node-builtins
+
 		await fs.cp('./test/assets/test-question-mark', tempAssetPath, {
 			preserveTimestamps: true,
 			recursive: true,

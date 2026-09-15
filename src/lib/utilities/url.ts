@@ -1,4 +1,3 @@
-/* eslint-disable node/no-unsupported-features/node-builtins */
 /* eslint-disable jsdoc/require-jsdoc */
 
 import type { MediaSupportedExtension } from '../shared/constants'

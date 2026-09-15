@@ -58,7 +58,7 @@ The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Ank
 
 ## Quick start
 
-Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 20.19 or newer.)
+Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 22.18 or newer.)
 
 Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on installed:
 

@@ -139,6 +139,5 @@ export async function getDefaultFileAdapter(): Promise<FileAdapter> {
 }
 
 export function getDefaultFetchAdapter(): FetchAdapter {
-	// eslint-disable-next-line node/no-unsupported-features/node-builtins
 	return fetch.bind(globalThis)
 }

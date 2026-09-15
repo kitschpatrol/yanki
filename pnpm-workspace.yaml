@@ -15,6 +15,4 @@ allowBuilds:
   puppeteer: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
-  - '@kitschpatrol/*'
-  - mdat-plugin-cli-help@3.2.0
-  - yanki-connect@4.0.10
+  - yanki-connect@4.0.11

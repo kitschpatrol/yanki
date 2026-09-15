@@ -1,5 +1,3 @@
-/* eslint-disable node/no-unsupported-features/node-builtins */
-
 import path from 'node:path'
 import { expect, it } from 'vitest'
 import { syncFiles } from '../src/lib'
