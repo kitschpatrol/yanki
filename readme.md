@@ -331,6 +331,12 @@ npm install --global yanki
 npm install --save-dev yanki
 ```
 
+...or install the CLI tool globally with Homebrew:
+
+```sh
+brew install kitschpatrol/tap/yanki
+```
+
 ## Usage
 
 ### Basics

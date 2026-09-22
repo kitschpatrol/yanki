@@ -338,6 +338,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^5.0.0
         version: 5.0.0(@vitest/browser@5.0.0)(vitest@5.0.0)
+      brewpub:
+        specifier: ^0.4.0
+        version: 0.4.0(supports-color@10.2.2)
       bumpp:
         specifier: ^12.3.0
         version: 12.3.0
@@ -2884,6 +2887,11 @@ packages:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
 
+  brewpub@0.4.0:
+    resolution: {integrity: sha512-1xv0Fi5c1qlbneuTshH3Q3xUqSf2mj/9q5FfFqOxDvvbKznu2n99iFcgejz68hxM69flRoUQCRbD0KxFBMZqQw==}
+    engines: {node: ^24.16.0 || >=26.3.0}
+    hasBin: true
+
   browserslist@4.28.9:
     resolution: {integrity: sha512-EWazOblFYUvlGZcfGhPUPmYh3nikUxBVb+y9MJun5f3hBi812X+8MSQTujLBtgK3cf51fJWbWfOjyeO954d+Eg==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
@@ -4740,6 +4748,24 @@ packages:
       electron:
         optional: true
 
+  lognow@0.8.3:
+    resolution: {integrity: sha512-lzAjCQ7nNpu1Hbcvscov/7qiRM3syypxNW/jTHHLxL05K5rDFTprSP40Y2MnXyAQF0wLihZxkmWum/CZx1vLsQ==}
+    engines: {node: '>=20.19.0'}
+    peerDependencies:
+      electron: '>=39.8.10'
+    peerDependenciesMeta:
+      electron:
+        optional: true
+
+  lognow@0.8.4:
+    resolution: {integrity: sha512-WZlKu58RCMYEKabPHJKey3FFQZvRFKcN9gEsdSYrZhnouFyo1SOw+0ZmSh2/ctkxw1DXQDT7g4fNC1okB8VrJw==}
+    engines: {node: '>=20.19.0'}
+    peerDependencies:
+      electron: '>=39.8.10'
+    peerDependenciesMeta:
+      electron:
+        optional: true
+
   longest-streak@3.1.0:
     resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
 
@@ -4882,6 +4908,11 @@ packages:
 
   metascope@0.11.1:
     resolution: {integrity: sha512-xUFh6yuSWYhUI9SJap+ZvDtGILMfzEqdRtUD8ZDAGbay/JlrbfId+bzkOs1PDYScxuzrGXn+ClnvazsESwHznQ==}
+    engines: {node: '>=24.16.0'}
+    hasBin: true
+
+  metascope@0.12.0:
+    resolution: {integrity: sha512-3EH+9wP+hNaNBOKT8r3ldFQ39pCgygEzj7nkErjbYXU6UtD7tx3Re/bmLwxu8wjgMTK8vZ9P35XbMTQ0KEDeqw==}
     engines: {node: '>=24.16.0'}
     hasBin: true
 
@@ -6756,6 +6787,9 @@ packages:
   web-tree-sitter@0.26.13:
     resolution: {integrity: sha512-5bUZ7vbQ1kcondet96wzP974+JfCZDeQ7bTpacICm2nnvHpa5cO0ByRsoMcAhUP+743vpkb4m0BFlVSm+Ye9VA==}
 
+  web-tree-sitter@0.27.0:
+    resolution: {integrity: sha512-XK08gj6RwTMQatAG7uVRP8MunqotL/XC19vHgkSPKmELgbGPBj4ECvB8haHOUnyj6ls2B8t42UTro14zxGgAHg==}
+
   web-worker@1.5.0:
     resolution: {integrity: sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==}
 
@@ -6894,6 +6928,10 @@ packages:
 
   yargs@18.1.0:
     resolution: {integrity: sha512-2rAgRKu54VsHkqI0/tYkmluGXHD4KW7yZoycuqDQ15QOTnc2VVfy0nN/1eMhnQLO00A+dwtK20xuCnc1YGeUyg==}
+    engines: {node: ^20.19.0 || ^22.12.0 || >=23}
+
+  yargs@18.2.0:
+    resolution: {integrity: sha512-9OpKOLeaoNFecEp7P6iYbzze/5CqWoH7N3SMs/6y1XF4nMvFMspEGZzJ6uFi9MmQwXhyzqYoSEKO3tvA3Z/o2w==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=23}
 
   yocto-queue@0.1.0:
@@ -9582,6 +9620,22 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
+  brewpub@0.4.0(supports-color@10.2.2):
+    dependencies:
+      '@octokit/core': 7.0.8
+      '@octokit/plugin-retry': 8.1.1(@octokit/core@7.0.8)
+      '@types/node': 24.13.4
+      '@types/yargs': 17.0.35
+      defu: 6.1.7
+      lognow: 0.8.4
+      metascope: 0.12.0(supports-color@10.2.2)
+      semver: 7.8.5
+      uint8array-extras: 1.5.0
+      yargs: 18.2.0
+    transitivePeerDependencies:
+      - electron
+      - supports-color
+
   browserslist@4.28.9:
     dependencies:
       baseline-browser-mapping: 2.11.23
@@ -11754,6 +11808,44 @@ snapshots:
       untildify: 6.0.0
       wrap-ansi: 10.0.1
 
+  lognow@0.8.3:
+    dependencies:
+      '@kitschpatrol/node-inspect-extracted': 3.3.3-fork.1
+      '@kitschpatrol/safe-stable-stringify': 2.5.0-fork.1
+      '@loglayer/context-manager': 2.3.0
+      '@loglayer/transport': 3.3.0
+      '@loglayer/transport-log-file-rotation': 3.3.0
+      '@types/node': 20.19.43
+      defu: 6.1.7
+      filenamify: 7.0.3
+      loglayer: 9.4.0
+      next-json: 0.5.1
+      read-package-up: 12.0.0
+      serialize-error: 13.0.1
+      terminal-size: 4.0.1
+      tinyrainbow: 3.1.1
+      untildify: 6.0.0
+      wrap-ansi: 10.0.1
+
+  lognow@0.8.4:
+    dependencies:
+      '@kitschpatrol/node-inspect-extracted': 3.3.3-fork.1
+      '@kitschpatrol/safe-stable-stringify': 2.5.0-fork.1
+      '@loglayer/context-manager': 2.3.0
+      '@loglayer/transport': 3.3.0
+      '@loglayer/transport-log-file-rotation': 3.3.0
+      '@types/node': 20.19.43
+      defu: 6.1.7
+      filenamify: 7.0.3
+      loglayer: 9.4.0
+      next-json: 0.5.1
+      read-package-up: 12.0.0
+      serialize-error: 13.0.1
+      terminal-size: 4.0.1
+      tinyrainbow: 3.1.1
+      untildify: 6.0.0
+      wrap-ansi: 10.0.1
+
   longest-streak@3.1.0: {}
 
   lru-cache@10.4.3: {}
@@ -12110,6 +12202,49 @@ snapshots:
       unified: 11.0.5
       updates: 18.1.0
       web-tree-sitter: 0.26.13
+      yaml: 2.9.1
+      yargs: 18.1.0
+      zod: 4.6.5
+    transitivePeerDependencies:
+      - electron
+      - supports-color
+
+  metascope@0.12.0(supports-color@10.2.2):
+    dependencies:
+      '@kitschpatrol/tokei': 2.0.2
+      '@mshibanami-org/xcode': 1.1.0(supports-color@10.2.2)
+      '@octokit/core': 7.0.8
+      '@octokit/plugin-retry': 8.1.1(@octokit/core@7.0.8)
+      '@octokit/plugin-throttling': 11.0.5(@octokit/core@7.0.8)
+      '@sindresorhus/is': 8.1.0
+      '@types/mdast': 4.0.4
+      '@types/node': 24.13.4
+      '@types/yargs': 17.0.35
+      case-police: 2.2.1
+      defu: 6.1.7
+      fast-xml-parser: 5.11.1
+      find-workspaces: 0.3.1
+      git-url-parse: 16.1.0
+      gray-matter-es: 0.2.1
+      jiti: 2.7.0
+      lognow: 0.8.3
+      package-json: 10.0.1
+      picomatch: 4.0.7
+      pkg-types: 2.3.3
+      plist: 5.0.0
+      pretty-ms: 9.3.1
+      read-pkg: 10.1.0
+      read-pyproject: 0.3.3
+      remark-parse: 11.0.0(supports-color@10.2.2)
+      semver: 7.8.5
+      simple-git: 3.36.0(supports-color@10.2.2)
+      smol-toml: 1.8.0
+      string-ts: 2.3.1
+      tinyexec: 1.3.1
+      tinyglobby: 0.2.17
+      unified: 11.0.5
+      updates: 18.1.0
+      web-tree-sitter: 0.27.0
       yaml: 2.9.1
       yargs: 18.1.0
       zod: 4.6.5
@@ -14561,6 +14696,8 @@ snapshots:
 
   web-tree-sitter@0.26.13: {}
 
+  web-tree-sitter@0.27.0: {}
+
   web-worker@1.5.0: {}
 
   which-boxed-primitive@1.1.1:
@@ -14702,6 +14839,15 @@ snapshots:
       yargs-parser: 20.2.9
 
   yargs@18.1.0:
+    dependencies:
+      cliui: 9.0.1
+      escalade: 3.2.0
+      get-caller-file: 2.0.5
+      string-width: 8.2.2
+      y18n: 5.0.8
+      yargs-parser: 22.0.0
+
+  yargs@18.2.0:
     dependencies:
       cliui: 9.0.1
       escalade: 3.2.0

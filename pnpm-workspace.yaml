@@ -16,3 +16,5 @@ allowBuilds:
   unrs-resolver: true
 minimumReleaseAgeExclude:
   - yanki-connect@4.0.11
+  - brewpub@0.4.0
+  - lognow@0.8.4
