@@ -102,7 +102,7 @@ describe('areNotesEqual', () => {
 		// É as single codepoint vs. e + combining accent
 		const noteA = makeNote({ fields: { Back: '\u{E9}', Front: 'f', YankiNamespace: 'test' } })
 		const noteB = makeNote({
-			fields: { Back: '\u{65}\u{301}', Front: 'f', YankiNamespace: 'test' },
+			fields: { Back: 'e\u{301}', Front: 'f', YankiNamespace: 'test' },
 		})
 		expect(areNotesEqual(noteA, noteB)).toBe(true)
 	})
@@ -751,13 +751,9 @@ describe('getRemoteNotes', () => {
 		const client = {
 			deck: {
 				deckNames: vi.fn().mockResolvedValue(['FilteredDeck', 'RealDeck', 'Default']),
-				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => {
-					if (deck === 'FilteredDeck') {
-						return { dyn: 1 }
-					}
-
-					return { dyn: 0 }
-				}),
+				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => ({
+					dyn: deck === 'FilteredDeck' ? 1 : 0,
+				})),
 				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
 			},
 			note: {
@@ -770,11 +766,7 @@ describe('getRemoteNotes', () => {
 						return [1]
 					}
 
-					if (query === '"deck:Default"') {
-						return []
-					}
-
-					return []
+					return query === '"deck:Default"' ? [] : []
 				}),
 				notesInfo: vi.fn().mockResolvedValue([
 					{
@@ -800,23 +792,17 @@ describe('getRemoteNotes', () => {
 		const client = {
 			deck: {
 				deckNames: vi.fn().mockResolvedValue(['FilteredDeck', 'Default']),
-				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => {
-					if (deck === 'FilteredDeck') {
-						return { dyn: 1 }
-					}
-
-					return { dyn: 0 }
-				}),
+				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => ({
+					dyn: deck === 'FilteredDeck' ? 1 : 0,
+				})),
 				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
 			},
 			note: {
-				findNotes: vi.fn().mockImplementation(({ query }: { query: string }) => {
-					if (query === '"YankiNamespace:test"') {
-						return [1]
-					}
-
-					return []
-				}),
+				findNotes: vi
+					.fn()
+					.mockImplementation(({ query }: { query: string }) =>
+						query === '"YankiNamespace:test"' ? [1] : [],
+					),
 				notesInfo: vi.fn().mockResolvedValue([
 					{
 						cards: [100],

@@ -16,11 +16,9 @@ export function sortMultiline(text: string): string {
 }
 
 export function cleanUpTempPath(filePath: string | undefined): string | undefined {
-	if (filePath === undefined) {
-		return undefined
-	}
-
-	return filePath.replaceAll(normalize(os.tmpdir()), '/').replaceAll(/\/\d{13}\//gv, '')
+	return filePath === undefined
+		? undefined
+		: filePath.replaceAll(normalize(os.tmpdir()), '/').replaceAll(/\/\d{13}\//gv, '')
 }
 
 function stripNewlines(input: string): string {

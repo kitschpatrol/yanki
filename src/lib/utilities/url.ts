@@ -51,14 +51,10 @@ export function safeParseUrl(text: string): undefined | URL {
 
 		// If a file url is detected, but wasn't explicitly passed via a protocol, then
 		// treat it as a file path and not a URL
-		if (
-			(FILE_PREFIX_REGEX.test(url.protocol) || DRIVE_LETTER_REGEX.test(url.protocol)) &&
+		return (FILE_PREFIX_REGEX.test(url.protocol) || DRIVE_LETTER_REGEX.test(url.protocol)) &&
 			!FILE_PREFIX_REGEX.test(text)
-		) {
-			return undefined
-		}
-
-		return url
+			? undefined
+			: url
 
 		// More notes:
 		// Windows file paths can yield protocols like `C:\Bla bla bla` will yield a
@@ -85,11 +81,7 @@ export function isUrl(text: string): boolean {
  */
 export function fileUrlToPath(url: string): string {
 	const parsedUrl = safeParseUrl(url)
-	if (parsedUrl?.protocol === 'file:') {
-		return parsedUrl.pathname
-	}
-
-	return url
+	return parsedUrl?.protocol === 'file:' ? parsedUrl.pathname : url
 }
 
 export function getSrcType(
@@ -130,11 +122,9 @@ export function getSrcType(
 		return 'obsidianVaultUrl'
 	}
 
-	if (url.protocol === 'http:' || url.protocol === 'https:') {
-		return 'remoteHttpUrl'
-	}
-
-	return 'unsupportedProtocolUrl'
+	return url.protocol === 'http:' || url.protocol === 'https:'
+		? 'remoteHttpUrl'
+		: 'unsupportedProtocolUrl'
 }
 
 /**
@@ -167,11 +157,7 @@ function getHeadersString(
 		.filter((value) => value !== null && value !== undefined)
 		.join('')
 
-	if (headerString === '') {
-		return undefined
-	}
-
-	return headerString
+	return headerString === '' ? undefined : headerString
 }
 
 function convertKeysToLowercase(object: Record<string, string>): Record<string, string> {
@@ -238,11 +224,9 @@ export async function getFileExtensionFromUrl(
 	}
 
 	// TODO get rid of type cast
-	if (MEDIA_SUPPORTED_EXTENSIONS.includes((extensionInUrl ?? '') as MediaSupportedExtension)) {
-		return extensionInUrl as MediaSupportedExtension
-	}
-
-	return undefined
+	return MEDIA_SUPPORTED_EXTENSIONS.includes((extensionInUrl ?? '') as MediaSupportedExtension)
+		? (extensionInUrl as MediaSupportedExtension)
+		: undefined
 }
 
 /**

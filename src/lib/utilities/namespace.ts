@@ -149,10 +149,12 @@ export function validateNamespace(namespace: string, allowAsterisk = false) {
 
 	for (const [regex, description] of forbiddenCharacters) {
 		const match = namespace.match(regex)
-		if (match) {
-			const character = JSON.stringify(match[0]).slice(1, -1)
-			errorMessages.push(`Forbidden character: ${description}: "${character}"`)
+		if (!match) {
+			continue
 		}
+
+		const character = JSON.stringify(match[0]).slice(1, -1)
+		errorMessages.push(`Forbidden character: ${description}: "${character}"`)
 	}
 
 	if (errorMessages.length > 0) {

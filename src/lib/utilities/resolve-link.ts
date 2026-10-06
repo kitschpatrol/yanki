@@ -217,7 +217,9 @@ function resolveLocalFilePath(decodedUrl: string, options: ResolveLinkOptions): 
 
 /** Render a matched local file and its still-unmodified Obsidian anchor. */
 function resolveMatchedLocalLink(link: ResolvedLocalLink, options: ResolveLinkOptions): string {
-	const { anchor, filePath } = link
+	const { anchor = '', filePath } = link
+	// Public options may carry a null basePath from JavaScript callers, which a destructuring default would not replace
+	// eslint-disable-next-line unicorn/prefer-default-parameters
 	const { basePath, convertFilePathsToProtocol, obsidianVaultName, type } = options
 
 	// For links, anything that exists should become a protocol link. For embeds,
@@ -237,7 +239,7 @@ function resolveMatchedLocalLink(link: ResolvedLocalLink, options: ResolveLinkOp
 		// This doesn't work in the Anki desktop application or the AnkiWeb browser version...
 		// Not really worth it
 		if (convertFilePathsToProtocol === 'file') {
-			return createFileLink(`${filePath}${anchor ?? ''}`)
+			return createFileLink(`${filePath}${anchor}`)
 		}
 	}
 

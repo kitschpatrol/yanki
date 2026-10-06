@@ -58,11 +58,7 @@ export function normalize(filePath: string): string {
 
 	// Tricky cases where we still want leading './' to distinguish between relative and "named"" paths,
 	// otherwise it's stripped by normalization
-	if (basicPath.startsWith('./')) {
-		return `./${normalizedPath}`
-	}
-
-	return normalizedPath
+	return basicPath.startsWith('./') ? `./${normalizedPath}` : normalizedPath
 }
 
 /**
@@ -146,11 +142,9 @@ export function resolveWithBasePath(
 // }
 
 export function stripBasePath(filePath: string, basePath: string): string {
-	if (filePath.toLowerCase().startsWith(basePath.toLowerCase())) {
-		return filePath.slice(basePath.length)
-	}
-
-	return filePath
+	return filePath.toLowerCase().startsWith(basePath.toLowerCase())
+		? filePath.slice(basePath.length)
+		: filePath
 }
 
 export function getBaseAndQueryParts(filePath: string): [string, string | undefined] {

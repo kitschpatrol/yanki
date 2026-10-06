@@ -83,23 +83,23 @@ export function describeWithFileFixture(
 			await loadTestProfile(context.yankiConnect, TEST_PROFILE_NAME)
 
 			// Clean up anki first
-			if (cleanUpAnki) {
-				// Clean up everything, since importing apkg can have other effects...
-				const deckNamesResult = await context.yankiConnect.deck.deckNames()
-				await context.yankiConnect.deck.deleteDecks({
-					cardsToo: true,
-					decks: deckNamesResult,
-				})
-				const deckNamesResultPostClean = await context.yankiConnect.deck.deckNames()
-				expect(deckNamesResultPostClean).toEqual(['Default'])
-
-				// Clean up tags
-				await context.yankiConnect.note.clearUnusedTags()
-				const tags = await context.yankiConnect.note.getTags()
-				expect(tags).toStrictEqual([])
-
-				// Models
+			if (!cleanUpAnki) {
+				return
 			}
+
+			// Clean up everything, since importing apkg can have other effects...
+			const deckNamesResult = await context.yankiConnect.deck.deckNames()
+			await context.yankiConnect.deck.deleteDecks({
+				cardsToo: true,
+				decks: deckNamesResult,
+			})
+			const deckNamesResultPostClean = await context.yankiConnect.deck.deckNames()
+			expect(deckNamesResultPostClean).toEqual(['Default'])
+
+			// Clean up tags
+			await context.yankiConnect.note.clearUnusedTags()
+			const tags = await context.yankiConnect.note.getTags()
+			expect(tags).toStrictEqual([])
 
 			// Setup logic before all tests
 			// console.log(`Setup before all tests: ${JSON.stringify(context, undefined, 2)}`)

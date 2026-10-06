@@ -10,10 +10,7 @@ function stripUndefinedFields<T extends Record<string, unknown>>(object: T): T {
 	return Object.fromEntries(Object.entries(object).filter(([_, v]) => v !== undefined)) as T
 }
 
-async function getNotesFromMarkdown(
-	markdownVariations: string[],
-	showOriginal = true,
-): Promise<
+async function getNotesFromMarkdown(markdownVariations: string[]): Promise<
 	Array<{
 		back?: string
 		front: string
@@ -36,7 +33,7 @@ async function getNotesFromMarkdown(
 						? note.fields.Back.split('\n').slice(2, -1).join('\n')
 						: undefined,
 				front: note.fields.Front.split('\n').slice(2, -1).join('\n'),
-				original: showOriginal ? markdownVariation : undefined,
+				original: markdownVariation,
 				type: note.modelName,
 			}),
 		)

@@ -3,13 +3,17 @@
 
 # @kitschpatrol/repo-config boilerplate
 !.env.example
+.agents/
 .astro/
+.claude/
 .DS_Store
 .env
 .env.*
 .eslint-config-inspector
 .pnpm-store/
 .svelte-kit/
+.vitest/
+.worktrees/
 {tmp,temp}/
 **/*.min.js
 /scratch/
@@ -18,14 +22,13 @@ build/
 coverage/
 dist/
 node_modules/
+skills-lock.json
 vendor/
 
 # Customizations
-.vitest/
 /src/test.ts
 /test/assets/test obsidian vault with spaces/.obsidian/workspace.json
 /test/assets/test obsidian vault with spaces/.obsidian/plugins
 /test/assets/test-obsidian-vault/.obsidian/workspace.json
 /test/assets/test-obsidian-vault/.obsidian/plugins
-.claude/
 __pycache__

@@ -187,7 +187,7 @@ it('generates different filenames for different files with identical size and mt
 	const fileAdapter = createMockFileAdapter({
 		// eslint-disable-next-line ts/require-await
 		async readFileBuffer(filePath: string) {
-			return filePath.includes('clip-1') ? new Uint8Array([1, 2, 3]) : new Uint8Array([4, 5, 6])
+			return new Uint8Array(filePath.includes('clip-1') ? [1, 2, 3] : [4, 5, 6])
 		},
 	})
 	const fetchAdapter = vi.fn()

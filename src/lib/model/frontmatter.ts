@@ -56,11 +56,9 @@ export async function setNoteIdInFrontmatter(
 
 			// Strip leading empty line if present
 			// (This is a common artifact of formatting Markdown files with frontmatter)
-			if (markdownWithoutFrontmatter[0]?.trim() === '') {
-				return markdownWithoutFrontmatter.slice(1).join('\n')
-			}
-
-			return markdownWithoutFrontmatter.join('\n')
+			return markdownWithoutFrontmatter[0]?.trim() === ''
+				? markdownWithoutFrontmatter.slice(1).join('\n')
+				: markdownWithoutFrontmatter.join('\n')
 		}
 	} else {
 		parsedFrontmatter.noteId = noteId
@@ -92,11 +90,9 @@ function getFrontmatterRange(
 		(line, index) => index > frontmatterStart && line.startsWith('---'),
 	)
 
-	if (frontmatterStart === -1 || frontmatterEnd === -1) {
-		return [undefined, undefined]
-	}
-
-	return [frontmatterStart, frontmatterEnd]
+	return frontmatterStart === -1 || frontmatterEnd === -1
+		? [undefined, undefined]
+		: [frontmatterStart, frontmatterEnd]
 }
 
 /**

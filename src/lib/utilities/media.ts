@@ -30,14 +30,10 @@ export async function getAnkiMediaFilenameExtension(
 		: path.extname(pathOrUrl).slice(1)
 
 	// Make sure it's supported, returns undefined if not
-	if (
-		extensionCandidate === undefined ||
+	return extensionCandidate === undefined ||
 		!MEDIA_SUPPORTED_EXTENSIONS.includes(extensionCandidate as MediaSupportedExtension)
-	) {
-		return undefined
-	}
-
-	return extensionCandidate as MediaSupportedExtension
+		? undefined
+		: (extensionCandidate as MediaSupportedExtension)
 }
 
 function getLegibleFilename(pathOrUrl: string, maxLength: number): string {
@@ -78,11 +74,9 @@ export async function mediaAssetExists(
 	fileAdapter: FileAdapter,
 	fetchAdapter: FetchAdapter,
 ): Promise<boolean> {
-	if (isUrl(absolutePathOrUrl)) {
-		return urlExists(absolutePathOrUrl, fetchAdapter)
-	}
-
-	return fileExists(absolutePathOrUrl, fileAdapter)
+	return isUrl(absolutePathOrUrl)
+		? urlExists(absolutePathOrUrl, fetchAdapter)
+		: fileExists(absolutePathOrUrl, fileAdapter)
 }
 
 /**

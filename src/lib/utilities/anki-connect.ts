@@ -272,19 +272,12 @@ export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = tr
 		return false
 	}
 
-	if (noteA.deckName !== noteB.deckName) {
-		return false
-	}
-
-	if (noteA.modelName !== noteB.modelName) {
-		return false
-	}
-
-	if (!areFieldsEqual(noteA.fields, noteB.fields)) {
-		return false
-	}
-
-	if (!areTagsEqual(noteA.tags ?? [], noteB.tags ?? [])) {
+	if (
+		noteA.deckName !== noteB.deckName ||
+		noteA.modelName !== noteB.modelName ||
+		!areFieldsEqual(noteA.fields, noteB.fields) ||
+		!areTagsEqual(noteA.tags ?? [], noteB.tags ?? [])
+	) {
 		return false
 	}
 

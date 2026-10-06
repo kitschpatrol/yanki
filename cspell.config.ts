@@ -4,7 +4,6 @@ export default cspellConfig({
 	ignorePaths: [
 		'**/*.svg',
 		'test/assets/test-deck-pruning/**/*',
-		'test/assets/test-unicode/**/*',
 		'test/fixtures/anki-data-folder/**/*',
 	],
 	words: [

@@ -1,5 +1,4 @@
 /* eslint-disable unicorn/prefer-string-raw */
-/* eslint-disable no-irregular-whitespace */
 
 import { expect, it } from 'vitest'
 import { NOTE_NAMESPACE_MAX_LENGTH } from '../src/lib/shared/constants'
@@ -78,8 +77,8 @@ it('catches invalid namespaces', () => {
 	expect(() => {
 		validateNamespace('t\u{200B}h\u{200C}i\u{200D}s contains hidden spaces.')
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace "t​h‌i‍s contains hidden spaces.":
-			- Forbidden character: Zero-width Space: "​"
+		[Error: Invalid namespace "t\u{200B}h‌i‍s contains hidden spaces.":
+			- Forbidden character: Zero-width Space: "\u{200B}"
 			- Forbidden character: Zero-width Non-joiner: "‌"
 			- Forbidden character: Zero-width Joiner: "‍"]
 	`)
@@ -94,7 +93,7 @@ it('allows asterisks when asked', () => {
 it('sanitizes inconsistent unicode', () => {
 	// Different unicode representations of the same character
 	const basicNamespace = 'A basic namespac\u{E9}' // Encodes é
-	const weirdNamespace = 'a bASic namespac\u{65}\u{301}' // Encodes é
+	const weirdNamespace = 'a bASic namespace\u{301}' // Encodes é
 
 	expect(basicNamespace.length).not.toEqual(weirdNamespace.length)
 

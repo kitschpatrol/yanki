@@ -9,12 +9,13 @@
 [![NPM Package yanki](https://img.shields.io/npm/v/yanki.svg)](https://www.npmjs.com/package/yanki)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit)
 [![CI](https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml)
+[![Homebrew](https://img.shields.io/badge/Homebrew-kitschpatrol%2Ftap%2Fyanki-FBB040?logo=homebrew&logoColor=white)](https://github.com/kitschpatrol/homebrew-tap/blob/HEAD/Formula/yanki.rb)
 
 <!-- /badges -->
 
 <!-- short-description -->
 
-**A CLI tool and TypeScript library to turn Markdown into Anki flashcards.**
+**CLI tool and TypeScript library to turn Markdown into Anki flashcards.**
 
 <!-- /short-description -->
 
@@ -58,7 +59,7 @@ The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Ank
 
 ## Quick start
 
-Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 22.18 or newer.)
+Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 24.16 or newer.)
 
 Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on installed:
 
@@ -313,28 +314,34 @@ _Linux users should note that the Flatpak / Flathub version of Anki is not recom
 
 ### Installation
 
-Invoke directly on Markdown files in a directory:
+Pick the option that matches how you plan to use it.
+
+#### CLI
+
+Run it once without installing:
 
 ```sh
 npx yanki ./folder-to-sync
 ```
 
-...or install globally:
+Or install it globally with Homebrew:
+
+```sh
+brew install kitschpatrol/tap/yanki
+```
+
+Or install it globally with npm:
 
 ```sh
 npm install --global yanki
 ```
 
-...or install locally in your JavaScript or TypeScript project to use the exported APIs:
+#### Library
+
+Add it to your project to import the TypeScript API. This also puts the `yanki` CLI on your project's path:
 
 ```sh
-npm install --save-dev yanki
-```
-
-...or install the CLI tool globally with Homebrew:
-
-```sh
-brew install kitschpatrol/tap/yanki
+npm install yanki
 ```
 
 ## Usage
@@ -369,7 +376,7 @@ Delete the Markdown file locally (not in Anki!) and run `yanki ./your-deck-folde
 
 All available commands and options for advanced use cases are described below, but shouldn't typically be necessary.
 
-<!-- cli-help -->
+<!-- cli-help({ heading: false, headingLevel: 3 }) -->
 
 #### Command: `yanki`
 

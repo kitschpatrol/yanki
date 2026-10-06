@@ -22,4 +22,4 @@ exclude = [
 # /Assets/yanki audio.mp3) only resolve against a vault root, which lychee has
 # no way to know about. They fail before `exclude` applies, so they can only be
 # silenced by skipping the files.
-exclude_path = ["test/assets/test-obsidian-vault"]
+exclude_path = ['test/assets/test-obsidian-vault']

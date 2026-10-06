@@ -2,6 +2,8 @@ import { eslintConfig } from '@kitschpatrol/eslint-config'
 
 export default eslintConfig({
 	ignores: [
+		// Claude Code only reads agent instructions from this exact filename
+		'CLAUDE.md',
 		'test/assets/test obsidian vault with spaces/**/*',
 		'test/assets/test-cloze-back/**/*',
 		'test/assets/test-deck-pruning/**/*',

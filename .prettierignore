@@ -3,13 +3,13 @@
 
 # @kitschpatrol/prettier-config boilerplate
 .claude/
+.agents/
 package-lock.json
 pnpm-lock.yaml
 skills-lock.json
 
 # Customizations
 test/assets/test-obsidian-vault/
-test/assets/test-tags/
 test/assets/test-unexpected-formatting/
 test/assets/test\ obsidian\ vault\ with\ spaces/
 test/assets/test-cloze-back/

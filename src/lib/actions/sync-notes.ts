@@ -318,7 +318,7 @@ export async function syncNotes(
 
 // Helper function to find notes with the same noteId
 function findNotesWithDuplicateIds(notes: YankiNote[], noteId: number): YankiNote[] {
-	return notes.filter((note) => (note.noteId === undefined ? false : note.noteId === noteId))
+	return notes.filter((note) => note.noteId !== undefined && note.noteId === noteId)
 }
 
 // Function to select the note to keep based on content matching with the remote note

@@ -108,11 +108,7 @@ export function wikiBasic(): Extension {
 			if (code === 124) {
 				// Special case if there's no link at this point,
 				// e.g. [[\|]]
-				if (linkLength === 1) {
-					return nok(code)
-				}
-
-				return transitionToLabel(code)
+				return linkLength === 1 ? nok(code) : transitionToLabel(code)
 			}
 
 			// Backslash - look ahead to check if followed by pipe

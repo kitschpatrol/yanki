@@ -145,11 +145,9 @@ export function getUniqueFilePath(filePath: string, existingFilenames: string[])
 export function auditUniqueFilePath(filePath: string, existingFilenames: string[]) {
 	const testPath = appendFilenameIncrement(filePath, 2)
 
-	if (existingFilenames.includes(testPath.toLowerCase())) {
-		return filePath
-	}
-
-	return stripFilenameIncrement(filePath)
+	return existingFilenames.includes(testPath.toLowerCase())
+		? filePath
+		: stripFilenameIncrement(filePath)
 }
 
 /**
