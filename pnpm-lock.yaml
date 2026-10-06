@@ -320,8 +320,8 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
       yanki-connect:
-        specifier: ^4.0.11
-        version: 4.0.11
+        specifier: ^4.0.12
+        version: 4.0.12
       yargs:
         specifier: ^18.2.0
         version: 18.2.0
@@ -6934,9 +6934,9 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
-  yanki-connect@4.0.11:
-    resolution: {integrity: sha512-UHWjJLoFTDV6ubnMKaNUVVZgvqpEEQCVcl1kxmh0//7q3zkq/NSx8S2bnUYnN+vbNHxsmak2LyAG1GLmfm8cAA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
+  yanki-connect@4.0.12:
+    resolution: {integrity: sha512-egHyjRjmqJ0g83EBTqbezKGv1poNJNkJuJD0GTzJDA64idvHvHuXfxG8kGZ8lHC/NWq63k/NdLT5zU1yet1Mkw==}
+    engines: {node: ^20.19.0 || ^22.12.0 || ^24.0.0 || >=26.0.0}
 
   yargs-parser@20.2.9:
     resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
@@ -14727,7 +14727,7 @@ snapshots:
 
   yaml@2.9.1: {}
 
-  yanki-connect@4.0.11:
+  yanki-connect@4.0.12:
     dependencies:
       '@types/node': 20.19.43
       open: 11.0.4
