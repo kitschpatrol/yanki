@@ -344,6 +344,32 @@ Add it to your project to import the TypeScript API. This also puts the `yanki` 
 npm install yanki
 ```
 
+<!-- skills({ headingLevel: 3 }) -->
+
+### Agent skills
+
+This project bundles an [Agent Skill](https://agentskills.io) in its published package to help coding agents work with yanki.
+
+To sync the skill into your project, run Vercel's [skills CLI](https://github.com/vercel-labs/skills) from your project root:
+
+```sh
+npx skills experimental_sync
+```
+
+Or install globally:
+
+```sh
+npx skills add kitschpatrol/yanki --global
+```
+
+Included skill:
+
+#### Skill: [`yanki`](skills/yanki/SKILL.md)
+
+Create and edit Markdown flashcards for Yanki, choose the correct card syntax, and sync notes to Anki with the Yanki CLI or TypeScript library.
+
+<!-- /skills -->
+
 ## Usage
 
 ### Basics

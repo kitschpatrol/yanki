@@ -46,7 +46,8 @@
 		"yanki": "dist/bin/cli.js"
 	},
 	"files": [
-		"dist/*"
+		"dist",
+		"skills"
 	],
 	"scripts": {
 		"build": "tsdown && attw -P --profile esm-only && publint",
