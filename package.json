@@ -116,7 +116,7 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
-		"@kitschpatrol/shared-config": "^8.12.1",
+		"@kitschpatrol/shared-config": "^8.13.1",
 		"@vitest/browser-playwright": "^5.0.3",
 		"@vitest/coverage-v8": "^5.0.3",
 		"brewpub": "^0.5.0",
