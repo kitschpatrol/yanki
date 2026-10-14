@@ -11,7 +11,8 @@
 		"markdown",
 		"cli",
 		"sync",
-		"npm-package"
+		"npm-package",
+		"homebrew-formula"
 	],
 	"homepage": "https://github.com/kitschpatrol/yanki",
 	"bugs": "https://github.com/kitschpatrol/yanki/issues",
@@ -117,20 +118,20 @@
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
 		"@kitschpatrol/shared-config": "^8.13.1",
-		"@vitest/browser-playwright": "^5.0.3",
-		"@vitest/coverage-v8": "^5.0.3",
+		"@vitest/browser-playwright": "^5.0.4",
+		"@vitest/coverage-v8": "^5.0.4",
 		"brewpub": "^0.5.0",
 		"bumpp": "^12.3.0",
-		"execa": "^10.1.0",
+		"execa": "^10.1.1",
 		"mdat-plugin-cli-help": "^3.4.1",
-		"playwright": "^1.63.0",
+		"playwright": "^1.64.0",
 		"publint": "^0.3.25",
 		"shx": "^0.4.0",
-		"skills": "^1.7.1",
-		"tsdown": "^0.23.0",
+		"skills": "^1.7.2",
+		"tsdown": "^0.23.1",
 		"tsx": "^4.23.15",
 		"typescript": "~6.0.3",
-		"vitest": "^5.0.3"
+		"vitest": "^5.0.4"
 	},
 	"packageManager": "pnpm@12.11.2",
 	"engines": {

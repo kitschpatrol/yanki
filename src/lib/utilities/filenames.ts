@@ -16,8 +16,8 @@ import {
 } from '../shared/constants'
 import { emptyIsUndefined, truncateOnWordBoundary } from './string'
 
-const CLOZE_CONTENT_REGEX = /\{\{\w\d*\s?:{0,2}([^:\}]+)/v
-const FILENAME_INCREMENT_SUFFIX_REGEX = /\s\(\d+\)$/v
+const CLOZE_CONTENT_REGEX = /\{\{\w\d*\s?:{0,2}([^:}]+)/u
+const FILENAME_INCREMENT_SUFFIX_REGEX = /\s\(\d+\)$/u
 
 // eslint-disable-next-line complexity
 export function getSafeTitleForNote(
@@ -106,7 +106,7 @@ function getSafeFilename(text: string, maxLength?: number): string {
 		// TODO Filename 7 doesn't tolerate whitespace...
 		replacement: ' ',
 	})
-		.replaceAll(/\s+/gv, ' ')
+		.replaceAll(/\s+/gu, ' ')
 		.trim()
 
 	// Edge case where the filename is empty

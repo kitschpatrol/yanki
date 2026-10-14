@@ -5,13 +5,13 @@ import path from 'path-browserify-esm'
 import slash from 'slash'
 import { splitAtFirstMatch } from './string'
 
-const WINDOWS_DRIVE_LETTER_REGEX = /^[A-Z]:/iv
+const WINDOWS_DRIVE_LETTER_REGEX = /^[A-Z]:/iu
 // Obsidian anchor delimiters: `#heading` and `#^block` (and bare `^block`).
 // `?` is deliberately absent: it has no meaning in Obsidian links or local
 // markdown links, and is a legal file name character on macOS and Linux.
 // Remote URLs (where `?` queries are real) never reach this code.
 // https://github.com/kitschpatrol/yanki/issues/20
-const QUERY_FRAGMENT_START_REGEX = /[#^]/v
+const QUERY_FRAGMENT_START_REGEX = /[#^]/u
 
 // Unused...
 // function stripLeadingSlash(filePath: string): string {
@@ -29,7 +29,7 @@ export function isAbsolute(filePath: string): boolean {
 	return isAbsolutePath.posix(filePath) || isAbsolutePath.win32(filePath)
 }
 
-const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/v
+const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/u
 
 // Unused
 // const RE_WINDOWS_UNC_PATH = /^\\\\[^\\]+\\[^\\]+/

@@ -7,7 +7,7 @@ import { CONTINUE, visit } from 'unist-util-visit'
 // MathJax tolerates whitespace between braces, so breaking up the runs keeps
 // rendering identical while making the math safe to embed in a cloze.
 // See https://github.com/kitschpatrol/yanki/issues/15
-const CONSECUTIVE_BRACES_REGEX = /([\{\}])(?=[\{\}])/gv
+const CONSECUTIVE_BRACES_REGEX = /([{}])(?=[{}])/gu
 
 function sanitizeBraces(value: string): string {
 	return value.replaceAll(CONSECUTIVE_BRACES_REGEX, '$1 ')

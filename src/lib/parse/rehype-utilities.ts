@@ -69,7 +69,7 @@ import { getSrcType, isUrl, safeDecodeURI } from '../utilities/url'
 import rehypeMathjaxAnki from './rehype-mathjax-anki'
 import remarkConditionalBreaks from './remark-conditional-breaks'
 
-const DIMENSION_CHARS_REGEX = /^[\dx]+$/v
+const DIMENSION_CHARS_REGEX = /^[\dx]+$/u
 
 // Fine-grained Shiki bundle: only the langs/themes listed below ship in the
 // build. Unknown languages fall back to plaintext via `fallbackLanguage`. See

@@ -5,11 +5,11 @@ export const ENVIRONMENT =
 
 export const PLATFORM =
 	ENVIRONMENT === 'browser'
-		? /windows/iv.test(navigator.userAgent)
+		? /windows/iu.test(navigator.userAgent)
 			? 'windows'
-			: /mac/iv.test(navigator.userAgent)
+			: /mac/iu.test(navigator.userAgent)
 				? 'mac'
-				: /linux/iv.test(navigator.userAgent) || /ubuntu/iv.test(navigator.userAgent)
+				: /linux/iu.test(navigator.userAgent) || /ubuntu/iu.test(navigator.userAgent)
 					? 'linux'
 					: 'other'
 		: ENVIRONMENT === 'node'

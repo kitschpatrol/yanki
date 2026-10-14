@@ -28,7 +28,7 @@ type AstFromMarkdownOptions = Pick<
 	'allFilePaths' | 'basePath' | 'cwd' | 'obsidianVault' | 'resolveUrls'
 >
 
-const CLOZE_NUMBER_PREFIX_REGEX = /^[\(\|]?(\d{1,2})(?:[\s\).\|]|$)(.*)$/v
+const CLOZE_NUMBER_PREFIX_REGEX = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/u
 
 const defaultAstFromMarkdownOptions: AstFromMarkdownOptions = {
 	...defaultGlobalOptions,

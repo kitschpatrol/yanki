@@ -11,8 +11,8 @@ import { getFileExtensionForMimeType } from './mime'
 import { isAbsolute, normalize } from './path'
 import { getHash } from './string'
 
-const DRIVE_LETTER_REGEX = /^[a-z]:/iv
-const FILE_PREFIX_REGEX = /^file:/iv
+const DRIVE_LETTER_REGEX = /^[a-z]:/iu
+const FILE_PREFIX_REGEX = /^file:/iu
 
 // Detect probably wiki-style name links
 // export function isNameUrl(text: string): boolean {

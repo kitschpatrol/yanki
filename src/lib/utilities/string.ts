@@ -53,9 +53,9 @@ export function cleanClassName(className: string): string {
 			.toLowerCase()
 			// Not using the `i` flag because with the `v` flag it would also spare
 			// case-folded characters like `ſ` (U+017F) and `K` (U+212A)
-			.replaceAll(/[^\dA-Za-z]/gv, ' ')
+			.replaceAll(/[^\dA-Za-z]/gu, ' ')
 			.trim()
-			.replaceAll(/ +/gv, '-')
+			.replaceAll(/ +/gu, '-')
 	)
 }
 
@@ -107,9 +107,9 @@ export function css(strings: TemplateStringsArray, ...values: unknown[]): string
 	return trimLeadingIndentation(strings, ...values)
 }
 
-const NEWLINE_REGEX = /\r?\n/v
+const NEWLINE_REGEX = /\r?\n/u
 // eslint-disable-next-line regexp/no-unused-capturing-group
-const LEADING_WHITESPACE_REGEX = /^(\s+)/v
+const LEADING_WHITESPACE_REGEX = /^(\s+)/u
 
 function trimLeadingIndentation(strings: TemplateStringsArray, ...values: unknown[]): string {
 	const lines = strings
@@ -121,7 +121,7 @@ function trimLeadingIndentation(strings: TemplateStringsArray, ...values: unknow
 	// Get leading white space of first line, and trim that much white space
 	// from subsequent lines
 	const leadingSpace = LEADING_WHITESPACE_REGEX.exec(lines[0] ?? '')?.[0] ?? ''
-	const leadingSpaceRegex = new RegExp(`^${leadingSpace}`, 'v')
+	const leadingSpaceRegex = new RegExp(`^${leadingSpace}`, 'u')
 	return lines.map((line) => line.replace(leadingSpaceRegex, '').trimEnd()).join('\n')
 }
 

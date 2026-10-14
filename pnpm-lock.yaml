@@ -333,10 +333,10 @@ importers:
         specifier: ^8.13.1
         version: 8.13.1(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@pnpm/logger@1100.0.0)(@types/node@22.18.13)(@types/unist@3.0.3)(@typescript-eslint/utils@8.71.2(eslint@10.12.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(jiti@2.7.0)(mdast-util-from-markdown@2.1.0(supports-color@10.2.2))(mdast-util-mdx@3.0.0(supports-color@10.2.2))(micromark-util-types@2.0.3)(postcss-html@2.0.0(postcss@8.5.30))(remark-parse@11.0.0(supports-color@10.2.2))(stylelint-order@8.1.2(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3)))(supports-color@10.2.2)(svelte@5.57.2(@typescript-eslint/types@8.71.2))(typescript@6.0.3)(vitest@5.0.4)
       '@vitest/browser-playwright':
-        specifier: ^5.0.3
+        specifier: ^5.0.4
         version: 5.0.4(playwright@1.64.0)(vite@8.3.4(@types/node@22.18.13)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))(vitest@5.0.4)
       '@vitest/coverage-v8':
-        specifier: ^5.0.3
+        specifier: ^5.0.4
         version: 5.0.4(@vitest/browser@5.0.4)(vitest@5.0.4)
       brewpub:
         specifier: ^0.5.0
@@ -345,13 +345,13 @@ importers:
         specifier: ^12.3.0
         version: 12.3.0
       execa:
-        specifier: ^10.1.0
+        specifier: ^10.1.1
         version: 10.1.1
       mdat-plugin-cli-help:
         specifier: ^3.4.1
         version: 3.4.1(mdat@3.6.2(@types/node@22.18.13)(prettier@3.9.10)(supports-color@10.2.2)(typescript@6.0.3))
       playwright:
-        specifier: ^1.63.0
+        specifier: ^1.64.0
         version: 1.64.0
       publint:
         specifier: ^0.3.25
@@ -360,10 +360,10 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0
       skills:
-        specifier: ^1.7.1
+        specifier: ^1.7.2
         version: 1.7.2
       tsdown:
-        specifier: ^0.23.0
+        specifier: ^0.23.1
         version: 0.23.1(@arethetypeswrong/core@0.18.5)(oxc-resolver@11.24.2)(publint@0.3.25)(tsx@4.23.15)(typescript@6.0.3)
       tsx:
         specifier: ^4.23.15
@@ -372,7 +372,7 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.3
+        specifier: ^5.0.4
         version: 5.0.4(@types/node@22.18.13)(@vitest/browser-playwright@5.0.4)(@vitest/coverage-v8@5.0.4)(@vitest/ui@5.0.4)(vite@8.3.4(@types/node@22.18.13)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
 
 packages:

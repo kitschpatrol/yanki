@@ -13,7 +13,7 @@ import {
 	safeParseUrl,
 } from './url'
 
-const MD_EXTENSION_REGEX = /\.md$/v
+const MD_EXTENSION_REGEX = /\.md$/u
 
 type ResolveLinkType =
 	// Via a `![[link]]` or `![alt](link)` syntax
