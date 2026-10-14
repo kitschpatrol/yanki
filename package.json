@@ -81,7 +81,7 @@
 		"mdast-util-from-markdown": "^2.1.0",
 		"micromark-util-sanitize-uri": "^2.0.1",
 		"micromark-util-types": "^2.0.3",
-		"nanoid": "^6.0.1",
+		"nanoid": "^6.0.2",
 		"path-browserify-esm": "^1.0.6",
 		"picocolors": "^1.1.1",
 		"plur": "^6.0.0",
@@ -111,7 +111,7 @@
 		"unist-util-visit": "^5.1.0",
 		"untildify": "^6.0.0",
 		"yaml": "^2.9.1",
-		"yanki-connect": "^4.0.12",
+		"yanki-connect": "^5.0.0",
 		"yargs": "^18.2.0"
 	},
 	"devDependencies": {
@@ -121,18 +121,18 @@
 		"@vitest/coverage-v8": "^5.0.3",
 		"brewpub": "^0.5.0",
 		"bumpp": "^12.3.0",
-		"execa": "^10.0.1",
-		"mdat-plugin-cli-help": "^3.4.0",
+		"execa": "^10.1.0",
+		"mdat-plugin-cli-help": "^3.4.1",
 		"playwright": "^1.63.0",
 		"publint": "^0.3.25",
 		"shx": "^0.4.0",
-		"skills": "^1.7.0",
+		"skills": "^1.7.1",
 		"tsdown": "^0.23.0",
 		"tsx": "^4.23.15",
 		"typescript": "~6.0.3",
 		"vitest": "^5.0.3"
 	},
-	"packageManager": "pnpm@12.9.1",
+	"packageManager": "pnpm@12.11.2",
 	"engines": {
 		"node": "^22.18.0 || ^24.0.0 || >=26.0.0"
 	},

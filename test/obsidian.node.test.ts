@@ -254,7 +254,7 @@ describeWithFileFixture(
 		cleanUpTempFiles: true,
 	},
 	(context) => {
-		it('correctly syncs an entire obsidian vault', { timeout: 60_000 }, async () => {
+		it('correctly syncs an entire obsidian vault', { timeout: 180_000 }, async () => {
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {

@@ -1,0 +1,1 @@
+{"name": "Anki-Connect", "mod": 1791944001, "min_point_version": 260800, "max_point_version": 260800, "branch_index": 2, "disabled": false, "config": {"apiKey": null, "apiLogPath": null, "ignoreOriginList": [], "webBindAddress": "0.0.0.0", "webBindPort": 8765, "webCorsOriginList": ["*"]}, "conflicts": ["AnkiConnectDev"], "update_enabled": false}

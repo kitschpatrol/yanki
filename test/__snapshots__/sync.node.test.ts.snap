@@ -4951,9 +4951,7 @@ exports[`update model permutations to basic > updates the model if it changes to
 ]
 `;
 
-exports[`update model permutations to basic > updates the model if it changes to basic 3`] = `true`;
-
-exports[`update model permutations to basic > updates the model if it changes to basic 4`] = `
+exports[`update model permutations to basic > updates the model if it changes to basic 3`] = `
 [
   "unchanged",
   "updated",
@@ -4962,7 +4960,7 @@ exports[`update model permutations to basic > updates the model if it changes to
 ]
 `;
 
-exports[`update model permutations to basic > updates the model if it changes to basic 5`] = `
+exports[`update model permutations to basic > updates the model if it changes to basic 4`] = `
 [
   "Yanki - Basic",
   "Yanki - Basic",
@@ -4989,9 +4987,7 @@ exports[`update model permutations to cloze > updates the model if it changes to
 ]
 `;
 
-exports[`update model permutations to cloze > updates the model if it changes to cloze 3`] = `false`;
-
-exports[`update model permutations to cloze > updates the model if it changes to cloze 4`] = `
+exports[`update model permutations to cloze > updates the model if it changes to cloze 3`] = `
 [
   "updated",
   "unchanged",
@@ -5000,7 +4996,7 @@ exports[`update model permutations to cloze > updates the model if it changes to
 ]
 `;
 
-exports[`update model permutations to cloze > updates the model if it changes to cloze 5`] = `
+exports[`update model permutations to cloze > updates the model if it changes to cloze 4`] = `
 [
   "Yanki - Cloze",
   "Yanki - Cloze",
@@ -5027,9 +5023,7 @@ exports[`update model permutations to reverse > updates the model if it changes 
 ]
 `;
 
-exports[`update model permutations to reverse > updates the model if it changes to reverse 3`] = `false`;
-
-exports[`update model permutations to reverse > updates the model if it changes to reverse 4`] = `
+exports[`update model permutations to reverse > updates the model if it changes to reverse 3`] = `
 [
   "updated",
   "updated",
@@ -5038,7 +5032,7 @@ exports[`update model permutations to reverse > updates the model if it changes 
 ]
 `;
 
-exports[`update model permutations to reverse > updates the model if it changes to reverse 5`] = `
+exports[`update model permutations to reverse > updates the model if it changes to reverse 4`] = `
 [
   "Yanki - Basic (and reversed card with extra)",
   "Yanki - Basic (and reversed card with extra)",
@@ -5065,9 +5059,7 @@ exports[`update model permutations to type > updates the model if it changes to 
 ]
 `;
 
-exports[`update model permutations to type > updates the model if it changes to type 3`] = `true`;
-
-exports[`update model permutations to type > updates the model if it changes to type 4`] = `
+exports[`update model permutations to type > updates the model if it changes to type 3`] = `
 [
   "updated",
   "updated",
@@ -5076,7 +5068,7 @@ exports[`update model permutations to type > updates the model if it changes to 
 ]
 `;
 
-exports[`update model permutations to type > updates the model if it changes to type 5`] = `
+exports[`update model permutations to type > updates the model if it changes to type 4`] = `
 [
   "Yanki - Basic (type in the answer)",
   "Yanki - Basic (type in the answer)",

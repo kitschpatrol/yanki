@@ -14,20 +14,30 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # PyPI version (no leading zero): aqt==25.9.2 corresponds to Anki 25.09.2
-  ANKI_VERSION: '25.9.2'
   # Extra startup time for pip-installed Anki in CI
   ANKI_CONNECT_TIMEOUT: '60000'
 
 jobs:
   test:
-    name: Test (${{ matrix.os }})
+    name: Test (${{ matrix.os }}, AnkiConnect ${{ matrix.anki-connect-version }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
+        anki-connect-version: ['25.11.9.0', '26.10.13.0']
         os: [ubuntu-latest, macos-latest, windows-latest]
+        # Each AnkiConnect fixture is paired with the Anki release it was built for.
+        # PyPI omits leading zeros: aqt==25.9.2 is Anki 25.09.2, aqt==26.9.3 is Anki 26.09.3.
+        include:
+          - anki-connect-version: '25.11.9.0'
+            anki-version: '25.9.2'
+          - anki-connect-version: '26.10.13.0'
+            anki-version: '26.9.3'
+
+    env:
+      ANKI_CONNECT_VERSION: ${{ matrix.anki-connect-version }}
+      ANKI_VERSION: ${{ matrix.anki-version }}
 
     steps:
       - name: Checkout
@@ -74,7 +84,8 @@ jobs:
           python-version: '3.13'
 
       - name: Install Anki
-        run: pip install "aqt==${{ env.ANKI_VERSION }}"
+        shell: bash
+        run: pip install "aqt==${ANKI_VERSION}"
 
       - name: Verify Anki is importable
         run: python -c "from aqt import run; print('aqt OK')"
@@ -83,7 +94,7 @@ jobs:
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm

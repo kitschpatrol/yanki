@@ -95,12 +95,20 @@ describe('deleteOrphanedDecks parent detection', () => {
 		const activeNotes: YankiNote[] = []
 		const originalNotes = [makeNote('Lang::Grammar'), makeNote('Lang::Vocabulary')]
 
-		await deleteOrphanedDecks(client as never, activeNotes, originalNotes, false)
+		const decksToDelete = await deleteOrphanedDecks(
+			client as never,
+			activeNotes,
+			originalNotes,
+			false,
+		)
 
 		// Both children orphaned, parent should also be a deletion candidate
-		expect(deletedDecks).toContain('Lang::Vocabulary')
-		expect(deletedDecks).toContain('Lang::Grammar')
-		expect(deletedDecks).toContain('Lang')
+		expect(decksToDelete).toEqual(['Lang', 'Lang::Grammar', 'Lang::Vocabulary'])
+
+		// Anki removes children with their parent, and AnkiConnect 26.x fails a
+		// request that names a deck an earlier entry already removed, so only
+		// the parent is sent
+		expect(deletedDecks).toEqual(['Lang'])
 	})
 
 	it('handles deeply nested decks correctly', async () => {

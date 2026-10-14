@@ -752,7 +752,7 @@ describe('getRemoteNotes', () => {
 			deck: {
 				deckNames: vi.fn().mockResolvedValue(['FilteredDeck', 'RealDeck', 'Default']),
 				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => ({
-					dyn: deck === 'FilteredDeck' ? 1 : 0,
+					dyn: deck === 'FilteredDeck' ? 1 : false,
 				})),
 				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
 			},
@@ -793,7 +793,7 @@ describe('getRemoteNotes', () => {
 			deck: {
 				deckNames: vi.fn().mockResolvedValue(['FilteredDeck', 'Default']),
 				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => ({
-					dyn: deck === 'FilteredDeck' ? 1 : 0,
+					dyn: deck === 'FilteredDeck' ? 1 : false,
 				})),
 				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
 			},
@@ -821,6 +821,35 @@ describe('getRemoteNotes', () => {
 
 		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
 			'No matching non-filtered deck found for note 1',
+		)
+	})
+
+	it('throws when a deck no longer exists while checking its filtered status', async () => {
+		const client = {
+			deck: {
+				getDeckConfig: vi.fn().mockResolvedValue(false),
+				getDecks: vi.fn().mockResolvedValue({ VanishedDeck: [100] }),
+			},
+			note: {
+				findNotes: vi.fn().mockResolvedValue([1]),
+				notesInfo: vi.fn().mockResolvedValue([
+					{
+						cards: [100],
+						fields: {
+							Back: { value: 'b' },
+							Front: { value: 'f' },
+							YankiNamespace: { value: 'test' },
+						},
+						modelName: 'Yanki - Basic',
+						noteId: 1,
+						tags: [],
+					},
+				]),
+			},
+		}
+
+		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+			'Deck "VanishedDeck" not found while checking its filtered status',
 		)
 	})
 })

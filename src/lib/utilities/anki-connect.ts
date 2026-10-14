@@ -413,9 +413,7 @@ async function getRemoteNotesById(
 
 		// Look up deck filter status
 		if (!deckFilteredStatusMap.has(deckName)) {
-			const deckConfig = await client.deck.getDeckConfig({ deck: deckName })
-
-			const isFiltered = Boolean(deckConfig.dyn)
+			const isFiltered = await isFilteredDeck(client, deckName)
 			deckFilteredStatusMap.set(deckName, isFiltered)
 
 			if (isFiltered) {
@@ -461,6 +459,20 @@ async function getRemoteNotesById(
 }
 
 /**
+ * Whether a deck is a filtered ("dynamic") deck. AnkiConnect returns `false`
+ * from `getDeckConfig` when the deck no longer exists.
+ */
+async function isFilteredDeck(client: YankiConnect, deckName: string): Promise<boolean> {
+	const deckConfig = await client.deck.getDeckConfig({ deck: deckName })
+
+	if (deckConfig === false) {
+		throw new Error(`Deck "${deckName}" not found while checking its filtered status`)
+	}
+
+	return deckConfig.dyn === 1
+}
+
+/**
  * When a filtered deck is spotted, we have to search all decks to find what
  * non-filtered deck has a given note... so completely populate the filtered
  * deck status map now, and reuse it for future notes.
@@ -477,9 +489,7 @@ async function populateUnfilteredDeckMaps(
 			continue
 		}
 
-		const deckConfig = await client.deck.getDeckConfig({ deck: deckName })
-
-		deckFilteredStatusMap.set(deckName, Boolean(deckConfig.dyn))
+		deckFilteredStatusMap.set(deckName, await isFilteredDeck(client, deckName))
 	}
 
 	// Sort decks deep to shallow, prevents deep child notes
@@ -614,10 +624,24 @@ export async function deleteOrphanedDecks(
 	}
 
 	if (!dryRun) {
-		await client.deck.deleteDecks({ cardsToo: true, decks: decksToDelete })
+		await client.deck.deleteDecks({
+			cardsToo: true,
+			decks: withoutDescendantDecks(decksToDelete),
+		})
 	}
 
 	return decksToDelete
+}
+
+/**
+ * Anki removes a deck's children along with the deck itself, and AnkiConnect
+ * 26.x fails a `deleteDecks` request that names a deck an earlier entry already
+ * removed that way. Drop every deck that has an ancestor in the list.
+ */
+function withoutDescendantDecks(deckNames: string[]): string[] {
+	return deckNames.filter((deckName) =>
+		deckNames.every((otherDeckName) => !deckName.startsWith(`${otherDeckName}::`)),
+	)
 }
 
 /**

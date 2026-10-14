@@ -4,7 +4,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import slash from 'slash'
 import sortKeys from 'sort-keys'
-import { expect, it } from 'vitest'
+import { expect, inject, it } from 'vitest'
 import { formatSyncFilesResult, getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter, setNoteIdInFrontmatter } from '../src/lib/model/frontmatter'
 import { getSlugifiedNamespace } from '../src/lib/utilities/namespace'
@@ -402,7 +402,14 @@ for (const targetType of ['basic', 'cloze', 'type', 'reverse']) {
 					syncMediaAssets: 'off',
 				})
 
-				expect(newModelResults.fixedDatabase).toMatchSnapshot()
+				// AnkiConnect 25.x reassigns the note's model ID directly, which strands
+				// the reversed model's second card when the target model has a single
+				// template and makes Yanki run Anki's database check. AnkiConnect 26.x
+				// converts note types properly, so nothing needs fixing.
+				const legacyUpdateNoteModel = inject('ankiConnectVersion') === '25.11.9.0'
+				expect(newModelResults.fixedDatabase).toBe(
+					legacyUpdateNoteModel && ['basic', 'type'].includes(targetType),
+				)
 				expect(newModelResults.synced.map(({ action }) => action)).toMatchSnapshot()
 				expect(newModelResults.synced.map(({ note }) => note.modelName)).toMatchSnapshot()
 			})

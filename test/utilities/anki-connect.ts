@@ -296,7 +296,6 @@ export async function loadTestProfile(client: YankiConnect, testProfileName: str
 		name: testProfileName,
 	})
 
-	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (!loadProfileResult) {
 		throw new Error('Could not load test profile')
 	}

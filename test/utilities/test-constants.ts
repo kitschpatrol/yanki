@@ -4,5 +4,6 @@ declare module 'vitest' {
 	// eslint-disable-next-line ts/consistent-type-definitions
 	interface ProvidedContext {
 		ankiBasePath: string
+		ankiConnectVersion: string
 	}
 }

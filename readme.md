@@ -306,6 +306,8 @@ _Linux users should note that the Flatpak / Flathub version of Anki is not recom
 
   If you need to install it, select _Tools → Add-ons_ from the menu, click _Get Add-ons..._, and then enter the code `2055492159` in the field to get AnkiConnect.
 
+  The latest releases of both Anki and AnkiConnect are recommended, and are what Yanki is developed and tested against. The technical minimum is Anki 2.1.55 with AnkiConnect 24.6.17.0. Older releases lack actions that Yanki depends on, and syncing against them will fail.
+
   AnkiConnect may ask for your permission in the Anki application to allow the connection on the first sync.
 
   If the automatic permission request fails, you might need to configure AnkiConnect to accept connections from your origin.

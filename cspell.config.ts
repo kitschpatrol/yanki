@@ -4,7 +4,7 @@ export default cspellConfig({
 	ignorePaths: [
 		'**/*.svg',
 		'test/assets/test-deck-pruning/**/*',
-		'test/fixtures/anki-data-folder/**/*',
+		'test/fixtures/anki-data-folder-*/**/*',
 	],
 	words: [
 		'extglob',

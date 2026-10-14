@@ -123,7 +123,7 @@ export function describeWithFileFixture(
 				const deckNamesResult = await context.yankiConnect.deck.deckNames()
 				await context.yankiConnect.deck.deleteDecks({
 					cardsToo: true,
-					decks: deckNamesResult,
+					decks: deckNamesResult.filter((deckName) => !deckName.includes('::')),
 				})
 				const deckNamesResultPostClean = await context.yankiConnect.deck.deckNames()
 				expect(deckNamesResultPostClean).toEqual(['Default'])
