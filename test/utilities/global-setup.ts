@@ -5,7 +5,7 @@ import path from 'node:path'
 import { closeAnki, openAnki } from './anki-connect'
 
 // Each version has a matching `test/fixtures/anki-data-folder-*` directory
-const ANKI_CONNECT_VERSIONS = ['25.11.9.0', '26.10.13.0']
+const ANKI_CONNECT_VERSIONS = ['25.11.9.0', '26.10.14.0']
 
 let ankiBasePath: string | undefined
 

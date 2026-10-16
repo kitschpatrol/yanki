@@ -2,7 +2,7 @@ allowBuilds:
   esbuild: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
-  - yanki-connect@5.0.0
+  - yanki-connect@5.1.0
 peerDependencyRules:
   allowedVersions:
     # Remove once the installed version declares ESLint 10 support.

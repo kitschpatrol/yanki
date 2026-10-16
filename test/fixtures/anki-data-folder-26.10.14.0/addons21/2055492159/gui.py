@@ -205,8 +205,13 @@ class Gui:
         return open_dialog()
 
     def populate_svelte(self, dialog, note, deck_id):
-        args = {'nid': None, 'notetypeId': str(note.mid), 'deckId': str(deck_id), 'initial': True, 'focusTo': 0}
-        code = 'await loadNote(' + json.dumps(args) + '); setFields(' + json.dumps(list(note.keys())) + ', ' + json.dumps(list(note.fields)) + '); setTags(' + json.dumps(list(note.tags)) + '); await saveNow(); return true;'
+        args = {'nid': None, 'notetypeId': str(note.mid), 'deckId': str(deck_id), 'initial': True, 'focusTo': 0,
+                'copyFromNote': {'notetypeId': str(note.mid), 'fields': list(note.fields), 'tags': list(note.tags)}}
+        # setTags() updates the chips but does not update Svelte's note state.
+        # Native draft loading copies tags into the note that the Add button saves.
+        # Keep the copied note out of the initial arguments that Anki reuses
+        # after saving, so the next draft does not repeat these fields/tags.
+        code = 'const args = ' + json.dumps(args) + '; const copy = args.copyFromNote; copy.notetypeId = BigInt(copy.notetypeId); delete args.copyFromNote; await loadNote(args); await loadNote({copyFromNote: copy}); setFields(' + json.dumps(list(note.keys())) + ', ' + json.dumps(list(note.fields)) + '); await saveNow(); return true;'
         return self.javascript(dialog.editor, code).map(lambda _: self.editor_record(dialog, 'add'))
 
     def editors_updateDraft(self, editorId, patch, mode='replace'):

@@ -25,14 +25,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        anki-connect-version: ['25.11.9.0', '26.10.13.0']
+        anki-connect-version: ['25.11.9.0', '26.10.14.0']
         os: [ubuntu-latest, macos-latest, windows-latest]
         # Each AnkiConnect fixture is paired with the Anki release it was built for.
         # PyPI omits leading zeros: aqt==25.9.2 is Anki 25.09.2, aqt==26.9.3 is Anki 26.09.3.
         include:
           - anki-connect-version: '25.11.9.0'
             anki-version: '25.9.2'
-          - anki-connect-version: '26.10.13.0'
+          - anki-connect-version: '26.10.14.0'
             anki-version: '26.9.3'
 
     env:

@@ -35,7 +35,7 @@ from aqt._macos_helper import macos_helper
 from aqt.qt import Qt, QTimer, QMessageBox, QCheckBox
 from . import util, web
 from .edit import Edit
-from .legacy import Legacy, Accepted
+from .legacy import Legacy, Accepted, legacy_request
 from .runtime import Runtime
 from .contract import SCHEMA, LEGACY_TARGETS
 from .protocol import Deferred, completed
@@ -124,15 +124,22 @@ class AnkiConnect:
             aliases = [(v, alias) for v, alias in getattr(method, 'versions', []) if v <= version]
             alias = max(aliases)[1] if aliases else methodName
             if alias == name:
+                signature = inspect.signature(method)
+                # Clients often reuse parameter objects across actions. Ignore
+                # surplus keys, while preserving the binder's missing-argument errors.
+                params = {key: value for key, value in params.items() if key in signature.parameters}
+                for key, parameter in signature.parameters.items():
+                    if params.get(key) is None and parameter.default is not inspect.Parameter.empty:
+                        params.pop(key, None)
                 try:
-                    bound = inspect.signature(method).bind(**params)
+                    bound = signature.bind(**params)
                 except TypeError:
                     # The real call binder retains the historical public error.
                     # Binding failed, so the method body cannot execute.
                     method(**params)
                     raise
                 bound.apply_defaults()
-                return methodName, dict(bound.arguments)
+                return methodName, Legacy.normalize_params(methodName, dict(bound.arguments))
         raise Exception('unsupported action')
 
     def guard_legacy(self, name, params):
@@ -157,6 +164,7 @@ class AnkiConnect:
                 self.runtime.gui.guard(target, converted)
 
     def legacy(self, name, params):
+        params = Legacy.normalize_params(name, params)
         self.guard_legacy(name, params)
         service = None
         if name not in ('version', 'requestPermission', 'apiReflect', 'getProfiles', 'getActiveProfile', 'loadProfile', 'sync', 'guiExitAnki'):
@@ -178,12 +186,16 @@ class AnkiConnect:
                 self.runtime.finish_changes(service)
 
     def handler(self, request):
-        version = request.get('version', 4)
+        version = 4
         try:
+            request = legacy_request(request)
+            version = request['version']
             name = request.get('action', '')
             if name != 'requestPermission' and request.get('key') != util.setting('apiKey'):
                 raise Exception('valid api key must be provided')
             name, params = self.resolve_action(name, version, request.get('params', {}))
+            if name == 'multi':
+                self.validate_multi(params['actions'])
             value = self.multi(params['actions']) if name == 'multi' else self.legacy(name, params)
             return format_success_reply(version, value)
         except Exception as error:
@@ -202,6 +214,7 @@ class AnkiConnect:
             if not isinstance(item, dict):
                 raise Exception('multi actions must be request objects')
             try:
+                item = legacy_request(item)
                 name, params = self.resolve_action(item.get('action', ''), item.get('version', 4), item.get('params', {}))
             except Exception:
                 # Invalid actions have their own error slot and cannot execute.
@@ -214,8 +227,10 @@ class AnkiConnect:
                 state['exit'] = name == 'guiExitAnki'
 
     def handler_async(self, request, barrier=False, depth=0):
-        version = request.get('version', 4)
+        version = 4
         try:
+            request = legacy_request(request)
+            version = request['version']
             if depth > 16:
                 raise Exception('multi nesting limit exceeded')
             name = request.get('action', '')

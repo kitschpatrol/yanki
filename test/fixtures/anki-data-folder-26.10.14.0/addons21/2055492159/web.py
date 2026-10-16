@@ -169,8 +169,10 @@ class WebServer:
                 raise ValueError('Non-finite JSON number')
             params = json.loads(req.body.decode('utf-8'), parse_constant=reject_constant)
             if not rpc:
+                from .legacy import legacy_request
+                params = legacy_request(params)
                 jsonschema.validate(params, request_schema)
-        except (ValueError, UnicodeError, jsonschema.ValidationError) as error:
+        except (ValueError, UnicodeError, jsonschema.ValidationError, ApiError) as error:
             if not allowed:
                 return response(None, '403 Forbidden', empty=True)
             if rpc:

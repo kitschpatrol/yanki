@@ -2,10 +2,38 @@
 import copy
 import html
 import os
+import re
 from datetime import datetime
 
 from .protocol import ApiError, Deferred
-from .services import RATINGS, KINDS, PRESET_ENUMS, MEDIA_ILLEGAL_CHARACTERS
+from .services import RATINGS, KINDS, PRESET_ENUMS, MEDIA_ILLEGAL_CHARACTERS, entity_id
+
+
+def integer(value):
+    """Accept decimal strings without rounding numbers or interpreting truthiness."""
+    if isinstance(value, str) and re.fullmatch(r'[+-]?[0-9]{1,19}', value.strip()):
+        return int(value)
+    if type(value) is float and value.is_integer() and abs(value) <= 9007199254740991:
+        return int(value)
+    return value
+
+
+def legacy_request(request):
+    """Normalize only the legacy envelope, shared by HTTP and nested dispatch."""
+    if not isinstance(request, dict):
+        raise ApiError('invalidParams', 'Legacy requests must be objects.')
+    request = dict(request)
+    version = integer(request.get('version')) if request.get('version') is not None else 4
+    if type(version) is not int:
+        raise ApiError('invalidParams', 'version must be an integer.')
+    request['version'] = version
+    params = request.get('params')
+    if params is None or params == []:
+        params = {}
+    if not isinstance(params, dict):
+        raise ApiError('invalidParams', 'params must be an object.')
+    request['params'] = dict(params)
+    return request
 
 
 class Accepted:
@@ -18,6 +46,137 @@ class Legacy:
         self.owner, self.runtime = owner, owner.runtime
         self.service = service
         self.media_transaction = None
+
+    @staticmethod
+    def boolean(value, default, label):
+        if value is None:
+            return default
+        if isinstance(value, str):
+            value = {'true': True, 'false': False, '1': True, '0': False}.get(value.strip().lower(), value)
+        if type(value) is int and value in (0, 1):
+            value = bool(value)
+        if type(value) is not bool:
+            raise ApiError('invalidParams', label + ' must be boolean')
+        return value
+
+    @staticmethod
+    def array(value):
+        return [] if value is None else value if isinstance(value, list) else [value]
+
+    @staticmethod
+    def identifier(value):
+        value = integer(value)
+        # Queries and direct native calls also consume legacy IDs, so validate
+        # before constructing a search or allowing Qt guards to inspect them.
+        if type(value) is not int:
+            raise ApiError('invalidParams', 'Expected a positive signed 64-bit decimal ID.')
+        entity_id(str(value))
+        return value
+
+    @classmethod
+    def normalize_params(cls, name, params):
+        """Keep coercion at the compatibility boundary, before guards and services."""
+        p = dict(params)
+        note_lists = name in ('addNotes', 'canAddNotes', 'canAddNotesWithErrorDetail')
+        for key in ('cards', 'notes', 'decks', 'modelIds', 'modelNames', 'easeFactors',
+                    'keys', 'newValues', 'answers', 'inOrderFields', 'cardTemplates'):
+            if key in p and not (name == 'notesInfo' and key == 'notes' and p[key] is None):
+                p[key] = cls.array(p[key])
+        for key in ('cards', 'modelIds', 'notes'):
+            if key in p and p[key] is not None and not (key == 'notes' and note_lists):
+                p[key] = [cls.identifier(value) for value in p[key]]
+        for key in ('card', 'note', 'deckId', 'modelId', 'configId', 'cloneFrom', 'ease', 'index', 'fontSize', 'startID'):
+            if key in p:
+                p[key] = integer(p[key])
+        if 'easeFactors' in p:
+            p['easeFactors'] = [integer(value) for value in p['easeFactors']]
+        if name == 'setDueDate' and type(p.get('days')) is int:
+            p['days'] = str(p['days'])
+        defaults = {'cardsToo': False, 'deleteExisting': True, 'add': True, 'warning_check': False,
+                    'suspend': True, 'complete': False, 'isCloze': False, 'front': True, 'back': True,
+                    'append': False, 'includeSched': False, 'wholeCollection': True}
+        if name == 'findAndReplaceInModels':
+            defaults['css'] = True
+        for key, default in defaults.items():
+            if key in p:
+                p[key] = cls.boolean(p[key], default, key)
+        if name == 'cardsInfo' and p.get('fields') is not None:
+            p['fields'] = cls.array(p['fields'])
+        if name == 'apiReflect':
+            if p.get('scopes') is None:
+                p['scopes'] = []
+            for key in ('scopes', 'actions'):
+                if isinstance(p.get(key), str):
+                    p[key] = cls.array(p[key])
+        if isinstance(p.get('note'), dict):
+            p['note'] = cls.normalize_note(p['note'])
+        if note_lists and 'notes' in p:
+            p['notes'] = [cls.normalize_note(note) if isinstance(note, dict) else note for note in p['notes']]
+        if name == 'answerCards':
+            p['answers'] = [{**answer, **{key: integer(answer[key]) for key in ('cardId', 'ease') if key in answer}}
+                            if isinstance(answer, dict) else answer for answer in p['answers']]
+        return p
+
+    @classmethod
+    def normalize_note(cls, note):
+        note = dict(note)
+        if 'id' in note:
+            note['id'] = integer(note['id'])
+        # Null optional settings mean the same thing as omitted settings.
+        if note.get('options') is None:
+            note['options'] = {}
+        options = note['options']
+        if isinstance(options, dict):
+            options = note['options'] = dict(options)
+            scoped = options.get('duplicateScopeOptions')
+            if scoped is None:
+                scoped = {}
+            if isinstance(scoped, dict):
+                scoped = dict(scoped)
+            options['duplicateScopeOptions'] = scoped
+        for kind in ('audio', 'video', 'picture'):
+            if note.get(kind):
+                entries = []
+                for entry in cls.array(note[kind]):
+                    if isinstance(entry, dict):
+                        entry = dict(entry)
+                        if 'deleteExisting' in entry:
+                            entry['deleteExisting'] = cls.boolean(entry['deleteExisting'], True, 'deleteExisting')
+                    entries.append(entry)
+                note[kind] = entries
+        return note
+
+    @staticmethod
+    def field_name(name, names):
+        if name in names:
+            return name
+        matches = [value for value in names if isinstance(name, str) and value.lower() == name.strip().lower()]
+        if len(matches) > 1:
+            raise ApiError('compatibilityError', 'Ambiguous field name.')
+        return matches[0] if matches else None
+
+    @classmethod
+    def fields(cls, values, names):
+        if values is None:
+            values = {}
+        if not isinstance(values, dict):
+            raise ApiError('invalidParams', 'Fields must be provided as a dictionary')
+        result = {}
+        for key, value in values.items():
+            actual = cls.field_name(key, names)
+            if actual is not None:
+                value = '' if value is None else value
+                if actual in values and key != actual:
+                    continue
+                if actual in result and result[actual] != value:
+                    raise ApiError('compatibilityError', 'Ambiguous field name.')
+                result[actual] = value
+        return result
+
+    @classmethod
+    def media_targets(cls, entry, fields):
+        return list(dict.fromkeys(actual for field in cls.array(entry.get('fields'))
+                                  if (actual := cls.field_name(field, fields)) is not None))
 
     def s(self, method, **params):
         if self.service is None:
@@ -112,29 +271,29 @@ class Legacy:
         return self.resolve({'id': str(id)} if id is not None else self.ref(name), 'noteType')
 
     @staticmethod
-    def without_empty_tags(tags):
-        # Older clients include empty tag entries; native Anki ignores them.
-        return [tag for tag in tags if tag != '']
+    def normalize_tags(tags):
+        if tags is None:
+            return []
+        entries = [tags] if isinstance(tags, str) else tags
+        if not isinstance(entries, list) or any(tag is not None and not isinstance(tag, str) for tag in entries):
+            raise ApiError('invalidParams', 'Must provide tags as a list of strings')
+        # Use Anki's whitespace-separated tag convention for both input forms.
+        return list(dict.fromkeys(tag for entry in entries if entry is not None for tag in entry.split()))
 
     def created_note(self, source, pure=False):
-        source = copy.deepcopy(source)
+        source = self.normalize_note(source)
         model = self.model(source['modelName'])
         self.resolve(self.ref(source['deckName']), 'deck')
         # Native notes have every model field, including omitted media targets.
         fields = {field['name']: '' for field in model['flds']}
-        for key, value in source['fields'].items():
-            matches = [field['name'] for field in model['flds'] if field['name'].lower() == key.lower()]
-            if len(matches) > 1:
-                raise ApiError('compatibilityError', 'Ambiguous field name.')
-            if matches:
-                fields[matches[0]] = value
+        fields.update(self.fields(source.get('fields'), fields))
         options = source.get('options', {})
         scoped = options.get('duplicateScopeOptions', {})
         for key, values, label in (('allowDuplicate', options, 'allowDuplicate'),
                                    ('checkChildren', scoped, 'duplicateScopeOptions.checkChildren'),
                                    ('checkAllModels', scoped, 'duplicateScopeOptions.checkAllModels')):
-            if key in values and type(values[key]) is not bool:
-                raise ApiError('invalidParams', 'option parameter "' + label + '" must be boolean')
+            if key in values:
+                values[key] = self.boolean(values[key], False, 'option parameter "' + label + '"')
         scope = 'deck' if options.get('duplicateScope') == 'deck' else 'collection'
         duplicates = {'allow': options.get('allowDuplicate', False), 'scope': scope,
                       'includeChildren': scoped.get('checkChildren', False),
@@ -143,7 +302,7 @@ class Legacy:
             deck_name = scoped.get('deckName')
             duplicates['deck'] = self.ref(source['deckName'] if deck_name is None else deck_name)
         data = {'noteType': self.ref(source['modelName']), 'deck': self.ref(source['deckName']),
-                'fields': fields, 'tags': self.without_empty_tags(source.get('tags', [])), 'duplicates': duplicates,
+                'fields': fields, 'tags': self.normalize_tags(source.get('tags')), 'duplicates': duplicates,
                 # Legacy creation lets Anki generate its fallback card. Rendering
                 # a blank template is not the same as a native add returning 0.
                 'rejectEmptyQuestions': False}
@@ -212,17 +371,15 @@ class Legacy:
                 continue
             escaped = html.escape(filename, quote=True)
             content = '<img src="' + escaped + '">' if kind == 'picture' else '[sound:' + escaped + ']'
-            for field in entry.get('fields', []):
-                if field in fields:
-                    fields[field] += content
+            for field in self.media_targets(entry, fields):
+                fields[field] += content
 
-    @staticmethod
-    def append_media_error(fields, entry, error):
+    @classmethod
+    def append_media_error(cls, fields, entry, error):
         # Historical note attachments report acquisition errors inside fields.
         message = html.escape(str(error), quote=False)
-        for field in entry.get('fields', []):
-            if field in fields:
-                fields[field] += message
+        for field in cls.media_targets(entry, fields):
+            fields[field] += message
 
     def store_media(self, params):
         return self.install(params, self.acquire(params))
@@ -290,9 +447,8 @@ class Legacy:
                             continue
                         filename = html.escape(filenames[id(entry)], quote=True)
                         content = '<img src="' + filename + '">' if kind == 'picture' else '[sound:' + filename + ']'
-                        for field in entry.get('fields', []):
-                            if field in data['fields']:
-                                data['fields'][field] += content
+                        for field in self.media_targets(entry, data['fields']):
+                            data['fields'][field] += content
             values = self.unwrap(self.s('notes.createMany', notes=prepared, atomic=atomic))
             transaction.commit()
             return [int(value['noteId']) for value in values]
@@ -342,7 +498,7 @@ class Legacy:
             result['nextReviews'] = [item['label'] for item in prediction['answers']]
         return result if requested is None else {key: value for key, value in result.items() if key in requested}
 
-    def gui_call(self, name, p):
+    def gui_call(self, name, p, draft_fields=None):
         runtime = self.runtime
         gui = runtime.gui
         def call(method, **params):
@@ -432,14 +588,24 @@ class Legacy:
                         if error.kind == 'notFound':
                             raise ApiError(error.kind, '{} "{}" not found'.format(label, source[key])) from error
                         raise
-            if 'fields' in source and ('modelName' in source or hasattr(dialog.editor, 'note')):
-                model = self.model(source['modelName']) if 'modelName' in source else dialog.editor.note.note_type()
-                for field in source['fields']:
-                    if field not in [value['name'] for value in model['flds']]:
+            if 'fields' in source:
+                names = draft_fields
+                if names is None:
+                    if 'modelName' in source or hasattr(dialog.editor, 'note'):
+                        model = self.model(source['modelName']) if 'modelName' in source else dialog.editor.note.note_type()
+                        names = [value['name'] for value in model['flds']]
+                    else:
+                        # Svelte keeps the selected note type in the webview.
+                        # Read its draft asynchronously before matching field keys.
+                        return gui.editor_record(dialog, 'add').map(
+                            lambda record: self.gui_call(name, p, list(record['fields'])))
+                for field in source['fields'] or {}:
+                    if self.field_name(field, names) is None:
                         raise ApiError('notFound', 'Field "' + field + '" not found in current note')
+                source['fields'] = self.fields(source['fields'], names)
             patch = {key: value for key, value in source.items() if key in ('fields', 'tags')}
             if 'tags' in patch:
-                patch['tags'] = self.without_empty_tags(patch['tags'])
+                patch['tags'] = self.normalize_tags(patch['tags'])
             for old, new in [('deckName', 'deck'), ('modelName', 'noteType')]:
                 if old in source:
                     patch[new] = self.ref(source[old])
@@ -507,6 +673,7 @@ class Legacy:
         raise ApiError('methodNotFound', 'Unknown GUI action.')
 
     def call(self, name, p):
+        p = self.normalize_params(name, p)
         def success(value):
             if self.media_transaction:
                 self.media_transaction.commit()
@@ -682,16 +849,19 @@ class Legacy:
             return values if name == 'addNotes' else values[0]
         if name in ('updateNote', 'updateNoteFields', 'updateNoteTags'):
             source = p['note']
-            if name == 'updateNoteTags' and not isinstance(p['tags'], str) and (not isinstance(p['tags'], list) or
-                                            any(not isinstance(tag, str) for tag in p['tags'])):
-                raise ApiError('invalidParams', 'Must provide tags as a list of strings')
             source = {'id': source, 'tags': p['tags']} if name == 'updateNoteTags' else copy.deepcopy(source)
             patch = {}
-            if 'fields' in source:
+            if 'fields' in source or any(source.get(kind) for kind in ('audio', 'video', 'picture')):
                 current = self.s('notes.get', id=str(source['id']))
-                patch['fields'] = {key: value for key, value in source['fields'].items() if key in current['fields']}
+                patch['fields'] = self.fields(source.get('fields'), current['fields'])
+                # Attachments may target a field omitted from the text patch.
+                for kind in ('audio', 'video', 'picture'):
+                    for entry in self.array(source.get(kind)):
+                        if entry:
+                            for field in self.media_targets(entry, current['fields']):
+                                patch['fields'].setdefault(field, current['fields'][field])
             if name != 'updateNoteFields' and 'tags' in source:
-                patch['tags'] = self.without_empty_tags([source['tags']] if isinstance(source['tags'], str) else source['tags'])
+                patch['tags'] = self.normalize_tags(source['tags'])
             if not patch:
                 raise ApiError('invalidParams', 'Must provide a "fields" or "tags" property.')
             self.runtime.dispatcher.params('notes.update', {'id': str(source['id']), 'patch': patch})
@@ -715,6 +885,13 @@ class Legacy:
                     raise ApiError(error.kind, "Model '" + source['modelName'] + "' not found", error.details) from error
                 raise
             plan = self.s('notes.planConversion', source={'id': original['noteType']['id']}, target={'id': target['id']})
+            fields = {item['name']: '' for item in target['fields']}
+            fields.update(self.fields(source['fields'], fields))
+            patch = {'fields': fields}
+            if 'tags' in source:
+                patch['tags'] = self.normalize_tags(source['tags'])
+            # Validate content before conversion can change cards or review history.
+            self.runtime.dispatcher.params('notes.update', {'id': str(source['id']), 'patch': patch})
             old = self.model(id=original['noteType']['id'])
             for key, mapping in [('flds', plan['fields']), ('tmpls', plan['templates'])]:
                 names = [[item['name'] for item in old[key] if item['name'].lower() == entry['target'].lower()]
@@ -729,17 +906,12 @@ class Legacy:
                 for entry, matches in zip(mapping, names):
                     entry['source'] = matches[0] if matches else None
             self.s('notes.convert', ids=[str(source['id'])], target={'id': target['id']}, fields=plan['fields'], templates=plan['templates'], planToken=plan['token'])
-            fields = {item['name']: '' for item in target['fields']}
-            for name, value in source['fields'].items():
-                actual = next((field for field in fields if field.lower() == name.lower()), None)
-                if actual:
-                    fields[actual] = value
-            self.s('notes.update', id=str(source['id']), patch={'fields': fields, **({'tags': self.without_empty_tags(source['tags'])} if 'tags' in source else {})})
+            self.s('notes.update', id=str(source['id']), patch=patch)
             return None
         if name == 'getNoteTags':
             return self.s('notes.get', id=str(p['note']))['tags']
         if name in ('addTags', 'removeTags'):
-            tags = self.without_empty_tags(self.service.col.tags.split(p['tags']) if isinstance(p['tags'], str) else p['tags'])
+            tags = self.normalize_tags(p['tags'])
             method = 'tags.remove' if name == 'removeTags' or not p.get('add', True) else 'tags.add'
             self.unwrap(self.s(method, noteIds=self.ids(p['notes']), tags=tags), missing=True)
             return None
