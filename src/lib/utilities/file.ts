@@ -1,6 +1,5 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
-import { sha256 } from 'crypto-hash'
 import type { FileAdapter } from '../shared/types'
 import { MEDIA_DEFAULT_HASH_MODE_FILE } from '../shared/constants'
 import { getHash } from './string'
@@ -26,7 +25,12 @@ export async function getFileContentHash(
 		case 'content': {
 			const fileContent = await fileAdapter.readFileBuffer(absoluteFilePath)
 			// Sha1 would technically be fine but is not measurably more performant...
-			const shaHash = await sha256(fileContent)
+			// Copy since Web Crypto rejects views over a SharedArrayBuffer
+			// eslint-disable-next-line node/no-unsupported-features/node-builtins -- Global Web Crypto is unflagged and warning-free since Node 19, it was only relabeled stable in 23
+			const digest = await crypto.subtle.digest('SHA-256', new Uint8Array(fileContent))
+			const shaHash = Array.from(new Uint8Array(digest), (byte) =>
+				byte.toString(16).padStart(2, '0'),
+			).join('')
 			return shaHash.slice(0, 16)
 		}
 

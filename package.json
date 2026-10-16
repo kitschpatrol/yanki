@@ -73,7 +73,6 @@
 		"@types/node": "~22.18.13",
 		"@types/unist": "^3.0.3",
 		"@types/yargs": "^17.0.35",
-		"crypto-hash": "^4.0.1",
 		"deepmerge-ts": "^8.0.2",
 		"filenamify": "6.0.0",
 		"globby": "^16.2.4",
