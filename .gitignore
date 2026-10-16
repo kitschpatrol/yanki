@@ -31,4 +31,7 @@ vendor/
 /test/assets/test obsidian vault with spaces/.obsidian/plugins
 /test/assets/test-obsidian-vault/.obsidian/workspace.json
 /test/assets/test-obsidian-vault/.obsidian/plugins
+/test/fixtures/anki-data-folder-*/*/backups/
+/test/fixtures/anki-data-folder-*/*/collection.media/
+/test/fixtures/anki-data-folder-*/logs/
 __pycache__
