@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { AnkiConnectUnreachableError } from 'yanki-connect'
 import type { YankiNote } from '../src/lib/model/note'
 import {
 	addNote,
@@ -8,6 +9,7 @@ import {
 	getRemoteNotes,
 	reconcileMedia,
 	requestPermission,
+	requirePermission,
 	syncToAnkiWeb,
 	updateModelStyle,
 	updateNote,
@@ -550,21 +552,12 @@ describe('requestPermission', () => {
 		await expect(requestPermission(client as never)).rejects.toThrow('Permission denied')
 	})
 
-	it('returns ankiUnreachable when fetch fails', async () => {
+	it('returns ankiUnreachable when AnkiConnect is unreachable', async () => {
 		const client = {
 			miscellaneous: {
-				requestPermission: vi.fn().mockRejectedValue(new Error('fetch failed')),
-			},
-		}
-
-		const result = await requestPermission(client as never)
-		expect(result).toBe('ankiUnreachable')
-	})
-
-	it('returns ankiUnreachable when connection is refused', async () => {
-		const client = {
-			miscellaneous: {
-				requestPermission: vi.fn().mockRejectedValue(new Error('net::ERR_CONNECTION_REFUSED')),
+				requestPermission: vi
+					.fn()
+					.mockRejectedValue(new AnkiConnectUnreachableError(new TypeError('fetch failed'))),
 			},
 		}
 
@@ -580,6 +573,51 @@ describe('requestPermission', () => {
 		}
 
 		await expect(requestPermission(client as never)).rejects.toThrow('some other error')
+	})
+})
+
+describe('requirePermission', () => {
+	it('resolves when permission is granted', async () => {
+		const client = {
+			miscellaneous: {
+				requestPermission: vi.fn().mockResolvedValue({ permission: 'granted' }),
+			},
+		}
+
+		await expect(requirePermission(client as never)).resolves.toBeUndefined()
+	})
+
+	it('throws with the connection error as cause when AnkiConnect is unreachable', async () => {
+		const unreachableError = new AnkiConnectUnreachableError(new TypeError('fetch failed'))
+		const client = {
+			miscellaneous: {
+				requestPermission: vi.fn().mockRejectedValue(unreachableError),
+			},
+		}
+
+		const request = requirePermission(client as never)
+		await expect(request).rejects.toThrow('Anki is unreachable. Is Anki running?')
+		await expect(request).rejects.toHaveProperty('cause', unreachableError)
+	})
+
+	it('throws when permission is denied', async () => {
+		const client = {
+			miscellaneous: {
+				requestPermission: vi.fn().mockResolvedValue({ permission: 'denied' }),
+			},
+		}
+
+		await expect(requirePermission(client as never)).rejects.toThrow('Permission denied')
+	})
+
+	it('rethrows other errors', async () => {
+		const client = {
+			miscellaneous: {
+				requestPermission: vi.fn().mockRejectedValue(new Error('some other error')),
+			},
+		}
+
+		await expect(requirePermission(client as never)).rejects.toThrow('some other error')
 	})
 })
 

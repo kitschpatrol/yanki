@@ -244,7 +244,7 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 	const ankiUnreachable = (actionCounts.ankiUnreachable ?? 0) > 0
 
 	lines.push(
-		`${result.dryRun ? 'Will sync' : ankiUnreachable ? 'Failed to sync' : 'Successfully synced'} ${totalSynced} ${plur('note', totalSynced)} to Anki${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,
+		`${ankiUnreachable ? 'Failed to sync' : result.dryRun ? 'Will sync' : 'Successfully synced'} ${totalSynced} ${plur('note', totalSynced)} to Anki${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,
 	)
 
 	if (verbose) {

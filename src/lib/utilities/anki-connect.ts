@@ -4,6 +4,7 @@
 
 import type { YankiConnect } from 'yanki-connect'
 import { uint8ArrayToBase64 } from 'uint8array-extras'
+import { AnkiConnectUnreachableError } from 'yanki-connect'
 import type { YankiModelName } from '../model/model'
 import type { YankiNote } from '../model/note'
 import type { Media } from '../parse/rehype-utilities'
@@ -851,6 +852,32 @@ export async function reconcileMedia(
 }
 
 /**
+ * Request permission to access Anki through AnkiConnect, and throw if Anki
+ * can't be reached.
+ *
+ * @throws {Error} If Anki is unreachable, with the
+ *   `AnkiConnectUnreachableError` as its `cause`, or if access is denied
+ */
+export async function requirePermission(client: YankiConnect): Promise<void> {
+	let response: Awaited<ReturnType<YankiConnect['miscellaneous']['requestPermission']>>
+	try {
+		response = await client.miscellaneous.requestPermission()
+	} catch (error) {
+		if (error instanceof AnkiConnectUnreachableError) {
+			throw new Error('Anki is unreachable. Is Anki running?', { cause: error })
+		}
+
+		throw error
+	}
+
+	if (response.permission === 'denied') {
+		throw new Error(
+			'Permission denied, please add this source to the "webCorsOriginList" in the AnkiConnect add-on configuration options.',
+		)
+	}
+}
+
+/**
  * Request permission to access Anki through AnkiConnect.
  *
  * @returns 'ankiUnreachable' if Anki is not open, or 'granted' if everything is
@@ -861,21 +888,10 @@ export async function requestPermission(
 	client: YankiConnect,
 ): Promise<'ankiUnreachable' | 'granted'> {
 	try {
-		const { permission } = await client.miscellaneous.requestPermission()
-
-		if (permission === 'denied') {
-			throw new Error(
-				'Permission denied, please add this source to the "webCorsOriginList" in the AnkiConnect add-on configuration options.',
-			)
-		}
-
+		await requirePermission(client)
 		return 'granted'
 	} catch (error) {
-		if (
-			error instanceof Error &&
-			// Accommodate error message from requestUrl in Obsidian as well
-			(error.message === 'fetch failed' || error.message === 'net::ERR_CONNECTION_REFUSED')
-		) {
+		if (error instanceof Error && error.cause instanceof AnkiConnectUnreachableError) {
 			return 'ankiUnreachable'
 		}
 

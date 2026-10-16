@@ -1,5 +1,7 @@
+import type { AddressInfo } from 'node:net'
 import { execa } from 'execa'
 import fs from 'node:fs/promises'
+import net from 'node:net'
 import path from 'node:path'
 import { expect, it } from 'vitest'
 import type { CleanResult, SetStyleResult, SyncFilesResult } from '../src/lib'
@@ -11,11 +13,12 @@ import { describeWithFileFixture } from './fixtures/file-fixture'
 // Runs the bundled CLI, since bundling can break code paths that pass when tested from source
 const cliPath = path.resolve('dist/bin/cli.js')
 const customCssPath = path.resolve('test/assets/test-style/custom.css')
+const stackTraceLine = /^\s+at /mv
 
 /**
- * Runs the built CLI with the given arguments and parses its JSON output.
+ * Throws an actionable error if the CLI hasn't been built.
  */
-async function runCli(args: string[]): Promise<unknown> {
+async function assertCliBuilt(): Promise<void> {
 	try {
 		await fs.access(cliPath)
 	} catch (error) {
@@ -23,9 +26,56 @@ async function runCli(args: string[]): Promise<unknown> {
 			cause: error,
 		})
 	}
+}
 
+/**
+ * Runs the built CLI with the given arguments and parses its JSON output.
+ */
+async function runCli(args: string[]): Promise<unknown> {
+	await assertCliBuilt()
 	const { stdout } = await execa(process.execPath, [cliPath, ...args, '--json'])
 	return JSON.parse(stdout)
+}
+
+/**
+ * Gets a port with nothing listening on it. Avoids fixed low ports, since
+ * Node's fetch refuses some of them (e.g. port 1) before connecting.
+ */
+async function getClosedPort(): Promise<number> {
+	const server = net.createServer()
+	await new Promise<void>((resolve) => {
+		server.listen(0, '127.0.0.1', resolve)
+	})
+	const { port } = server.address() as AddressInfo
+	await new Promise((resolve) => {
+		server.close(resolve)
+	})
+	return port
+}
+
+/**
+ * Runs the built CLI against a port with nothing listening, as if Anki were
+ * closed. Resolves with the exit code and output instead of throwing on
+ * failure.
+ */
+async function runCliWithoutAnki(args: string[]) {
+	await assertCliBuilt()
+	const ankiConnect = `http://127.0.0.1:${await getClosedPort()}`
+	return execa(process.execPath, [cliPath, ...args, '--anki-connect', ankiConnect], {
+		reject: false,
+	})
+}
+
+/**
+ * Checks for the friendly error, and for no yargs help text or stack trace.
+ */
+function expectAnkiUnreachableError({ exitCode, stderr }: { exitCode?: number; stderr: string }) {
+	expect(exitCode).toBe(1)
+	expect(stderr).toContain(
+		'Failed to connect to Anki. Make sure Anki is running and AnkiConnect is installed.',
+	)
+	expect(stderr).not.toContain('Options:')
+	expect(stderr).not.toMatch(stackTraceLine)
 }
 
 describeWithFileFixture(
@@ -131,6 +181,54 @@ describeWithFileFixture(
 				modelName: 'Basic',
 			})
 			expect(CSS_DEFAULT_STYLE).toBe(ankiDefaultCss)
+		})
+	},
+)
+
+describeWithFileFixture(
+	'built cli without anki',
+	{
+		assetPath: './test/assets/test-minimal-notes/',
+		cleanUpAnki: false,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		// eslint-disable-next-line test/expect-expect -- expectAnkiUnreachableError makes the assertions.
+		it.each([
+			{ args: ['list'] },
+			// Random namespace, don't touch anything
+			{ args: ['delete', '--namespace', 'D2FCB6BB-7214-458C-82C6-1ECC7593656F'] },
+			{ args: ['style'] },
+		])('$args.0 reports that Anki is unreachable', { timeout: 20_000 }, async ({ args }) => {
+			expectAnkiUnreachableError(await runCliWithoutAnki(args))
+		})
+
+		it('sync reports that Anki is unreachable', { timeout: 20_000 }, async () => {
+			const result = await runCliWithoutAnki(['sync', context.tempAssetPath])
+
+			expectAnkiUnreachableError(result)
+			expect(result.stderr).toContain(
+				`Failed to sync ${context.markdownFiles.length} notes to Anki`,
+			)
+		})
+
+		it('sync --dry-run reports that Anki is unreachable', { timeout: 20_000 }, async () => {
+			const result = await runCliWithoutAnki(['sync', context.tempAssetPath, '--dry-run'])
+
+			expectAnkiUnreachableError(result)
+			expect(result.stderr).toContain(
+				`Failed to sync ${context.markdownFiles.length} notes to Anki.`,
+			)
+		})
+
+		it('sync --json reports each note as unreachable', { timeout: 20_000 }, async () => {
+			const result = await runCliWithoutAnki(['sync', context.tempAssetPath, '--json'])
+
+			expectAnkiUnreachableError(result)
+			const { synced } = JSON.parse(result.stdout) as SyncFilesResult
+			expect(synced.map((note) => note.action)).toEqual(
+				context.markdownFiles.map(() => 'ankiUnreachable'),
+			)
 		})
 	},
 )

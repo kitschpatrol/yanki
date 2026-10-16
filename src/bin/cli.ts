@@ -4,6 +4,7 @@ import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import untildify from 'untildify'
+import { AnkiConnectUnreachableError } from 'yanki-connect'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { version } from '../../package.json'
@@ -26,18 +27,20 @@ import {
 } from './options'
 import { urlToHostAndPortValidated } from './utilities/validation'
 
+const ankiUnreachableMessage =
+	'Failed to connect to Anki. Make sure Anki is running and AnkiConnect is installed.'
+
 // Helper for nice errors in the most common case where Anki is not running
 // Must be a constant function expression with an explicit `never` return type
 // so TS knows code after a call to it is unreachable
 const ankiNotRunningErrorHandler = (error: unknown): never => {
 	if (error instanceof Error) {
-		// Destructuring here can throws runtime errors if code is undefined...
-		const code = (error.cause as undefined | { code?: string })?.code
-
-		if (code === 'ECONNREFUSED') {
-			log.error(
-				'Failed to connect to Anki. Make sure Anki is running and AnkiConnect is installed.',
-			)
+		// The permission check wraps the error, but Anki can also close mid-command
+		if (
+			error instanceof AnkiConnectUnreachableError ||
+			error.cause instanceof AnkiConnectUnreachableError
+		) {
+			log.error(ankiUnreachableMessage)
 			process.exitCode = 1
 
 			process.exit()
@@ -196,6 +199,14 @@ await yargsInstance
 				process.stderr.write(formatSyncFilesResult(result, verbose))
 				process.stderr.write('\n')
 			}
+
+			// Sync reports an unreachable Anki per note instead of throwing
+			if (result.synced.every((note) => note.action !== 'ankiUnreachable')) {
+				return
+			}
+
+			log.error(ankiUnreachableMessage)
+			process.exitCode = 1
 		},
 	)
 	// `yanki list`
