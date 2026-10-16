@@ -4,13 +4,19 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import slash from 'slash'
 import sortKeys from 'sort-keys'
-import { expect, inject, it } from 'vitest'
+import { afterAll, expect, inject, it } from 'vitest'
 import { formatSyncFilesResult, getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter, setNoteIdInFrontmatter } from '../src/lib/model/frontmatter'
 import { getSlugifiedNamespace } from '../src/lib/utilities/namespace'
 import * as pathExtras from '../src/lib/utilities/path'
 import { getUnicodeCodePoints } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
+import {
+	FILTERED_DECK_SCENARIOS,
+	getFilteredDeckLoadOptions,
+	getFilteredDeckPackagePath,
+} from './fixtures/filtered-deck-scenarios'
+import { deleteUnusedYankiModels } from './utilities/anki-connect'
 import { countLinesOfFrontmatter } from './utilities/frontmatter-counter'
 import { stableNoteIds, stablePrettyMs, stableResults } from './utilities/stable-sync-results'
 
@@ -1735,159 +1741,88 @@ describeWithFileFixture(
 )
 
 /**
- * Check Filtered / custom study decks Related to
- * https://github.com/kitschpatrol/yanki-obsidian/issues/52
+ * Notes in filtered decks, such as Anki's "Custom Study Session", should sync
+ * like notes in their home decks, and syncing should leave the filtered decks
+ * alone. Earlier versions deleted filtered decks
+ * (https://github.com/kitschpatrol/yanki-obsidian/issues/52), failed on
+ * AnkiConnect 26.10.11.0 and later, which reject `getDeckConfig` for filtered
+ * decks, and mistook the parent of a nested filtered deck for a note's home
+ * deck.
  *
- * Thanks `@edgarguo` for reporting.
- *
- * "I put tags in notes, and then manually created a filtered deck in Anki by
- * search results of the tag. Everything working so far. Now I sync, the
- * filtered deck is deleted. Tags are preserved, only the filtered deck is
- * gone."
- *
- * Tangentially related: https://github.com/FooSoft/anki-connect/issues/147
- * https://forums.ankiweb.net/t/ankiconnect-getting-unsupported-action-error-createfiltereddeck-command-not-working/59387
- *
- * Filtered decks are tagged with: 'dyn': 1 'conf': (absent if the deck is
- * filtered)
- *
- * Deck JSON via:
- * https://github.com/ankidroid/Anki-Android/wiki/Database-Structure#decks-jsonobjects
+ * Each test imports its notes already pulled into filtered decks, from a
+ * package built by `scripts/build-filtered-deck-packages.ts`.
  */
-describeWithFileFixture(
-	'filtered decks',
-	{
-		assetPath: './test/assets/test-filtered-decks',
-		cleanUpAnki: true,
-		cleanUpTempFiles: true,
-	},
-	(context) => {
-		// Skipped until there's a way to handle this without manual user action
-		it.todo('tests filtered decks', { timeout: 30_000 }, async () => {
-			// Sync
-			const results = await syncFiles(context.markdownFiles, {
-				allFilePaths: context.allFiles,
-				ankiConnectOptions: {
-					autoLaunch: false,
-				},
-				ankiWeb: false,
-				dryRun: false,
-				manageFilenames: 'off',
-				namespace: context.namespace,
-				obsidianVault: 'Vault',
-				syncMediaAssets: 'off',
+for (const scenario of FILTERED_DECK_SCENARIOS) {
+	describeWithFileFixture(
+		scenario.description,
+		{
+			assetPath: scenario.assetPath,
+			cleanUpAnki: true,
+			cleanUpTempFiles: true,
+		},
+		(context) => {
+			// AnkiConnect 25.11.9.0 imports packages with Anki's legacy importer,
+			// which turns filtered decks into normal decks
+			const isLegacyImporter = inject('ankiConnectVersion') === '25.11.9.0'
+
+			// Runs after the file fixture removes the imported notes
+			afterAll(async () => {
+				if (!isLegacyImporter) {
+					await deleteUnusedYankiModels(context.yankiConnect)
+				}
 			})
 
-			expect(stableResults(results)).toMatchSnapshot()
-			expect(results.synced.every((synced) => synced.action === 'created')).toBe(true)
+			it.skipIf(isLegacyImporter)(
+				'syncs notes in filtered decks and leaves the filtered decks alone',
+				{ timeout: 60_000 },
+				async () => {
+					await deleteUnusedYankiModels(context.yankiConnect)
+					await context.yankiConnect.miscellaneous.importPackage({
+						path: getFilteredDeckPackagePath(scenario),
+					})
 
-			const tags = await context.yankiConnect.note.getTags()
-			expect(tags).toStrictEqual(['foobar', 'marsupials', 'reticulation', 'splines'])
+					const deckNames = await context.yankiConnect.deck.deckNames()
+					const filteredCards = await context.yankiConnect.card.findCards({
+						query: 'deck:filtered',
+					})
+					expect(filteredCards.length).toBeGreaterThan(0)
 
-			// User action required...
-			console.log(
-				'Manually create a filtered deck (F key) with the query "tag:splines" in the Anki desktop app...',
+					const syncOptions = {
+						...getFilteredDeckLoadOptions(scenario, context),
+						ankiConnectOptions: {
+							autoLaunch: false,
+						},
+						ankiWeb: false,
+						dryRun: false,
+						manageFilenames: 'off',
+					} as const
+
+					// Content matches include each note's deck, so this also checks that
+					// notes resolve to their home decks. Notes created instead of matched
+					// mean the package is stale and needs a rebuild.
+					const results = await syncFiles(context.markdownFiles, syncOptions)
+					expect(results.synced.map(({ action }) => action)).toEqual(
+						context.markdownFiles.map(() => 'matched'),
+					)
+					expect(await context.yankiConnect.deck.deckNames()).toEqual(deckNames)
+					expect(await context.yankiConnect.card.findCards({ query: 'deck:filtered' })).toEqual(
+						filteredCards,
+					)
+
+					// Matched by the note IDs the first sync wrote to the files
+					const secondResults = await syncFiles(context.markdownFiles, syncOptions)
+					expect(secondResults.synced.map(({ action }) => action)).toEqual(
+						context.markdownFiles.map(() => 'unchanged'),
+					)
+					expect(await context.yankiConnect.deck.deckNames()).toEqual(deckNames)
+					expect(await context.yankiConnect.card.findCards({ query: 'deck:filtered' })).toEqual(
+						filteredCards,
+					)
+				},
 			)
-			// Poll every second for an increase in deck count
-			const { length: startingDeckCount } = await context.yankiConnect.deck.deckNames()
-			let currentDeckCount = startingDeckCount
-			while (startingDeckCount === currentDeckCount) {
-				await new Promise((resolve) => {
-					setTimeout(resolve, 1000)
-				})
-				const { length: latestDeckCount } = await context.yankiConnect.deck.deckNames()
-				currentDeckCount = latestDeckCount
-			}
-
-			console.log('Continuing...')
-
-			// Second sync
-			const secondResults = await syncFiles(context.markdownFiles, {
-				allFilePaths: context.allFiles,
-				ankiConnectOptions: {
-					autoLaunch: false,
-				},
-				ankiWeb: false,
-				dryRun: false,
-				manageFilenames: 'off',
-				namespace: context.namespace,
-				obsidianVault: 'Vault',
-				syncMediaAssets: 'off',
-			})
-
-			expect(stableResults(secondResults)).toMatchSnapshot()
-			expect(secondResults.synced.every((synced) => synced.action === 'unchanged')).toBe(true)
-
-			console.log('Good!')
-		})
-	},
-)
-
-describeWithFileFixture(
-	'filtered decks alongside deep nesting',
-	{
-		assetPath: './test/assets/test-obsidian-vault',
-		cleanUpAnki: true,
-		cleanUpTempFiles: true,
-	},
-	(context) => {
-		// Skipped until there's a way to handle this without manual user action
-		it.todo('tests filtered decks alongside deep nesting', { timeout: 60_000 }, async () => {
-			// Sync
-			const results = await syncFiles(context.markdownFiles, {
-				allFilePaths: context.allFiles,
-				ankiConnectOptions: {
-					autoLaunch: false,
-				},
-				ankiWeb: false,
-				basePath: context.tempAssetPath,
-				dryRun: false,
-				manageFilenames: 'off',
-				namespace: context.namespace,
-				obsidianVault: 'test-obsidian-vault',
-				syncMediaAssets: 'off',
-			})
-
-			expect(results.synced.every((synced) => synced.action === 'created')).toBe(true)
-
-			// User action required...
-			console.log(
-				'Manually create a filtered deck (F key) with the query "*" in the Anki desktop app...',
-			)
-			// Poll every second for an increase in deck count
-			const { length: startingDeckCount } = await context.yankiConnect.deck.deckNames()
-			let currentDeckCount = startingDeckCount
-			while (startingDeckCount === currentDeckCount) {
-				await new Promise((resolve) => {
-					setTimeout(resolve, 1000)
-				})
-				const { length: latestDeckCount } = await context.yankiConnect.deck.deckNames()
-				currentDeckCount = latestDeckCount
-			}
-
-			console.log('Continuing...')
-
-			// Second sync
-			const secondResults = await syncFiles(context.markdownFiles, {
-				allFilePaths: context.allFiles,
-				ankiConnectOptions: {
-					autoLaunch: false,
-				},
-				ankiWeb: false,
-				basePath: context.tempAssetPath,
-				dryRun: false,
-				manageFilenames: 'off',
-				namespace: context.namespace,
-				obsidianVault: 'test-obsidian-vault',
-				syncMediaAssets: 'off',
-			})
-
-			expect(secondResults.synced.every((synced) => synced.action === 'unchanged')).toBe(true)
-
-			console.log('Good!')
-		})
-	},
-)
+		},
+	)
+}
 
 /**
  * Reproduces an edge case where media synced to Anki and then manually deleted

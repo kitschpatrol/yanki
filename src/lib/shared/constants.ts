@@ -1,24 +1,25 @@
 import { u } from 'unist-builder'
-import { css } from '../utilities/string'
 
 // These are configurations that should be relatively static and don't warrant cluttering option arguments.
 // Other defaults are defined in options.ts.
 
 /**
- * The default CSS to use for cards. This matches Anki's default. Stored in the
- * Yanki card models and shared across all Yanki-managed notes regardless of
- * namespace. It does change occasionally, see
+ * The default CSS to use for cards. Stored in the Yanki card models and shared
+ * across all Yanki-managed notes regardless of namespace.
+ *
+ * Matches the CSS Anki gives new note types character for character, so
+ * restoring the default leaves them exactly as Anki created them instead of
+ * rewriting their whitespace. It does change occasionally, see
  * https://github.com/ankitects/anki/blob/main/rslib/src/notetype/styling.css
  */
-export const CSS_DEFAULT_STYLE = css`
-	.card {
-		font-family: arial;
-		font-size: 20px;
-		line-height: 1.5;
-		text-align: center;
-		color: black;
-		background-color: white;
-	}
+export const CSS_DEFAULT_STYLE = `.card {
+    font-family: arial;
+    font-size: 20px;
+    line-height: 1.5;
+    text-align: center;
+    color: black;
+    background-color: white;
+}
 `
 
 /**

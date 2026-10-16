@@ -5,9 +5,8 @@ import path from 'path-browserify-esm'
 import { afterAll, beforeAll, describe, expect } from 'vitest'
 import { YankiConnect } from 'yanki-connect'
 import { normalize } from '../../src/lib/utilities/path'
-import { getHash } from '../../src/lib/utilities/string'
 import { loadTestProfile } from '../utilities/anki-connect'
-import { TEST_PROFILE_NAME } from '../utilities/test-constants'
+import { getTestNamespace, TEST_PROFILE_NAME } from '../utilities/test-constants'
 
 type FixtureOptions = {
 	assetPath: string
@@ -39,7 +38,7 @@ export function describeWithFileFixture(
 			allFiles: [],
 			assetPath: '',
 			markdownFiles: [],
-			namespace: `Yanki Test - ${getHash(description, 16)}`,
+			namespace: getTestNamespace(description),
 			tempAssetPath: '',
 			yankiConnect: new YankiConnect({ autoLaunch: false }),
 		}

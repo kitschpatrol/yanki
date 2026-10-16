@@ -125,6 +125,12 @@ describeWithFileFixture(
 			await runCli(['style', '--anki-web', 'false'])
 
 			expect(await getStyle({ ankiConnectOptions: { autoLaunch: false } })).toBe(CSS_DEFAULT_STYLE)
+
+			// Clean means identical to the CSS of Anki's own note types
+			const { css: ankiDefaultCss } = await context.yankiConnect.model.modelStyling({
+				modelName: 'Basic',
+			})
+			expect(CSS_DEFAULT_STYLE).toBe(ankiDefaultCss)
 		})
 	},
 )

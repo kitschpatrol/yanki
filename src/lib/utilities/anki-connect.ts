@@ -376,12 +376,10 @@ async function getRemoteNotesById(
 		}
 	}
 
-	// Figure out which decks are filtered, if any
-	// Have to search the whole collection, unfortunately
-	const deckFilteredStatusMap = new Map<string, boolean>()
+	const filteredDeckNames = await getFilteredDeckNames(client, cardIdToDeckMap)
 
-	// Populated as needed with a list of all non-filtered decks in the collection (if we spot a filtered deck)
-	const unfilteredDeckNoteIdMap = new Map<string, number[] | undefined>()
+	// Populated on first use, since only notes in filtered decks need it
+	let homeDeckCandidates: HomeDeckCandidate[] | undefined
 
 	for (const ankiNote of ankiNotes) {
 		if (ankiNote.noteId === undefined) {
@@ -411,30 +409,21 @@ async function getRemoteNotesById(
 			throw new Error(`No deck found for cards in note ${ankiNote.noteId}`)
 		}
 
-		// Look up deck filter status
-		if (!deckFilteredStatusMap.has(deckName)) {
-			const isFiltered = await isFilteredDeck(client, deckName)
-			deckFilteredStatusMap.set(deckName, isFiltered)
-
-			if (isFiltered) {
-				await populateUnfilteredDeckMaps(client, deckFilteredStatusMap, unfilteredDeckNoteIdMap)
-			}
-		}
-
 		// Look up matching "real" non-filtered decks if the note is in a filtered deck
-		if (deckFilteredStatusMap.get(deckName)) {
-			const unfilteredDeckName = await findUnfilteredDeckNameForNote(
+		if (filteredDeckNames.has(deckName)) {
+			homeDeckCandidates ??= await getHomeDeckCandidates(client, filteredDeckNames)
+			const homeDeckName = await findHomeDeckNameForNote(
 				client,
-				unfilteredDeckNoteIdMap,
+				homeDeckCandidates,
 				ankiNote.noteId,
 			)
 
-			if (unfilteredDeckName === undefined) {
+			if (homeDeckName === undefined) {
 				throw new Error(`No matching non-filtered deck found for note ${ankiNote.noteId}`)
 			}
 
 			// Update deck name
-			deckName = unfilteredDeckName
+			deckName = homeDeckName
 		} else {
 			// Deck is good, leave it alone
 		}
@@ -459,79 +448,68 @@ async function getRemoteNotesById(
 }
 
 /**
- * Whether a deck is a filtered ("dynamic") deck. AnkiConnect returns `false`
- * from `getDeckConfig` when the deck no longer exists.
+ * Names of the filtered ("dynamic") decks currently holding any of the given
+ * cards. Anki's `deck:filtered` search works on every supported release, while
+ * AnkiConnect 26.10.11.0 and later fail `getDeckConfig` for filtered decks.
  */
-async function isFilteredDeck(client: YankiConnect, deckName: string): Promise<boolean> {
-	const deckConfig = await client.deck.getDeckConfig({ deck: deckName })
-
-	if (deckConfig === false) {
-		throw new Error(`Deck "${deckName}" not found while checking its filtered status`)
-	}
-
-	return deckConfig.dyn === 1
-}
-
-/**
- * When a filtered deck is spotted, we have to search all decks to find what
- * non-filtered deck has a given note... so completely populate the filtered
- * deck status map now, and reuse it for future notes.
- */
-async function populateUnfilteredDeckMaps(
+async function getFilteredDeckNames(
 	client: YankiConnect,
-	deckFilteredStatusMap: Map<string, boolean>,
-	unfilteredDeckNoteIdMap: Map<string, number[] | undefined>,
-): Promise<void> {
-	const allDeckNames = await client.deck.deckNames()
+	cardIdToDeckMap: Map<number, string>,
+): Promise<Set<string>> {
+	const filteredCardIds = await client.card.findCards({ query: 'deck:filtered' })
+	const filteredDeckNames = new Set<string>()
 
-	for (const deckName of allDeckNames) {
-		if (deckFilteredStatusMap.has(deckName)) {
-			continue
+	for (const cardId of filteredCardIds) {
+		const deckName = cardIdToDeckMap.get(cardId)
+		if (deckName !== undefined) {
+			filteredDeckNames.add(deckName)
 		}
-
-		deckFilteredStatusMap.set(deckName, await isFilteredDeck(client, deckName))
 	}
 
-	// Sort decks deep to shallow, prevents deep child notes
-	// from ending up in a parent deck
-	const sortedUnfilteredDeckNames = [...deckFilteredStatusMap]
-		.filter(([deck, isFiltered]) => !isFiltered && deck !== 'Default')
-		.map(([deck]) => deck)
-		.toSorted((a, b) => b.split('::').length - a.split('::').length)
-	// Default always at the end, least likely to contain a Yanki note
-	sortedUnfilteredDeckNames.push('Default')
+	return filteredDeckNames
+}
 
-	for (const deckName of sortedUnfilteredDeckNames) {
-		// Undefined will be populated with nodeIDs lazily as needed
-		unfilteredDeckNoteIdMap.set(deckName, undefined)
-	}
+type HomeDeckCandidate = {
+	deckId: number
+	deckName: string
+	/** Notes with a card in this deck or returning to it, fetched on first use */
+	noteIds: number[] | undefined
 }
 
 /**
- * Find the "real" non-filtered deck containing a note that's currently in a
- * filtered deck. Lazily populates and caches the note IDs for each unfiltered
- * deck as needed.
- *
- * @returns The name of the unfiltered deck containing the note, or undefined if
- *   none is found.
+ * Every deck that could be the home deck of a note whose cards are in a
+ * filtered deck. Filtered decks holding none of the synced cards remain
+ * candidates, but never match.
  */
-async function findUnfilteredDeckNameForNote(
+async function getHomeDeckCandidates(
 	client: YankiConnect,
-	unfilteredDeckNoteIdMap: Map<string, number[] | undefined>,
+	filteredDeckNames: Set<string>,
+): Promise<HomeDeckCandidate[]> {
+	const deckNamesAndIds = await client.deck.deckNamesAndIds()
+
+	return Object.entries(deckNamesAndIds)
+		.filter(([deckName]) => !filteredDeckNames.has(deckName))
+		.map(([deckName, deckId]) => ({ deckId, deckName, noteIds: undefined }))
+}
+
+/**
+ * Find the home deck of a note whose cards are in a filtered deck. Anki's
+ * `did:` search matches a card by its current or home deck, and unlike a
+ * `deck:` search it ignores child decks, so a filtered child deck can't make
+ * its parent look like the home deck.
+ *
+ * @returns The name of the note's home deck, or undefined if none is found.
+ */
+async function findHomeDeckNameForNote(
+	client: YankiConnect,
+	homeDeckCandidates: HomeDeckCandidate[],
 	noteId: number,
 ): Promise<string | undefined> {
-	for (const nameToCheck of unfilteredDeckNoteIdMap.keys()) {
-		// Populate and cache the unfiltered deck note IDs if needed
-		if (unfilteredDeckNoteIdMap.get(nameToCheck) === undefined) {
-			unfilteredDeckNoteIdMap.set(
-				nameToCheck,
-				await client.note.findNotes({ query: `"deck:${nameToCheck}"` }),
-			)
-		}
+	for (const candidate of homeDeckCandidates) {
+		candidate.noteIds ??= await client.note.findNotes({ query: `did:${candidate.deckId}` })
 
-		// Find the matching note in the unfiltered deck
-		if (unfilteredDeckNoteIdMap.get(nameToCheck)?.includes(noteId)) {
-			return nameToCheck
+		if (candidate.noteIds.includes(noteId)) {
+			return candidate.deckName
 		}
 	}
 

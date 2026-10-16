@@ -637,8 +637,8 @@ describe('getRemoteNotes', () => {
 
 	it('maps notes with deck info correctly', async () => {
 		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([]) },
 			deck: {
-				getDeckConfig: vi.fn().mockResolvedValue({ dyn: 0 }),
 				getDecks: vi.fn().mockResolvedValue({ TestDeck: [100] }),
 			},
 			note: {
@@ -671,8 +671,8 @@ describe('getRemoteNotes', () => {
 
 	it('drops phantom IDs while keeping resolvable notes', async () => {
 		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([]) },
 			deck: {
-				getDeckConfig: vi.fn().mockResolvedValue({ dyn: 0 }),
 				getDecks: vi.fn().mockResolvedValue({ TestDeck: [100] }),
 			},
 			note: {
@@ -701,6 +701,7 @@ describe('getRemoteNotes', () => {
 
 	it('throws for unknown model name', async () => {
 		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([]) },
 			deck: {
 				getDecks: vi.fn().mockResolvedValue({ TestDeck: [100] }),
 			},
@@ -725,6 +726,7 @@ describe('getRemoteNotes', () => {
 
 	it('throws when no deck found for cards', async () => {
 		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([]) },
 			deck: {
 				getDecks: vi.fn().mockResolvedValue({}),
 			},
@@ -747,40 +749,57 @@ describe('getRemoteNotes', () => {
 		)
 	})
 
+	/** A `notesInfo` entry for a Yanki note with one card */
+	function yankiNoteInfo(noteId: number, cardId: number) {
+		return {
+			cards: [cardId],
+			fields: {
+				Back: { value: 'b' },
+				Front: { value: 'f' },
+				YankiNamespace: { value: 'test' },
+			},
+			modelName: 'Yanki - Basic',
+			noteId,
+			tags: [],
+		}
+	}
+
+	/** A `findNotes` mock answering each query from a lookup table */
+	function findNotesByQuery(results: Record<string, number[]>) {
+		return vi.fn().mockImplementation(({ query }: { query: string }) => results[query] ?? [])
+	}
+
 	it('resolves filtered decks to their real non-filtered deck', async () => {
 		const client = {
+			card: {
+				findCards: vi
+					.fn()
+					.mockImplementation(({ query }: { query: string }) =>
+						query === 'deck:filtered' ? [100] : [],
+					),
+			},
 			deck: {
-				deckNames: vi.fn().mockResolvedValue(['FilteredDeck', 'RealDeck', 'Default']),
-				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => ({
-					dyn: deck === 'FilteredDeck' ? 1 : false,
-				})),
-				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
+				deckNamesAndIds: vi
+					.fn()
+					.mockResolvedValue({ 'Custom Study Session': 2, Default: 1, RealDeck: 3 }),
+				// AnkiConnect 26.10.11.0 and later fail this for filtered decks
+				getDeckConfig: vi
+					.fn()
+					.mockRejectedValue(
+						new Error(
+							"int() argument must be a string, a bytes-like object or a real number, not 'NoneType'",
+						),
+					),
+				getDecks: vi.fn().mockResolvedValue({ 'Custom Study Session': [100] }),
 			},
 			note: {
-				findNotes: vi.fn().mockImplementation(({ query }: { query: string }) => {
-					if (query === '"YankiNamespace:test"') {
-						return [1]
-					}
-
-					if (query === '"deck:RealDeck"') {
-						return [1]
-					}
-
-					return query === '"deck:Default"' ? [] : []
+				// Like Anki, `did:` matches cards by their current or home deck
+				findNotes: findNotesByQuery({
+					'"YankiNamespace:test"': [1],
+					'did:2': [1],
+					'did:3': [1],
 				}),
-				notesInfo: vi.fn().mockResolvedValue([
-					{
-						cards: [100],
-						fields: {
-							Back: { value: 'b' },
-							Front: { value: 'f' },
-							YankiNamespace: { value: 'test' },
-						},
-						modelName: 'Yanki - Basic',
-						noteId: 1,
-						tags: [],
-					},
-				]),
+				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100)]),
 			},
 		}
 
@@ -788,68 +807,88 @@ describe('getRemoteNotes', () => {
 		expect(result[0]?.deckName).toBe('RealDeck')
 	})
 
+	it('resolves notes in filtered decks to their exact home deck', async () => {
+		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([100, 200]) },
+			deck: {
+				deckNamesAndIds: vi
+					.fn()
+					.mockResolvedValue({ Default: 1, Filtered: 2, Parent: 3, 'Parent::Child': 4 }),
+				getDecks: vi.fn().mockResolvedValue({ Filtered: [100, 200] }),
+			},
+			note: {
+				findNotes: findNotesByQuery({
+					'"YankiNamespace:test"': [1, 2],
+					'did:2': [1, 2],
+					'did:3': [2],
+					'did:4': [1],
+				}),
+				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100), yankiNoteInfo(2, 200)]),
+			},
+		}
+
+		const result = await getRemoteNotes(client as never, 'test')
+		expect(result.map((note) => note.deckName)).toEqual(['Parent::Child', 'Parent'])
+		expect(client.deck.deckNamesAndIds).toHaveBeenCalledTimes(1)
+	})
+
+	it('does not resolve a note to the parent of the filtered deck holding it', async () => {
+		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([100]) },
+			deck: {
+				deckNamesAndIds: vi
+					.fn()
+					.mockResolvedValue({ Default: 1, Parent: 2, 'Parent::Custom Study Session': 3, Zeta: 4 }),
+				getDecks: vi.fn().mockResolvedValue({ 'Parent::Custom Study Session': [100] }),
+			},
+			note: {
+				// Like Anki, `deck:` includes child decks, so it would match Parent
+				findNotes: findNotesByQuery({
+					'"deck:Parent"': [1],
+					'"YankiNamespace:test"': [1],
+					'did:3': [1],
+					'did:4': [1],
+				}),
+				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100)]),
+			},
+		}
+
+		const result = await getRemoteNotes(client as never, 'test')
+		expect(result[0]?.deckName).toBe('Zeta')
+	})
+
+	it('keeps the deck of notes outside filtered decks', async () => {
+		const client = {
+			// Another card in the collection is in a filtered deck
+			card: { findCards: vi.fn().mockResolvedValue([999]) },
+			deck: {
+				getDecks: vi.fn().mockResolvedValue({ TestDeck: [100] }),
+			},
+			note: {
+				findNotes: vi.fn().mockResolvedValue([1]),
+				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100)]),
+			},
+		}
+
+		const result = await getRemoteNotes(client as never, 'test')
+		expect(result[0]?.deckName).toBe('TestDeck')
+	})
+
 	it('throws when no matching non-filtered deck found', async () => {
 		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([100]) },
 			deck: {
-				deckNames: vi.fn().mockResolvedValue(['FilteredDeck', 'Default']),
-				getDeckConfig: vi.fn().mockImplementation(({ deck }: { deck: string }) => ({
-					dyn: deck === 'FilteredDeck' ? 1 : false,
-				})),
+				deckNamesAndIds: vi.fn().mockResolvedValue({ Default: 1, FilteredDeck: 2 }),
 				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
 			},
 			note: {
-				findNotes: vi
-					.fn()
-					.mockImplementation(({ query }: { query: string }) =>
-						query === '"YankiNamespace:test"' ? [1] : [],
-					),
-				notesInfo: vi.fn().mockResolvedValue([
-					{
-						cards: [100],
-						fields: {
-							Back: { value: 'b' },
-							Front: { value: 'f' },
-							YankiNamespace: { value: 'test' },
-						},
-						modelName: 'Yanki - Basic',
-						noteId: 1,
-						tags: [],
-					},
-				]),
+				findNotes: findNotesByQuery({ '"YankiNamespace:test"': [1] }),
+				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100)]),
 			},
 		}
 
 		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
 			'No matching non-filtered deck found for note 1',
-		)
-	})
-
-	it('throws when a deck no longer exists while checking its filtered status', async () => {
-		const client = {
-			deck: {
-				getDeckConfig: vi.fn().mockResolvedValue(false),
-				getDecks: vi.fn().mockResolvedValue({ VanishedDeck: [100] }),
-			},
-			note: {
-				findNotes: vi.fn().mockResolvedValue([1]),
-				notesInfo: vi.fn().mockResolvedValue([
-					{
-						cards: [100],
-						fields: {
-							Back: { value: 'b' },
-							Front: { value: 'f' },
-							YankiNamespace: { value: 'test' },
-						},
-						modelName: 'Yanki - Basic',
-						noteId: 1,
-						tags: [],
-					},
-				]),
-			},
-		}
-
-		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
-			'Deck "VanishedDeck" not found while checking its filtered status',
 		)
 	})
 })

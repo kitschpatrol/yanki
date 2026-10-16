@@ -2,8 +2,8 @@ import { execa } from 'execa'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { YankiConnect } from 'yanki-connect'
-import { yankiModels } from '../../src/lib/model/model'
+import { defaultYankiConnectOptions, YankiConnect } from 'yanki-connect'
+import { yankiModelNames, yankiModels } from '../../src/lib/model/model'
 import { requestPermission } from '../../src/lib/utilities/anki-connect'
 import { PLATFORM } from '../../src/lib/utilities/platform'
 import { TEST_PROFILE_NAME } from './test-constants'
@@ -319,5 +319,45 @@ export async function createModels(client: YankiConnect) {
 
 			throw new TypeError('Unknown error', { cause: error })
 		}
+	}
+}
+
+/**
+ * Deletes Yanki's note types, which must not be in use, so an imported package
+ * keeps its own copies' names instead of getting renamed duplicates. Yanki
+ * recreates note types as needed. Requires AnkiConnect's API v1 (26.x).
+ */
+export async function deleteUnusedYankiModels(client: YankiConnect): Promise<void> {
+	const modelNames = await client.model.modelNames()
+	const noteTypes = yankiModelNames
+		.filter((modelName) => modelNames.includes(modelName))
+		.map((name) => ({ name }))
+
+	if (noteTypes.length === 0) {
+		return
+	}
+
+	const { host, port } = defaultYankiConnectOptions
+	const response = await fetch(`${host}:${String(port)}/api/v1`, {
+		body: JSON.stringify({
+			id: 1,
+			jsonrpc: '2.0',
+			method: 'noteTypes.deleteUnused',
+			params: { noteTypes },
+		}),
+		method: 'POST',
+	})
+	const reply = (await response.json()) as {
+		error?: { message: string }
+		result?: { items: Array<{ error?: { message: string } }> }
+	}
+	const errors = [reply.error, ...(reply.result?.items ?? []).map((item) => item.error)].filter(
+		(error) => error !== undefined,
+	)
+
+	if (errors.length > 0) {
+		throw new Error(
+			`Could not delete Yanki note types: ${errors.map(({ message }) => message).join(', ')}`,
+		)
 	}
 }
