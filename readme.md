@@ -358,7 +358,13 @@ npm install yanki
 
 This project bundles an [Agent Skill](https://agentskills.io) in its published package to help coding agents work with yanki.
 
-To sync the skill into your project, run Vercel's [skills CLI](https://github.com/vercel-labs/skills) from your project root:
+To link the skill into your project with [pnpm](https://pnpm.io/agent-skills) 12.11 or later, approve the package once and pnpm links its skill on every install:
+
+```sh
+pnpm approve yanki
+```
+
+With other package managers, sync the skill from your project root with Vercel's [skills CLI](https://github.com/vercel-labs/skills):
 
 ```sh
 npx skills experimental_sync

@@ -329,11 +329,11 @@ await yargsInstance
 				try {
 					loadedCss = await fs.readFile(css, 'utf8')
 				} catch (error) {
-					if (error instanceof Error) {
-						log.error(`Error loading CSS file: ${error.message}`)
-					} else {
-						log.error(`Unknown error loading CSS file: ${String(error)}`)
-					}
+					log.error(
+						error instanceof Error
+							? `Error loading CSS file: ${error.message}`
+							: `Unknown error loading CSS file: ${String(error)}`,
+					)
 
 					process.exitCode = 1
 					return

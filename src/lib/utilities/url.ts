@@ -101,16 +101,13 @@ export function getSrcType(
 
 		// Links that are relative or absolute probably aren't wiki-style name links
 		// TODO vet this with the normalized paths
-		if (
+		const isPath =
 			isAbsolute(normalizedPath) ||
 			// Can't use isRelative() since that considered no prefix to be relative
 			normalizedPath.startsWith('./') ||
 			normalizedPath.startsWith('../')
-		) {
-			return 'localFilePath'
-		}
 
-		return 'localFileName'
+		return isPath ? 'localFilePath' : 'localFileName'
 	}
 
 	// Probably a url

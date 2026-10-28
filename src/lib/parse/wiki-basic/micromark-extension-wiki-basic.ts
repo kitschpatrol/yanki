@@ -184,21 +184,17 @@ export function wikiBasic(): Extension {
 		 * or is simply part of the label text.
 		 */
 		function lookaheadClosingMarker(code: Code): State | undefined {
-			// Invalid
-			// ']'
-			if (code !== 93) {
-				return nok(code)
-			}
-
-			// Lookahead
-			return effects.check(
-				// Check if the next character is also a `]`
-				{ partial: true, tokenize: closingMarkerLookahead },
-				// End
-				firstClosingMarker,
-				// Continue...
-				consumeMarker,
-			)(code)
+			// Lookahead on ']', otherwise invalid
+			return code === 93
+				? effects.check(
+						// Check if the next character is also a `]`
+						{ partial: true, tokenize: closingMarkerLookahead },
+						// End
+						firstClosingMarker,
+						// Continue...
+						consumeMarker,
+					)(code)
+				: nok(code)
 		}
 
 		function firstClosingMarker(code: Code): State | undefined {
@@ -240,11 +236,9 @@ export function wikiBasic(): Extension {
 			effects.consume(code)
 			effects.exit('wikiMarker' as keyof TokenTypeMap)
 
-			if (isEmbed) {
-				effects.exit('wikiEmbed' as keyof TokenTypeMap)
-			} else {
-				effects.exit('wikiLink' as keyof TokenTypeMap)
-			}
+			effects.exit(
+				isEmbed ? ('wikiEmbed' as keyof TokenTypeMap) : ('wikiLink' as keyof TokenTypeMap),
+			)
 
 			return ok
 		}

@@ -116,17 +116,14 @@ export function resolveWithBasePath(
 
 	// Absolute
 	if (isAbsolute(filePath)) {
-		// Path is absolute by drive letter on Windows, or there's not base path to prepend
-		if (
+		// Path is absolute by drive letter on Windows, or there's no base path to prepend
+		const isResolved =
 			basePath === undefined ||
 			WINDOWS_DRIVE_LETTER_REGEX.test(filePath) ||
 			(!compoundBase && filePath.startsWith(basePath))
-		) {
-			return filePath
-		}
 
-		// Resolve over base
-		return path.join(basePath, filePath)
+		// Otherwise resolve over base
+		return isResolved ? filePath : path.join(basePath, filePath)
 	}
 
 	// Relative

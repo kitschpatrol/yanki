@@ -352,12 +352,8 @@ function findBestNameMatch(base: string, cwd: string, allFilePaths: string[]): s
 		const aDepth = a.split(path.sep).length
 		const bDepth = b.split(path.sep).length
 
-		if (aDepth !== bDepth) {
-			return aDepth - bDepth
-		}
-
-		// Then sort by name alphabetically
-		return a.localeCompare(b)
+		// Fall back to sorting by name alphabetically when depths match
+		return aDepth === bDepth ? a.localeCompare(b) : aDepth - bDepth
 	})
 
 	return sortedPaths[0]
@@ -395,14 +391,9 @@ export function parseObsidianVaultLink(url: string):
 			linkPath: string
 			vaultName: string
 	  } {
-	// Parse the URL
+	// Parse the URL and ensure it's an obsidian://open type
 	const urlObject = safeParseUrl(url)
-	if (urlObject === undefined) {
-		return undefined
-	}
-
-	// Ensure the URL is an obsidian://open type
-	if (urlObject.protocol !== 'obsidian:' || urlObject.hostname !== 'open') {
+	if (urlObject?.protocol !== 'obsidian:' || urlObject.hostname !== 'open') {
 		return undefined
 	}
 

@@ -276,12 +276,8 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 		}
 
 		lines.push('', result.dryRun ? 'Sync Plan Details:' : 'Sync Details:')
-		for (const { action, filePath, note } of synced) {
-			if (filePath === undefined) {
-				lines.push(`  Note ID ${note.noteId} ${capitalize(action)} (From Anki)`)
-			} else {
-				lines.push(`  Note ID ${note.noteId} ${capitalize(action)} ${filePath}`)
-			}
+		for (const { action, filePath = '(From Anki)', note } of synced) {
+			lines.push(`  Note ID ${note.noteId} ${capitalize(action)} ${filePath}`)
 		}
 	}
 

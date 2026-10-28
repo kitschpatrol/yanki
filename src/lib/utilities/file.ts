@@ -37,21 +37,19 @@ export async function getFileContentHash(
 		case 'metadata': {
 			// Skipping ctimeMs, as it's not stable across systems
 			// Consumer-provided file adapters may return null fields, which destructuring defaults would not replace
-			// eslint-disable-next-line unicorn/prefer-default-parameters
 			const { mtimeMs, size } = await fileAdapter.stat(absoluteFilePath)
 
 			// Ctime not stable?
 			// eslint-disable-next-line ts/no-unnecessary-condition
 			const metadataString = `${mtimeMs ?? ''}${size ?? ''}`
 
-			if (metadataString === '') {
-				// Fall through to name mode
-				return getHash(absoluteFilePath, 16)
-			}
-
-			// Include the path so distinct files that happen to share size and
-			// mtime (e.g. batch-copied within the same millisecond) don't collide
-			return getHash(`${absoluteFilePath}${metadataString}`, 16)
+			// Fall through to name mode if metadata is missing, otherwise include
+			// the path so distinct files that happen to share size and mtime (e.g.
+			// batch-copied within the same millisecond) don't collide
+			return getHash(
+				metadataString === '' ? absoluteFilePath : `${absoluteFilePath}${metadataString}`,
+				16,
+			)
 		}
 
 		case 'name': {

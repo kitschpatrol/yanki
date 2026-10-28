@@ -1,5 +1,3 @@
-/* eslint-disable unicorn/prefer-string-raw */
-
 import { expect, it } from 'vitest'
 import { getNoteFromMarkdown } from '../src/lib'
 import { markdown } from '../src/lib/utilities/string'
