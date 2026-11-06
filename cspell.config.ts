@@ -5,9 +5,11 @@ export default cspellConfig({
 		'**/*.svg',
 		'test/assets/test-deck-pruning/**/*',
 		'test/fixtures/anki-data-folder-*/**/*',
+		'**/changelog.md',
 	],
 	words: [
 		'afmt',
+		'chagent',
 		'extglob',
 		'FEFF',
 		'Fpandas',

@@ -2,6 +2,7 @@ allowBuilds:
   esbuild: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
+  - '@kitschpatrol/chagent@0.4.0'
   - yanki-connect@5.2.1
 peerDependencyRules:
   allowedVersions:
