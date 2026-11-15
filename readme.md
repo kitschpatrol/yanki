@@ -109,7 +109,7 @@ Optionally, you can add a `tags` array to your Markdown file's frontmatter and h
 
 Nested tags are supported, and you may use `/` in addition to `::` as a delimiter in the Markdown frontmatter for compatibility with tools like Obsidian.
 
-Tag array contents _must_ be primitive string values. Any non-string values will br coerced into strings.
+Tag array contents _must_ be primitive string values. Any non-string values will be coerced into strings.
 
 ### Intelligent synchronization
 
