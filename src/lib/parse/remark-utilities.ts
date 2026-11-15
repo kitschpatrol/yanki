@@ -30,6 +30,14 @@ type AstFromMarkdownOptions = Pick<
 
 const CLOZE_NUMBER_PREFIX_REGEX = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/u
 
+// Inside a cloze, Anki reads a literal `::` as the hint separator and a literal
+// `}}` as the terminator. An empty HTML comment between the two characters
+// hides the sequence from Anki's cloze parser without changing what's rendered.
+// See https://docs.ankiweb.net/math.html#cloze-conflicts
+// See https://github.com/kitschpatrol/yanki/issues/28
+const CLOZE_DELIMITER_INTERIOR_REGEX = /(?<=:)(?=:)|(?<=\})(?=\})/u
+const CLOZE_DELIMITER_BREAK = '<!-- -->'
+
 const defaultAstFromMarkdownOptions: AstFromMarkdownOptions = {
 	...defaultGlobalOptions,
 }
@@ -141,6 +149,102 @@ function trimLeadingAndTrailingSpaces(nodes: PhrasingContent[]): PhrasingContent
 	return nodes
 }
 
+/**
+ * Breaks up any `::` or `}}` sequences in the content of a cloze, so that Anki
+ * does not mistake them for its own cloze syntax.
+ *
+ * @param nodes - The phrasing content nodes inside a single cloze deletion.
+ *
+ * @returns The nodes with an HTML comment between the characters of each
+ *   delimiter sequence.
+ */
+function breakClozeDelimiters(nodes: PhrasingContent[]): PhrasingContent[] {
+	return nodes.flatMap((node): PhrasingContent[] => {
+		if (node.type === 'text') {
+			return node.value
+				.split(CLOZE_DELIMITER_INTERIOR_REGEX)
+				.flatMap((part, index) =>
+					index === 0 ? [u('text', part)] : [u('html', CLOZE_DELIMITER_BREAK), u('text', part)],
+				)
+		}
+
+		if (node.type === 'inlineCode') {
+			const parts = node.value.split(CLOZE_DELIMITER_INTERIOR_REGEX)
+			if (parts.length > 1) {
+				// Inline code has no child nodes in mdast, so the comments have to be
+				// passed through to its `<code>` element in the HTML tree
+				node.data = {
+					...node.data,
+					hChildren: parts.flatMap((part, index) =>
+						index === 0 ? [u('text', part)] : [u('comment', ' '), u('text', part)],
+					),
+				}
+			}
+		} else if ('children' in node) {
+			node.children = breakClozeDelimiters(node.children)
+		}
+
+		return [node]
+	})
+}
+
+/**
+ * Keeps the last character of a cloze's content from combining with the cloze
+ * markup that follows it, as in `}` + `}}` or `:` + `::`.
+ *
+ * @param nodes - The phrasing content nodes that precede the markup.
+ * @param markupCharacter - The character the markup starts with.
+ *
+ * @returns An HTML comment node if the content would otherwise extend the
+ *   markup, or nothing.
+ */
+function breakBeforeClozeMarkup(
+	nodes: PhrasingContent[],
+	markupCharacter: ':' | '}',
+): PhrasingContent[] {
+	const lastNode = nodes.at(-1)
+	return lastNode?.type === 'text' && lastNode.value.endsWith(markupCharacter)
+		? [u('html', CLOZE_DELIMITER_BREAK)]
+		: []
+}
+
+/**
+ * Wraps the content of a cloze deletion in Anki's `{{cN::answer::hint}}`
+ * markup.
+ *
+ * @param nodes - The phrasing content nodes inside a single cloze deletion.
+ * @param clozeIndex - The cloze number.
+ *
+ * @returns The nodes surrounded by cloze markup, with any content that Anki
+ *   would mistake for cloze syntax broken up.
+ */
+function wrapInClozeMarkup(nodes: PhrasingContent[], clozeIndex: number): PhrasingContent[] {
+	// If the last node is an emphasis node, we treat it as a hint
+	const hasHint = nodes.length > 1 && nodes.at(-1)?.type === 'emphasis'
+
+	const answerNodes = breakClozeDelimiters(
+		trimLeadingAndTrailingSpaces(hasHint ? nodes.slice(0, -1) : nodes),
+	)
+
+	if (!hasHint) {
+		return [
+			u('text', `{{c${clozeIndex}::`),
+			...answerNodes,
+			...breakBeforeClozeMarkup(answerNodes, '}'),
+			u('text', '}}'),
+		]
+	}
+
+	return [
+		u('text', `{{c${clozeIndex}::`),
+		...answerNodes,
+		...breakBeforeClozeMarkup(answerNodes, ':'),
+		u('text', '::'),
+		...breakClozeDelimiters(trimLeadingAndTrailingSpaces(nodes.slice(-1))),
+		u('text', '}}'),
+	]
+}
+
 // For Cloze notes
 export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 	let clozeIndex = 1
@@ -184,25 +288,8 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 			}
 		}
 
-		// If the last node is an emphasis node, we treat it as a hint
-		const lastNode = node.children.at(-1)
-		const clozeNodes =
-			node.children.length > 1 && lastNode?.type === 'emphasis'
-				? [
-						u('text', `{{c${clozeIndex}::`),
-						...trimLeadingAndTrailingSpaces(node.children.slice(0, -1)),
-						u('text', '::'),
-						...trimLeadingAndTrailingSpaces(node.children.slice(-1)),
-						u('text', '}}'),
-					]
-				: [
-						u('text', `{{c${clozeIndex}::`),
-						...trimLeadingAndTrailingSpaces(node.children),
-						u('text', '}}'),
-					]
-
 		// Add the cloze markup around the kids
-		parent.children.splice(index, 1, ...clozeNodes)
+		parent.children.splice(index, 1, ...wrapInClozeMarkup(node.children, clozeIndex))
 
 		clozeIndex += 1
 

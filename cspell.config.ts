@@ -20,9 +20,11 @@ export default cspellConfig({
 		'metametapod',
 		'msvideo',
 		'namespac',
+		'rslib',
 		'Splintdewolfcry',
 		'thisnotehasaverylongonewordtitlecanwestillsplititusingthe',
 		'thisnotehasaverylongonewordtitlecanwestillsplititusingthetruncationalgorithm',
+		'trackoor',
 		'vmatrix',
 	],
 })
