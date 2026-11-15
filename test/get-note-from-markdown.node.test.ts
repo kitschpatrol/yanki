@@ -1,3 +1,6 @@
+import { toText } from 'hast-util-to-text'
+import rehypeParse from 'rehype-parse'
+import { unified } from 'unified'
 import { expect, it } from 'vitest'
 import { getNoteFromMarkdown } from '../src/lib'
 import { markdown } from '../src/lib/utilities/string'
@@ -445,4 +448,152 @@ $$
 
 	expect(note.fields.Front).toMatchSnapshot()
 	expect(note.fields.Back).toMatchSnapshot()
+})
+
+const ANKI_CLOZE_REGEX = /\{\{c(\d+)::(.*?)\}\}/gsv
+const ANKI_CLOZE_HINT_SEPARATOR = '::'
+
+function htmlToText(html: string): string {
+	return toText(unified().use(rehypeParse, { fragment: true }).parse(html))
+}
+
+/**
+ * Minimal model of how Anki reads cloze deletions out of a field, following
+ * `rslib/src/cloze.rs`: a cloze opens at `{{cN::`, closes at the first `}}`,
+ * and its content is split into answer and hint at the first `::`.
+ *
+ * Anki does this on the raw field text, before the HTML is rendered, so the
+ * delimiters are matched literally here and only the resulting pieces are
+ * rendered to text.
+ */
+function readFieldLikeAnki(field: string): {
+	clozes: Array<{ answer: string; hint: string | undefined; index: number }>
+	surroundingText: string
+} {
+	const clozes = Array.from(field.matchAll(ANKI_CLOZE_REGEX), ([, index = '', content = '']) => {
+		const separatorPosition = content.indexOf(ANKI_CLOZE_HINT_SEPARATOR)
+		const hasHint = separatorPosition !== -1
+		return {
+			answer: htmlToText(hasHint ? content.slice(0, separatorPosition) : content),
+			hint: hasHint
+				? htmlToText(content.slice(separatorPosition + ANKI_CLOZE_HINT_SEPARATOR.length))
+				: undefined,
+			index: Number(index),
+		}
+	})
+
+	return {
+		clozes,
+		surroundingText: htmlToText(field.replaceAll(ANKI_CLOZE_REGEX, '[...]')),
+	}
+}
+
+/**
+ * Cloze content containing `::` or `}}` must not be read by Anki as cloze
+ * syntax. A literal `::` is Anki's hint separator, and a literal `}}` is its
+ * cloze terminator, so emitting either unescaped inside `{{cN::...}}` hides
+ * only part of the content and leaks the rest as a hint or as plain text.
+ *
+ * Thanks `@trackoor` for reporting. Reproduces
+ * https://github.com/kitschpatrol/yanki/issues/28
+ */
+it.each([
+	{
+		expectedCloze: { answer: 'std::vector', hint: undefined, index: 1 },
+		expectedSurroundingText: 'A dynamic array in C++ is [...].',
+		markdownWithCloze: 'A dynamic array in C++ is ~~std::vector~~.',
+		name: 'a hint separator in text',
+	},
+	{
+		expectedCloze: { answer: '{a: {b: 1}}', hint: undefined, index: 1 },
+		expectedSurroundingText: 'The nested literal is [...].',
+		markdownWithCloze: 'The nested literal is ~~{a: {b: 1}}~~.',
+		name: 'a cloze terminator in text',
+	},
+	{
+		expectedCloze: { answer: 'std::vector', hint: undefined, index: 1 },
+		expectedSurroundingText: 'A dynamic array in C++ is [...].',
+		markdownWithCloze: 'A dynamic array in C++ is ~~`std::vector`~~.',
+		name: 'a hint separator in inline code',
+	},
+	{
+		expectedCloze: { answer: '{a: {b: 1}}', hint: undefined, index: 1 },
+		expectedSurroundingText: 'The nested literal is [...].',
+		markdownWithCloze: 'The nested literal is ~~`{a: {b: 1}}`~~.',
+		name: 'a cloze terminator in inline code',
+	},
+	{
+		expectedCloze: { answer: 'std::vector', hint: 'container', index: 1 },
+		expectedSurroundingText: 'A dynamic array in C++ is [...].',
+		markdownWithCloze: 'A dynamic array in C++ is ~~std::vector _container_~~.',
+		name: 'a hint separator in text followed by a hint',
+	},
+	{
+		expectedCloze: { answer: 'std::vector', hint: undefined, index: 1 },
+		expectedSurroundingText: 'A dynamic array in C++ is [...].',
+		markdownWithCloze: 'A dynamic array in C++ is ~~**std::vector**~~.',
+		name: 'a hint separator in nested formatting',
+	},
+	{
+		expectedCloze: { answer: '{a: 1}', hint: undefined, index: 1 },
+		expectedSurroundingText: 'The literal is [...].',
+		markdownWithCloze: 'The literal is ~~{a: 1}~~.',
+		name: 'a trailing brace',
+	},
+	{
+		expectedCloze: { answer: 'std:', hint: 'prefix', index: 1 },
+		expectedSurroundingText: 'The namespace prefix is [...].',
+		markdownWithCloze: 'The namespace prefix is ~~std: _prefix_~~.',
+		name: 'a trailing colon followed by a hint',
+	},
+	{
+		expectedCloze: { answer: 'a set of sets', hint: 'like {{1}, {2}}', index: 1 },
+		expectedSurroundingText: 'A family is [...].',
+		markdownWithCloze: 'A family is ~~a set of sets _like {{1}, {2}}_~~.',
+		name: 'a cloze terminator in a hint',
+	},
+	{
+		expectedCloze: { answer: '{{c2::nested}}', hint: undefined, index: 1 },
+		expectedSurroundingText: 'Anki cloze syntax looks like [...].',
+		markdownWithCloze: 'Anki cloze syntax looks like ~~{{c2::nested}}~~.',
+		name: 'literal cloze syntax',
+	},
+])(
+	'handles $name inside cloze deletions',
+	async ({ expectedCloze, expectedSurroundingText, markdownWithCloze }) => {
+		const note = await getNoteFromMarkdown(markdownWithCloze)
+
+		expect(note.modelName).toBe('Yanki - Cloze')
+
+		const { clozes, surroundingText } = readFieldLikeAnki(note.fields.Front)
+
+		expect(clozes).toEqual([expectedCloze])
+		expect(surroundingText).toBe(expectedSurroundingText)
+	},
+)
+
+/**
+ * MathJax inside a cloze deletion must not contain a literal `::` either, since
+ * Anki splits the cloze into answer and hint at the first one it finds.
+ *
+ * TeX ignores spaces in math mode, so the math is compared without them.
+ *
+ * Reproduces https://github.com/kitschpatrol/yanki/issues/28
+ */
+it('handles MathJax with consecutive colons inside cloze deletions', async () => {
+	const markdownWithMathCloze = String.raw`The cons operator has type ~~$a :: [a] \to [a]$ _Haskell_~~.`
+	const note = await getNoteFromMarkdown(markdownWithMathCloze)
+
+	expect(note.modelName).toBe('Yanki - Cloze')
+
+	const { clozes, surroundingText } = readFieldLikeAnki(note.fields.Front)
+	const clozesWithoutSpaces = clozes.map((cloze) => ({
+		...cloze,
+		answer: cloze.answer.replaceAll(/\s/gv, ''),
+	}))
+
+	expect(clozesWithoutSpaces).toEqual([
+		{ answer: String.raw`\(a::[a]\to[a]\)`, hint: 'Haskell', index: 1 },
+	])
+	expect(surroundingText).toBe('The cons operator has type [...].')
 })
