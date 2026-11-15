@@ -4,13 +4,16 @@ import { CONTINUE, visit } from 'unist-util-visit'
 
 // Runs of consecutive `{` or `}` collide with Anki's cloze syntax (`{{c1::…}}`),
 // causing its non-greedy cloze regex to terminate the cloze inside the math.
-// MathJax tolerates whitespace between braces, so breaking up the runs keeps
+// Consecutive colons collide with it too, since Anki splits a cloze into answer
+// and hint at the first `::`.
+// MathJax ignores whitespace in math mode, so breaking up the runs keeps
 // rendering identical while making the math safe to embed in a cloze.
 // See https://github.com/kitschpatrol/yanki/issues/15
-const CONSECUTIVE_BRACES_REGEX = /([{}])(?=[{}])/gu
+// See https://github.com/kitschpatrol/yanki/issues/28
+const CLOZE_SYNTAX_COLLISION_REGEX = /[{}](?=[{}])|:(?=:)/gu
 
-function sanitizeBraces(value: string): string {
-	return value.replaceAll(CONSECUTIVE_BRACES_REGEX, '$1 ')
+function sanitizeClozeSyntaxCollisions(value: string): string {
+	return value.replaceAll(CLOZE_SYNTAX_COLLISION_REGEX, '$& ')
 }
 
 /**
@@ -66,7 +69,7 @@ const plugin: Plugin<unknown[], Root> = function () {
 
 				for (const child of node.children) {
 					if (child.type === 'text') {
-						child.value = sanitizeBraces(child.value)
+						child.value = sanitizeClozeSyntaxCollisions(child.value)
 					}
 				}
 
