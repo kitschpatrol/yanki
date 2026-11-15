@@ -60,9 +60,9 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@shikijs/langs": "^4.5.0",
-		"@shikijs/rehype": "^4.5.0",
-		"@shikijs/themes": "^4.5.0",
+		"@shikijs/langs": "^4.6.0",
+		"@shikijs/rehype": "^4.6.0",
+		"@shikijs/themes": "^4.6.0",
 		"@sindresorhus/fnv1a": "^3.1.0",
 		"@sindresorhus/slugify": "^3.0.1",
 		"@stdlib/assert-is-absolute-path": "^0.2.3",
@@ -76,7 +76,7 @@
 		"filenamify": "6.0.0",
 		"globby": "^16.2.4",
 		"hast-util-to-text": "^4.0.3",
-		"linkedom": "^0.18.14",
+		"linkedom": "^0.18.15",
 		"mdast-util-from-markdown": "^2.1.0",
 		"micromark-util-sanitize-uri": "^2.0.1",
 		"micromark-util-types": "^2.0.3",
@@ -99,7 +99,7 @@
 		"remark-math": "^6.0.0",
 		"remark-parse": "^11.0.0",
 		"remark-rehype": "^11.1.2",
-		"shiki": "^4.5.0",
+		"shiki": "^4.6.0",
 		"slash": "^5.1.0",
 		"sort-keys": "^6.0.1",
 		"strip-ansi": "^7.2.0",
@@ -110,35 +110,35 @@
 		"unist-util-visit": "^5.2.0",
 		"untildify": "^6.0.0",
 		"yaml": "^2.9.1",
-		"yanki-connect": "^5.2.1",
+		"yanki-connect": "^5.2.2",
 		"yargs": "^18.2.0"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
-		"@kitschpatrol/chagent": "^0.5.0",
-		"@kitschpatrol/shared-config": "^8.14.0",
-		"@vitest/browser-playwright": "^5.0.5",
-		"@vitest/coverage-v8": "^5.0.5",
-		"brewpub": "^0.5.0",
+		"@kitschpatrol/chagent": "^0.6.0",
+		"@kitschpatrol/shared-config": "^8.14.1",
+		"@vitest/browser-playwright": "^5.1.0",
+		"@vitest/coverage-v8": "^5.1.0",
+		"brewpub": "^0.5.1",
 		"bumpp": "^12.3.0",
 		"execa": "^10.2.1",
-		"mdat-plugin-cli-help": "^3.4.1",
-		"playwright": "^1.64.1",
+		"mdat-plugin-cli-help": "^3.4.2",
+		"playwright": "^1.65.1",
 		"publint": "^0.3.25",
 		"shx": "^0.4.0",
-		"tsdown": "^0.23.4",
+		"tsdown": "^0.23.7",
 		"tsx": "^4.23.15",
 		"typescript": "~6.0.3",
-		"vitest": "^5.0.5"
+		"vitest": "^5.1.0"
 	},
-	"packageManager": "pnpm@12.16.1",
+	"packageManager": "pnpm@12.21.0",
 	"engines": {
 		"node": "^22.18.0 || ^24.0.0 || >=26.0.0"
 	},
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": ">=24.16.0"
+			"version": "^24.16.0 || >=26.3.0"
 		}
 	}
 }

@@ -14,3 +14,9 @@ test/assets/test-unexpected-formatting/
 test/assets/test\ obsidian\ vault\ with\ spaces/
 test/assets/test-cloze-back/
 test/fixtures/anki-data-folder-*/
+
+# Preserve deliberate leading YAML and thematic-break syntax in parser fixtures.
+test/assets/test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md
+test/assets/test-minimal-notes/basic-with-back-and-no-front.md
+test/assets/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md
+test/assets/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md

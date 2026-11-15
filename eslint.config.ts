@@ -10,6 +10,11 @@ export default eslintConfig(
 			'test/assets/test-deck-pruning/**/*',
 			'test/assets/test-fancy-markdown/**/*',
 			'test/assets/test-link-encoding/**/*',
+			// Preserve deliberate leading YAML and thematic-break syntax in parser fixtures.
+			'test/assets/test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md',
+			'test/assets/test-minimal-notes/basic-with-back-and-no-front.md',
+			'test/assets/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md',
+			'test/assets/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md',
 			'test/assets/test-minimal-notes/basic-with-front-image-wiki-embed-and-no-back.md',
 			'test/assets/test-obsidian-vault/**/*',
 			'test/assets/test-question-mark/**/*',

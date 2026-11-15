@@ -1,6 +1,7 @@
 import { toText } from 'hast-util-to-text'
 import rehypeParse from 'rehype-parse'
 import { unified } from 'unified'
+import { visit } from 'unist-util-visit'
 import { expect, it } from 'vitest'
 import { getNoteFromMarkdown } from '../src/lib'
 import { markdown } from '../src/lib/utilities/string'
@@ -596,4 +597,68 @@ it('handles MathJax with consecutive colons inside cloze deletions', async () =>
 		{ answer: String.raw`\(a::[a]\to[a]\)`, hint: 'Haskell', index: 1 },
 	])
 	expect(surroundingText).toBe('The cons operator has type [...].')
+})
+
+function getCodeBlockTexts(html: string): string[] {
+	const codeBlockTexts: string[] = []
+	visit(unified().use(rehypeParse, { fragment: true }).parse(html), 'element', (node) => {
+		if (node.tagName === 'pre') {
+			codeBlockTexts.push(toText(node, { whitespace: 'pre' }))
+		}
+	})
+
+	return codeBlockTexts
+}
+
+/**
+ * Generated HTML must stay stable, since any change to it rewrites the affected
+ * notes in Anki on the next sync.
+ *
+ * A fenced code block keeps its indentation and all but the first of its
+ * leading blank lines. `hast-util-raw` 9.1.1 and later drops that first
+ * newline, applying the HTML rule that ignores a newline right after `<pre>` to
+ * the code nested one level deeper in `<pre><code>`.
+ */
+it.each([
+	{
+		code: 'const a = 1\nconst b = 2',
+		expected: 'const a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'no leading whitespace',
+	},
+	{
+		code: '\nconst a = 1\nconst b = 2',
+		expected: 'const a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'a leading blank line',
+	},
+	{
+		code: '\n\n\nconst a = 1\nconst b = 2',
+		expected: '\n\nconst a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'several leading blank lines',
+	},
+	{
+		code: '\nconst a = 1\nconst b = 2',
+		expected: 'const a = 1\nconst b = 2',
+		language: '',
+		name: 'a leading blank line and no language',
+	},
+	{
+		code: '    const a = 1\nconst b = 2',
+		expected: '    const a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'leading indentation',
+	},
+	{
+		code: '\n    const a = 1\nconst b = 2',
+		expected: '    const a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'a leading blank line followed by indentation',
+	},
+])('renders fenced code blocks with $name', async ({ code, expected, language }) => {
+	const fence = '```'
+	const note = await getNoteFromMarkdown(`${fence}${language}\n${code}\n${fence}`)
+
+	expect(getCodeBlockTexts(note.fields.Front)).toEqual([expected])
 })

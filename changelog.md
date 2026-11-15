@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Omit a leading blank line from display-math blocks and fenced code blocks in generated HTML after a dependency update, so existing notes containing one are rewritten in Anki once on the next synchronization, with scheduling unaffected.
+
 ### Maintenance
 
 - Use the configured npm authentication for publishing instead of injecting a token in the release script.
