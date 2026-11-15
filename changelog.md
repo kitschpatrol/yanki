@@ -7,15 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 (Node.js support requirements have sometimes increased in minor or patch releases.)
 
-## [Unreleased]
+## [3.2.3] - 2026-11-15
 
 ### Changed
 
 - Omit a leading blank line from display-math blocks and fenced code blocks in generated HTML after a dependency update, so existing notes containing one are rewritten in Anki once on the next synchronization, with scheduling unaffected.
 
+### Fixed
+
+- Prevent literal `::` and `}}` in cloze text, inline code, and hints, and consecutive colons in MathJax, from prematurely splitting or ending cloze deletions.
+
 ### Maintenance
 
 - Use the configured npm authentication for publishing instead of injecting a token in the release script.
+- Add automatic changelog generation with `chagent` during releases and update the GitHub release changelog action.
+- Refresh runtime dependencies, including Shiki, `linkedom`, and `yanki-connect`.
+- Refresh development dependencies, shared configuration, pnpm, and GitHub Actions; revise skill linking and set the contributor Node.js requirement to `^24.16.0 || >=26.3.0`.
+- Add regression tests for fenced code block whitespace and protect syntax-sensitive Markdown parser fixtures from automatic formatting.
 
 ## [3.2.2] - 2026-11-02
 
@@ -1151,7 +1159,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Establish build, lint, test, and release workflows, including Markdown rendering and synchronization fixtures.
 
-[Unreleased]: https://github.com/kitschpatrol/yanki/compare/v3.2.2...HEAD
 [0.1.1]: https://github.com/kitschpatrol/yanki/releases/tag/v0.1.1
 [0.2.0]: https://github.com/kitschpatrol/yanki/compare/v0.1.1...v0.2.0
 [0.2.1]: https://github.com/kitschpatrol/yanki/compare/v0.2.0...v0.2.1
@@ -1248,3 +1255,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [3.2.0]: https://github.com/kitschpatrol/yanki/compare/v3.1.0...v3.2.0
 [3.2.1]: https://github.com/kitschpatrol/yanki/compare/v3.2.0...v3.2.1
 [3.2.2]: https://github.com/kitschpatrol/yanki/compare/v3.2.1...v3.2.2
+[3.2.3]: https://github.com/kitschpatrol/yanki/compare/v3.2.2...v3.2.3
