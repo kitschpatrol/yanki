@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 (Node.js support requirements have sometimes increased in minor or patch releases.)
 
+## [3.2.4] - 2026-11-16
+
+### Fixed
+
+- Prevent synchronization and cleanup from deleting decks whose descendants still contain cards, including unmanaged cards, suspended or buried cards, future-due cards, and cards temporarily in filtered decks.
+- Preserve decks with active or incoming notes anywhere in their hierarchy, including notes directly in parent decks, and compare deck names case-insensitively.
+- Skip missing decks during cleanup instead of creating them while checking whether they are empty.
+- Make dry-run deck deletion reports match real runs for notes with multiple cards, notes moving between decks, and decks receiving notes.
+
+### Documentation
+
+- Correct a typo in the readme's explanation of frontmatter tag coercion.
+
+### Maintenance
+
+- Update `yanki-connect` to `^5.3.0` and extend integration tests and CI coverage to AnkiConnect 26.11.15.0 with Anki 26.09.4.
+- Add regression tests for deck cleanup safety, missing decks, and agreement between dry-run and real-run deletion reports.
+
 ## [3.2.3] - 2026-11-15
 
 ### Changed
@@ -1256,3 +1274,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [3.2.1]: https://github.com/kitschpatrol/yanki/compare/v3.2.0...v3.2.1
 [3.2.2]: https://github.com/kitschpatrol/yanki/compare/v3.2.1...v3.2.2
 [3.2.3]: https://github.com/kitschpatrol/yanki/compare/v3.2.2...v3.2.3
+[3.2.4]: https://github.com/kitschpatrol/yanki/compare/v3.2.3...v3.2.4
