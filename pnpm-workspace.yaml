@@ -1,7 +1,7 @@
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
-  - yanki-connect@5.2.2
+  - yanki-connect@5.3.0
 peerDependencyRules:
   allowedVersions:
     # Remove once the installed version declares ESLint 10 support.
