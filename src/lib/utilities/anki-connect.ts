@@ -529,9 +529,9 @@ export async function deleteOrphanedDecks(
 		Boolean,
 	)
 
-	// Set that's excluded from set of notes deck names and recently deleted notes deck names
-	const orphanedDeckNames = originalNoteDeckNames.filter(
-		(deckName) => !activeNoteDeckNames.includes(deckName),
+	// Decks that held notes, and whose tree no active note remains in or arrives in
+	const orphanedDeckNames = originalNoteDeckNames.filter((deckName) =>
+		activeNoteDeckNames.every((activeDeckName) => !isInDeckTree(activeDeckName, deckName)),
 	)
 
 	// Check the parent deck of each orphaned deck
@@ -542,67 +542,53 @@ export async function deleteOrphanedDecks(
 		)
 	}
 
-	// This is a dangerous place and (maybe) a potential source of bugs...
-	// https://github.com/kitschpatrol/yanki-obsidian/issues/6
-	// https://github.com/kitschpatrol/yanki-obsidian/issues/14
-	//
-	// Two possible issues:
-	// 1. The order of the decks returned from `getDeckStats` does not necessarily
-	//    match the order of the decks in the `deckDeletionCandidates` array? It's
-	//    looking for a matching deck ID anywhere in the hierarchy, which may or
-	//    may not be the leaf we want. Solution: Call it one deck at a time.
-	// 2. The `total_in_deck` field is apparently not reliable.... sometimes it
-	//    can be zero when there are cards in the deck. In those cases, it appears
-	//    that `new_count + learn_count + review_count` indicates at least a
-	//    partial non-zero quantity. (But it's not the same as `total_in_deck`
-	//    when available.) Solution: Take the max of these sources as the deck count.
-
 	const deckDeletionCandidates = (
 		[...new Set([...orphanedDeckNames, ...orphanedParentDeckNames])] as string[]
 	).toSorted()
+	if (deckDeletionCandidates.length === 0) {
+		return []
+	}
 
+	const existingDecks = await client.deck.deckNamesAndIds()
+
+	// A dry run leaves every card in place, so subtract the cards a real run
+	// would have cleared out by now: those of deleted notes, and those of notes
+	// moving to another deck, which is never inside a candidate's tree.
+	const activeDeckNames = new Map(activeNotes.map((note) => [note.noteId, note.deckName]))
+	const cardsToRemove = new Set(
+		dryRun
+			? originalNotes
+					.filter((note) => {
+						const activeDeckName = activeDeckNames.get(note.noteId)
+						return activeDeckName === undefined || !isSameDeck(activeDeckName, note.deckName)
+					})
+					.flatMap((note) => note.cards ?? [])
+			: [],
+	)
 	const decksToDelete: string[] = []
 
-	// Ensure all decks are actually empty
 	for (const deckName of deckDeletionCandidates) {
-		// One at a time...
-		const deckStatsObject = await client.deck.getDeckStats({ decks: [deckName] })
-		const deckStatsValues = Object.values(deckStatsObject)
-
-		if (deckStatsValues.length > 1) {
-			// This should never happen, but don't touch it
-			console.warn(`Multiple decks found for deck name: ${deckName}`)
-			continue
-		}
-
-		const deckStats = deckStatsValues.at(0)
-		if (deckStats === undefined) {
-			// Anki claims deck does not exist, but don't touch it
+		if (existingDecks[deckName] === undefined) {
 			console.warn(`Deck not found for deck name: ${deckName}`)
 			continue
 		}
 
-		const cardCount = Math.max(
-			deckStats.total_in_deck,
-			deckStats.new_count + deckStats.learn_count + deckStats.review_count,
-		)
-
-		if (dryRun) {
-			// Get number of original notes in the deck, vs the number of cards in the deck now...
-			// TODO this is not correct, but only affects dry run...
-			// It's a messy card vs. note quantity situation
-			const originalCount = originalNotes.filter((note) => note.deckName === deckName).length
-			const activeCount = activeNotes.filter((note) => note.deckName === deckName).length
-
-			if (cardCount === originalCount && activeCount === 0 && !decksToDelete.includes(deckName)) {
-				decksToDelete.push(deckName)
-			}
-		} else if (cardCount === 0 && !decksToDelete.includes(deckName)) {
+		// Deleting a parent also deletes its descendants. Due counts omit
+		// suspended, buried, and future-due cards, while total_in_deck may
+		// count only the parent's own cards. Search actual cards instead.
+		// Numeric IDs avoid wildcard/quoting rules in deck names. did: also
+		// includes cards whose home deck is here while in a filtered deck.
+		const query = Object.entries(existingDecks)
+			.filter(([name]) => isInDeckTree(name, deckName))
+			.map(([, id]) => `did:${id}`)
+			.join(' OR ')
+		const cards = await client.card.findCards({ query })
+		if (cards.every((card) => cardsToRemove.has(card))) {
 			decksToDelete.push(deckName)
 		}
 	}
 
-	if (!dryRun) {
+	if (!dryRun && decksToDelete.length > 0) {
 		await client.deck.deleteDecks({
 			cardsToo: true,
 			decks: withoutDescendantDecks(decksToDelete),
@@ -610,6 +596,23 @@ export async function deleteOrphanedDecks(
 	}
 
 	return decksToDelete
+}
+
+/**
+ * Anki treats deck names that differ only by case as the same deck.
+ */
+function isSameDeck(deckName: string, otherDeckName: string): boolean {
+	return deckName.toLowerCase() === otherDeckName.toLowerCase()
+}
+
+/**
+ * Whether a deck is the given root deck or one of its descendants.
+ */
+function isInDeckTree(deckName: string, rootDeckName: string): boolean {
+	return (
+		isSameDeck(deckName, rootDeckName) ||
+		deckName.toLowerCase().startsWith(`${rootDeckName.toLowerCase()}::`)
+	)
 }
 
 /**
@@ -625,7 +628,7 @@ function withoutDescendantDecks(deckNames: string[]): string[] {
 
 /**
  * Walk up an orphaned deck's ancestry, collecting parent deck names until one
- * is found that still contains an active note's deck.
+ * is found that still has an active note in its tree.
  */
 function getOrphanedParentDeckNames(
 	orphanedDeckName: string,
@@ -637,7 +640,7 @@ function getOrphanedParentDeckNames(
 	while (parts.length > 1) {
 		parts.pop()
 		const parentDeckName = parts.join('::')
-		if (activeNoteDeckNames.some((deckName) => deckName.startsWith(`${parentDeckName}::`))) {
+		if (activeNoteDeckNames.some((deckName) => isInDeckTree(deckName, parentDeckName))) {
 			break
 		}
 

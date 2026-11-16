@@ -40,7 +40,7 @@ describeWithFileFixture(
 
 			const dryRunFormatted = formatCleanResult(dryRunResult)
 			expect(dryRunFormatted).toMatchInlineSnapshot(
-				`"Will deleted 9 notes, 6 decks, and 0 media assets from Anki."`,
+				`"Will deleted 9 notes, 15 decks, and 0 media assets from Anki."`,
 			)
 
 			const ankiNotes = await listNotes({
@@ -61,6 +61,7 @@ describeWithFileFixture(
 			})
 
 			expect(runResult.deletedNotes).toHaveLength(context.markdownFiles.length)
+			expect(runResult.deletedDecks).toEqual(dryRunResult.deletedDecks)
 			expect(runResult.dryRun).toBe(false)
 			expect(runResult.namespace).toBe(context.namespace)
 

@@ -30,6 +30,34 @@ function makeNote(overrides: Partial<YankiNote> = {}): YankiNote {
 	}
 }
 
+/**
+ * Create a mock client holding the given cards in the given decks. Deck IDs are
+ * the 1-based position of each deck name, and card searches resolve the `did:`
+ * terms of a query against those IDs.
+ */
+function makeDeckClient(cardsByDeckName: Record<string, number[]>) {
+	const cardsByDeckId = Object.values(cardsByDeckName)
+	const deckIds = Object.fromEntries(
+		Object.keys(cardsByDeckName).map((deckName, index) => [deckName, index + 1]),
+	)
+
+	return {
+		card: {
+			findCards: vi
+				.fn()
+				.mockImplementation(({ query }: { query: string }) =>
+					query
+						.split(' OR ')
+						.flatMap((term) => cardsByDeckId[Number(term.replace('did:', '')) - 1] ?? []),
+				),
+		},
+		deck: {
+			deckNamesAndIds: vi.fn().mockResolvedValue(deckIds),
+			deleteDecks: vi.fn(),
+		},
+	}
+}
+
 describe('areNotesEqual', () => {
 	it('returns true for identical notes', () => {
 		const note = makeNote()
@@ -931,42 +959,202 @@ describe('getRemoteNotes', () => {
 	})
 })
 
-describe('deleteOrphanedDecks edge cases', () => {
-	it('warns when multiple decks returned for a single name', async () => {
-		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+describe('deleteOrphanedDecks', () => {
+	it.each([false, true])('preserves occupied parent trees (dryRun: %s)', async (dryRun) => {
 		const client = {
+			card: {
+				findCards: vi.fn().mockResolvedValueOnce([100]).mockResolvedValueOnce([]),
+			},
 			deck: {
+				deckNamesAndIds: vi
+					.fn()
+					.mockResolvedValue({ Parent: 1, 'Parent::Managed': 2, 'Parent::Personal': 3 }),
 				deleteDecks: vi.fn(),
-				getDeckStats: vi.fn().mockResolvedValue({
-					'OrphanDeck-1': { learn_count: 0, new_count: 0, review_count: 0, total_in_deck: 0 },
-					'OrphanDeck-2': { learn_count: 0, new_count: 0, review_count: 0, total_in_deck: 0 },
-				}),
 			},
 		}
+		const result = await deleteOrphanedDecks(
+			client as never,
+			[],
+			[makeNote({ deckName: 'Parent::Managed' })],
+			dryRun,
+		)
+		expect(result).toEqual(['Parent::Managed'])
+		expect(client.card.findCards).toHaveBeenCalledWith({ query: 'did:1 OR did:2 OR did:3' })
+		expect(client.deck.deleteDecks.mock.calls).toEqual(
+			dryRun ? [] : [[{ cardsToo: true, decks: ['Parent::Managed'] }]],
+		)
+	})
 
-		const activeNotes: YankiNote[] = []
-		const originalNotes = [makeNote({ deckName: 'OrphanDeck' })]
+	it('deletes empty parent trees without repeating descendant deletions', async () => {
+		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([]) },
+			deck: {
+				deckNamesAndIds: vi.fn().mockResolvedValue({ Parent: 1, 'Parent::Managed': 2 }),
+				deleteDecks: vi.fn(),
+			},
+		}
+		const result = await deleteOrphanedDecks(
+			client as never,
+			[],
+			[makeNote({ deckName: 'Parent::Managed' })],
+			false,
+		)
+		expect(result).toEqual(['Parent', 'Parent::Managed'])
+		expect(client.deck.deleteDecks).toHaveBeenCalledExactlyOnceWith({
+			cardsToo: true,
+			decks: ['Parent'],
+		})
+	})
 
-		await deleteOrphanedDecks(client as never, activeNotes, originalNotes, false)
-		expect(spyWarn).toHaveBeenCalledWith('Multiple decks found for deck name: OrphanDeck')
+	it('skips missing decks without creating them or issuing a deletion', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const client = {
+			card: { findCards: vi.fn() },
+			deck: {
+				deckNamesAndIds: vi.fn().mockResolvedValue({}),
+				deleteDecks: vi.fn(),
+			},
+		}
+		const result = await deleteOrphanedDecks(
+			client as never,
+			[],
+			[makeNote({ deckName: 'GhostDeck' })],
+			false,
+		)
+		expect(result).toEqual([])
+		expect(spyWarn).toHaveBeenCalledWith('Deck not found for deck name: GhostDeck')
+		expect(client.card.findCards).not.toHaveBeenCalled()
+		expect(client.deck.deleteDecks).not.toHaveBeenCalled()
 		spyWarn.mockRestore()
 	})
 
-	it('warns when deck stats returns empty for a deck', async () => {
-		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+	it('does not delete any decks when a card search fails', async () => {
 		const client = {
+			card: {
+				findCards: vi.fn().mockResolvedValueOnce([]).mockRejectedValue(new Error('search failed')),
+			},
 			deck: {
+				deckNamesAndIds: vi.fn().mockResolvedValue({ Parent: 1, 'Parent::Managed': 2 }),
 				deleteDecks: vi.fn(),
-				getDeckStats: vi.fn().mockResolvedValue({}),
 			},
 		}
+		await expect(
+			deleteOrphanedDecks(client as never, [], [makeNote({ deckName: 'Parent::Managed' })], false),
+		).rejects.toThrow('search failed')
+		expect(client.deck.deleteDecks).not.toHaveBeenCalled()
+	})
 
-		const activeNotes: YankiNote[] = []
-		const originalNotes = [makeNote({ deckName: 'GhostDeck' })]
+	it.each([
+		{ expected: ['Parent', 'Parent::Managed'], remaining: [] },
+		{ expected: [], remaining: [99] },
+	])(
+		'dry runs subtract deleted card IDs and preserve remaining cards: $remaining',
+		async ({ expected, remaining }) => {
+			const client = {
+				card: { findCards: vi.fn().mockResolvedValue([11, 12, ...remaining]) },
+				deck: {
+					deckNamesAndIds: vi.fn().mockResolvedValue({ Parent: 1, 'Parent::Managed': 2 }),
+					deleteDecks: vi.fn(),
+				},
+			}
+			const result = await deleteOrphanedDecks(
+				client as never,
+				[],
+				[makeNote({ cards: [11, 12], deckName: 'Parent::Managed' })],
+				true,
+			)
+			expect(result).toEqual(expected)
+			expect(client.deck.deleteDecks).not.toHaveBeenCalled()
+		},
+	)
 
-		await deleteOrphanedDecks(client as never, activeNotes, originalNotes, false)
-		expect(spyWarn).toHaveBeenCalledWith('Deck not found for deck name: GhostDeck')
-		spyWarn.mockRestore()
+	it('preserves cards in dry runs when card IDs are unknown', async () => {
+		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([11]) },
+			deck: {
+				deckNamesAndIds: vi.fn().mockResolvedValue({ TestDeck: 1 }),
+				deleteDecks: vi.fn(),
+			},
+		}
+		expect(await deleteOrphanedDecks(client as never, [], [makeNote()], true)).toEqual([])
+		expect(client.deck.deleteDecks).not.toHaveBeenCalled()
+	})
+
+	describe.each<{
+		activeNotes: YankiNote[]
+		/** Cards by deck name once a real run has synced notes */
+		after: Record<string, number[]>
+		/** Cards by deck name as a dry run finds them, with nothing synced */
+		before: Record<string, number[]>
+		expected: string[]
+		name: string
+		originalNotes: YankiNote[]
+	}>([
+		{
+			activeNotes: [makeNote({ deckName: 'New' })],
+			after: { New: [11, 12], Old: [] },
+			before: { New: [], Old: [11, 12] },
+			expected: ['Old'],
+			name: 'deletes a deck vacated by a moved note',
+			originalNotes: [makeNote({ cards: [11, 12], deckName: 'Old' })],
+		},
+		{
+			activeNotes: [makeNote({ deckName: 'Parent' })],
+			after: { Parent: [11], 'Parent::Child': [] },
+			before: { Parent: [], 'Parent::Child': [11] },
+			expected: ['Parent::Child'],
+			name: 'keeps a parent deck that a note moves up into',
+			originalNotes: [makeNote({ cards: [11], deckName: 'Parent::Child' })],
+		},
+		{
+			activeNotes: [makeNote({ deckName: 'Parent', noteId: 0 })],
+			after: { Parent: [99], 'Parent::Child': [] },
+			before: { Parent: [], 'Parent::Child': [11] },
+			expected: ['Parent::Child'],
+			name: 'keeps a parent deck that receives a new note',
+			originalNotes: [makeNote({ cards: [11], deckName: 'Parent::Child' })],
+		},
+		{
+			activeNotes: [makeNote({ deckName: 'Parent::New', noteId: 0 })],
+			after: { Parent: [], 'Parent::New': [99] },
+			before: { Parent: [11] },
+			expected: [],
+			name: 'keeps an orphaned deck whose child receives a new note',
+			originalNotes: [makeNote({ cards: [11], deckName: 'Parent' })],
+		},
+		{
+			activeNotes: [makeNote({ deckName: 'lang' })],
+			after: { Lang: [11] },
+			before: { Lang: [11] },
+			expected: [],
+			name: 'keeps a deck whose name differs from the local one only by case',
+			originalNotes: [makeNote({ cards: [11], deckName: 'Lang' })],
+		},
+		{
+			activeNotes: [makeNote({ deckName: 'Home' })],
+			after: { Home: [], Vacated: [], 'Vacated::Filtered': [11] },
+			before: { Home: [], Vacated: [21], 'Vacated::Filtered': [11] },
+			expected: [],
+			name: 'keeps a deck whose filtered child holds a card of an unmoved note',
+			originalNotes: [
+				makeNote({ cards: [11], deckName: 'Home' }),
+				makeNote({ cards: [21], deckName: 'Vacated', noteId: 2 }),
+			],
+		},
+	])('$name', ({ activeNotes, after, before, expected, originalNotes }) => {
+		it.each([
+			{ cardsByDeckName: before, dryRun: true },
+			{ cardsByDeckName: after, dryRun: false },
+		])('dryRun: $dryRun', async ({ cardsByDeckName, dryRun }) => {
+			const client = makeDeckClient(cardsByDeckName)
+			expect(
+				await deleteOrphanedDecks(client as never, activeNotes, originalNotes, dryRun),
+			).toEqual(expected)
+		})
+	})
+
+	it('does not query Anki when there are no orphaned decks', async () => {
+		expect(await deleteOrphanedDecks({} as never, [makeNote()], [makeNote()], false)).toEqual([])
 	})
 })
 
