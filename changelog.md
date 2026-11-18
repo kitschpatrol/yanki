@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Entries are drafted with LLM assistance via [Chagent](https://github.com/kitschpatrol/chagent).
 
-## [Unreleased]
+## [3.3.0] - 2026-11-18
 
 ### Added
 
@@ -21,6 +21,8 @@ Entries are drafted with LLM assistance via [Chagent](https://github.com/kitschp
 - Use Obsidian’s precedence when several files match a link. Prefer an exact path from the vault root, then rank path-suffix matches by the linking note’s directory, shorter paths, and order in `allFilePaths`.
 - Resolve leading-slash links from the vault root and stop relative links from climbing above a configured root. Without a configured root, `yanki sync` uses the common directory of the source note and the synced file list.
 - Resolve same-note wiki links, Markdown fragment links, and note embeds back to the source note during file sync, preserving heading and block anchors in Obsidian URLs.
+- Fall back to matching the end of a file's path when a relative wiki or Markdown link has no direct match, as Obsidian does.
+- Preserve the matched file's actual path casing when resolving links and embeds that use explicit relative paths, absolute paths, or `file:` URLs.
 
 ### Documentation
 
@@ -1300,4 +1302,4 @@ Entries are drafted with LLM assistance via [Chagent](https://github.com/kitschp
 [3.2.2]: https://github.com/kitschpatrol/yanki/compare/v3.2.1...v3.2.2
 [3.2.3]: https://github.com/kitschpatrol/yanki/compare/v3.2.2...v3.2.3
 [3.2.4]: https://github.com/kitschpatrol/yanki/compare/v3.2.3...v3.2.4
-[Unreleased]: https://github.com/kitschpatrol/yanki/compare/v3.2.4...HEAD
+[3.3.0]: https://github.com/kitschpatrol/yanki/compare/v3.2.4...v3.3.0
