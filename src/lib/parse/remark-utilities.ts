@@ -26,7 +26,10 @@ import remarkWikiBasic from './wiki-basic/remark-wiki-basic'
 type AstFromMarkdownOptions = Pick<
 	GlobalOptions,
 	'allFilePaths' | 'basePath' | 'cwd' | 'obsidianVault' | 'resolveUrls'
->
+> & {
+	/** Absolute path of the note the Markdown came from. */
+	sourcePath?: string | undefined
+}
 
 const CLOZE_NUMBER_PREFIX_REGEX = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/u
 
@@ -46,7 +49,7 @@ export async function getAstFromMarkdown(
 	markdown: string,
 	options?: Partial<AstFromMarkdownOptions>,
 ): Promise<Root> {
-	const { allFilePaths, basePath, cwd, obsidianVault, resolveUrls } = deepmerge(
+	const { allFilePaths, basePath, cwd, obsidianVault, resolveUrls, sourcePath } = deepmerge(
 		defaultAstFromMarkdownOptions,
 		options ?? {},
 	)
@@ -58,7 +61,14 @@ export async function getAstFromMarkdown(
 		.use(remarkFrontmatter, [{ anywhere: false, marker: '-', type: 'yaml' }])
 		.use(remarkWikiBasic)
 		.use(remarkGfm, { singleTilde: false })
-		.use(remarkResolveLinks, { allFilePaths, basePath, cwd, enabled: resolveUrls, obsidianVault })
+		.use(remarkResolveLinks, {
+			allFilePaths,
+			basePath,
+			cwd,
+			enabled: resolveUrls,
+			obsidianVault,
+			sourcePath,
+		})
 		.use(remarkMath)
 		.use(
 			remarkGithubBetaBlockquoteAdmonitions,

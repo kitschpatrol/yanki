@@ -10,10 +10,11 @@ type Options = {
 	cwd: string
 	enabled?: boolean
 	obsidianVault?: string
+	sourcePath?: string | undefined
 }
 
 const plugin: Plugin<[Options], Root> = function (options) {
-	const { allFilePaths = [], basePath, cwd, enabled = true, obsidianVault } = options
+	const { allFilePaths = [], basePath, cwd, enabled = true, obsidianVault, sourcePath } = options
 
 	return function (tree) {
 		// Disable so we can A/B test
@@ -36,6 +37,7 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				convertFilePathsToProtocol: obsidianVault === undefined ? 'none' : 'obsidian',
 				cwd,
 				obsidianVaultName: obsidianVault,
+				sourcePath,
 				type: 'link',
 			})
 
@@ -66,6 +68,7 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				convertFilePathsToProtocol: obsidianVault === undefined ? 'none' : 'obsidian',
 				cwd,
 				obsidianVaultName: obsidianVault,
+				sourcePath,
 				type: 'embed',
 			})
 

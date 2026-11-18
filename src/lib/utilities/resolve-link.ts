@@ -67,13 +67,20 @@ type ResolveLinkOptions = {
 	convertFilePathsToProtocol?: 'file' | 'none' | 'obsidian'
 	/**
 	 * Current working directory, used to resolve relative paths. Set to the
-	 * absolute path of the file being processed.
+	 * absolute path of the directory of the file being processed. Ignored when
+	 * `sourcePath` is given.
 	 */
 	cwd: string
 	/**
 	 * Name of Obsidian vault, used in Obsidian protocol URL creation.
 	 */
 	obsidianVaultName?: string | undefined
+	/**
+	 * Absolute path of the file being processed. Links without a path, like
+	 * `[[#Heading]]`, lead back to it, and its directory takes precedence over
+	 * `cwd`.
+	 */
+	sourcePath?: string | undefined
 	/**
 	 * Whether we're dealing with a link (to be `<a>`-tagged) or an embed (to be
 	 * `<img>`-tagged). Affects how the resolved path is treated.
@@ -88,6 +95,7 @@ const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
 	basePath: undefined,
 	convertFilePathsToProtocol: 'none',
 	obsidianVaultName: undefined,
+	sourcePath: undefined,
 }
 
 /**
@@ -171,7 +179,9 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
  * protocol URL.
  */
 function resolveLocalLink(decodedLink: string, options: ResolveLinkOptions): string {
-	const { allFilePaths = [], basePath, cwd } = options
+	const { allFilePaths = [], basePath, sourcePath } = options
+	// Links lead from the directory of the file they're in
+	const cwd = sourcePath === undefined ? options.cwd : path.dirname(sourcePath)
 	// Obsidian resolves links against the vault root. Without a known one, the
 	// deepest directory containing every file stands in for it. (Public options
 	// may carry a null basePath from JavaScript callers.)
@@ -209,24 +219,26 @@ function resolveLocalLink(decodedLink: string, options: ResolveLinkOptions): str
 		return index === -1 ? undefined : allFilePaths[index]
 	}
 
+	// Obsidian stops relative links at the vault root, but a stand-in root says
+	// nothing about what lies above it, so a link leading there is followed as a
+	// plain file system path instead
+	const getLinkedFile = (linkPath: string): string | undefined =>
+		!isVaultRootKnown && path.join(sourceDirectory, linkPath).startsWith('../')
+			? getFileAtAbsolutePath(path.join(cwd, linkPath))
+			: (getLinkpathDestinations(linkPath, sourceDirectory, getFilesNamed)[0]?.filePath ??
+				getFileAtAbsolutePath(linkPath))
+
 	const candidates = pathExtras.getLocalPathCandidates(decodedLink)
 
 	// File names may contain anchor delimiter characters, so try the longest
 	// literal file name interpretation first, and only treat those characters as
 	// anchor delimiters when no real file matches
 	for (const { anchor, filePath } of candidates) {
-		// Normalize only the path portion. Anchor text may contain slashes, dot
-		// segments, backslashes, or other characters with path semantics.
-		const linkPath = pathExtras.normalize(filePath)
-		// Obsidian stops relative links at the vault root, but a stand-in root
-		// says nothing about what lies above it, so a link leading there is
-		// followed as a plain file system path instead
-		const leavesStandInRoot =
-			!isVaultRootKnown && path.join(sourceDirectory, linkPath).startsWith('../')
-		const matchedPath = leavesStandInRoot
-			? getFileAtAbsolutePath(path.join(cwd, linkPath))
-			: (getLinkpathDestinations(linkPath, sourceDirectory, getFilesNamed)[0]?.filePath ??
-				getFileAtAbsolutePath(linkPath))
+		// A link without a path, like `[[#Heading]]`, leads back to the file it's
+		// in, as in Obsidian. Otherwise, normalize only the path portion. Anchor
+		// text may contain slashes, dot segments, backslashes, or other characters
+		// with path semantics.
+		const matchedPath = filePath === '' ? sourcePath : getLinkedFile(pathExtras.normalize(filePath))
 
 		if (matchedPath !== undefined) {
 			return resolveMatchedLocalLink({ anchor, filePath: matchedPath }, options)
