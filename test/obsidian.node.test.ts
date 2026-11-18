@@ -44,7 +44,11 @@ it.skipIf(!isObsidianInstalled)('detects absence of obsidian vault', async () =>
 	expect(await detectVault('./test/assets/test-media/audio/yanki.3gp')).toBeUndefined()
 })
 
-it('correctly resolves obsidian wiki links', async () => {
+// The CLI syncs without a vault, and must still resolve links like Obsidian
+it.each([
+	{ context: 'in a vault', isVault: true },
+	{ context: 'without a vault', isVault: false },
+])('correctly resolves obsidian wiki links $context', async ({ isVault }) => {
 	// Notes have been specially prepared with the correct Obsidian-resolved link
 	// path in their alt text or innerHTML text
 	const notesToTestRaw = [
@@ -68,11 +72,10 @@ it('correctly resolves obsidian wiki links', async () => {
 
 		const noteResolved = await getNoteFromMarkdown(markdown, {
 			allFilePaths,
-			basePath,
 			cwd: normalize(path.dirname(file)),
 			namespace: 'test',
-			obsidianVault: 'test-obsidian-vault',
 			syncMediaAssets: 'off',
+			...(isVault && { basePath, obsidianVault: 'test-obsidian-vault' }),
 		})
 
 		const noteHtml = `${noteResolved.fields.Front}${noteResolved.fields.Back}${noteResolved.fields.Extra}`
