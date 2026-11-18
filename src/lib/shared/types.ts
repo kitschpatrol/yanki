@@ -51,6 +51,10 @@ export type GlobalOptions = {
 	 * card corruption
 	 */
 	checkDatabase: boolean
+	/**
+	 * Directory that links in Markdown are resolved from when the path of the
+	 * note itself isn't given
+	 */
 	cwd: string
 	dryRun: boolean
 	/**

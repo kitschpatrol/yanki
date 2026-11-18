@@ -262,6 +262,67 @@ it('resolves absolute file system paths that Obsidian would not', () => {
 	expect(resolveInVault('file:///vault/Cards/image.png', vaultPaths)).toBe('Cards/image.png')
 })
 
+it('resolves links without a path to the file they are in', () => {
+	const options: Parameters<typeof resolveLink>[1] = {
+		allFilePaths: ['/vault/Cards/note.md', '/vault/note.md'],
+		basePath: '/vault',
+		convertFilePathsToProtocol: 'obsidian',
+		cwd: '/vault/Cards',
+		obsidianVaultName: 'vault',
+		sourcePath: '/vault/Cards/note.md',
+		type: 'link',
+	}
+	const vaultUrl = (linkPath: string) =>
+		`obsidian://open?vault=vault&file=${encodeURIComponent(linkPath)}`
+
+	expect(resolveLink('#Heading', options)).toBe(vaultUrl('/Cards/note.md#Heading'))
+	expect(resolveLink('#Heading#Subheading', options)).toBe(
+		vaultUrl('/Cards/note.md#Heading#Subheading'),
+	)
+	expect(resolveLink('#^block', options)).toBe(vaultUrl('/Cards/note.md#^block'))
+	expect(resolveLink('#Heading/With a slash', options)).toBe(
+		vaultUrl('/Cards/note.md#Heading/With a slash'),
+	)
+	expect(resolveLink('#Heading', { ...options, type: 'embed' })).toBe(
+		vaultUrl('/Cards/note.md#Heading'),
+	)
+
+	// Plain paths never carry anchors
+	expect(resolveLink('#Heading', { ...options, convertFilePathsToProtocol: 'none' })).toBe(
+		'/vault/Cards/note.md',
+	)
+
+	// A path still leads to the file with that name, not back to the source
+	expect(resolveLink('/note#Heading', options)).toBe(vaultUrl('/note.md#Heading'))
+})
+
+it('leaves links without a path unresolved when the file they are in is unknown', () => {
+	const resolved = resolveLink('#Heading', {
+		allFilePaths: ['/vault/Cards/note.md'],
+		basePath: '/vault',
+		convertFilePathsToProtocol: 'obsidian',
+		cwd: '/vault/Cards',
+		obsidianVaultName: 'vault',
+		type: 'link',
+	})
+
+	expect(parseObsidianVaultLink(resolved)).toBeUndefined()
+})
+
+it('resolves links from the directory of the source path instead of the working directory', () => {
+	const options: Parameters<typeof resolveLink>[1] = {
+		allFilePaths: ['/vault/Cards/image.png', '/vault/Cards/peer.md', '/vault/Notes/image.png'],
+		// A stale working directory must not matter
+		cwd: '/vault/Notes',
+		sourcePath: '/vault/Cards/note.md',
+		type: 'link',
+	}
+
+	expect(resolveLink('./peer', options)).toBe('/vault/Cards/peer.md')
+	expect(resolveLink('image.png', options)).toBe('/vault/Cards/image.png')
+	expect(resolveLink('missing', options)).toBe('/vault/Cards/missing')
+})
+
 it('treats the deepest directory containing every file as the vault root when none is given', () => {
 	const allFilePaths = [
 		'/synced/Assets/image.png',

@@ -64,6 +64,8 @@ Name and path targets are resolved against `allFilePaths`, the list of every rea
 7. A target starting with `/` only ever matches from the vault root, so it stops here.
 8. Otherwise, the candidates whose path ends with the target remain, which is all of them for a bare name. Those under the linking note's directory are preferred, then those with shorter paths, then those listed earlier in `allFilePaths`.
 
+A target with no path at all, like `[[#Heading]]`, skips all of this and leads back to the linking note itself.
+
 Matching is case-insensitive (like Obsidian), but the resolved path preserves the real file's case.
 
 Some quirks follow from reproducing Obsidian's behavior exactly:
@@ -93,6 +95,7 @@ Obsidian anchor suffixes are supported on all local link forms:
 
 - `[[Note#Heading]]`, `[[Note#Heading#Subheading]]` — heading anchors
 - `[[Note#^abc123]]`, `[[Note^abc123]]` — block anchors
+- `[[#Heading]]`, `[[#^abc123]]` — anchors in the linking note itself
 
 `#` and `^` are legal file name characters, so a file named `E = mc^2.md` is ambiguous with an anchor on a file named `E = mc.md`. Yanki resolves the ambiguity against the real file list: the longest literal file name interpretation is tried first, and anchor splitting only applies when no real file matches the literal reading (`getLocalPathCandidates` in `src/lib/utilities/path.ts`).
 
@@ -134,7 +137,7 @@ The `yanki sync` command resolves links against the synced directory tree but pe
 
 ### Library
 
-`getNoteFromMarkdown` and `syncFiles` accept `allFilePaths`, `basePath`, `obsidianVault`, and `cwd` directly. In the browser there is no file system, so `allFilePaths` must be provided for any local link resolution to work; without it, wiki names fall back to unresolvable synthetic paths.
+`getNoteFromMarkdown` and `syncFiles` accept `allFilePaths`, `basePath`, and `obsidianVault` directly. `syncFiles` resolves each note's links from that note's own path. `getNoteFromMarkdown` only has a string of Markdown to go on, so pass it `sourcePath`, the absolute path of the note, or failing that `cwd`, the directory to resolve links from. In the browser there is no file system, so `allFilePaths` must be provided for any local link resolution to work; without it, wiki names fall back to unresolvable synthetic paths.
 
 ## Embeds and media
 
@@ -162,7 +165,7 @@ The generated HTML carries metadata for round-tripping and debugging:
 
 - **Unresolved links** — a link to a nonexistent file still renders as an `<a>` with a best-effort absolute path; no error is raised.
 - **Case collisions** — matching is case-insensitive; on case-sensitive file systems two files differing only in case are both candidates for the same links, and the one listed first in `allFilePaths` wins.
-- **Same-note links** — `[[#Heading]]` and `[[#^block]]` have no file target, and are not resolved to the linking note.
+- **Same-note links** — `[[#Heading]]` and `[[#^block]]` lead back to the linking note only when its path is known. `syncFiles` always knows it, but `getNoteFromMarkdown` needs `sourcePath`, and without it such a link falls back to the note's directory.
 - **Files without extensions** — a target without a dot is always a note, so a file named `LICENSE` can't be linked, matching Obsidian.
 - **`file://` URLs** — converted to plain paths because Anki cannot open file URLs; any URL query string is lost in the conversion.
 - **Protocol-less web addresses** — `www.example.com` is treated as a local file name, per standard Markdown semantics.

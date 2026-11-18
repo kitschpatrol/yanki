@@ -68,12 +68,12 @@ export async function loadLocalNotes(
 			const note = await getNoteFromMarkdown(markdown, {
 				allFilePaths,
 				basePath,
-				cwd: path.dirname(filePath),
 				fetchAdapter,
 				fileAdapter,
 				namespace: sanitizedNamespace,
 				namespaceValidationAndSanitization: false, // Optimization
 				obsidianVault,
+				sourcePath: filePath,
 				strictLineBreaks,
 				syncMediaAssets,
 			})

@@ -45,6 +45,12 @@ export type GetNoteFromMarkdownOptions = Pick<
 	 * when the namespace is already validated.
 	 */
 	namespaceValidationAndSanitization: boolean
+	/**
+	 * Absolute path of the note the Markdown came from. Links without a path,
+	 * like `[[#Heading]]`, lead back to it, and its directory takes precedence
+	 * over `cwd` when resolving links.
+	 */
+	sourcePath?: string | undefined
 }
 
 export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
@@ -66,6 +72,7 @@ export async function getNoteFromMarkdown(
 		namespaceValidationAndSanitization,
 		obsidianVault,
 		resolveUrls,
+		sourcePath,
 		strictLineBreaks,
 		syncMediaAssets,
 	} = deepmerge(defaultGetNoteFromMarkdownOptions, options ?? {})
@@ -83,6 +90,7 @@ export async function getNoteFromMarkdown(
 		cwd,
 		obsidianVault,
 		resolveUrls,
+		sourcePath,
 	})
 	const modelName = getYankiModelNameFromTree(ast)
 	const frontmatter = getFrontmatterFromTree(ast)

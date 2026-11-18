@@ -6,6 +6,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { expect, it } from 'vitest'
 import { detectVault } from '../src/bin/utilities/obsidian'
+import { loadLocalNotes } from '../src/lib/actions/load-local-notes'
 import { getNoteFromMarkdown, syncFiles } from '../src/lib/index'
 import { getBase, normalize, stripBasePath } from '../src/lib/utilities/path'
 import { PLATFORM } from '../src/lib/utilities/platform'
@@ -81,6 +82,71 @@ it.each([
 		const noteHtml = `${noteResolved.fields.Front}${noteResolved.fields.Back}${noteResolved.fields.Extra}`
 		// Guard against vacuous passes if a prepared note has no links at all
 		expect(checkWikiLinkResolution(noteHtml, basePath)).toBeGreaterThan(0)
+	}
+})
+
+it('resolves same-note links to the note given as the source path', async () => {
+	const note = await getNoteFromMarkdown(
+		'[[#Summary]] · [[#Summary|this heading]] · [[#^example|this block]] · [Markdown](#Summary) · ![[#Summary]] · [[./Peer]]',
+		{
+			allFilePaths: ['/vault/Cards/Flashcard.md', '/vault/Cards/Peer.md', '/vault/Notes/Peer.md'],
+			basePath: '/vault',
+			// The directory of the source path takes precedence
+			cwd: '/vault/Notes',
+			namespace: 'test',
+			obsidianVault: 'test',
+			sourcePath: '/vault/Cards/Flashcard.md',
+			syncMediaAssets: 'off',
+		},
+	)
+	const { document } = parseHTML(`${note.fields.Front}${note.fields.Back}`)
+	const links = Array.from(document.querySelectorAll('a'), (node) => [
+		node.textContent,
+		parseObsidianVaultLink(node.href)?.linkPath,
+	])
+
+	expect(links).toEqual([
+		['Summary', '/Cards/Flashcard.md#Summary'],
+		['this heading', '/Cards/Flashcard.md#Summary'],
+		['this block', '/Cards/Flashcard.md#^example'],
+		['Markdown', '/Cards/Flashcard.md#Summary'],
+		// Embedded notes render as links
+		['#Summary', '/Cards/Flashcard.md#Summary'],
+		['./Peer', '/Cards/Peer.md'],
+	])
+})
+
+it('resolves same-note links in notes loaded from files', async () => {
+	const vaultPath = normalize(path.join(os.tmpdir(), `yanki-test-${Date.now()}`, 'test-same-note'))
+	// Normalized, as syncFiles does before loading notes
+	const noteFile = normalize(path.join(vaultPath, 'Cards/Flashcard.md'))
+	const otherNoteFile = normalize(path.join(vaultPath, 'Flashcard.md'))
+	await fs.mkdir(path.dirname(noteFile), { recursive: true })
+	await fs.writeFile(noteFile, '[[#Summary]]\n\n---\n\n# Summary\n')
+	await fs.writeFile(otherNoteFile, '[[#Summary]]\n\n---\n\n# Summary\n')
+
+	try {
+		const localNotes = await loadLocalNotes([noteFile, otherNoteFile], {
+			allFilePaths: [noteFile, otherNoteFile],
+			basePath: vaultPath,
+			namespace: 'test',
+			obsidianVault: 'test-same-note',
+			syncMediaAssets: 'off',
+		})
+
+		// Each note links to itself, even though another has the same name
+		const linkPaths = localNotes.map(({ filePath, note }) => [
+			stripBasePath(filePath, vaultPath),
+			parseObsidianVaultLink(parseHTML(note.fields.Front).document.querySelector('a')?.href ?? '')
+				?.linkPath,
+		])
+
+		expect(linkPaths).toEqual([
+			['/Cards/Flashcard.md', '/Cards/Flashcard.md#Summary'],
+			['/Flashcard.md', '/Flashcard.md#Summary'],
+		])
+	} finally {
+		await fs.rm(path.dirname(vaultPath), { force: true, recursive: true })
 	}
 })
 
