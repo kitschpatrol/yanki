@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 (Node.js support requirements have sometimes increased in minor or patch releases.)
 
+Entries are drafted with LLM assistance via [Chagent](https://github.com/kitschpatrol/chagent).
+
+## [Unreleased]
+
+### Added
+
+- Add an optional `sourcePath` to `getNoteFromMarkdown` so library callers can supply the note’s absolute path and use its directory in place of `cwd` for link resolution.
+
+### Fixed
+
+- Match local wiki and Markdown links and embeds by full filename, so `[[Gewebe]]` resolves to `Gewebe.md` and `[[image.png]]` prefers the actual image over `image.png.md`. (Thanks @DrSandhu for reporting in [kitschpatrol/yanki-obsidian](https://github.com/kitschpatrol/yanki-obsidian/issues/88).)
+- Use Obsidian’s precedence when several files match a link. Prefer an exact path from the vault root, then rank path-suffix matches by the linking note’s directory, shorter paths, and order in `allFilePaths`.
+- Resolve leading-slash links from the vault root and stop relative links from climbing above a configured root. Without a configured root, `yanki sync` uses the common directory of the source note and the synced file list.
+- Resolve same-note wiki links, Markdown fragment links, and note embeds back to the source note during file sync, preserving heading and block anchors in Obsidian URLs.
+
+### Documentation
+
+- Update the link behavior guide and API documentation to explain filename matching, vault root selection, tie-breaking, and how to pass `sourcePath` for same-note links.
+
+### Maintenance
+
+- Update `yanki-connect` to `^5.3.1`.
+- Update `@kitschpatrol/chagent` to `^0.8.0` and run it with `-i` during releases. Exempt the updated `chagent` and `yanki-connect` versions from pnpm’s minimum release age.
+- Add regression tests for filename collisions, link resolution with and without a vault, and same-note anchors.
+
 ## [3.2.4] - 2026-11-16
 
 ### Fixed
@@ -1275,3 +1300,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [3.2.2]: https://github.com/kitschpatrol/yanki/compare/v3.2.1...v3.2.2
 [3.2.3]: https://github.com/kitschpatrol/yanki/compare/v3.2.2...v3.2.3
 [3.2.4]: https://github.com/kitschpatrol/yanki/compare/v3.2.3...v3.2.4
+[Unreleased]: https://github.com/kitschpatrol/yanki/compare/v3.2.4...HEAD
