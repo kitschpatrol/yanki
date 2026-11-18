@@ -26,7 +26,9 @@ export type FileAdapter = {
 // Options used in more than one place... diamond problem prevents a pure hierarchy
 export type GlobalOptions = {
 	/**
-	 * Used for wiki link resolution
+	 * Absolute paths of all the files links might lead to, used for link
+	 * resolution. When a link matches several files equally well, the one listed
+	 * first wins.
 	 */
 	allFilePaths: string[]
 	ankiConnectOptions: YankiConnectOptions
@@ -39,7 +41,9 @@ export type GlobalOptions = {
 	ankiWeb: boolean
 	/**
 	 * Override where "/" should resolve to... useful in Obsidian to set the vault
-	 * path as the "root"
+	 * path as the "root". Links resolve against it as they would in an Obsidian
+	 * vault. If unset, the deepest directory containing every file in
+	 * `allFilePaths` stands in for it when matching links to files.
 	 */
 	basePath: string | undefined
 	/**

@@ -82,6 +82,213 @@ it('resolves wiki links with many dots and a weird extension', () => {
 	)
 })
 
+// https://github.com/kitschpatrol/yanki-obsidian/issues/88
+// A wiki link must not resolve to a different file whose name merely ends with
+// the linked name, even when that file sorts first alphabetically
+it('resolves wiki links to the exact file name instead of a file name with the same suffix', () => {
+	/* Spell-checker:disable */
+	const allFilePaths = [
+		'/base-path/vault/Anki/anki-note.md',
+		'/base-path/vault/Some Folder/Bindegewebe.md',
+		'/base-path/vault/Some Folder/Gewebe.md',
+	]
+
+	expect(
+		resolveLink('Gewebe', {
+			allFilePaths,
+			basePath: '/base-path/vault',
+			convertFilePathsToProtocol: 'obsidian',
+			cwd: '/base-path/vault/Anki',
+			obsidianVaultName: 'test-vault',
+			type: 'link',
+		}),
+	).toBe('obsidian://open?vault=test-vault&file=%2FSome%20Folder%2FGewebe.md')
+	/* Spell-checker:enable */
+})
+
+/**
+ * Resolve a link from a note in a vault at `/vault`, and get the vault path of
+ * the matched file, or undefined if the link didn't match one.
+ */
+function resolveInVault(
+	link: string,
+	vaultPaths: string[],
+	sourceDirectory = '',
+): string | undefined {
+	const resolved = resolveLink(link, {
+		allFilePaths: vaultPaths.map((vaultPath) => `/vault/${vaultPath}`),
+		basePath: '/vault',
+		convertFilePathsToProtocol: 'obsidian',
+		cwd: sourceDirectory === '' ? '/vault' : `/vault/${sourceDirectory}`,
+		obsidianVaultName: 'vault',
+		type: 'link',
+	})
+
+	// Only links that match a file become vault URLs, the rest fall back to a
+	// plain path that may or may not exist
+	return parseObsidianVaultLink(resolved)?.linkPath.slice(1)
+}
+
+// The expectations in the tests below mirror `MetadataCache.getLinkpathDest()`
+// in Obsidian 1.15.1, which resolves wiki links and Markdown links alike
+
+it('only considers files with exactly the linked name', () => {
+	/* Spell-checker:disable */
+	// A file name that merely ends with the linked name is never a match, even
+	// where it would otherwise be preferred for its shorter path
+	expect(resolveInVault('Gewebe', ['Bindegewebe.md', 'Some Folder/Gewebe.md'])).toBe(
+		'Some Folder/Gewebe.md',
+	)
+	expect(resolveInVault('Gewebe', ['Bindegewebe.md'])).toBeUndefined()
+	expect(resolveInVault('Folder/Gewebe', ['Folder/Bindegewebe.md'])).toBeUndefined()
+	expect(resolveInVault('./Gewebe', ['Bindegewebe.md'])).toBeUndefined()
+	expect(resolveInVault('/Gewebe', ['Bindegewebe.md'])).toBeUndefined()
+	expect(resolveInVault('ewebe.md', ['Gewebe.md'])).toBeUndefined()
+	/* Spell-checker:enable */
+})
+
+it('matches file names without regard to case, and returns the case of the file', () => {
+	/* Spell-checker:disable */
+	expect(resolveInVault('GEWEBE', ['Folder/Gewebe.md'])).toBe('Folder/Gewebe.md')
+	expect(resolveInVault('folder/gewebe.MD', ['Folder/Gewebe.md'])).toBe('Folder/Gewebe.md')
+	expect(resolveInVault('./folder/GEWEBE', ['Folder/Gewebe.md'])).toBe('Folder/Gewebe.md')
+	/* Spell-checker:enable */
+})
+
+it('only appends a Markdown extension when no file has the exact linked name', () => {
+	const vaultPaths = ['Assets/diagram.png', 'Notes/diagram.png.md', 'Notes/version 1.2.md']
+
+	expect(resolveInVault('diagram.png', vaultPaths)).toBe('Assets/diagram.png')
+	expect(resolveInVault('diagram.png.md', vaultPaths)).toBe('Notes/diagram.png.md')
+	expect(resolveInVault('version 1.2', vaultPaths)).toBe('Notes/version 1.2.md')
+
+	// A name without a dot is always a note, never a file without an extension
+	expect(resolveInVault('LICENSE', ['LICENSE'])).toBeUndefined()
+	expect(resolveInVault('LICENSE', ['LICENSE', 'Notes/LICENSE.md'])).toBe('Notes/LICENSE.md')
+})
+
+it('resolves a path from the vault root before any other file with the same name', () => {
+	const vaultPaths = [
+		'Archive/Notes/topic.md',
+		'Archive/topic.md',
+		'Notes/topic.md',
+		'topic.md',
+		'Work/Notes/topic.md',
+	]
+
+	// Even from a directory with nearer matches
+	expect(resolveInVault('topic', vaultPaths, 'Archive')).toBe('topic.md')
+	expect(resolveInVault('Notes/topic', vaultPaths, 'Archive')).toBe('Notes/topic.md')
+	expect(resolveInVault('/Notes/topic', vaultPaths, 'Archive')).toBe('Notes/topic.md')
+})
+
+it('prefers files under the linking directory, then shorter paths, then earlier files', () => {
+	const vaultPaths = [
+		'Projects/Alpha/Deep/Deeper/image.png',
+		'Projects/Beta/image.png',
+		'Projects/Alpha/Deep/image.png',
+		'Zeta/image.png',
+		'Yoga/image.png',
+	]
+
+	// Under the linking directory, the shortest path wins
+	expect(resolveInVault('image.png', vaultPaths, 'Projects/Alpha')).toBe(
+		'Projects/Alpha/Deep/image.png',
+	)
+
+	// A file elsewhere is not preferred, however near it is
+	expect(resolveInVault('image.png', vaultPaths, 'Projects/Alpha/Deep/Deeper')).toBe(
+		'Projects/Alpha/Deep/Deeper/image.png',
+	)
+
+	// With nothing under the linking directory, the shortest path wins, and
+	// paths of equal length resolve in the order they're listed
+	expect(resolveInVault('image.png', vaultPaths, 'Elsewhere')).toBe('Zeta/image.png')
+	expect(resolveInVault('image.png', vaultPaths.toReversed(), 'Elsewhere')).toBe('Yoga/image.png')
+
+	// Obsidian compares the start of the whole path, not whole directory names
+	expect(resolveInVault('image.png', vaultPaths, 'Proj')).toBe('Projects/Beta/image.png')
+})
+
+it('resolves partial paths by suffix, including partial directory names', () => {
+	const vaultPaths = ['Cards/Group 1/note.md', 'Cards/Group 2/note.md', 'Cards/Group 12/note.md']
+
+	expect(resolveInVault('Group 2/note', vaultPaths)).toBe('Cards/Group 2/note.md')
+	expect(resolveInVault('Group 12/note', vaultPaths)).toBe('Cards/Group 12/note.md')
+
+	// Obsidian compares the end of the whole path, not whole directory names
+	expect(resolveInVault('oup 1/note', vaultPaths)).toBe('Cards/Group 1/note.md')
+})
+
+it('resolves relative links from the linking directory, stopping at the vault root', () => {
+	const vaultPaths = ['note.md', 'Cards/note.md', 'Cards/Group/note.md', 'Other/note.md']
+
+	expect(resolveInVault('./note', vaultPaths, 'Cards')).toBe('Cards/note.md')
+	expect(resolveInVault('./Group/note', vaultPaths, 'Cards')).toBe('Cards/Group/note.md')
+	expect(resolveInVault('../note', vaultPaths, 'Cards/Group')).toBe('Cards/note.md')
+	expect(resolveInVault('../Other/note', vaultPaths, 'Cards')).toBe('Other/note.md')
+	expect(resolveInVault('./../Other/note', vaultPaths, 'Cards')).toBe('Other/note.md')
+
+	// Obsidian can't leave the vault, so surplus ascents are ignored
+	expect(resolveInVault('../../../note', vaultPaths, 'Cards')).toBe('note.md')
+})
+
+it('falls back to matching by suffix when a relative link leads nowhere', () => {
+	const vaultPaths = ['Cards/Group 1/note.md', 'Archive/Cards/Group 2/note.md']
+
+	expect(resolveInVault('./Group 2/note', vaultPaths, 'Cards')).toBe(
+		'Archive/Cards/Group 2/note.md',
+	)
+	expect(resolveInVault('./note', vaultPaths)).toBe('Cards/Group 1/note.md')
+})
+
+it('never falls back to matching by suffix for links starting with a slash', () => {
+	const vaultPaths = ['Cards/note.md', 'Cards/unique.md']
+
+	expect(resolveInVault('/Cards/note', vaultPaths)).toBe('Cards/note.md')
+	expect(resolveInVault('/note', vaultPaths)).toBeUndefined()
+	expect(resolveInVault('/unique', vaultPaths)).toBeUndefined()
+
+	// Without the slash, the same links do fall back
+	expect(resolveInVault('note', vaultPaths)).toBe('Cards/note.md')
+	expect(resolveInVault('unique', vaultPaths)).toBe('Cards/unique.md')
+})
+
+it('resolves absolute file system paths that Obsidian would not', () => {
+	const vaultPaths = ['Cards/note.md', 'Cards/image.png']
+
+	expect(resolveInVault('/vault/Cards/note.md', vaultPaths)).toBe('Cards/note.md')
+	expect(resolveInVault('/vault/Cards/note', vaultPaths)).toBe('Cards/note.md')
+	expect(resolveInVault('file:///vault/Cards/image.png', vaultPaths)).toBe('Cards/image.png')
+})
+
+it('treats the deepest directory containing every file as the vault root when none is given', () => {
+	const allFilePaths = [
+		'/synced/Assets/image.png',
+		'/synced/Cards/Group/note.md',
+		'/synced/Cards/image.png',
+		'/synced/Cards/note.md',
+		'/synced/note.md',
+	]
+	const resolve = (link: string, cwd: string) =>
+		resolveLink(link, { allFilePaths, cwd, type: 'link' })
+
+	// A path from the stand-in root wins, as it would from a real vault root
+	expect(resolve('note', '/synced/Cards/Group')).toBe('/synced/note.md')
+	expect(resolve('Cards/note', '/synced/Cards/Group')).toBe('/synced/Cards/note.md')
+	expect(resolve('/Cards/note', '/synced/Cards/Group')).toBe('/synced/Cards/note.md')
+	expect(resolve('/Assets/image.png', '/synced/Cards')).toBe('/synced/Assets/image.png')
+
+	// The rest of Obsidian's rules still apply
+	expect(resolve('image.png', '/synced/Assets')).toBe('/synced/Assets/image.png')
+	expect(resolve('image.png', '/synced/Cards/Group')).toBe('/synced/Cards/image.png')
+	expect(resolve('./note', '/synced/Cards/Group')).toBe('/synced/Cards/Group/note.md')
+
+	// But a stand-in root is only a guess, so relative links can lead above it
+	expect(resolve('../../../synced/Cards/note', '/synced/Cards/Group')).toBe('/synced/Cards/note.md')
+	expect(resolve('../synced/Assets/image.png', '/synced')).toBe('/synced/Assets/image.png')
+})
+
 // Question marks are valid in note file names on macOS and Linux
 //https://github.com/kitschpatrol/yanki/issues/20
 it('resolves file paths with question marks in their names', () => {

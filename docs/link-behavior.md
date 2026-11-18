@@ -40,10 +40,10 @@ Every link target is classified before resolution (`getSrcType` in `src/lib/util
 
 | Target                | Example                            | Classification | Behavior                                                                                                                                                               |
 | --------------------- | ---------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Wiki name             | `[[Note name]]`                    | Name           | Matched against the file list by name, anywhere in the tree (see below)                                                                                                |
-| Bare path             | `[[Cards/Note name.md]]`           | Name           | Matched against the file list by path suffix, like Obsidian's vault-root-relative links                                                                                |
+| Wiki name             | `[[Note name]]`                    | Name           | Matched against the file list by exact file name, anywhere in the tree (see below)                                                                                     |
+| Bare path             | `[[Cards/Note name.md]]`           | Name           | Matched from the vault root, then by path suffix among the files with that name (see below)                                                                            |
 | Relative path         | `[[./sibling.md]]`, `[[../up.md]]` | Path           | Resolved against the note's own directory                                                                                                                              |
-| Absolute path         | `[[/Cards/Note name.md]]`          | Path           | Resolved against `basePath` (the vault root) when set, otherwise treated as volume-absolute                                                                            |
+| Absolute path         | `[[/Cards/Note name.md]]`          | Path           | Resolved against the vault root (`basePath` when set, see below), then as a volume-absolute path                                                                       |
 | Windows path          | `C:\Notes\card.md`                 | Path           | Normalized to forward slashes; drive-letter paths are never prepended with `basePath`                                                                                  |
 | HTTP / HTTPS URL      | `https://example.com/page?a=b#c`   | URL            | Passed through completely untouched, including query strings and fragments                                                                                             |
 | Obsidian URL          | `obsidian://open?vault=…&file=…`   | URL            | Passed through untouched                                                                                                                                               |
@@ -53,14 +53,39 @@ Every link target is classified before resolution (`getSrcType` in `src/lib/util
 
 ## Resolution algorithm
 
-Name and path targets are resolved against `allFilePaths`, the list of every real file in the sync scope:
+Name and path targets are resolved against `allFilePaths`, the list of every real file in the sync scope, so that a link in Anki leads to the same file it opens in Obsidian. The matching is a port of the function Obsidian itself uses for every internal link (`MetadataCache.getLinkpathDest()`, as of Obsidian 1.15.1), whether wiki-style or Markdown-style, link or embed, name or path:
 
 1. The target is URI-decoded and normalized (backslashes to forward slashes, `.`/`..` segments collapsed).
-2. Wiki names and bare paths are matched against the file list by case-insensitive path suffix. `.md` extensions are ignored on both sides of the comparison, so `[[pandas.DataFrame.xs]]` matches `pandas.DataFrame.xs.md` even though the name looks like it already has an extension.
-3. Extension-less targets are assumed to be `.md` files, matching Obsidian. For path targets, the literal path is tried first, then the path with `.md` appended.
-4. If several files share the matched name, the best match is chosen: for image-like or path-containing names, files under the linking note's directory win first; then shallower paths win; then alphabetical order.
-5. Matching is case-insensitive (like Obsidian), but the resolved path preserves the real file's case.
-6. If nothing matches, the target falls back to plain path resolution (relative to the note's directory, or `basePath` for absolute paths) and is emitted as an absolute path even though no file exists there.
+2. Only files whose full name is the target's file name are candidates. `[[Card]]` can resolve to `Card.md`, but never to `Flashcard.md` ([yanki-obsidian#88](https://github.com/kitschpatrol/yanki-obsidian/issues/88)).
+3. The target's file name is taken as written if it contains a dot and some file has exactly that name. Otherwise `.md` is appended. Extension-less targets are therefore always notes, `[[image.png]]` prefers `image.png` over a note named `image.png.md`, and `[[pandas.DataFrame.xs]]` still matches `pandas.DataFrame.xs.md` even though the name looks like it already has an extension.
+4. A bare name with a single candidate resolves to it, wherever it is.
+5. A target starting with `./` or `../` is resolved against the linking note's directory. It can't climb out of the vault: surplus `../` segments are ignored at the vault root.
+6. A candidate at exactly the target's path from the vault root wins. This is why `[[Note]]` resolves to `Note.md` at the root of the vault even when the linking note has a sibling with the same name.
+7. A target starting with `/` only ever matches from the vault root, so it stops here.
+8. Otherwise, the candidates whose path ends with the target remain, which is all of them for a bare name. Those under the linking note's directory are preferred, then those with shorter paths, then those listed earlier in `allFilePaths`.
+
+Matching is case-insensitive (like Obsidian), but the resolved path preserves the real file's case.
+
+Some quirks follow from reproducing Obsidian's behavior exactly:
+
+- A relative target that leads to no file falls through to steps 6 and 8, so from a note at the vault root, `[[./Note]]` finds `Note.md` anywhere in the vault.
+- Step 8 compares the end of the whole path, not whole directory names, so `[[older/Note]]` matches `Folder/Note.md`.
+- "Under the linking note's directory" is a prefix comparison, so a note in `Cards` also prefers files in `Cards 2`.
+- Ties between equally good candidates are broken by the order of `allFilePaths`, as Obsidian breaks them by the order files were loaded into the vault.
+
+Yanki also resolves a few things Obsidian would not:
+
+- Targets are normalized first (step 1), so `[[Cards\Note]]` and `[[./Cards/../Note]]` resolve.
+- A target that is the absolute file system path of a file in `allFilePaths` resolves to that file. These turn up in Markdown links and `file:` URLs.
+- `#` and `^` in file names are supported (see below).
+
+If nothing matches, the target falls back to plain path resolution (relative to the note's directory, or `basePath` for absolute paths) and is emitted as an absolute path even though no file may exist there.
+
+### Vault root
+
+The vault root is `basePath` when it's set. When it's not, the deepest directory containing the linking note and every file in `allFilePaths` stands in for it. When the CLI syncs the root of a vault, that's ordinarily the vault root itself, so links resolve just as they do in Obsidian.
+
+Since a stand-in root is only a guess, relative targets are allowed to climb above it and are then followed as plain file system paths, where a real vault root would stop them.
 
 ### Anchors
 
@@ -105,7 +130,7 @@ Protocol conversion applies to:
 
 ### CLI
 
-The `yanki sync` command resolves links against the synced directory tree but performs no protocol conversion — there is no vault to link back to. Resolved links are emitted as plain absolute paths. Absolute-style targets (`/Cards/note.md`) still match files in the synced tree by suffix, so Obsidian-flavored Markdown syncs correctly even without vault detection.
+The `yanki sync` command resolves links against the synced directory tree but performs no protocol conversion — there is no vault to link back to. Resolved links are emitted as plain absolute paths. The synced tree's common directory stands in for the vault root (see [Vault root](#vault-root)), so Obsidian-flavored Markdown with absolute-style targets (`/Cards/note.md`) syncs correctly even without vault detection.
 
 ### Library
 
@@ -136,7 +161,9 @@ The generated HTML carries metadata for round-tripping and debugging:
 ## Edge cases
 
 - **Unresolved links** — a link to a nonexistent file still renders as an `<a>` with a best-effort absolute path; no error is raised.
-- **Case collisions** — matching is case-insensitive; on case-sensitive file systems two files differing only in case are distinguished by whichever sorts as the best match.
+- **Case collisions** — matching is case-insensitive; on case-sensitive file systems two files differing only in case are both candidates for the same links, and the one listed first in `allFilePaths` wins.
+- **Same-note links** — `[[#Heading]]` and `[[#^block]]` have no file target, and are not resolved to the linking note.
+- **Files without extensions** — a target without a dot is always a note, so a file named `LICENSE` can't be linked, matching Obsidian.
 - **`file://` URLs** — converted to plain paths because Anki cannot open file URLs; any URL query string is lost in the conversion.
 - **Protocol-less web addresses** — `www.example.com` is treated as a local file name, per standard Markdown semantics.
 - **Windows** — `?` file names cannot exist, so `?`-literal resolution is only relevant on macOS and Linux; Windows-style input paths (backslashes, drive letters, UNC) are normalized, and extended-length paths (`\\?\…`) are passed through with a warning.
