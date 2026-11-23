@@ -1,7 +1,7 @@
 import { globby } from 'globby'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { afterAll, beforeAll, bench, describe } from 'vitest'
+import { afterAll, beforeAll, describe } from 'vitest'
 import { YankiConnect } from 'yanki-connect'
 import type { YankiNote } from '../src/lib/model/note'
 import type { FileAdapter } from '../src/lib/shared/types'
@@ -11,6 +11,7 @@ import { getDefaultFileAdapter } from '../src/lib/shared/types'
 import { addNote, deleteNotes, getRemoteNotes } from '../src/lib/utilities/anki-connect'
 import { getSlugifiedNamespace } from '../src/lib/utilities/namespace'
 import { loadTestProfile } from './utilities/anki-connect'
+import { benchTest } from './utilities/bench-test'
 import { TEST_PROFILE_NAME } from './utilities/test-constants'
 
 const ASSETS_DIRECTORY = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'assets')
@@ -19,11 +20,9 @@ const MEDIA_NOTES_DIRECTORY = path.join(ASSETS_DIRECTORY, 'test-media')
 const BENCH_NAMESPACE = 'Yanki Bench'
 const BENCH_NAMESPACE_SLUG = getSlugifiedNamespace(BENCH_NAMESPACE)
 const MANY_DECKS_NAMESPACE = 'Yanki Bench Many Decks'
-// One note per deck. Sized to make the O(N) sequential `getDeckConfig` cost in
-// `getRemoteNotesById` visibly dominate the warm sync. With localhost
-// AnkiConnect round trips of a few ms each, ~100 decks puts the deck-config
-// loop in the hundreds of ms — a future change that batches via `multi()` (or
-// drops the call entirely when no deck is filtered) should drop this dramatically.
+// One note per deck. Sized so any per-deck request in `getRemoteNotesById`
+// visibly dominates the warm sync: with localhost AnkiConnect round trips of
+// a few ms each, ~100 sequential requests add up to hundreds of ms.
 const MANY_DECKS_COUNT = 100
 
 // Each bench iteration touches Anki over HTTP and is comparatively slow.
@@ -108,8 +107,7 @@ beforeAll(async () => {
 	// Many-decks corpus: one note per deck, all under a dedicated namespace so it
 	// doesn't pollute other benches. Initial sync creates the decks and notes;
 	// subsequent bench iterations re-sync the same set unchanged, exercising the
-	// `getRemoteNotesById` path that fans out one `getDeckConfig` call per
-	// unique deck.
+	// deck resolution in `getRemoteNotesById` across many unique decks.
 	await clearManyDecksNamespace()
 	const manyDecksColdNotes: YankiNote[] = Array.from({ length: MANY_DECKS_COUNT }, (_, index) => ({
 		deckName: `${MANY_DECKS_NAMESPACE}::Deck ${String(index).padStart(3, '0')}`,
@@ -135,7 +133,7 @@ afterAll(async () => {
 }, 60_000)
 
 describe('Tier 4 — syncNotes (cold)', () => {
-	bench(
+	benchTest(
 		'syncNotes :: new notes (clean state per iteration)',
 		async () => {
 			await clearBenchNamespace()
@@ -149,7 +147,7 @@ describe('Tier 4 — syncNotes (cold)', () => {
 })
 
 describe('Tier 4 — syncNotes (warm/unchanged)', () => {
-	bench(
+	benchTest(
 		'syncNotes :: unchanged notes',
 		async () => {
 			await syncNotes(warmNotes, { namespace: BENCH_NAMESPACE })
@@ -162,7 +160,7 @@ describe('Tier 4 — syncNotes (mixed)', () => {
 	// Each iteration: clear, batch-create 19 baseline notes, then run a syncNotes
 	// pass against an input that mixes 10 modified + 9 unchanged + 10 brand-new
 	// notes. Setup is ~150 ms per iteration (constant), included in the timing.
-	bench(
+	benchTest(
 		'syncNotes :: 10 new + 10 updated + 9 unchanged',
 		async () => {
 			await clearBenchNamespace()
@@ -177,32 +175,28 @@ describe('Tier 4 — syncNotes (mixed)', () => {
 					tags: note.tags,
 				})),
 			})
-			if (ids === null) {
-				throw new Error('Mixed bench setup: addNotes returned null for the batch')
-			}
-
 			const mixedInput: YankiNote[] = [
 				// First 10 baseline notes — content modified to force an update.
 				...baseline.slice(0, 10).map((note, i) => {
 					const id = ids[i]
-					if (id === null) {
+					if (id === undefined) {
 						throw new Error(`Mixed bench setup: missing noteId at index ${i}`)
 					}
 
 					return {
 						...note,
 						fields: { ...note.fields, Front: `${note.fields.Front} (mixed-bench-updated)` },
-						noteId: Number(id),
+						noteId: id,
 					}
 				}),
 				// Next 9 baseline notes — unchanged content, valid noteIds.
 				...baseline.slice(10, 19).map((note, i) => {
 					const id = ids[10 + i]
-					if (id === null) {
+					if (id === undefined) {
 						throw new Error(`Mixed bench setup: missing noteId at index ${10 + i}`)
 					}
 
-					return { ...note, noteId: Number(id) }
+					return { ...note, noteId: id }
 				}),
 				// Last 10 cold notes — never created in this iteration, so syncNotes
 				// will treat them as new.
@@ -216,7 +210,7 @@ describe('Tier 4 — syncNotes (mixed)', () => {
 })
 
 describe('Tier 4 — addNote batching probe', () => {
-	bench(
+	benchTest(
 		'addNote :: sequential await loop',
 		async () => {
 			await clearBenchNamespace()
@@ -227,7 +221,7 @@ describe('Tier 4 — addNote batching probe', () => {
 		BENCH_OPTIONS,
 	)
 
-	bench(
+	benchTest(
 		'addNote :: Promise.all (concurrent)',
 		async () => {
 			await clearBenchNamespace()
@@ -238,7 +232,7 @@ describe('Tier 4 — addNote batching probe', () => {
 		BENCH_OPTIONS,
 	)
 
-	bench(
+	benchTest(
 		'client.note.addNotes :: single batched call',
 		async () => {
 			await clearBenchNamespace()
@@ -257,11 +251,10 @@ describe('Tier 4 — addNote batching probe', () => {
 })
 
 describe('Tier 4 — syncNotes (many decks)', () => {
-	// `getRemoteNotesById` calls `client.deck.getDeckConfig` sequentially for
-	// every unique deck name returned by `notesInfo`. With ~100 decks each
-	// localhost round trip adds up; a future change that batches via `multi()`
-	// or skips the call when no deck is filtered should drop this dramatically.
-	bench(
+	// Guards against `getRemoteNotesById` regressing to one request per unique
+	// deck name returned by `notesInfo`. With ~100 decks each localhost round
+	// trip adds up.
+	benchTest(
 		`syncNotes :: ${MANY_DECKS_COUNT} unchanged notes across ${MANY_DECKS_COUNT} decks`,
 		async () => {
 			await syncNotes(manyDecksWarmNotes, { namespace: MANY_DECKS_NAMESPACE })
@@ -269,9 +262,9 @@ describe('Tier 4 — syncNotes (many decks)', () => {
 		BENCH_OPTIONS,
 	)
 
-	// Narrow probe on the bottlenecked function. Isolates the deck-config loop
-	// from the rest of syncNotes so the signal is sharper.
-	bench(
+	// Narrow probe on the function that resolves decks. Isolates it from the
+	// rest of syncNotes so the signal is sharper.
+	benchTest(
 		`getRemoteNotes :: ${MANY_DECKS_COUNT} notes across ${MANY_DECKS_COUNT} decks`,
 		async () => {
 			await getRemoteNotes(client, MANY_DECKS_NAMESPACE)
@@ -286,7 +279,7 @@ describe('Tier 4 — syncNotes (media batching)', () => {
 	// batched `multi()` flow consolidates, plus the parallel `Promise.all`
 	// buffer reads. With ~50 unique media references this also crosses the
 	// chunk-of-25 boundary in the new batched implementation.
-	bench(
+	benchTest(
 		'syncNotes :: cold sync uploads all media',
 		async () => {
 			await clearBenchNamespace()
@@ -308,7 +301,7 @@ describe('Tier 4 — syncNotes (media batching)', () => {
 	// requests. Because no notes are freshly written this iteration, the new
 	// `freshWriteNoteIds` filter should leave every restored file in the
 	// returned `reuploadedMedia`.
-	bench(
+	benchTest(
 		'syncNotes :: recovery re-uploads missing media',
 		async () => {
 			await clearBenchNamespace()

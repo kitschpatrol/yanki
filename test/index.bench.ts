@@ -2,10 +2,11 @@ import { globby } from 'globby'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { bench, describe, vi } from 'vitest'
+import { describe, vi } from 'vitest'
 import { loadLocalNotes } from '../src/lib/actions/load-local-notes'
 import { renameFiles } from '../src/lib/actions/rename'
 import { getNoteFromMarkdown } from '../src/lib/parse/parse'
+import { benchTest } from './utilities/bench-test'
 
 const ASSETS_DIRECTORY = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'assets')
 
@@ -76,7 +77,7 @@ const LARGE_CORPUS_MARKDOWN: readonly string[] = Array.from(
 const COLD_START_PLAIN_MARKDOWN = 'Plain front\n\n---\n\nPlain back with no code at all.'
 
 describe('Tier 1 — public API (cold start)', () => {
-	bench(
+	benchTest(
 		'getNoteFromMarkdown :: cold start, no code',
 		async () => {
 			vi.resetModules()
@@ -89,7 +90,7 @@ describe('Tier 1 — public API (cold start)', () => {
 
 describe('Tier 1 — public API (in-memory)', () => {
 	for (const [name, markdown] of FIXTURE_MARKDOWN) {
-		bench(`getNoteFromMarkdown :: ${name}`, async () => {
+		benchTest(`getNoteFromMarkdown :: ${name}`, async () => {
 			await getNoteFromMarkdown(markdown, INTERNAL_OPTIONS)
 		})
 	}
@@ -99,7 +100,7 @@ describe('Tier 1 — public API (scale)', () => {
 	// At 10k notes a single iteration takes tens of seconds; bound the total
 	// wall time rather than chasing many samples. Catches regressions of the
 	// PR #14 class (parser overhead amplified by N).
-	bench(
+	benchTest(
 		`getNoteFromMarkdown :: ${LARGE_CORPUS_SIZE} basic notes`,
 		async () => {
 			for (const markdown of LARGE_CORPUS_MARKDOWN) {
@@ -111,11 +112,11 @@ describe('Tier 1 — public API (scale)', () => {
 })
 
 describe('Tier 1 — public API (disk I/O)', () => {
-	bench('loadLocalNotes :: test-minimal-notes', async () => {
+	benchTest('loadLocalNotes :: test-minimal-notes', async () => {
 		await loadLocalNotes([...MINIMAL_NOTES_FILE_PATHS], { syncMediaAssets: 'off' })
 	})
 
-	bench('renameFiles dryRun :: test-minimal-notes', async () => {
+	benchTest('renameFiles dryRun :: test-minimal-notes', async () => {
 		await renameFiles([...MINIMAL_NOTES_FILE_PATHS], {
 			dryRun: true,
 			manageFilenames: 'response',

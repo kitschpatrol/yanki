@@ -12,7 +12,6 @@ export default defineConfig({
 	test: {
 		benchmark: {
 			include: ['test/**/*.bench.ts'],
-			includeSamples: true,
 		},
 		coverage: {
 			include: ['src/**/*.ts'],
@@ -71,7 +70,6 @@ export default defineConfig({
 				test: {
 					benchmark: {
 						include: ['test/**/*.bench.ts'],
-						includeSamples: true,
 					},
 					environment: 'node',
 					exclude: ['test/**/*.browser.test.ts'],

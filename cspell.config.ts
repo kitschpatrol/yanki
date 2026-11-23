@@ -9,7 +9,6 @@ export default cspellConfig({
 	],
 	words: [
 		'afmt',
-		'bottlenecked',
 		'chagent',
 		'extglob',
 		'FEFF',
