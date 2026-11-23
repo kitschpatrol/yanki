@@ -17,10 +17,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   # Extra startup time for pip-installed Anki in CI
   ANKI_CONNECT_TIMEOUT: '60000'
@@ -32,10 +28,18 @@ env:
 jobs:
   benchmark:
     name: Benchmark against base
-    # Pull requests opt in with the `benchmark` label
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'benchmark')
+    # Pull requests opt in with the `benchmark` label: run when it is added, and
+    # on later pushes while it is present
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'benchmark') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'benchmark'))
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # Set on the job so that skipped runs never cancel a benchmark in progress
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout base
