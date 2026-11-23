@@ -59,12 +59,14 @@ export async function ensureModelsAndDecks(
 		throw new Error('Deck name is empty')
 	}
 
-	const [modelsResponse, decksResponse] = await client.miscellaneous.multi({
+	const responses = await client.miscellaneous.multi({
 		actions: [
 			{ action: 'modelNames', version: 6 },
 			{ action: 'deckNames', version: 6 },
 		],
 	})
+	const modelsResponse = toMultiActionResponse(responses[0])
+	const decksResponse = toMultiActionResponse(responses[1])
 
 	if (modelsResponse.error !== null) {
 		throw new Error(`modelNames failed: ${modelsResponse.error}`)
@@ -293,11 +295,12 @@ export async function executeUpdates(
 	const responses = await client.miscellaneous.multi({ actions })
 	const failures: string[] = []
 	for (const [i, response] of responses.entries()) {
-		if (response.error !== null) {
+		const { error } = toMultiActionResponse(response)
+		if (error !== null) {
 			const action = actions[i]
 			const note = actionNotes[i]
 			const noteContext = note === undefined ? '' : ` (${describeNote(note)})`
-			failures.push(`${action?.action ?? `index ${i}`}${noteContext}: ${response.error}`)
+			failures.push(`${action?.action ?? `index ${i}`}${noteContext}: ${error}`)
 		}
 	}
 
@@ -1087,13 +1090,12 @@ async function runWithConcurrency<T>(
 		return
 	}
 
-	let cursor = 0
+	// Every lane pulls from the same iterator, so each item is handed out once
+	const remainingItems = items.entries()
 	const lanes: Array<Promise<void>> = []
 	const next = async (): Promise<void> => {
-		while (cursor < items.length) {
-			const index = cursor++
-
-			await worker(items[index], index)
+		for (const [index, item] of remainingItems) {
+			await worker(item, index)
 		}
 	}
 
@@ -1283,6 +1285,30 @@ export async function reconcileMedia(
 type MultiActionResponse = { error: null | string; result: unknown }
 
 /**
+ * Narrow one entry of a `multi()` response to its `{ error, result }` envelope.
+ * AnkiConnect wraps a nested action's reply this way whenever the action
+ * carries a `version`, as every action sent from this module does, but
+ * yanki-connect types the entries as a union that also covers bare results.
+ *
+ * @throws {TypeError} If the entry is not an `{ error, result }` envelope.
+ */
+function toMultiActionResponse(value: unknown): MultiActionResponse {
+	if (
+		typeof value !== 'object' ||
+		value === null ||
+		!('error' in value) ||
+		!('result' in value) ||
+		(value.error !== null && typeof value.error !== 'string')
+	) {
+		throw new TypeError(
+			`Expected { error, result } from a multi() action, got: ${JSON.stringify(value)}`,
+		)
+	}
+
+	return { error: value.error, result: value.result }
+}
+
+/**
  * Generic chunked dispatcher for Anki-Connect's `multi()`. The handler sees the
  * raw response, including per-action errors — caller decides whether to throw,
  * log, or recover. For the common throw-on-error case prefer `runMultiOrThrow`,
@@ -1298,7 +1324,7 @@ async function runMultiInChunks(
 		const chunk = actions.slice(i, i + chunkSize)
 		const responses = await client.miscellaneous.multi({ actions: chunk })
 		for (const [j, response] of responses.entries()) {
-			handleResponse(i + j, response)
+			handleResponse(i + j, toMultiActionResponse(response))
 		}
 	}
 }

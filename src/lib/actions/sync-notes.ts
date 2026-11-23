@@ -183,7 +183,12 @@ export async function syncNotes(
 	const unchangedSyncedIndices = await executeUpdates(client, plan.toUpdate, dryRun)
 
 	for (const syncedIndex of unchangedSyncedIndices) {
-		plan.synced[syncedIndex] = { action: 'unchanged', note: plan.synced[syncedIndex].note }
+		const syncedNote = plan.synced[syncedIndex]
+		if (syncedNote === undefined) {
+			throw new Error(`No synced note at index ${syncedIndex}`)
+		}
+
+		plan.synced[syncedIndex] = { action: 'unchanged', note: syncedNote.note }
 	}
 
 	const { synced } = plan

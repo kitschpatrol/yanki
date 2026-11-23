@@ -34,12 +34,12 @@ type MultiResponse = { error: null | string; result: unknown }
 function makeMultiMock(handlers: Record<string, ActionHandler>) {
 	return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) => {
 		const responses: MultiResponse[] = actions.map(({ action, params = {} }) => {
-			if (!Object.hasOwn(handlers, action)) {
+			const handler = Object.hasOwn(handlers, action) ? handlers[action] : undefined
+			if (handler === undefined) {
 				// eslint-disable-next-line unicorn/no-null
 				return { error: `unhandled action ${action}`, result: null }
 			}
 
-			const handler = handlers[action]
 			try {
 				// eslint-disable-next-line unicorn/no-null
 				return { error: null, result: handler(params) }
@@ -278,6 +278,20 @@ describe('executeUpdates', () => {
 		).rejects.toThrow(UPDATE_BATCH_NOTE_CONTEXT_PATTERN)
 	})
 
+	it('throws a TypeError when multi() returns a bare result instead of an envelope', async () => {
+		// AnkiConnect only wraps a nested action's reply when the action has a version
+		const multi = vi.fn().mockResolvedValue([true])
+		const local = makeNote({ deckName: 'New', noteId: 1 })
+		const remote = makeNote({ cards: [10], deckName: 'Old', noteId: 1 })
+		await expect(
+			executeUpdates(
+				{ miscellaneous: { multi } } as never,
+				[{ localNote: local, remoteNote: remote, syncedIndex: 0 }],
+				false,
+			),
+		).rejects.toThrow('Expected { error, result } from a multi() action, got: true')
+	})
+
 	it('throws when local note ID is undefined', async () => {
 		const local = makeNote({ noteId: undefined })
 		const remote = makeNote({ cards: [10], noteId: 1 })
@@ -411,5 +425,13 @@ describe('ensureModelsAndDecks', () => {
 		await expect(
 			ensureModelsAndDecks({ miscellaneous: { multi } } as never, ['Yanki - Basic'], [], false),
 		).rejects.toThrow(MODEL_NAMES_BAD_SHAPE_PATTERN)
+	})
+
+	it('rejects a multi() reply that is missing a probe response', async () => {
+		// eslint-disable-next-line unicorn/no-null
+		const multi = vi.fn().mockResolvedValue([{ error: null, result: [] }])
+		await expect(
+			ensureModelsAndDecks({ miscellaneous: { multi } } as never, ['Yanki - Basic'], [], false),
+		).rejects.toThrow('Expected { error, result } from a multi() action, got: undefined')
 	})
 })

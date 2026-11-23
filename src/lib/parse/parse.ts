@@ -7,7 +7,7 @@
 import type { Root } from 'mdast'
 import { deepmerge } from 'deepmerge-ts'
 import { u } from 'unist-builder'
-import { EXIT, visit } from 'unist-util-visit'
+import { CONTINUE, EXIT, visit } from 'unist-util-visit'
 import type { YankiNote } from '../model/note'
 import type { GlobalOptions } from '../shared/types'
 import { CSS_DEFAULT_CLASS_NAME } from '../shared/constants'
@@ -118,6 +118,8 @@ export async function getNoteFromMarkdown(
 			hasCodeBlocks = true
 			return EXIT
 		}
+
+		return CONTINUE
 	})
 
 	let front = ''

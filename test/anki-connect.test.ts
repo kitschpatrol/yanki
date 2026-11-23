@@ -47,12 +47,12 @@ type MultiCall = [{ actions: MultiActionInput[] }]
 function makeMultiMock(handlers: Record<string, ActionHandler>) {
 	return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) => {
 		const responses: MultiResponse[] = actions.map(({ action, params = {} }) => {
-			if (!Object.hasOwn(handlers, action)) {
+			const handler = Object.hasOwn(handlers, action) ? handlers[action] : undefined
+			if (handler === undefined) {
 				// eslint-disable-next-line unicorn/no-null
 				return { error: `unhandled action ${action}`, result: null }
 			}
 
-			const handler = handlers[action]
 			try {
 				// eslint-disable-next-line unicorn/no-null
 				return { error: null, result: handler(params) }
