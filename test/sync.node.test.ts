@@ -2031,3 +2031,64 @@ describeWithFileFixture(
 		})
 	},
 )
+
+/**
+ * Confirm that the second card of a "Basic (and reversed card with extra)" note
+ * asks with the back of the note and answers with the front.
+ *
+ * Both cards share one note, so Anki's note editor and "Sort Field" column look
+ * identical for each of them. Only the rendered sides show the reversal.
+ *
+ * Prompted by https://github.com/kitschpatrol/yanki-obsidian/issues/89
+ */
+describeWithFileFixture(
+	'reversed card sides',
+	{
+		assetPath: './test/assets/test-minimal-notes/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('swaps the question and answer on the reversed card', async () => {
+			const front = 'which is sometimes the answer'
+			const back = 'which is sometimes the question'
+			const extra = 'always appears on the back of the card'
+
+			const filePath = context.markdownFiles.find(
+				(file) => path.posix.basename(file) === 'basic-and-reversed-card-with-extra.md',
+			)
+			expect(filePath).toBeDefined()
+
+			const results = await syncFiles([filePath!], {
+				ankiConnectOptions: {
+					autoLaunch: false,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				syncMediaAssets: 'off',
+			})
+
+			const { noteId } = results.synced[0]!.note
+			expect(noteId).toBeDefined()
+
+			const cardIds = await context.yankiConnect.card.findCards({ query: `nid:${noteId!}` })
+			const cards = await context.yankiConnect.card.cardsInfo({ cards: cardIds })
+			expect(cards).toHaveLength(2)
+
+			const [forwardCard, reversedCard] = cards.toSorted((a, b) => a.ord - b.ord)
+
+			expect(forwardCard!.question).toContain(front)
+			expect(forwardCard!.question).not.toContain(back)
+			expect(forwardCard!.question).not.toContain(extra)
+			expect(forwardCard!.answer).toContain(back)
+			expect(forwardCard!.answer).toContain(extra)
+
+			expect(reversedCard!.question).toContain(back)
+			expect(reversedCard!.question).not.toContain(front)
+			expect(reversedCard!.question).not.toContain(extra)
+			expect(reversedCard!.answer).toContain(front)
+			expect(reversedCard!.answer).toContain(extra)
+		})
+	},
+)
