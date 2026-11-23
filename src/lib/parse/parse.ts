@@ -59,7 +59,7 @@ export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
 	...defaultGlobalOptions,
 }
 
-const HTML_CODE_TAG_REGEX = /<code\b/i
+const HTML_CODE_TAG_REGEX = /<code\b/iu
 
 export async function getNoteFromMarkdown(
 	markdown: string,

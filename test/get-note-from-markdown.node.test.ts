@@ -398,27 +398,27 @@ it('handles strikethrough before and after a break', async () => {
 })
 
 it('applies Shiki highlighting for triple-backtick fenced code blocks', async () => {
-	const markdown = 'What does this do?\n\n---\n\n```typescript\nconst x = 1\n```'
-	const note = await getNoteFromMarkdown(markdown)
+	const noteMarkdown = 'What does this do?\n\n---\n\n```typescript\nconst x = 1\n```'
+	const note = await getNoteFromMarkdown(noteMarkdown)
 	expect(note.fields.Back).toContain('shiki')
 })
 
 it('applies Shiki highlighting for triple-tilde fenced code blocks', async () => {
-	const markdown = 'What does this do?\n\n---\n\n~~~javascript\nconst x = 1\n~~~'
-	const note = await getNoteFromMarkdown(markdown)
+	const noteMarkdown = 'What does this do?\n\n---\n\n~~~javascript\nconst x = 1\n~~~'
+	const note = await getNoteFromMarkdown(noteMarkdown)
 	expect(note.fields.Back).toContain('shiki')
 })
 
 it('applies Shiki highlighting for indented code blocks', async () => {
-	const markdown = 'What does this do?\n\n---\n\n    const x = 1\n    const y = 2'
-	const note = await getNoteFromMarkdown(markdown)
+	const noteMarkdown = 'What does this do?\n\n---\n\n    const x = 1\n    const y = 2'
+	const note = await getNoteFromMarkdown(noteMarkdown)
 	expect(note.fields.Back).toContain('shiki')
 })
 
 it('applies Shiki highlighting for raw HTML code blocks', async () => {
-	const markdown =
+	const noteMarkdown =
 		'What does this do?\n\n---\n\n<pre><code class="language-ts">const x = 1</code></pre>'
-	const note = await getNoteFromMarkdown(markdown)
+	const note = await getNoteFromMarkdown(noteMarkdown)
 	expect(note.fields.Back).toContain('shiki')
 })
 
@@ -428,8 +428,8 @@ it('applies Shiki highlighting for raw HTML code blocks', async () => {
  * short-circuit's correctness for inline-only content.
  */
 it('skips Shiki for notes with only inline code', async () => {
-	const markdown = 'Use the `console.log()` function\n\n---\n\nThat is all.'
-	const note = await getNoteFromMarkdown(markdown)
+	const noteMarkdown = 'Use the `console.log()` function\n\n---\n\nThat is all.'
+	const note = await getNoteFromMarkdown(noteMarkdown)
 	expect(note.fields.Front).not.toContain('shiki')
 	expect(note.fields.Back).not.toContain('shiki')
 })
@@ -440,28 +440,28 @@ it('skips Shiki for notes with only inline code', async () => {
  * appears in a raw-HTML mdast node. Output must remain correct regardless.
  */
 it('produces correct output even when prose mentions a literal <code> tag', async () => {
-	const markdown = 'Use the <code> tag for inline code.\n\n---\n\nDone.'
-	const note = await getNoteFromMarkdown(markdown)
+	const noteMarkdown = 'Use the <code> tag for inline code.\n\n---\n\nDone.'
+	const note = await getNoteFromMarkdown(noteMarkdown)
 	expect(note.fields.Front).toContain('Use the')
 	expect(note.fields.Back).toContain('Done')
 })
 
 it('detects code blocks nested inside a blockquote', async () => {
-	const markdown = '> ```js\n> const x = 1\n> ```\n\n---\n\nback'
-	const note = await getNoteFromMarkdown(markdown)
+	const noteMarkdown = '> ```js\n> const x = 1\n> ```\n\n---\n\nback'
+	const note = await getNoteFromMarkdown(noteMarkdown)
 	expect(note.fields.Front).toContain('shiki')
 })
 
 it('detects code blocks nested inside a list item', async () => {
-	const markdown = '- item with code:\n\n  ```js\n  const x = 1\n  ```\n\n---\n\nback'
-	const note = await getNoteFromMarkdown(markdown)
+	const noteMarkdown = '- item with code:\n\n  ```js\n  const x = 1\n  ```\n\n---\n\nback'
+	const note = await getNoteFromMarkdown(noteMarkdown)
 	expect(note.fields.Front).toContain('shiki')
 })
 
 it('detects code blocks inside table cells', async () => {
-	const markdown =
+	const noteMarkdown =
 		'| col |\n| --- |\n| `inline only no shiki` |\n\n---\n\n<pre><code>real</code></pre>'
-	const note = await getNoteFromMarkdown(markdown)
+	const note = await getNoteFromMarkdown(noteMarkdown)
 	// Inline code in the table cell stays unstyled; the back has a real
 	// pre/code block which must reach Shiki.
 	expect(note.fields.Back).toContain('shiki')

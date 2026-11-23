@@ -21,10 +21,7 @@ function makeNote(overrides: Partial<YankiNote> = {}): YankiNote {
 	}
 }
 
-type MultiActionInput = { action: string; params?: Record<string, unknown> }
 type ActionHandler = (params: Record<string, unknown>) => unknown
-// eslint-disable-next-line ts/no-restricted-types
-type MultiResponse = { error: null | string; result: unknown }
 
 /**
  * Dispatches incoming `multi()` action arrays to the per-action handlers.
@@ -32,8 +29,9 @@ type MultiResponse = { error: null | string; result: unknown }
  * imported to keep the two unit-test files independently runnable.
  */
 function makeMultiMock(handlers: Record<string, ActionHandler>) {
-	return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) => {
-		const responses: MultiResponse[] = actions.map(({ action, params = {} }) => {
+	type MultiActionInput = { action: string; params?: Record<string, unknown> }
+	return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) =>
+		actions.map(({ action, params = {} }) => {
 			const handler = Object.hasOwn(handlers, action) ? handlers[action] : undefined
 			if (handler === undefined) {
 				// eslint-disable-next-line unicorn/no-null
@@ -50,18 +48,17 @@ function makeMultiMock(handlers: Record<string, ActionHandler>) {
 					result: null,
 				}
 			}
-		})
-		return responses
-	})
+		}),
+	)
 }
 
-const ADD_NOTES_FAILED_PATTERN = /addNotes failed/
-const ADD_NOTES_FRONT_NAMING_PATTERN = /second front[\s\S]*third front/
-const ADD_NOTES_TOO_MANY_IDS_PATTERN = /returned more IDs/
-const UPDATE_BATCH_NOTE_CONTEXT_PATTERN = /changeDeck.*noteId 2.*no such card/
-const UNKNOWN_MODEL_NAME_PATTERN = /Unknown model name: Bogus Model/
-const MODEL_NAMES_FAILED_PATTERN = /modelNames failed: anki offline/
-const MODEL_NAMES_BAD_SHAPE_PATTERN = /Expected string\[\] from modelNames/
+const ADD_NOTES_FAILED_PATTERN = /addNotes failed/v
+const ADD_NOTES_FRONT_NAMING_PATTERN = /second front[\s\S]*third front/v
+const ADD_NOTES_TOO_MANY_IDS_PATTERN = /returned more IDs/v
+const UPDATE_BATCH_NOTE_CONTEXT_PATTERN = /changeDeck.*noteId 2.*no such card/v
+const UNKNOWN_MODEL_NAME_PATTERN = /Unknown model name: Bogus Model/v
+const MODEL_NAMES_FAILED_PATTERN = /modelNames failed: anki offline/v
+const MODEL_NAMES_BAD_SHAPE_PATTERN = /Expected string\[\] from modelNames/v
 
 describe('executeCreates', () => {
 	it('returns immediately when toCreate is empty', async () => {
@@ -210,7 +207,7 @@ describe('executeUpdates', () => {
 			false,
 		)
 		expect(multi).not.toHaveBeenCalled()
-		expect([...result].sort((a, b) => a - b)).toEqual([0, 1])
+		expect([...result].toSorted((a, b) => a - b)).toEqual([0, 1])
 	})
 
 	it('skips multi() in dry run mode but reports unchanged indices', async () => {
@@ -368,8 +365,8 @@ describe('ensureModelsAndDecks', () => {
 			false,
 		)
 		expect(createModel).toHaveBeenCalledTimes(1)
-		const createModelArg = createModel.mock.calls[0]?.[0] as { modelName: string }
-		expect(createModelArg.modelName).toBe('Yanki - Cloze')
+		const modelArgument = createModel.mock.calls[0]?.[0] as { modelName: string }
+		expect(modelArgument.modelName).toBe('Yanki - Cloze')
 		expect(createDeck).toHaveBeenCalledWith({ deck: 'NewDeck' })
 	})
 

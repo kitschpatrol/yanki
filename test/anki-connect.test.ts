@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+
 import { describe, expect, it, vi } from 'vitest'
 import { AnkiConnectUnreachableError } from 'yanki-connect'
 import type { YankiNote } from '../src/lib/model/note'
@@ -32,8 +34,6 @@ function makeNote(overrides: Partial<YankiNote> = {}): YankiNote {
 
 type MultiActionInput = { action: string; params?: Record<string, unknown> }
 type ActionHandler = (params: Record<string, unknown>) => unknown
-// eslint-disable-next-line ts/no-restricted-types
-type MultiResponse = { error: null | string; result: unknown }
 type MultiCall = [{ actions: MultiActionInput[] }]
 
 /**
@@ -45,8 +45,8 @@ type MultiCall = [{ actions: MultiActionInput[] }]
  * message becomes the response's `error` field.
  */
 function makeMultiMock(handlers: Record<string, ActionHandler>) {
-	return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) => {
-		const responses: MultiResponse[] = actions.map(({ action, params = {} }) => {
+	return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) =>
+		actions.map(({ action, params = {} }) => {
 			const handler = Object.hasOwn(handlers, action) ? handlers[action] : undefined
 			if (handler === undefined) {
 				// eslint-disable-next-line unicorn/no-null
@@ -63,9 +63,8 @@ function makeMultiMock(handlers: Record<string, ActionHandler>) {
 					result: null,
 				}
 			}
-		})
-		return responses
-	})
+		}),
+	)
 }
 
 function makeAnkiNote(noteId: number, cards: number[]): Record<string, unknown> {
@@ -1046,7 +1045,7 @@ describe('getRemoteNotes', () => {
 				deckNamesAndIds: vi
 					.fn()
 					.mockResolvedValue({ Default: 1, FilteredA: 2, FilteredB: 3, RealDeck: 4 }),
-				getDecks: vi.fn().mockResolvedValue({ FilteredA: [100], FilteredB: [200] }),
+				getDecks: vi.fn().mockResolvedValue({ FilteredB: [200], FilteredA: [100] }),
 			},
 			miscellaneous: { multi: multiMock },
 			note: {
@@ -1408,12 +1407,12 @@ describe('reconcileMedia', () => {
 		const result = await reconcileMedia(client as never, notes, 'test', false)
 		expect(result.deleted).toContain('yanki-test-old-file.png')
 
-		const deleteCall = multi.mock.calls.find((call) =>
+		const deletionCall = multi.mock.calls.find((call) =>
 			(call[0] as { actions: Array<{ action: string }> }).actions.some(
 				(a) => a.action === 'deleteMediaFile',
 			),
 		)
-		expect(deleteCall).toBeDefined()
+		expect(deletionCall).toBeDefined()
 	})
 
 	it('warns when no file adapter for local media re-upload', async () => {
@@ -1566,7 +1565,7 @@ describe('reconcileMedia', () => {
 		const notes = [
 			makeNote({
 				fields: {
-					Back: '<img src="yanki-test-good.png" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/good.png"><img src="yanki-test-bad.png" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/bad.png">',
+					Back: '<img src="yanki-test-good.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/good.png"><img src="yanki-test-bad.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/bad.png">',
 					Front: 'front',
 					YankiNamespace: 'test',
 				},
@@ -1634,7 +1633,7 @@ describe('reconcileMedia', () => {
 			miscellaneous: { multi },
 		}
 		const sharedHtml =
-			'<img src="yanki-test-shared.png" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/shared.png">'
+			'<img src="yanki-test-shared.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/shared.png">'
 		const notes = [
 			makeNote({
 				fields: { Back: sharedHtml, Front: 'a', YankiNamespace: 'test' },
@@ -1670,7 +1669,7 @@ describe('reconcileMedia', () => {
 		const imgTags = filenames
 			.map(
 				(name, i) =>
-					`<img src="${name}" data-yanki-media-sync="true" data-yanki-media-src="http://example.com/${i}.png">`,
+					`<img src="${name}" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/${i}.png">`,
 			)
 			.join('')
 

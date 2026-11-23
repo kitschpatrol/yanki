@@ -66,27 +66,23 @@ export async function ensureModelsAndDecks(
 		],
 	})
 	const modelsResponse = toMultiActionResponse(responses[0])
-	const decksResponse = toMultiActionResponse(responses[1])
-
 	if (modelsResponse.error !== null) {
 		throw new Error(`modelNames failed: ${modelsResponse.error}`)
 	}
 
+	const decksResponse = toMultiActionResponse(responses[1])
 	if (decksResponse.error !== null) {
 		throw new Error(`deckNames failed: ${decksResponse.error}`)
 	}
 
-	const existingModels = new Set(toStringArray(modelsResponse.result, 'modelNames'))
-	const existingDecks = new Set(toStringArray(decksResponse.result, 'deckNames'))
-
-	const missingModels = [...new Set(modelNames)].filter((name) => !existingModels.has(name))
-	const missingDecks = [...new Set(deckNames)].filter(
-		(name) => name !== '' && !existingDecks.has(name),
-	)
-
 	if (dryRun) {
 		return
 	}
+
+	const existingModels = new Set(toStringArray(modelsResponse.result, 'modelNames'))
+	const existingDecks = new Set(toStringArray(decksResponse.result, 'deckNames'))
+	const missingModels = new Set(modelNames).difference(existingModels)
+	const missingDecks = new Set(deckNames).difference(existingDecks)
 
 	for (const modelName of missingModels) {
 		const model = yankiModels.find((candidate) => candidate.modelName === modelName)
@@ -108,11 +104,11 @@ export async function ensureModelsAndDecks(
  * verify at runtime that the action returned what we expect.
  */
 function toStringArray(value: unknown, actionName: string): string[] {
-	if (!Array.isArray(value) || !value.every((entry) => typeof entry === 'string')) {
-		throw new TypeError(`Expected string[] from ${actionName}, got: ${JSON.stringify(value)}`)
+	if (Array.isArray(value) && value.every((entry) => typeof entry === 'string')) {
+		return value
 	}
 
-	return value
+	throw new TypeError(`Expected string[] from ${actionName}, got: ${JSON.stringify(value)}`)
 }
 
 /**
@@ -120,11 +116,11 @@ function toStringArray(value: unknown, actionName: string): string[] {
  * `findNotes`-style responses.
  */
 function toNumberArray(value: unknown, actionName: string): number[] {
-	if (!Array.isArray(value) || !value.every((entry) => typeof entry === 'number')) {
-		throw new TypeError(`Expected number[] from ${actionName}, got: ${JSON.stringify(value)}`)
+	if (Array.isArray(value) && value.every((entry) => typeof entry === 'number')) {
+		return value
 	}
 
-	return value
+	throw new TypeError(`Expected number[] from ${actionName}, got: ${JSON.stringify(value)}`)
 }
 
 /**
@@ -138,7 +134,7 @@ function describeNote(note: YankiNote): string {
 		return `noteId ${note.noteId}`
 	}
 
-	const front = note.fields.Front.replaceAll(/\s+/g, ' ').trim()
+	const front = note.fields.Front.replaceAll(/\s+/gu, ' ').trim()
 	const preview = front.length > 60 ? `${front.slice(0, 57)}...` : front
 	return preview === '' ? '(empty Front field)' : `front "${preview}"`
 }
@@ -198,7 +194,7 @@ export async function executeCreates(
 			continue
 		}
 
-		entry.localNote.noteId = Number(id)
+		entry.localNote.noteId = id
 	}
 
 	if (failedDescriptions.length > 0) {
@@ -215,6 +211,59 @@ type UpdateBucketEntry = {
 }
 
 type MultiAction = Parameters<YankiConnect['miscellaneous']['multi']>[0]['actions'][number]
+
+/**
+ * Plan the Anki-Connect actions that bring one remote note in line with its
+ * local counterpart. `changeDeck` comes before `updateNoteModel`.
+ *
+ * @returns The actions to run, empty if the notes already match.
+ * @throws {Error} If the local note has no ID, the remote note has no cards, or
+ *   a deck change targets an empty deck name.
+ */
+function getUpdateActions(localNote: YankiNote, remoteNote: YankiNote): MultiAction[] {
+	if (localNote.noteId === undefined) {
+		throw new Error('Local note ID is undefined')
+	}
+
+	if (remoteNote.cards === undefined) {
+		throw new Error('Remote note cards are undefined')
+	}
+
+	const actions: MultiAction[] = []
+
+	if (localNote.deckName !== remoteNote.deckName) {
+		if (localNote.deckName === '') {
+			throw new Error('Local deck name is empty')
+		}
+
+		actions.push({
+			action: 'changeDeck',
+			params: { cards: remoteNote.cards, deck: localNote.deckName },
+			version: 6,
+		})
+	}
+
+	if (
+		!areTagsEqual(localNote.tags ?? [], remoteNote.tags ?? []) ||
+		!areFieldsEqual(localNote.fields, remoteNote.fields) ||
+		localNote.modelName !== remoteNote.modelName
+	) {
+		actions.push({
+			action: 'updateNoteModel',
+			params: {
+				note: {
+					fields: localNote.fields,
+					id: localNote.noteId,
+					modelName: localNote.modelName,
+					tags: localNote.tags ?? [],
+				},
+			},
+			version: 6,
+		})
+	}
+
+	return actions
+}
 
 /**
  * Apply a batch of note updates by bundling per-note actions (`changeDeck`,
@@ -238,53 +287,15 @@ export async function executeUpdates(
 	const unchangedSyncedIndices = new Set<number>()
 
 	for (const { localNote, remoteNote, syncedIndex } of toUpdate) {
-		if (localNote.noteId === undefined) {
-			throw new Error('Local note ID is undefined')
-		}
-
-		if (remoteNote.cards === undefined) {
-			throw new Error('Remote note cards are undefined')
-		}
-
-		let didChange = false
-
-		if (localNote.deckName !== remoteNote.deckName) {
-			if (localNote.deckName === '') {
-				throw new Error('Local deck name is empty')
-			}
-
-			actions.push({
-				action: 'changeDeck',
-				params: { cards: remoteNote.cards, deck: localNote.deckName },
-				version: 6,
-			})
-			actionNotes.push(localNote)
-			didChange = true
-		}
-
-		if (
-			!areTagsEqual(localNote.tags ?? [], remoteNote.tags ?? []) ||
-			!areFieldsEqual(localNote.fields, remoteNote.fields) ||
-			localNote.modelName !== remoteNote.modelName
-		) {
-			actions.push({
-				action: 'updateNoteModel',
-				params: {
-					note: {
-						fields: localNote.fields,
-						id: localNote.noteId,
-						modelName: localNote.modelName,
-						tags: localNote.tags ?? [],
-					},
-				},
-				version: 6,
-			})
-			actionNotes.push(localNote)
-			didChange = true
-		}
-
-		if (!didChange) {
+		const noteActions = getUpdateActions(localNote, remoteNote)
+		if (noteActions.length === 0) {
 			unchangedSyncedIndices.add(syncedIndex)
+			continue
+		}
+
+		for (const action of noteActions) {
+			actions.push(action)
+			actionNotes.push(localNote)
 		}
 	}
 
@@ -296,12 +307,14 @@ export async function executeUpdates(
 	const failures: string[] = []
 	for (const [i, response] of responses.entries()) {
 		const { error } = toMultiActionResponse(response)
-		if (error !== null) {
-			const action = actions[i]
-			const note = actionNotes[i]
-			const noteContext = note === undefined ? '' : ` (${describeNote(note)})`
-			failures.push(`${action?.action ?? `index ${i}`}${noteContext}: ${error}`)
+		if (error === null) {
+			continue
 		}
+
+		const action = actions[i]
+		const note = actionNotes[i]
+		const noteContext = note === undefined ? '' : ` (${describeNote(note)})`
+		failures.push(`${action?.action ?? `index ${i}`}${noteContext}: ${error}`)
 	}
 
 	if (failures.length > 0) {
@@ -1254,14 +1267,14 @@ export async function reconcileMedia(
 		}
 	})
 
-	const deleteActions: MultiAction[] = toDelete.map((filename) => ({
+	const mediaDeletionActions: MultiAction[] = toDelete.map((filename) => ({
 		action: 'deleteMediaFile',
 		params: { filename },
 		version: 6,
 	}))
 
 	const deleted: string[] = []
-	await runMultiInChunks(client, deleteActions, (index, response) => {
+	await runMultiInChunks(client, mediaDeletionActions, (index, response) => {
 		const filename = toDelete[index]
 		if (filename === undefined) {
 			return
@@ -1318,10 +1331,9 @@ async function runMultiInChunks(
 	client: YankiConnect,
 	actions: MultiAction[],
 	handleResponse: (index: number, response: MultiActionResponse) => void,
-	chunkSize: number = MULTI_BATCH_CHUNK_SIZE,
 ): Promise<void> {
-	for (let i = 0; i < actions.length; i += chunkSize) {
-		const chunk = actions.slice(i, i + chunkSize)
+	for (let i = 0; i < actions.length; i += MULTI_BATCH_CHUNK_SIZE) {
+		const chunk = actions.slice(i, i + MULTI_BATCH_CHUNK_SIZE)
 		const responses = await client.miscellaneous.multi({ actions: chunk })
 		for (const [j, response] of responses.entries()) {
 			handleResponse(i + j, toMultiActionResponse(response))
