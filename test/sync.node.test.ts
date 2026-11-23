@@ -2007,6 +2007,9 @@ describeWithFileFixture(
  * This is a "won't fix" because even in the Anki desktop, it's invalid to put
  * any cloze markup in a non-cloze note type, and there is no reasonable means
  * to escape the syntax.
+ *
+ * Notes are created in one `addNotes` batch, which AnkiConnect fails as a whole
+ * with a list of the per-note errors.
  */
 describeWithFileFixture(
 	'invalid cloze literal',
@@ -2027,7 +2030,9 @@ describeWithFileFixture(
 					namespace: context.namespace,
 					syncMediaAssets: 'off',
 				}),
-			).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: cannot create note for unknown reason]`)
+			).rejects.toThrowErrorMatchingInlineSnapshot(
+				`[Error: ['cannot create note for unknown reason']]`,
+			)
 		})
 	},
 )
