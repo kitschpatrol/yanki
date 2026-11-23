@@ -88,8 +88,7 @@ beforeAll(async () => {
 	warmNotes = warmResult.synced.map((entry) => entry.note)
 
 	// Media-rich corpus: ~50 unique local media files referenced across the
-	// test-media markdown notes. With chunk size 25 in multi(), this spans
-	// multiple batches and exercises both the upload and reconcile paths.
+	// test-media markdown notes, exercising both the upload and reconcile paths.
 	const mediaFilePaths = await globby('**/*.md', {
 		absolute: true,
 		cwd: MEDIA_NOTES_DIRECTORY,
@@ -275,10 +274,7 @@ describe('Tier 4 — syncNotes (many decks)', () => {
 
 describe('Tier 4 — syncNotes (media batching)', () => {
 	// Cold media sync: every note is brand new and every referenced media file
-	// must be uploaded. Targets the in-line per-note upload path that the
-	// batched `multi()` flow consolidates, plus the parallel `Promise.all`
-	// buffer reads. With ~50 unique media references this also crosses the
-	// chunk-of-25 boundary in the new batched implementation.
+	// must be read from disk and uploaded.
 	benchTest(
 		'syncNotes :: cold sync uploads all media',
 		async () => {
@@ -296,11 +292,8 @@ describe('Tier 4 — syncNotes (media batching)', () => {
 	)
 
 	// Recovery sync: notes are already present and unchanged, but every media
-	// file is missing in Anki. Exercises the `reconcileMedia` recovery path —
-	// one `getMediaFilesNames` lookup, then chunked `multi()` `storeMediaFile`
-	// requests. Because no notes are freshly written this iteration, the new
-	// `freshWriteNoteIds` filter should leave every restored file in the
-	// returned `reuploadedMedia`.
+	// file is missing in Anki. Exercises the `reconcileMedia` recovery path,
+	// which has to find and re-upload every missing file.
 	benchTest(
 		'syncNotes :: recovery re-uploads missing media',
 		async () => {

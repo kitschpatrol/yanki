@@ -63,17 +63,11 @@ const LARGE_CORPUS_MARKDOWN: readonly string[] = Array.from(
 	(_, index) => `Front of card ${index}\n\n---\n\nBack of card ${index}\n`,
 )
 
-// Must run BEFORE any other bench in this file so Shiki's process-global
-// singleton highlighter is genuinely cold on the first iteration. Steady-state
-// benches further down don't surface first-call init costs (theme/grammar
-// loading); even `vi.resetModules` can't reset Shiki's singleton, so only
-// iteration #1 is truly cold. Small sample count + zero warmup so the cold
-// call dominates `max` (and meaningfully shifts `mean`) instead of being
-// averaged out across hundreds of warm samples.
-//
-// Compare `max` across runs: pre-optimization the first iteration pays full
-// Shiki init (~2s); when a future change skips Shiki for code-free notes it
-// should drop to AST-only cost (tens of ms).
+// Measures what a fresh process pays before its first note. Steady-state
+// benches further down don't surface these first-call costs, so
+// `vi.resetModules` makes every iteration evaluate the parser modules again,
+// including the syntax highlighter they build at load time. Zero warmup and a
+// small sample count keep every sample a cold call.
 const COLD_START_PLAIN_MARKDOWN = 'Plain front\n\n---\n\nPlain back with no code at all.'
 
 describe('Tier 1 — public API (cold start)', () => {
