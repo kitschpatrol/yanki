@@ -11,7 +11,7 @@ const log = {
 
 	// Intended for temporary logging
 	log(...data: unknown[]): void {
-		if (!this.verbose) {
+		if (!log.verbose) {
 			return
 		}
 
@@ -24,11 +24,11 @@ const log = {
 		}
 	},
 	logPrefixed(prefix: string, ...data: unknown[]): void {
-		this.info(pc.blue(`[${prefix}]`), ...data)
+		log.info(pc.blue(`[${prefix}]`), ...data)
 	},
 
 	info(...data: unknown[]): void {
-		if (!this.verbose) {
+		if (!log.verbose) {
 			return
 		}
 
@@ -41,21 +41,21 @@ const log = {
 		}
 	},
 	infoPrefixed(prefix: string, ...data: unknown[]): void {
-		this.info(pc.blue(`[${prefix}]`), ...data)
+		log.info(pc.blue(`[${prefix}]`), ...data)
 	},
 
 	warn(...data: unknown[]): void {
 		console.warn(pc.yellow('[Warning]'), ...data)
 	},
 	warnPrefixed(prefix: string, ...data: unknown[]): void {
-		this.warn(pc.blue(`[${prefix}]`), ...data)
+		log.warn(pc.blue(`[${prefix}]`), ...data)
 	},
 
 	error(...data: unknown[]): void {
 		console.error(pc.red('[Error]'), ...data)
 	},
 	errorPrefixed(prefix: string, ...data: unknown[]): void {
-		this.error(pc.blue(`[${prefix}]`), ...data)
+		log.error(pc.blue(`[${prefix}]`), ...data)
 	},
 }
 

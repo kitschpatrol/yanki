@@ -2,15 +2,11 @@ import { knipConfig } from '@kitschpatrol/knip-config'
 
 export default knipConfig({
 	entry: ['test/utilities/field-mask.ts'],
-	ignore: ['test/assets/**/*'],
-	ignoreBinaries: ['anki', 'awk', 'launchctl', 'open', 'osascript', 'pkill', 'taskkill'],
+	ignoreBinaries: ['anki', 'uv'],
 	ignoreDependencies: [
-		'@kitschpatrol/typescript-config',
+		'@kitschpatrol/chagent', // Typically invoked through bumpp's --execute argument, which Knip doesn't parse
 		'@types/lodash-es',
 		'@types/unist',
-		'@vitest/coverage-v8',
-		'playwright',
 		'remark',
-		'tsx',
 	],
 })

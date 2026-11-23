@@ -1,6 +1,3 @@
-/* eslint-disable unicorn/prefer-string-raw */
-/* eslint-disable no-irregular-whitespace */
-
 import { expect, it } from 'vitest'
 import { NOTE_NAMESPACE_MAX_LENGTH } from '../src/lib/shared/constants'
 import { sanitizeNamespace, validateNamespace } from '../src/lib/utilities/namespace'
@@ -23,13 +20,11 @@ it('allows valid namespaces', () => {
 	}).not.toThrow()
 
 	expect(() => {
-		validateNamespace(Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH }).fill('A').join(''))
+		validateNamespace('A'.repeat(NOTE_NAMESPACE_MAX_LENGTH))
 	}).not.toThrow()
 
 	expect(() => {
-		validateNamespace(
-			`   ${Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH }).fill('A').join('')}   `,
-		)
+		validateNamespace(`   ${'A'.repeat(NOTE_NAMESPACE_MAX_LENGTH)}   `)
 	}).not.toThrow()
 })
 
@@ -47,7 +42,7 @@ it('catches invalid namespaces', () => {
 			- Cannot be empty]
 	`)
 	expect(() => {
-		validateNamespace('    ')
+		validateNamespace(' '.repeat(4))
 	}).toThrowErrorMatchingInlineSnapshot(`
 		[Error: Invalid namespace "    ":
 			- Cannot be empty]
@@ -59,11 +54,7 @@ it('catches invalid namespaces', () => {
 			- Forbidden character: Asterisk: "*"]
 	`)
 	expect(() => {
-		validateNamespace(
-			Array.from({ length: NOTE_NAMESPACE_MAX_LENGTH + 1 })
-				.fill('A')
-				.join(''),
-		)
+		validateNamespace('A'.repeat(NOTE_NAMESPACE_MAX_LENGTH + 1))
 	}).toThrowErrorMatchingInlineSnapshot(`
 		[Error: Invalid namespace "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA":
 			- Cannot be longer than 60 characters]
@@ -82,10 +73,10 @@ it('catches invalid namespaces', () => {
 			- Forbidden character: Horizontal Tab: "\\t"]
 	`)
 	expect(() => {
-		validateNamespace('t\u200Bh\u200Ci\u200Ds contains hidden spaces.')
+		validateNamespace('t\u{200B}h\u{200C}i\u{200D}s contains hidden spaces.')
 	}).toThrowErrorMatchingInlineSnapshot(`
-		[Error: Invalid namespace "t​h‌i‍s contains hidden spaces.":
-			- Forbidden character: Zero-width Space: "​"
+		[Error: Invalid namespace "t\u{200B}h‌i‍s contains hidden spaces.":
+			- Forbidden character: Zero-width Space: "\u{200B}"
 			- Forbidden character: Zero-width Non-joiner: "‌"
 			- Forbidden character: Zero-width Joiner: "‍"]
 	`)
@@ -99,8 +90,8 @@ it('allows asterisks when asked', () => {
 
 it('sanitizes inconsistent unicode', () => {
 	// Different unicode representations of the same character
-	const basicNamespace = 'A basic namespac\u00E9' // Encodes é
-	const weirdNamespace = 'a bASic namespac\u0065\u0301' // Encodes é
+	const basicNamespace = 'A basic namespac\u{E9}' // Encodes é
+	const weirdNamespace = 'a bASic namespace\u{301}' // Encodes é
 
 	expect(basicNamespace.length).not.toEqual(weirdNamespace.length)
 

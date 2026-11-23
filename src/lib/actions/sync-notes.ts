@@ -190,8 +190,8 @@ export async function syncNotes(
 
 	// Deletion pass, we need the full info to do deck cleanup later on
 	// TODO does strictMatching have implications here?
-	const orphanedNotes = remoteNotes.filter(
-		(remoteNote) => !allLocalNotesCopy.some((localNote) => localNote.noteId === remoteNote.noteId),
+	const orphanedNotes = remoteNotes.filter((remoteNote) =>
+		allLocalNotesCopy.every((localNote) => localNote.noteId !== remoteNote.noteId),
 	)
 
 	await deleteNotes(client, orphanedNotes, dryRun)
@@ -302,7 +302,7 @@ export async function syncNotes(
 
 // Helper function to find notes with the same noteId
 function findNotesWithDuplicateIds(notes: YankiNote[], noteId: number): YankiNote[] {
-	return notes.filter((note) => (note.noteId === undefined ? false : note.noteId === noteId))
+	return notes.filter((note) => note.noteId !== undefined && note.noteId === noteId)
 }
 
 // Function to select the note to keep based on content matching with the remote note
@@ -313,7 +313,7 @@ function selectNoteToKeep(duplicates: YankiNote[], remoteNote: undefined | Yanki
 				duplicate.fields.Front === remoteNote?.fields.Front &&
 				duplicate.fields.Back === remoteNote.fields.Back &&
 				duplicate.fields.Extra === remoteNote.fields.Extra,
-		) ?? duplicates[0] // Default to the first note if no content match is found
+		) ?? duplicates[0]! // Default to the first note if no content match is found
 	)
 }
 

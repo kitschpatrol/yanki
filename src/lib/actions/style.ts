@@ -11,7 +11,7 @@ import { CSS_DEFAULT_STYLE, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared
 import { defaultGlobalOptions } from '../shared/types'
 import {
 	getModelStyle,
-	requestPermission,
+	requirePermission,
 	syncToAnkiWeb,
 	updateModelStyle,
 } from '../utilities/anki-connect'
@@ -46,10 +46,7 @@ export async function getStyle(options: PartialDeep<GetStyleOptions>): Promise<s
 	const { ankiConnectOptions } = deepmerge(defaultSetStyleOptions, options ?? {}) as GetStyleOptions
 
 	const client = new YankiConnect(ankiConnectOptions)
-	const permissionStatus = await requestPermission(client)
-	if (permissionStatus === 'ankiUnreachable') {
-		throw new Error('Anki is unreachable. Is Anki running?')
-	}
+	await requirePermission(client)
 
 	// Create string set
 	const cssSet = new Set<string>()
@@ -59,7 +56,9 @@ export async function getStyle(options: PartialDeep<GetStyleOptions>): Promise<s
 		cssSet.add(css)
 	}
 
-	if (cssSet.size === 0) {
+	const [firstCss] = cssSet
+
+	if (firstCss === undefined) {
 		throw new Error('No CSS found in any Yanki model.')
 	}
 
@@ -67,7 +66,7 @@ export async function getStyle(options: PartialDeep<GetStyleOptions>): Promise<s
 		throw new Error('Expected all Yanki models to have identical CSS.')
 	}
 
-	return [...cssSet][0]
+	return firstCss
 }
 
 export async function setStyle(options?: PartialDeep<SetStyleOptions>): Promise<SetStyleResult> {
@@ -81,10 +80,7 @@ export async function setStyle(options?: PartialDeep<SetStyleOptions>): Promise<
 
 	const client = new YankiConnect(ankiConnectOptions)
 
-	const permissionStatus = await requestPermission(client)
-	if (permissionStatus === 'ankiUnreachable') {
-		throw new Error('Anki is unreachable. Is Anki running?')
-	}
+	await requirePermission(client)
 
 	const modelsReport: SetStyleResult['models'] = []
 

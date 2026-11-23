@@ -1,12 +1,22 @@
-onlyBuiltDependencies:
-  - esbuild
-  - oxc-resolver
-  - puppeteer
-  - unrs-resolver
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@kitschpatrol/chagent@0.8.0'
+  - yanki-connect@5.3.1
+peerDependencyRules:
+  allowedVersions:
+    # Remove once the installed version declares ESLint 10 support.
+    # https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/issues/1075
+    # https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/pull/1081
+    eslint-plugin-jsx-a11y@6>eslint: ^10.0.0
+permissions:
+  '@kitschpatrol/shared-config':
+    skills: true
+  tsdown:
+    skills: true
 publicHoistPattern:
   - '@kitschpatrol/repo-config'
   - '@kitschpatrol/typescript-config'
-  - 'case-police'
   - '*cspell*'
   - '*eslint*'
   - '*knip*'
@@ -14,3 +24,7 @@ publicHoistPattern:
   - '*prettier*'
   - '*remark*'
   - '*stylelint*'
+  - 'case-police'
+skills:
+  dirs:
+    - .agents/skills

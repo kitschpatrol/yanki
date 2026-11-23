@@ -1,5 +1,4 @@
 /* eslint-disable jsdoc/require-jsdoc */
-/* eslint-disable complexity */
 
 // TODO move this into its own package?
 
@@ -14,7 +13,8 @@ import {
 	safeParseUrl,
 } from './url'
 
-const MD_EXTENSION_REGEX = /\.md$/
+const LEADING_AND_TRAILING_SLASHES_REGEX = /^\/+|\/+$/gu
+const TRAILING_SLASHES_REGEX = /\/+$/u
 
 type ResolveLinkType =
 	// Via a `![[link]]` or `![alt](link)` syntax
@@ -22,10 +22,30 @@ type ResolveLinkType =
 	// Via a `[[link]]` or `[text](link)` syntax
 	| 'link'
 
+type ResolvedLocalLink = {
+	anchor: string | undefined
+	filePath: string
+}
+
+/**
+ * A file from `allFilePaths`, addressed the way Obsidian addresses the files in
+ * a vault.
+ */
+type VaultFile = {
+	/** Absolute path, exactly as provided in `allFilePaths`. */
+	filePath: string
+	/** Path relative to the vault root, without a leading slash. */
+	vaultPath: string
+	/** Lowercase vault path, since Obsidian's link resolution is case insensitive. */
+	vaultPathLowerCase: string
+}
+
 type ResolveLinkOptions = {
 	/**
-	 * Array of all absolute file paths to consider when resolving wiki-style
-	 * named links.
+	 * Array of all absolute file paths to consider when resolving local links.
+	 * When several files are equally good matches for a link, the one listed
+	 * first wins, just as Obsidian breaks ties by the order of files in the
+	 * vault.
 	 */
 	allFilePaths?: string[] | undefined
 	/**
@@ -47,13 +67,20 @@ type ResolveLinkOptions = {
 	convertFilePathsToProtocol?: 'file' | 'none' | 'obsidian'
 	/**
 	 * Current working directory, used to resolve relative paths. Set to the
-	 * absolute path of the file being processed.
+	 * absolute path of the directory of the file being processed. Ignored when
+	 * `sourcePath` is given.
 	 */
 	cwd: string
 	/**
 	 * Name of Obsidian vault, used in Obsidian protocol URL creation.
 	 */
 	obsidianVaultName?: string | undefined
+	/**
+	 * Absolute path of the file being processed. Links without a path, like
+	 * `[[#Heading]]`, lead back to it, and its directory takes precedence over
+	 * `cwd`.
+	 */
+	sourcePath?: string | undefined
 	/**
 	 * Whether we're dealing with a link (to be `<a>`-tagged) or an embed (to be
 	 * `<img>`-tagged). Affects how the resolved path is treated.
@@ -68,13 +95,17 @@ const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
 	basePath: undefined,
 	convertFilePathsToProtocol: 'none',
 	obsidianVaultName: undefined,
+	sourcePath: undefined,
 }
 
 /**
  * Resolve a file path, URL, or wiki-style named links to an absolute path.
  *
- * Warning: Wiki name link resolution is CASE INSENSITIVE, like in Obsidian,
- * though the case of the matching file will be preserved in the returned path.
+ * Local links are matched against `allFilePaths` exactly as Obsidian matches
+ * them against the files in a vault, see `getLinkpathDestinations()`.
+ *
+ * Warning: Local link resolution is CASE INSENSITIVE, like in Obsidian, though
+ * the case of the matching file will be preserved in the returned path.
  *
  * @param filePathOrUrl May be one of:
  *
@@ -92,7 +123,9 @@ const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
  * @returns Resolved absolute path or URL One of:
  *
  *   - Resolved absolute POSIX-style paths
- *   - Removes any file path query parameters
+ *   - Removes any Obsidian-style heading and block anchors, unless the anchor
+ *       characters are a literal part of a matched file's name (`?` is always
+ *       treated as a literal file name character in local paths)
  *   - Not URI-encoded
  *   - Retains original case
  *   - HTTP protocol URL
@@ -101,9 +134,10 @@ const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
  */
 export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions): string {
 	// Defaults
-	const { allFilePaths, basePath, convertFilePathsToProtocol, cwd, obsidianVaultName, type } =
+	const resolvedOptions =
 		// eslint-disable-next-line ts/no-unnecessary-condition
 		deepmerge(defaultResolveLinkOptions, options ?? {}) as ResolveLinkOptions
+	const { convertFilePathsToProtocol, obsidianVaultName } = resolvedOptions
 
 	// Option validation...
 	if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName === undefined) {
@@ -112,141 +146,24 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 
 	const decodedUrl = safeDecodeURI(filePathOrUrl) ?? filePathOrUrl
 
-	const sourceType = getSrcType(decodedUrl)
-
-	switch (sourceType) {
-		case 'localFileName': {
-			let resolvedUrl = pathExtras.addExtensionIfMissing(pathExtras.normalize(decodedUrl), 'md')
-
-			// Fall back to base path resolution if there's no path
-			const resolvedNameLink = resolveNameLink(resolvedUrl, cwd, allFilePaths ?? [])
-
-			resolvedUrl =
-				resolvedNameLink ??
-				pathExtras.resolveWithBasePath(decodedUrl, {
-					basePath,
-					cwd,
-				})
-
-			// Run it through again as a relative localFilePath
-
-			// Prevent infinite recursion
-			if (getSrcType(resolvedUrl) === 'localFilePath') {
-				return resolveLink(resolvedUrl, {
-					allFilePaths,
-					basePath,
-					convertFilePathsToProtocol,
-					cwd,
-					obsidianVaultName,
-					type,
-				})
-			}
-
-			console.warn(
-				`Failed to convert local file wiki-style name to path: ${filePathOrUrl} --> ${resolvedUrl}`,
-			)
-			return resolvedUrl
-		}
-
+	switch (getSrcType(decodedUrl)) {
+		// Obsidian resolves names and paths with the same algorithm
+		case 'localFileName':
 		case 'localFilePath': {
-			// Make it absolute
-			const resolvedUrl = pathExtras.resolveWithBasePath(pathExtras.normalize(decodedUrl), {
-				basePath,
-				cwd,
-			})
-
-			// If undefined, there was no match in the list of all file paths
-			const resolvedUrlWithMatchedExtension: string | undefined =
-				// Assume extension-less files are .md
-				// in Obsidian, ![[these links]] and ![](<these links>) without an extension are always to an MD file
-				pathExistsInAllFiles(
-					pathExtras.addExtensionIfMissing(resolvedUrl, 'md'),
-					allFilePaths ?? [],
-				) ??
-				// Add an .md extension even if we already have an extension.
-				// This handles cases with dots in the name.
-				pathExistsInAllFiles(pathExtras.addExtension(resolvedUrl, 'md'), allFilePaths ?? []) ??
-				undefined
-
-			if (resolvedUrlWithMatchedExtension !== undefined) {
-				// Perform obsidian vault link protocol conversion if requested
-				// For links, anything that exists should become an obsidian link
-				// For embeds, only markdown files should become obsidian links
-				if (
-					convertFilePathsToProtocol !== 'none' &&
-					(type === 'link' ||
-						// eslint-disable-next-line ts/no-unnecessary-condition
-						(type === 'embed' &&
-							// https://help.obsidian.md/Files+and+folders/Accepted+file+formats
-							['.md', '.pdf'].includes(pathExtras.getExtension(resolvedUrlWithMatchedExtension))))
-				) {
-					if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName !== undefined) {
-						return createObsidianVaultLink(
-							resolvedUrlWithMatchedExtension,
-							basePath ?? '',
-							obsidianVaultName,
-						)
-					}
-
-					// This doesn't work in the Anki desktop application or the AnkiWeb browser version...
-					// Not really worth it
-					if (convertFilePathsToProtocol === 'file') {
-						return createFileLink(resolvedUrlWithMatchedExtension)
-					}
-				}
-
-				return pathExtras.getBase(resolvedUrlWithMatchedExtension)
-			}
-
-			// TODO good idea?
-			// Some kind of "assume exists" flag?
-			// Linked file was not found, but give up and treat relative links as
-			// obsidian vault links if the context suggests it
-			// if (
-			// 	type === 'link' &&
-			// 	convertFilePathsToProtocol === 'obsidian' &&
-			// 	obsidianVaultName !== undefined
-			// ) {
-			// 	return createObsidianVaultLink(
-			// 		resolvedUrlWithDefaultExtension,
-			// 		basePath ?? '',
-			// 		obsidianVaultName,
-			// 	)
-			// }
-
-			return pathExtras.getBase(resolvedUrl)
+			return resolveLocalLink(decodedUrl, resolvedOptions)
 		}
 
 		case 'localFileUrl': {
-			// Convert file:// url to path (file:// paths are already always absolute)
-			// Anki can't open them
-			const resolvedUrl = pathExtras.normalize(fileUrlToPath(filePathOrUrl))
-
-			// Run it through again as a localFilePath
-
-			// Prevent infinite recursion
-			if (getSrcType(resolvedUrl) === 'localFilePath') {
-				return resolveLink(resolvedUrl, {
-					allFilePaths,
-					basePath,
-					convertFilePathsToProtocol,
-					cwd,
-					obsidianVaultName,
-					type,
-				})
-			}
-
-			console.warn(`Failed to convert file URL to path: ${filePathOrUrl} --> ${resolvedUrl}`)
-			return resolvedUrl
+			// Convert file:// URLs to paths; Anki cannot open them. Use the original
+			// encoded URL for parsing, then decode its extracted path for matching.
+			const encodedFilePath = fileUrlToPath(filePathOrUrl)
+			const decodedFilePath = safeDecodeURI(encodedFilePath) ?? encodedFilePath
+			return resolveLocalLink(decodedFilePath, resolvedOptions)
 		}
 
-		case 'obsidianVaultUrl': {
-			// Do nothing
-			return filePathOrUrl
-		}
-
+		case 'obsidianVaultUrl':
 		case 'remoteHttpUrl': {
-			// Do nothing
+			// Preserve already-valid URLs exactly as provided.
 			return filePathOrUrl
 		}
 
@@ -258,160 +175,312 @@ export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions):
 }
 
 /**
- * Convert from a (usually wiki-style) named link to an absolute path to an
- * actual file to match Obsidian's undocumented link resolution algorithm.
- *
- * See Obsidian's `getFirstLinkpathDest()` for a roughly equivalent algorithm.
- *
- * Obsidian seems to treat note links slightly differently from image / asset
- * links.
- *
- * @param name Non-URI-encoded name of the file, may have file extension, if no
- *   match with a non-.md extension is found, a match will be attempted with .md
- *   regardless. (POSIX-style paths.)
- * @param cwd Absolute path to the current working directory of the file from
- *   which we're resolving the link. (POSIX-style paths)
- * @param allFilePaths Array of absolute paths to all other files in the paths
- *   to be considered. (POSIX-style paths.)
- *
- * @returns Absolute path to the best matching file with the name provided, or
- *   undefined if there's no valid match. (POSIX-style paths.)
+ * Resolve a decoded local wiki-style name or file path to an absolute path or
+ * protocol URL.
  */
-function resolveNameLink(name: string, cwd: string, allFilePaths: string[]): string | undefined {
-	// Edge case, no file paths provided
-	if (allFilePaths.length === 0) {
-		return undefined
+function resolveLocalLink(decodedLink: string, options: ResolveLinkOptions): string {
+	const { allFilePaths = [], basePath, sourcePath } = options
+	// Links lead from the directory of the file they're in
+	const cwd = sourcePath === undefined ? options.cwd : path.dirname(sourcePath)
+	// Obsidian resolves links against the vault root. Without a known one, the
+	// deepest directory containing every file stands in for it. (Public options
+	// may carry a null basePath from JavaScript callers.)
+	const isVaultRootKnown = typeof basePath === 'string'
+	const vaultRoot = isVaultRootKnown ? basePath : getCommonDirectory(cwd, allFilePaths)
+	const sourceDirectory = getVaultPath(cwd, vaultRoot).toLowerCase()
+	const lowerCaseFilePaths = allFilePaths.map((filePath) => filePath.toLowerCase())
+
+	// Stands in for Obsidian's index of the files in a vault by lowercase name
+	const getFilesNamed = (fileName: string): VaultFile[] => {
+		const pathEnding = `/${fileName}`
+
+		return (
+			allFilePaths
+				// Index is in bounds, since the arrays are parallel
+				.filter((_, index) => lowerCaseFilePaths[index]!.endsWith(pathEnding))
+				.map((filePath) => {
+					const vaultPath = getVaultPath(filePath, vaultRoot)
+					return { filePath, vaultPath, vaultPathLowerCase: vaultPath.toLowerCase() }
+				})
+		)
 	}
 
-	const [base, query] = pathExtras.getBaseAndQueryParts(name)
-
-	// To address https://github.com/kitschpatrol/yanki-obsidian/issues/42, ignore .md extensions when matching
-	// Obsidian is not case sensitive
-	const baseWithoutMd = base.replace(MD_EXTENSION_REGEX, '').toLowerCase()
-
-	const pathsToName = allFilePaths.filter((filePath) => {
-		// Strip .md extensions
-		// Name-only files with dots in the name won't match
-		// Since add extensionIfMissing won't have added .md to those files
-		const pathWithoutMd = filePath.replace(MD_EXTENSION_REGEX, '').toLowerCase()
-		return pathWithoutMd.endsWith(baseWithoutMd)
-	})
-
-	// No matches found
-	if (pathsToName.length === 0) {
-		return undefined
-	}
-
-	// Fast path, there's only one file with that name
-	if (pathsToName.length === 1) {
-		return `${pathsToName[0]}${query ?? ''}`
-	}
-
-	// Sort the paths to name to find the best match
-	const sortedPaths = pathsToName.toSorted((a, b) => {
-		// TODO pass type / mode instead instead of inferring resolution strategy
-		// from name extension? Images prioritize child paths, as do any names with
-		// separators?
-		if (!base.endsWith('.md') || base.includes(path.sep)) {
-			// Then sort by whether the path contains the cwd
-			const aHasCwd = a.startsWith(cwd)
-			const bHasCwd = b.startsWith(cwd)
-
-			if (aHasCwd !== bHasCwd) {
-				return aHasCwd ? -1 : 1
-			}
+	// Obsidian has no notion of absolute file system paths, but they turn up in
+	// Markdown links and `file:` URLs
+	const getFileAtAbsolutePath = (absolutePath: string): string | undefined => {
+		if (!pathExtras.isAbsolute(absolutePath)) {
+			return undefined
 		}
 
-		// Sort by depth
-		const aDepth = a.split(path.sep).length
-		const bDepth = b.split(path.sep).length
+		const target = absolutePath.toLowerCase()
+		const exactIndex = lowerCaseFilePaths.indexOf(target)
+		const index = exactIndex === -1 ? lowerCaseFilePaths.indexOf(`${target}.md`) : exactIndex
 
-		if (aDepth !== bDepth) {
-			return aDepth - bDepth
+		return index === -1 ? undefined : allFilePaths[index]
+	}
+
+	// Obsidian stops relative links at the vault root, but a stand-in root says
+	// nothing about what lies above it, so a link leading there is followed as a
+	// plain file system path instead
+	const getLinkedFile = (linkPath: string): string | undefined =>
+		!isVaultRootKnown && path.join(sourceDirectory, linkPath).startsWith('../')
+			? getFileAtAbsolutePath(path.join(cwd, linkPath))
+			: (getLinkpathDestinations(linkPath, sourceDirectory, getFilesNamed)[0]?.filePath ??
+				getFileAtAbsolutePath(linkPath))
+
+	const candidates = pathExtras.getLocalPathCandidates(decodedLink)
+
+	// File names may contain anchor delimiter characters, so try the longest
+	// literal file name interpretation first, and only treat those characters as
+	// anchor delimiters when no real file matches
+	for (const { anchor, filePath } of candidates) {
+		// A link without a path, like `[[#Heading]]`, leads back to the file it's
+		// in, as in Obsidian. Otherwise, normalize only the path portion. Anchor
+		// text may contain slashes, dot segments, backslashes, or other characters
+		// with path semantics.
+		const matchedPath = filePath === '' ? sourcePath : getLinkedFile(pathExtras.normalize(filePath))
+
+		if (matchedPath !== undefined) {
+			return resolveMatchedLocalLink({ anchor, filePath: matchedPath }, options)
 		}
+	}
 
-		// Markdown files prioritize depth
-		// if (base.endsWith('.md')) {
-		// 	// Then sort by whether the path contains the cwd
-		// 	const aHasCwd = a.startsWith(cwd)
-		// 	const bHasCwd = b.startsWith(cwd)
-
-		// 	if (aHasCwd !== bHasCwd) {
-		// 		return aHasCwd ? -1 : 1
-		// 	}
-		// }
-
-		// Then sort by name alphabetically
-		return a.localeCompare(b)
-	})
-
-	return `${sortedPaths[0]}${query ?? ''}`
-
-	// Fast path, perfect match
-	// for (const filePath of pathsToName) {
-	// 	if (filePath.toLowerCase() === path.join(cwd, `${base}`).toLowerCase()) {
-	// 		return path.join(cwd, name)
-	// 	}
+	// TODO good idea?
+	// Some kind of "assume exists" flag?
+	// Linked file was not found, but give up and treat relative links as
+	// obsidian vault links if the context suggests it
+	// if (
+	// 	type === 'link' &&
+	// 	convertFilePathsToProtocol === 'obsidian' &&
+	// 	obsidianVaultName !== undefined
+	// ) {
+	// 	return createObsidianVaultLink(
+	// 		resolvedUrlWithDefaultExtension,
+	// 		basePath ?? '',
+	// 		obsidianVaultName,
+	// 	)
 	// }
 
-	// Not needed?
-	// const storedCwd = path.process_cwd
-	// path.setCWD(cwd)
-	// const relativePathsToName = pathsToName.map((filePath) => path.relative(cwd, filePath))
-	// path.setCWD(storedCwd)
-	//
-	// relativePathsToName.sort((a, b) => {
-	// 	// Prefer fewest number of up-traversals
-	// 	const { down: aStepsDown, up: aStepsUp } = pathExtras.quantifyPathDistance(a)
-	// 	const { down: bStepsDown, up: bStepsUp } = pathExtras.quantifyPathDistance(b)
-	//
-	// 	// Sort first by shortest number of steps "down"
-	// 	if (aStepsDown !== bStepsDown) {
-	// 		return aStepsDown - bStepsDown
-	// 	}
-	//
-	// 	// Then sort by shortest number of steps "up"
-	// 	if (aStepsUp !== bStepsUp) {
-	// 		// Doesn't help
-	// 		// return aStepsUp - bStepsUp
-	// 	}
-	//
-	// 	// Sort second by name alphabetically
-	// 	return 0 // A.localeCompare(b)
-	// })
-	//
-	// return path.join(cwd, `${relativePathsToName[0]}${query ?? ''}`)
+	// With no real file to disambiguate against, retain the historical behavior
+	// of treating the first anchor delimiter as the start of the anchor.
+	const fallbackBase = candidates.at(-1)?.filePath ?? decodedLink
+	return pathExtras.resolveWithBasePath(pathExtras.normalize(fallbackBase), {
+		basePath,
+		cwd,
+	})
+}
+
+/** Render a matched local file and its still-unmodified Obsidian anchor. */
+function resolveMatchedLocalLink(link: ResolvedLocalLink, options: ResolveLinkOptions): string {
+	const { anchor = '', filePath } = link
+	// Public options may carry a null basePath from JavaScript callers, which a destructuring default would not replace
+	// eslint-disable-next-line unicorn/prefer-default-parameters
+	const { basePath, convertFilePathsToProtocol, obsidianVaultName, type } = options
+
+	// For links, anything that exists should become a protocol link. For embeds,
+	// only Markdown and PDF files should; other media must remain local paths.
+	if (
+		convertFilePathsToProtocol !== 'none' &&
+		(type === 'link' ||
+			// eslint-disable-next-line ts/no-unnecessary-condition
+			(type === 'embed' &&
+				// https://obsidian.md/help/file-formats
+				['.md', '.pdf'].includes(path.extname(filePath))))
+	) {
+		if (convertFilePathsToProtocol === 'obsidian' && obsidianVaultName !== undefined) {
+			return createObsidianVaultLink(link, basePath ?? '', obsidianVaultName)
+		}
+
+		// This doesn't work in the Anki desktop application or the AnkiWeb browser version...
+		// Not really worth it
+		if (convertFilePathsToProtocol === 'file') {
+			return createFileLink(`${filePath}${anchor}`)
+		}
+	}
+
+	return filePath
 }
 
 /**
- * Check for presence of a path in a list in a case- and query- agnostic manner.
- * Ignores .md extensions to simplify matching files
+ * Find the files a link could refer to, best match first.
  *
- * @param filePath File path with file extension. (POSIX-style path.)
- * @param allFilePaths Array of absolute file paths to check. (POSIX-style
- *   paths.)
+ * This is a port of `MetadataCache.getLinkpathDest()` from Obsidian 1.15.1,
+ * which resolves every internal link in a vault: wiki-style or Markdown-style,
+ * link or embed, name or path. Its behavior is reproduced as closely as
+ * possible, quirks included, so that a link always leads to the file Obsidian
+ * would open:
  *
- * @returns The file path if it is present in the list of all file paths, or
- *   undefined if it is not.
+ * 1. Only files whose full name is the link's file name are ever considered, and
+ *    `.md` is only appended to the link when its file name has no dot, or when
+ *    no file has that exact name.
+ * 2. A bare name shared by no other file resolves to that file.
+ * 3. A link starting with `./` or `../` resolves against the source directory,
+ *    stopping at the vault root.
+ * 4. A path that leads to a file from the vault root resolves to that file.
+ * 5. Any other link except one starting with `/` falls back to the files whose
+ *    path ends with the link, preferring those under the source directory, then
+ *    shorter paths, then files listed earlier.
+ *
+ * @param linkPath Non-URI-encoded, normalized name or path of the linked file,
+ *   with or without a file extension, and without an anchor suffix.
+ *   (POSIX-style path.)
+ * @param sourceDirectory Lowercase vault path of the directory containing the
+ *   file from which we're resolving the link, empty for the vault root.
+ * @param getFilesNamed Gets every file with a given lowercase name, in vault
+ *   order.
+ *
+ * @returns The matching files, best first, or an empty array if the link does
+ *   not resolve.
  */
-function pathExistsInAllFiles(filePath: string, allFilePaths: string[]): string | undefined {
-	const base = pathExtras.getBase(filePath)
+function getLinkpathDestinations(
+	linkPath: string,
+	sourceDirectory: string,
+	getFilesNamed: (fileName: string) => VaultFile[],
+): VaultFile[] {
+	let target = linkPath.toLowerCase()
+	let fileName = getFileName(target)
+	let candidates = fileName.includes('.') ? getFilesNamed(fileName) : []
 
-	// Obsidian is not case sensitive
-	if (allFilePaths.some((file) => file.toLowerCase().endsWith(base.toLowerCase()))) {
-		return filePath
+	if (candidates.length === 0) {
+		target += '.md'
+		fileName = getFileName(target)
+		candidates = getFilesNamed(fileName)
 	}
 
-	return undefined
+	if (candidates.length === 0) {
+		return []
+	}
+
+	if (target === fileName && candidates.length === 1) {
+		return candidates
+	}
+
+	let directory = sourceDirectory
+
+	if (target.startsWith('./') || target.startsWith('../')) {
+		if (target.startsWith('./../')) {
+			target = target.slice(2)
+		}
+
+		if (target.startsWith('./')) {
+			target = target.slice(2)
+		} else {
+			while (target.startsWith('../')) {
+				target = target.slice(3)
+				directory = getParentPath(directory)
+			}
+		}
+
+		// The trailing slash and any ascent up the tree both carry over to the
+		// source directory preference below, as in Obsidian
+		if (directory !== '') {
+			directory += '/'
+		}
+
+		// Now a path from the vault root
+		target = directory + target
+	}
+
+	if (target.startsWith('/')) {
+		target = target.slice(1)
+	}
+
+	const rootMatch = candidates.find((file) => file.vaultPathLowerCase === target)
+	if (rootMatch !== undefined) {
+		return [rootMatch]
+	}
+
+	if (linkPath.startsWith('/')) {
+		return []
+	}
+
+	const suffixMatches = candidates.filter((file) => file.vaultPathLowerCase.endsWith(target))
+	const isUnderDirectory = (file: VaultFile) => file.vaultPathLowerCase.startsWith(directory)
+	const byPathLength = (a: VaultFile, b: VaultFile) => a.vaultPath.length - b.vaultPath.length
+
+	return [
+		...suffixMatches.filter((file) => isUnderDirectory(file)).toSorted(byPathLength),
+		...suffixMatches.filter((file) => !isUnderDirectory(file)).toSorted(byPathLength),
+	]
+}
+
+/**
+ * Convert a path to an Obsidian-style vault path: relative to the vault root,
+ * without leading or trailing slashes. Paths outside the vault are relative to
+ * the volume root instead.
+ *
+ * @param filePath Normalized absolute path to a file or directory. (POSIX-style
+ *   path.)
+ * @param vaultRoot Normalized absolute path to the root directory of the vault.
+ *   (POSIX-style path.)
+ */
+function getVaultPath(filePath: string, vaultRoot: string): string {
+	const rootPrefix = `${vaultRoot.replace(TRAILING_SLASHES_REGEX, '')}/`
+	// The appended slash lets the vault root itself match
+	const isInVault =
+		`${filePath}/`.slice(0, rootPrefix.length).toLowerCase() === rootPrefix.toLowerCase()
+
+	return (isInVault ? filePath.slice(rootPrefix.length) : filePath).replaceAll(
+		LEADING_AND_TRAILING_SLASHES_REGEX,
+		'',
+	)
+}
+
+/**
+ * Find the deepest directory containing a directory and every one of a list of
+ * files.
+ *
+ * @param directory Normalized absolute path to a directory. (POSIX-style path.)
+ * @param filePaths Normalized absolute paths to files. (POSIX-style paths.)
+ *
+ * @returns The path to the common directory with a trailing slash, or an empty
+ *   string if the paths have nothing in common.
+ */
+function getCommonDirectory(directory: string, filePaths: string[]): string {
+	// The trailing slash lets the directory itself be the common directory
+	const directoryPath = `${directory.replace(TRAILING_SLASHES_REGEX, '')}/`
+
+	// Whatever the first and last paths in sort order have in common is common
+	// to every path between them, which saves comparing each path's characters.
+	// This runs for every link, and file lists can be long.
+	let firstPath = directoryPath
+	let lastPath = directoryPath
+
+	for (const filePath of filePaths) {
+		if (filePath < firstPath) {
+			firstPath = filePath
+		} else if (filePath > lastPath) {
+			lastPath = filePath
+		}
+	}
+
+	let commonLength = 0
+	while (commonLength < firstPath.length && firstPath[commonLength] === lastPath[commonLength]) {
+		commonLength++
+	}
+
+	const commonPrefix = firstPath.slice(0, commonLength)
+	return commonPrefix.slice(0, commonPrefix.lastIndexOf('/') + 1)
+}
+
+/** Get the part of a vault path after its last slash. */
+function getFileName(vaultPath: string): string {
+	return vaultPath.slice(vaultPath.lastIndexOf('/') + 1)
+}
+
+/** Get the part of a vault path before its last slash, empty at the root. */
+function getParentPath(vaultPath: string): string {
+	return vaultPath.slice(0, Math.max(0, vaultPath.lastIndexOf('/')))
 }
 
 function createFileLink(absolutePath: string): string {
 	return `file://${absolutePath}`
 }
 
-function createObsidianVaultLink(absolutePath: string, basePath: string, obsidianVault: string) {
-	const relativePath = pathExtras.stripBasePath(absolutePath, basePath)
-	return `obsidian://open?vault=${encodeURIComponent(obsidianVault)}&file=${encodeURIComponent(relativePath)}`
+function createObsidianVaultLink(link: ResolvedLocalLink, basePath: string, obsidianVault: string) {
+	const relativePath = pathExtras.stripBasePath(link.filePath, basePath)
+	const linkPath = `${relativePath}${link.anchor ?? ''}`
+	return `obsidian://open?vault=${encodeURIComponent(obsidianVault)}&file=${encodeURIComponent(linkPath)}`
 }
 
 export function parseObsidianVaultLink(url: string):
@@ -420,14 +489,9 @@ export function parseObsidianVaultLink(url: string):
 			linkPath: string
 			vaultName: string
 	  } {
-	// Parse the URL
+	// Parse the URL and ensure it's an obsidian://open type
 	const urlObject = safeParseUrl(url)
-	if (urlObject === undefined) {
-		return undefined
-	}
-
-	// Ensure the URL is an obsidian://open type
-	if (urlObject.protocol !== 'obsidian:' || urlObject.hostname !== 'open') {
+	if (urlObject?.protocol !== 'obsidian:' || urlObject.hostname !== 'open') {
 		return undefined
 	}
 
@@ -435,7 +499,8 @@ export function parseObsidianVaultLink(url: string):
 	const vault = urlObject.searchParams.get('vault')
 	const file = urlObject.searchParams.get('file')
 
-	if (!vault || !file) {
+	// Null when the parameter is absent, treat empty strings as missing too
+	if (vault === null || vault === '' || file === null || file === '') {
 		console.warn('Missing required parameters')
 		return undefined
 	}

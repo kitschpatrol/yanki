@@ -7,7 +7,7 @@ import type { YankiNote } from '../model/note'
 import type { GlobalOptions } from '../shared/types'
 import { getFirstLineOfHtmlAsPlainText } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
-import { getRemoteNotes, requestPermission } from '../utilities/anki-connect'
+import { getRemoteNotes, requirePermission } from '../utilities/anki-connect'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { truncateOnWordBoundary } from '../utilities/string'
 
@@ -35,10 +35,7 @@ export async function listNotes(options?: PartialDeep<ListOptions>): Promise<Lis
 
 	const client = new YankiConnect(ankiConnectOptions)
 
-	const permissionStatus = await requestPermission(client)
-	if (permissionStatus === 'ankiUnreachable') {
-		throw new Error('Anki is unreachable. Is Anki running?')
-	}
+	await requirePermission(client)
 
 	const notes = await getRemoteNotes(client, sanitizedNamespace)
 

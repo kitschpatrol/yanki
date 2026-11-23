@@ -1,4 +1,4 @@
-import { type Options } from 'yargs'
+import type { Options } from 'yargs'
 import { defaultGlobalOptions } from '../lib/shared/types'
 
 export const ankiAutoLaunchOption = {
@@ -25,7 +25,7 @@ export const ankiConnectOption = {
 	'anki-connect': {
 		default: 'http://127.0.0.1:8765',
 		describe:
-			'Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.',
+			'Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.',
 		type: 'string',
 	},
 } as const satisfies Record<string, Options>
@@ -38,6 +38,10 @@ export const verboseOption = {
 	},
 } as const satisfies Record<string, Options>
 
+/**
+ * Creates a yargs option that enables JSON output, with a command-specific
+ * description.
+ */
 export function jsonOption(describe: string) {
 	return {
 		json: {
@@ -58,6 +62,10 @@ export const dryRun = {
 	},
 } as const satisfies Record<string, Options>
 
+/**
+ * Creates a yargs option that sets the Yanki namespace, with a command-specific
+ * description.
+ */
 export function namespaceOption(describe: string) {
 	return {
 		namespace: {

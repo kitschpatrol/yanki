@@ -2,9 +2,11 @@ import { globby } from 'globby'
 import { HTMLElement, parseHTML } from 'linkedom'
 import nodeFs from 'node:fs'
 import fs from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 import { expect, it } from 'vitest'
 import { detectVault } from '../src/bin/utilities/obsidian'
+import { loadLocalNotes } from '../src/lib/actions/load-local-notes'
 import { getNoteFromMarkdown, syncFiles } from '../src/lib/index'
 import { getBase, normalize, stripBasePath } from '../src/lib/utilities/path'
 import { PLATFORM } from '../src/lib/utilities/platform'
@@ -43,7 +45,11 @@ it.skipIf(!isObsidianInstalled)('detects absence of obsidian vault', async () =>
 	expect(await detectVault('./test/assets/test-media/audio/yanki.3gp')).toBeUndefined()
 })
 
-it('correctly resolves obsidian wiki links', async () => {
+// The CLI syncs without a vault, and must still resolve links like Obsidian
+it.each([
+	{ context: 'in a vault', isVault: true },
+	{ context: 'without a vault', isVault: false },
+])('correctly resolves obsidian wiki links $context', async ({ isVault }) => {
 	// Notes have been specially prepared with the correct Obsidian-resolved link
 	// path in their alt text or innerHTML text
 	const notesToTestRaw = [
@@ -67,17 +73,247 @@ it('correctly resolves obsidian wiki links', async () => {
 
 		const noteResolved = await getNoteFromMarkdown(markdown, {
 			allFilePaths,
-			basePath,
 			cwd: normalize(path.dirname(file)),
 			namespace: 'test',
-			obsidianVault: 'test-obsidian-vault',
 			syncMediaAssets: 'off',
+			...(isVault && { basePath, obsidianVault: 'test-obsidian-vault' }),
 		})
 
 		const noteHtml = `${noteResolved.fields.Front}${noteResolved.fields.Back}${noteResolved.fields.Extra}`
-		checkWikiLinkResolution(noteHtml, basePath)
+		// Guard against vacuous passes if a prepared note has no links at all
+		expect(checkWikiLinkResolution(noteHtml, basePath)).toBeGreaterThan(0)
 	}
 })
+
+it('resolves same-note links to the note given as the source path', async () => {
+	const note = await getNoteFromMarkdown(
+		'[[#Summary]] · [[#Summary|this heading]] · [[#^example|this block]] · [Markdown](#Summary) · ![[#Summary]] · [[./Peer]]',
+		{
+			allFilePaths: ['/vault/Cards/Flashcard.md', '/vault/Cards/Peer.md', '/vault/Notes/Peer.md'],
+			basePath: '/vault',
+			// The directory of the source path takes precedence
+			cwd: '/vault/Notes',
+			namespace: 'test',
+			obsidianVault: 'test',
+			sourcePath: '/vault/Cards/Flashcard.md',
+			syncMediaAssets: 'off',
+		},
+	)
+	const { document } = parseHTML(`${note.fields.Front}${note.fields.Back}`)
+	const links = Array.from(document.querySelectorAll('a'), (node) => [
+		node.textContent,
+		parseObsidianVaultLink(node.href)?.linkPath,
+	])
+
+	expect(links).toEqual([
+		['Summary', '/Cards/Flashcard.md#Summary'],
+		['this heading', '/Cards/Flashcard.md#Summary'],
+		['this block', '/Cards/Flashcard.md#^example'],
+		['Markdown', '/Cards/Flashcard.md#Summary'],
+		// Embedded notes render as links
+		['#Summary', '/Cards/Flashcard.md#Summary'],
+		['./Peer', '/Cards/Peer.md'],
+	])
+})
+
+it('resolves same-note links in notes loaded from files', async () => {
+	const vaultPath = normalize(path.join(os.tmpdir(), `yanki-test-${Date.now()}`, 'test-same-note'))
+	// Normalized, as syncFiles does before loading notes
+	const noteFile = normalize(path.join(vaultPath, 'Cards/Flashcard.md'))
+	const otherNoteFile = normalize(path.join(vaultPath, 'Flashcard.md'))
+	await fs.mkdir(path.dirname(noteFile), { recursive: true })
+	await fs.writeFile(noteFile, '[[#Summary]]\n\n---\n\n# Summary\n')
+	await fs.writeFile(otherNoteFile, '[[#Summary]]\n\n---\n\n# Summary\n')
+
+	try {
+		const localNotes = await loadLocalNotes([noteFile, otherNoteFile], {
+			allFilePaths: [noteFile, otherNoteFile],
+			basePath: vaultPath,
+			namespace: 'test',
+			obsidianVault: 'test-same-note',
+			syncMediaAssets: 'off',
+		})
+
+		// Each note links to itself, even though another has the same name
+		const linkPaths = localNotes.map(({ filePath, note }) => [
+			stripBasePath(filePath, vaultPath),
+			parseObsidianVaultLink(parseHTML(note.fields.Front).document.querySelector('a')?.href ?? '')
+				?.linkPath,
+		])
+
+		expect(linkPaths).toEqual([
+			['/Cards/Flashcard.md', '/Cards/Flashcard.md#Summary'],
+			['/Flashcard.md', '/Flashcard.md#Summary'],
+		])
+	} finally {
+		await fs.rm(path.dirname(vaultPath), { force: true, recursive: true })
+	}
+})
+
+it('resolves slash and Unicode heading links', async () => {
+	const vaultPath = normalize(path.resolve('./test/assets/test-link-encoding'))
+	const noteFile = normalize(path.join(vaultPath, 'Cards/✓Test Card 1.md'))
+	const allFilePathsRaw = await globby('**/*', {
+		absolute: true,
+		cwd: vaultPath,
+	})
+	const allFilePaths = allFilePathsRaw.toSorted().map((file) => normalize(file))
+	const markdown = await fs.readFile(noteFile, 'utf8')
+	const note = await getNoteFromMarkdown(markdown, {
+		allFilePaths,
+		basePath: vaultPath,
+		cwd: normalize(path.dirname(noteFile)),
+		namespace: 'test',
+		obsidianVault: 'test-link-encoding',
+		syncMediaAssets: 'off',
+	})
+	const { document } = parseHTML(`${note.fields.Front}${note.fields.Back}${note.fields.Extra}`)
+	const links = Array.from(document.querySelectorAll('a'), (node) => node.href)
+
+	/* Spell-checker:disable */
+	expect(links).toMatchInlineSnapshot(`
+		[
+		  "obsidian://open?vault=test-link-encoding&file=%252FNotes%252FMobile%20Communication%20Protocols%20(Monolith%20Note).md%25232G%252FEDGE%20Heading",
+		  "obsidian://open?vault=test-link-encoding&file=%252FNotes%252FMobile%20Communication%20Protocols%20(Monolith%20Note).md%2523%E2%9C%93%205G%252FLTE%20Heading",
+		  "obsidian://open?vault=test-link-encoding&file=%252FCards%252F%E2%9C%93Test%20Card%201.md%2523Pareto%20Principle%20(80%252F20%20Rule)",
+		  "obsidian://open?vault=test-link-encoding&file=%252FCards%252F%E2%9C%93Test%20Card%201.md%2523%E2%9C%93%20ISP's%20Gray%20IP%252FNAT%20Bypassing%20for%20self-hosting",
+		]
+	`)
+	/* Spell-checker:enable */
+})
+
+// Question marks are valid in note file names on macOS and Linux, but not on
+// Windows, so the "?" file name is created by renaming at test time — a
+// committed "?" in a path would break git checkout on Windows CI runners.
+//https://github.com/kitschpatrol/yanki/issues/20
+it.skipIf(PLATFORM === 'windows')(
+	'resolves links to notes with question marks in their file names',
+	async () => {
+		const tempAssetPath = normalize(
+			path.join(os.tmpdir(), `yanki-test-${Date.now()}`, 'test-question-mark'),
+		)
+
+		await fs.cp('./test/assets/test-question-mark', tempAssetPath, {
+			preserveTimestamps: true,
+			recursive: true,
+		})
+		await fs.rename(
+			path.join(tempAssetPath, 'Cards/How much is 2+2=.md'),
+			path.join(tempAssetPath, 'Cards/How much is 2+2=?.md'),
+		)
+		await fs.copyFile(
+			'./test/assets/test-obsidian-vault/yanki image.jpg',
+			path.join(tempAssetPath, 'Cards/question mark image?.jpg'),
+		)
+
+		try {
+			const noteFile = path.join(tempAssetPath, 'Cards/How much is 2+2=?.md')
+
+			const allFilePathsRaw = await globby('**/*', {
+				absolute: true,
+				cwd: tempAssetPath,
+			})
+			allFilePathsRaw.sort()
+			const allFilePaths = allFilePathsRaw.map((file) => normalize(file))
+
+			const markdown = await fs.readFile(noteFile, 'utf8')
+
+			const note = await getNoteFromMarkdown(markdown, {
+				allFilePaths,
+				basePath: tempAssetPath,
+				cwd: normalize(path.dirname(noteFile)),
+				namespace: 'test',
+				obsidianVault: 'test-question-mark',
+				syncMediaAssets: 'off',
+			})
+
+			const html = `${note.fields.Front}${note.fields.Back}${note.fields.Extra}`
+			const { document } = parseHTML(html)
+			const links = [...document.querySelectorAll('a[data-yanki-src-original]')]
+
+			// The note links to itself twice, once by vault-root-relative path and
+			// once by bare wiki name
+			expect(links).toHaveLength(2)
+
+			const expectedHref = `obsidian://open?vault=test-question-mark&file=${encodeURIComponent('/Cards/How much is 2+2=?.md')}`
+			for (const link of links) {
+				expect(link.getAttribute('href')).toBe(expectedHref)
+			}
+
+			// Media embeds of files with question marks in their names must keep
+			// the literal path in their media src
+			const images = [...document.querySelectorAll('img[data-yanki-media-src]')]
+			expect(images).toHaveLength(1)
+			const [image] = images
+			if (!(image instanceof HTMLElement)) {
+				throw new TypeError('Expected image embed to be an HTMLElement')
+			}
+
+			expect((image.dataset as DOMStringMap).yankiMediaSrc).toBe(
+				path.join(tempAssetPath, 'Cards/question mark image?.jpg'),
+			)
+
+			// With media syncing enabled, the question-mark asset must be found on
+			// disk, hashed, and assigned a safe Anki media filename
+			const noteSyncedMedia = await getNoteFromMarkdown(markdown, {
+				allFilePaths,
+				basePath: tempAssetPath,
+				cwd: normalize(path.dirname(noteFile)),
+				namespace: 'test',
+				obsidianVault: 'test-question-mark',
+				syncMediaAssets: 'local',
+			})
+
+			const htmlSyncedMedia = `${noteSyncedMedia.fields.Front}${noteSyncedMedia.fields.Back}${noteSyncedMedia.fields.Extra}`
+			const { document: documentSyncedMedia } = parseHTML(htmlSyncedMedia)
+			const syncedImages = [...documentSyncedMedia.querySelectorAll('img[data-yanki-media-src]')]
+			expect(syncedImages).toHaveLength(1)
+			const [syncedImage] = syncedImages
+			if (!(syncedImage instanceof HTMLElement)) {
+				throw new TypeError('Expected image embed to be an HTMLElement')
+			}
+
+			const syncedImageDataset = syncedImage.dataset as DOMStringMap
+
+			// Sync is only marked true if the file at the literal "?" path was
+			// actually found and content-hashed through the file adapter
+			expect(syncedImageDataset.yankiMediaSync).toBe('true')
+
+			// Anki fetches the asset from the literal path
+			expect(syncedImageDataset.yankiMediaSrc).toBe(
+				path.join(tempAssetPath, 'Cards/question mark image?.jpg'),
+			)
+
+			// The stored media filename is a hashed slug with no question mark
+			const syncedImageSrc = syncedImage.getAttribute('src') ?? ''
+			expect(syncedImageSrc.endsWith('.jpg')).toBe(true)
+			expect(syncedImageSrc).not.toContain('?')
+			expect(syncedImageSrc).not.toBe(syncedImageDataset.yankiMediaSrc)
+
+			// Without a vault, links resolve to plain absolute paths, and the
+			// question mark must be percent-encoded so the href parses as a path
+			const notePlain = await getNoteFromMarkdown(markdown, {
+				allFilePaths,
+				basePath: tempAssetPath,
+				cwd: normalize(path.dirname(noteFile)),
+				namespace: 'test',
+				syncMediaAssets: 'off',
+			})
+
+			const htmlPlain = `${notePlain.fields.Front}${notePlain.fields.Back}${notePlain.fields.Extra}`
+			const { document: documentPlain } = parseHTML(htmlPlain)
+			const linksPlain = [...documentPlain.querySelectorAll('a[data-yanki-src-original]')]
+			expect(linksPlain).toHaveLength(2)
+
+			const expectedPlainHref = encodeURI(normalize(noteFile)).replaceAll('?', '%3F')
+			for (const link of linksPlain) {
+				expect(link.getAttribute('href')).toBe(expectedPlainHref)
+			}
+		} finally {
+			await fs.rm(path.dirname(tempAssetPath), { force: true, recursive: true })
+		}
+	},
+)
 
 describeWithFileFixture(
 	'obsidian vault sync',
@@ -87,7 +323,7 @@ describeWithFileFixture(
 		cleanUpTempFiles: true,
 	},
 	(context) => {
-		it('correctly syncs an entire obsidian vault', { timeout: 60_000 }, async () => {
+		it('correctly syncs an entire obsidian vault', { timeout: 180_000 }, async () => {
 			const results = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
 				ankiConnectOptions: {
@@ -105,12 +341,14 @@ describeWithFileFixture(
 			// Valid wiki links
 			for (const result of results.synced) {
 				if (
-					result.filePathOriginal?.includes('/Wiki Links/') &&
-					result.filePathOriginal.endsWith('test card.md')
+					!result.filePathOriginal?.includes('/Wiki Links/') ||
+					!result.filePathOriginal.endsWith('test card.md')
 				) {
-					const html = `${result.note.fields.Front}${result.note.fields.Back}${result.note.fields.Extra}`
-					checkWikiLinkResolution(html, normalize(context.tempAssetPath))
+					continue
 				}
+
+				const html = `${result.note.fields.Front}${result.note.fields.Back}${result.note.fields.Extra}`
+				checkWikiLinkResolution(html, normalize(context.tempAssetPath))
 			}
 
 			// Basic stability
@@ -166,9 +404,106 @@ describeWithFileFixture(
 	},
 )
 
-function checkWikiLinkResolution(html: string, basePath: string): void {
+// The two notes in this fixture are named so that managed renaming inverts
+// their sort order: 'aa first.md' → 'Zebra prompt.md' and 'zz last.md' →
+// 'Apple prompt.md'. The Obsidian note reload in syncFiles pairs reloaded
+// notes with renamed notes by index, which is only safe if renameNotes and
+// loadLocalNotes agree on sort order.
+describeWithFileFixture(
+	'obsidian reload pairing when renames change sort order',
+	{
+		assetPath: './test/assets/test-rename-order/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it(
+			'pairs reloaded notes with the correct files when renames invert file sort order',
+			{ timeout: 60_000 },
+			async () => {
+				const results = await syncFiles(context.markdownFiles, {
+					allFilePaths: context.allFiles,
+					ankiConnectOptions: {
+						autoLaunch: false,
+					},
+					ankiWeb: false,
+					basePath: context.tempAssetPath,
+					dryRun: false,
+					manageFilenames: 'prompt',
+					namespace: context.namespace,
+					obsidianVault: 'test-rename-order',
+					syncMediaAssets: 'off',
+				})
+
+				const zebra = results.synced.find((result) =>
+					result.filePathOriginal?.endsWith('aa first.md'),
+				)
+				const apple = results.synced.find((result) =>
+					result.filePathOriginal?.endsWith('zz last.md'),
+				)
+
+				// Sanity: the renames happened and inverted the files' sort order
+				expect(zebra?.filePath?.endsWith('Zebra prompt.md')).toBe(true)
+				expect(apple?.filePath?.endsWith('Apple prompt.md')).toBe(true)
+
+				// Each synced entry's note must be the note parsed from its own
+				// file, not from the neighbor that swapped sort positions with it
+				expect(zebra?.note.fields.Front).toContain('Zebra prompt')
+				expect(apple?.note.fields.Front).toContain('Apple prompt')
+
+				// And on disk, each renamed file must still hold its own content
+				const zebraMarkdown = await fs.readFile(zebra!.filePath!, 'utf8')
+				const appleMarkdown = await fs.readFile(apple!.filePath!, 'utf8')
+				expect(zebraMarkdown).toContain('Zebra prompt')
+				expect(appleMarkdown).toContain('Apple prompt')
+			},
+		)
+	},
+)
+
+describeWithFileFixture(
+	'obsidian dry-run rename reload',
+	{
+		assetPath: './test/assets/test-rename-order/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it(
+			'reloads notes without reading renamed paths that were never created during a dry run',
+			{ timeout: 60_000 },
+			async () => {
+				// A dry run skips the on-disk renames, but still reports the new
+				// file paths, so the Obsidian note reload must not read from them
+				const results = await syncFiles(context.markdownFiles, {
+					allFilePaths: context.allFiles,
+					ankiConnectOptions: {
+						autoLaunch: false,
+					},
+					ankiWeb: false,
+					basePath: context.tempAssetPath,
+					dryRun: true,
+					manageFilenames: 'prompt',
+					namespace: context.namespace,
+					obsidianVault: 'test-rename-order',
+					syncMediaAssets: 'off',
+				})
+
+				expect(results.synced).toHaveLength(2)
+			},
+		)
+	},
+)
+
+/**
+ * Asserts that every resolved link in the HTML matches the expected path
+ * prepared in the element's alt text or innerHTML. Returns the number of links
+ * checked so callers can assert the notes weren't empty of links.
+ */
+function checkWikiLinkResolution(html: string, basePath: string): number {
 	const { document } = parseHTML(html)
 	const elements = document.querySelectorAll('[data-yanki-src-original]')
+	let checkedCount = 0
 
 	for (const element of elements) {
 		// Ensure element is an instance of Element
@@ -183,6 +518,7 @@ function checkWikiLinkResolution(html: string, basePath: string): void {
 
 		const resolvedSrc =
 			dataset.yankiMediaSrc ?? element.getAttribute('href') ?? element.getAttribute('src') ?? ''
+		// eslint-disable-next-line unicorn/prefer-dom-node-html-methods
 		const expectedSrc = element.getAttribute('alt') ?? dataset.yankiAltText ?? element.innerHTML
 
 		// Clean up for comparison, handling Obsidian vault links if present
@@ -205,5 +541,8 @@ function checkWikiLinkResolution(html: string, basePath: string): void {
 		)
 
 		expect(resolvedSrcClean, `Original link source: "${originalSrc}"`).toEqual(expectedSrcClean)
+		checkedCount++
 	}
+
+	return checkedCount
 }

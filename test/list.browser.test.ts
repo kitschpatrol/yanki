@@ -12,7 +12,8 @@ import { listNotes, syncNotes } from '../src/lib'
 // 	return fetch(url, options)
 // }
 
-it('lists notes', { only: true }, async () => {
+// eslint-disable-next-line test/no-focused-tests
+it('lists notes', { only: true, timeout: 60_000 }, async () => {
 	// Mock data
 	const namespace = 'Yanki Test - list.browser.test'
 	const testNote: YankiNote = {

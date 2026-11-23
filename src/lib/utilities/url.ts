@@ -1,5 +1,4 @@
 /* eslint-disable jsdoc/require-jsdoc */
-/* eslint-disable node/no-unsupported-features/node-builtins */
 
 import type { MediaSupportedExtension } from '../shared/constants'
 import type { FetchAdapter } from '../shared/types'
@@ -12,8 +11,8 @@ import { getFileExtensionForMimeType } from './mime'
 import { isAbsolute, normalize } from './path'
 import { getHash } from './string'
 
-const DRIVE_LETTER_REGEX = /^[a-z]:/i
-const FILE_PREFIX_REGEX = /^file:/i
+const DRIVE_LETTER_REGEX = /^[a-z]:/iu
+const FILE_PREFIX_REGEX = /^file:/iu
 
 // Detect probably wiki-style name links
 // export function isNameUrl(text: string): boolean {
@@ -52,14 +51,10 @@ export function safeParseUrl(text: string): undefined | URL {
 
 		// If a file url is detected, but wasn't explicitly passed via a protocol, then
 		// treat it as a file path and not a URL
-		if (
-			(FILE_PREFIX_REGEX.test(url.protocol) || DRIVE_LETTER_REGEX.test(url.protocol)) &&
+		return (FILE_PREFIX_REGEX.test(url.protocol) || DRIVE_LETTER_REGEX.test(url.protocol)) &&
 			!FILE_PREFIX_REGEX.test(text)
-		) {
-			return undefined
-		}
-
-		return url
+			? undefined
+			: url
 
 		// More notes:
 		// Windows file paths can yield protocols like `C:\Bla bla bla` will yield a
@@ -86,11 +81,7 @@ export function isUrl(text: string): boolean {
  */
 export function fileUrlToPath(url: string): string {
 	const parsedUrl = safeParseUrl(url)
-	if (parsedUrl?.protocol === 'file:') {
-		return parsedUrl.pathname
-	}
-
-	return url
+	return parsedUrl?.protocol === 'file:' ? parsedUrl.pathname : url
 }
 
 export function getSrcType(
@@ -110,16 +101,13 @@ export function getSrcType(
 
 		// Links that are relative or absolute probably aren't wiki-style name links
 		// TODO vet this with the normalized paths
-		if (
+		const isPath =
 			isAbsolute(normalizedPath) ||
 			// Can't use isRelative() since that considered no prefix to be relative
 			normalizedPath.startsWith('./') ||
 			normalizedPath.startsWith('../')
-		) {
-			return 'localFilePath'
-		}
 
-		return 'localFileName'
+		return isPath ? 'localFilePath' : 'localFileName'
 	}
 
 	// Probably a url
@@ -131,11 +119,9 @@ export function getSrcType(
 		return 'obsidianVaultUrl'
 	}
 
-	if (url.protocol === 'http:' || url.protocol === 'https:') {
-		return 'remoteHttpUrl'
-	}
-
-	return 'unsupportedProtocolUrl'
+	return url.protocol === 'http:' || url.protocol === 'https:'
+		? 'remoteHttpUrl'
+		: 'unsupportedProtocolUrl'
 }
 
 /**
@@ -164,15 +150,11 @@ function getHeadersString(
 			? headerKeys.map((key) => headers.get(key))
 			: headerKeys.map((key) => headers[key])
 	)
-		// eslint-disable-next-line ts/no-unnecessary-condition
+
 		.filter((value) => value !== null && value !== undefined)
 		.join('')
 
-	if (headerString === '') {
-		return undefined
-	}
-
-	return headerString
+	return headerString === '' ? undefined : headerString
 }
 
 function convertKeysToLowercase(object: Record<string, string>): Record<string, string> {
@@ -200,54 +182,48 @@ export async function getFileExtensionFromUrl(
 	fetchAdapter: FetchAdapter | undefined,
 	mode = MEDIA_URL_CONTENT_TYPE_MODE,
 ): Promise<MediaSupportedExtension | undefined> {
-	switch (mode) {
-		case 'metadata': {
-			if (fetchAdapter === undefined) {
-				// Fall through to name mode
-				return getFileExtensionFromUrl(url, fetchAdapter, 'name')
+	if (mode === 'metadata' && fetchAdapter !== undefined) {
+		try {
+			const response = await fetchAdapter(url, { method: 'HEAD' })
+			const contentTypeHeaderValue = getHeadersString(response?.headers, ['content-type'])
+
+			if (contentTypeHeaderValue === undefined) {
+				throw new Error('No content-type header found')
 			}
 
-			try {
-				const response = await fetchAdapter(url, { method: 'HEAD' })
-				const contentTypeHeaderValue = getHeadersString(response?.headers, ['content-type'])
-
-				if (contentTypeHeaderValue === undefined) {
-					throw new Error('No content-type header found')
-				}
-
-				return getFileExtensionForMimeType(contentTypeHeaderValue)
-			} catch {
-				// Fall through to name mode
-				return getFileExtensionFromUrl(url, fetchAdapter, 'name')
-			}
-		}
-
-		case 'name': {
-			let extensionInUrl: string | undefined
-			const parsedUrl = safeParseUrl(url)
-
-			if (parsedUrl === undefined) {
-				console.warn(`Could not parse URL: ${url}`)
-				return undefined
+			const extension = getFileExtensionForMimeType(contentTypeHeaderValue)
+			if (extension !== undefined) {
+				return extension
 			}
 
-			const pathnameParts = parsedUrl.pathname.split('.')
-			if (pathnameParts.length > 1) {
-				extensionInUrl = pathnameParts.at(-1)
-			} else {
-				// Look in the query string if we must...
-				const searchParts = parsedUrl.search.split('.')
-				extensionInUrl = searchParts.at(-1)
-			}
-
-			// TODO get rid of type cast
-			if (MEDIA_SUPPORTED_EXTENSIONS.includes((extensionInUrl ?? '') as MediaSupportedExtension)) {
-				return extensionInUrl as MediaSupportedExtension
-			}
-
-			return undefined
+			// Unknown mime type, fall through to name mode
+		} catch {
+			// Fall through to name mode
 		}
 	}
+
+	// Name mode, also the fallback if metadata mode is unavailable or fails
+	const parsedUrl = safeParseUrl(url)
+
+	if (parsedUrl === undefined) {
+		console.warn(`Could not parse URL: ${url}`)
+		return undefined
+	}
+
+	let extensionInUrl: string | undefined
+	const pathnameParts = parsedUrl.pathname.split('.')
+	if (pathnameParts.length > 1) {
+		extensionInUrl = pathnameParts.at(-1)
+	} else {
+		// Look in the query string if we must...
+		const searchParts = parsedUrl.search.split('.')
+		extensionInUrl = searchParts.at(-1)
+	}
+
+	// TODO get rid of type cast
+	return MEDIA_SUPPORTED_EXTENSIONS.includes((extensionInUrl ?? '') as MediaSupportedExtension)
+		? (extensionInUrl as MediaSupportedExtension)
+		: undefined
 }
 
 /**
@@ -267,49 +243,64 @@ export async function getUrlContentHash(
 	fetchAdapter: FetchAdapter,
 	mode = MEDIA_DEFAULT_HASH_MODE_URL,
 ): Promise<string> {
-	// Obliging the no-fallthrough lint rule, but this effectively falls through
-	// via recursion instead...
-	switch (mode) {
-		case 'content': {
-			console.warn('`content` hash mode is not yet implemented for URLs')
-			// Use metadata mode
-			return getUrlContentHash(url, fetchAdapter, 'metadata')
-		}
+	if (mode === 'content') {
+		console.warn('`content` hash mode is not yet implemented for URLs')
+		// Use metadata mode instead
+	}
 
-		case 'metadata': {
-			try {
-				const response = await fetchAdapter(url, { method: 'HEAD' })
-				const stringToHash = getHeadersString(response?.headers, [
-					'etag',
-					'last-modified',
-					'content-length',
-				])
+	if (mode !== 'name') {
+		try {
+			const response = await fetchAdapter(url, { method: 'HEAD' })
+			const stringToHash = getHeadersString(response?.headers, [
+				'etag',
+				'last-modified',
+				'content-length',
+			])
 
-				if (stringToHash === undefined) {
-					throw new Error('No headers found')
-				}
-
-				return getHash(stringToHash, 16)
-			} catch {
-				// Fall through to name mode
-				return getUrlContentHash(url, fetchAdapter, 'name')
+			if (stringToHash === undefined) {
+				throw new Error('No headers found')
 			}
-		}
 
-		case 'name': {
-			return getHash(url, 16)
+			// Include the URL so distinct URLs that serve identical headers
+			// (e.g. same last-modified and content-length, no etag) don't collide
+			return getHash(`${url}${stringToHash}`, 16)
+		} catch {
+			// Fall through to name mode
 		}
 	}
+
+	// Name mode, also the fallback if metadata mode fails
+	return getHash(url, 16)
+}
+
+// The WHATWG URL parser leaves `URL.port` empty when the port matches the
+// protocol's default, so an explicitly-typed default port (e.g. `:443` on
+// https) is otherwise silently dropped. Covers all "special schemes" with a
+// default port: https://url.spec.whatwg.org/#special-scheme
+const DEFAULT_PORT_BY_PROTOCOL: Record<string, number> = {
+	'ftp:': 21,
+	'http:': 80,
+	'https:': 443,
+	'ws:': 80,
+	'wss:': 443,
 }
 
 export function urlToHostAndPort(url: string): undefined | { host: string; port: number } {
 	const parsedUrl = safeParseUrl(url)
-	return parsedUrl === undefined
-		? undefined
-		: {
-				host: `${parsedUrl.protocol}//${parsedUrl.hostname}`,
-				port: Number.parseInt(parsedUrl.port, 10),
-			}
+	if (parsedUrl === undefined) {
+		return undefined
+	}
+
+	return {
+		host: `${parsedUrl.protocol}//${parsedUrl.hostname}`,
+		// `URL.port` is empty for the protocol's default port, so recover it from
+		// the protocol rather than dropping it. Protocols without a known default
+		// yield NaN, preserving the prior behavior for those.
+		port:
+			parsedUrl.port === ''
+				? (DEFAULT_PORT_BY_PROTOCOL[parsedUrl.protocol] ?? NaN)
+				: Number(parsedUrl.port),
+	}
 }
 
 export function hostAndPortToUrl(host: string, port: number): string {

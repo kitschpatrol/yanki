@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises'
 
-const NEWLINE_REGEX = /\r?\n/
+const NEWLINE_REGEX = /\r?\n/v
 
 export async function countLinesOfFrontmatter(filePath: string) {
 	const markdown = await fs.readFile(filePath, 'utf8')

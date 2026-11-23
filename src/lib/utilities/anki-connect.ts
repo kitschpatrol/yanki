@@ -1,10 +1,10 @@
-/* eslint-disable complexity */
 /* eslint-disable max-depth */
 /* eslint-disable ts/no-unnecessary-condition */
 /* eslint-disable jsdoc/require-jsdoc */
 
 import type { YankiConnect } from 'yanki-connect'
 import { uint8ArrayToBase64 } from 'uint8array-extras'
+import { AnkiConnectUnreachableError } from 'yanki-connect'
 import type { YankiModelName } from '../model/model'
 import type { YankiNote } from '../model/note'
 import type { Media } from '../parse/rehype-utilities'
@@ -14,6 +14,21 @@ import { extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
 import { getSlugifiedNamespace } from './namespace'
 import { isUrl } from './url'
+
+async function ensureModelExists(
+	client: YankiConnect,
+	model: (typeof yankiModels)[number],
+): Promise<void> {
+	try {
+		await client.model.createModel(model)
+	} catch (error) {
+		if (error instanceof Error && error.message === 'Model name already exists') {
+			return
+		}
+
+		throw error
+	}
+}
 
 export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryRun = false) {
 	if (dryRun) {
@@ -108,26 +123,6 @@ function toNumberArray(value: unknown, actionName: string): number[] {
 	}
 
 	return value
-}
-
-/**
- * Narrow a `getDeckConfig` `multi()` result to its `dyn` flag. The full
- * yanki-connect `DeckConfig` shape is large; we only need `dyn`, which is
- * either `1` (filtered) or `false` (regular).
- */
-function toDeckDyn(value: unknown, actionName: string, deckName: string): boolean {
-	if (
-		typeof value !== 'object' ||
-		value === null ||
-		!('dyn' in value) ||
-		(value.dyn !== 1 && value.dyn !== false)
-	) {
-		throw new TypeError(
-			`Expected { dyn: 1 | false } from ${actionName} for deck "${deckName}", got: ${JSON.stringify(value)}`,
-		)
-	}
-
-	return Boolean(value.dyn)
 }
 
 /**
@@ -363,40 +358,40 @@ export async function addNote(
 		return 0
 	}
 
-	const newNote = await client.note
-		.addNote({
-			note: {
-				...note,
-				options: {
-					allowDuplicate: true,
+	let newNote: number | undefined
+	try {
+		// The client returns null on failure, but the project convention is undefined
+		newNote =
+			(await client.note.addNote({
+				note: {
+					...note,
+					options: {
+						allowDuplicate: true,
+					},
 				},
-			},
-		})
-		.catch(async (error: unknown) => {
-			if (error instanceof Error) {
-				if (error.message === `model was not found: ${note.modelName}`) {
-					// Create the model and try again
-					const model = yankiModels.find((model) => model.modelName === note.modelName)
-					if (model === undefined) {
-						throw new Error(`Model not found: ${note.modelName}`)
-					}
-
-					await client.model.createModel(model)
-
-					return addNote(client, note, dryRun, fileAdapter)
+			})) ?? undefined
+	} catch (error) {
+		if (error instanceof Error) {
+			if (error.message === `model was not found: ${note.modelName}`) {
+				// Create the model and try again
+				const model = yankiModels.find((model) => model.modelName === note.modelName)
+				if (model === undefined) {
+					throw new Error(`Model not found: ${note.modelName}`, { cause: error })
 				}
 
-				if (error.message === `deck was not found: ${note.deckName}`) {
-					// Create the deck and try again
+				await ensureModelExists(client, model)
 
-					if (note.deckName === '') {
-						throw new Error('Deck name is empty')
-					}
+				newNote = await addNote(client, note, dryRun, fileAdapter)
+			} else if (error.message === `deck was not found: ${note.deckName}`) {
+				// Create the deck and try again
 
-					await client.deck.createDeck({ deck: note.deckName })
-					return addNote(client, note, dryRun, fileAdapter)
+				if (note.deckName === '') {
+					throw new Error('Deck name is empty', { cause: error })
 				}
 
+				await client.deck.createDeck({ deck: note.deckName })
+				newNote = await addNote(client, note, dryRun, fileAdapter)
+			} else {
 				// Do this in parse.ts instead to simplify future local / remote diffs
 				// Anki won't create notes if the front field is blank, but we want
 				// parity between markdown files and notes at all costs, so we'll put
@@ -411,12 +406,13 @@ export async function addNote(
 				// }
 
 				throw error
-			} else {
-				throw new TypeError('Unknown error')
 			}
-		})
+		} else {
+			throw new TypeError('Unknown error', { cause: error })
+		}
+	}
 
-	if (newNote === null) {
+	if (newNote === undefined) {
 		throw new Error('Note creation failed')
 	}
 
@@ -484,31 +480,31 @@ export async function updateNote(
 			// - tags
 			// - assigned model
 
-			await client.note
-				.updateNoteModel({
+			try {
+				await client.note.updateNoteModel({
 					note: { ...localNote, id: localNote.noteId, tags: localNote.tags ?? [] },
 				})
-				.catch(async (error: unknown) => {
-					if (error instanceof Error) {
-						if (error.message === `Model '${localNote.modelName}' not found`) {
-							// Create the model and try again
-							const model = yankiModels.find((model) => model.modelName === localNote.modelName)
-							if (model === undefined) {
-								throw new Error(`Model not found: ${localNote.modelName}`)
-							}
-
-							await client.model.createModel(model)
-
-							return updateNote(client, localNote, remoteNote, dryRun, fileAdapter)
+			} catch (error) {
+				if (error instanceof Error) {
+					if (error.message === `Model '${localNote.modelName}' not found`) {
+						// Create the model and try again
+						const model = yankiModels.find((model) => model.modelName === localNote.modelName)
+						if (model === undefined) {
+							throw new Error(`Model not found: ${localNote.modelName}`, { cause: error })
 						}
 
+						await ensureModelExists(client, model)
+
+						await updateNote(client, localNote, remoteNote, dryRun, fileAdapter)
+					} else {
 						// TODO What about missing decks?
 						// updateNoteModel does not throw deck exceptions...
 						throw error
-					} else {
-						throw new TypeError('Unknown error')
 					}
-				})
+				} else {
+					throw new TypeError('Unknown error', { cause: error })
+				}
+			}
 
 			// Always try to update media, in case media assets are missing from Anki
 			// Check happens in uploadMediaForNote
@@ -534,14 +530,17 @@ function areFieldsEqual(
 	const keys = ['Front', 'Back', 'Extra']
 
 	for (const key of keys) {
+		const localValue = Object.hasOwn(localFields, key) ? localFields[key] : undefined
+		const remoteValue = Object.hasOwn(remoteFields, key) ? remoteFields[key] : undefined
+
 		// Both fields have the key (e.g. Extra)
-		if (key in localFields && key in remoteFields) {
-			if (localFields[key].normalize('NFC') !== remoteFields[key].normalize('NFC')) {
+		if (localValue !== undefined && remoteValue !== undefined) {
+			if (localValue.normalize('NFC') !== remoteValue.normalize('NFC')) {
 				return false
 			}
 		}
 		// Only one fields has the key
-		else if (key in localFields || key in remoteFields) {
+		else if (localValue !== undefined || remoteValue !== undefined) {
 			return false
 		}
 	}
@@ -555,19 +554,12 @@ export function areNotesEqual(noteA: YankiNote, noteB: YankiNote, includeId = tr
 		return false
 	}
 
-	if (noteA.deckName !== noteB.deckName) {
-		return false
-	}
-
-	if (noteA.modelName !== noteB.modelName) {
-		return false
-	}
-
-	if (!areFieldsEqual(noteA.fields, noteB.fields)) {
-		return false
-	}
-
-	if (!areTagsEqual(noteA.tags ?? [], noteB.tags ?? [])) {
+	if (
+		noteA.deckName !== noteB.deckName ||
+		noteA.modelName !== noteB.modelName ||
+		!areFieldsEqual(noteA.fields, noteB.fields) ||
+		!areTagsEqual(noteA.tags ?? [], noteB.tags ?? [])
+	) {
 		return false
 	}
 
@@ -589,7 +581,7 @@ function areTagsEqual(localTags: string[], remoteTags: string[]): boolean {
 	// Create a set of both tags
 	const localTagsSet = new Set(localTags.map((tag) => tag.normalize('NFC').toLowerCase()))
 	const remoteTagsSet = new Set(remoteTags.map((tag) => tag.normalize('NFC').toLowerCase()))
-	const allTagsSet = new Set([...localTagsSet, ...remoteTagsSet])
+	const allTagsSet = localTagsSet.union(remoteTagsSet)
 
 	// If the merged tags sets are the same size, then the tags must be equal
 	return allTagsSet.size === remoteTagsSet.size
@@ -611,26 +603,31 @@ export async function getRemoteNotes(
 ): Promise<YankiNote[]> {
 	const noteIds = await client.note.findNotes({ query: `"YankiNamespace:${namespace}"` })
 
-	// We can trust that these are defined, since the list of notes is coming
-	// straight from Anki
-	return (await getRemoteNotesById(client, noteIds)) as YankiNote[]
+	// The findNotes function can return IDs for notes that notesInfo no longer
+	// resolves — e.g. transient phantoms left behind when addNote retried after a
+	// missing model/deck error. Drop those undefined entries so callers can rely
+	// on every returned note being fully populated.
+	const notes = await getRemoteNotesById(client, noteIds)
+	return notes.filter((note): note is YankiNote => note !== undefined)
+}
+
+function getFieldValue(field: undefined | { value: string }): string {
+	return field?.value ?? ''
 }
 
 /**
  * Get all data from Anki required to populate the YankiNote type.
  *
  * Handles some extra footwork to identify the deck name and validate the model
- * name. There's no way to get everything we need in one shot from
- * Anki-Connect.
- *
- * Undefined elements in the returned array are subsequently used to identify
- * notes that need to be created.
+ * name. There's no way to get everything we need in one shot from AnkiConnect.
  *
  * @param client An instance of YankiConnect
- * @param noteIds An array of local note IDs to (attempt) to fetch
+ * @param noteIds An array of note IDs (from `findNotes`) to fetch
  *
- * @returns Array of YankiNote objects, with undefined for notes that could not
- *   be found.
+ * @returns Array positionally aligned with `noteIds`. Entries are `undefined`
+ *   when `notesInfo` does not resolve the corresponding ID — `findNotes` can
+ *   return phantom IDs (e.g. left behind by `addNote` retries) that no longer
+ *   exist as notes.
  * @throws {Error} If an unknown model name or multiple decks are found for a
  *   note, or if no deck is found.
  */
@@ -642,9 +639,12 @@ async function getRemoteNotesById(
 
 	if (ankiNotes.every((ankiNote) => ankiNote.noteId === undefined)) {
 		// All undefined, return early
-		// eslint-disable-next-line unicorn/no-useless-undefined
-		return Array.from<undefined>({ length: ankiNotes.length }).fill(undefined)
+
+		// Array.from({ length }) creates an array of `undefined` elements
+		return Array.from<undefined>({ length: ankiNotes.length })
 	}
+
+	const yankiNotes: Array<undefined | YankiNote> = []
 
 	// Have to fish decks out of the card IDs
 	const allCardIds = ankiNotes.flatMap((note) => note.cards ?? [])
@@ -658,88 +658,13 @@ async function getRemoteNotesById(
 		}
 	}
 
-	// Phase A — batch getDeckConfig for every deck this sync touches.
-	const deckFilteredStatusMap = new Map<string, boolean>()
-	const syncDeckNames = Object.keys(deckToCardMap)
-	const phaseAActions: MultiAction[] = syncDeckNames.map((deck) => ({
-		action: 'getDeckConfig',
-		params: { deck },
-		version: 6,
-	}))
-	await runMultiOrThrow(
-		client,
-		phaseAActions,
-		(index) => `deck "${syncDeckNames[index] ?? `index ${index}`}"`,
-		(index, result) => {
-			const deckName = syncDeckNames[index]
-			deckFilteredStatusMap.set(deckName, toDeckDyn(result, 'getDeckConfig', deckName))
-		},
-	)
+	const filteredDeckNames = await getFilteredDeckNames(client, cardIdToDeckMap)
 
-	// Phases B + C only run when at least one deck in this sync is filtered.
-	const sortedUnfilteredDeckNames: string[] = []
-	const unfilteredDeckNoteIdMap = new Map<string, number[]>()
-	const anyFiltered = [...deckFilteredStatusMap.values()].some(Boolean)
+	// Only notes in filtered decks need a home deck lookup, so skip the extra
+	// requests entirely when this sync touches no filtered decks
+	const homeDeckCandidates =
+		filteredDeckNames.size > 0 ? await getHomeDeckCandidates(client, filteredDeckNames) : []
 
-	if (anyFiltered) {
-		// Phase B — fan out to every remaining deck, including Default. Probing
-		// one extra deck is cheap (it rides in the same multi() chunks) and
-		// avoids silently mis-resolving filtered notes if a user has somehow
-		// turned Default into a filtered deck.
-		const allDeckNames = await client.deck.deckNames()
-		const remainingDecks = allDeckNames.filter((name) => !deckFilteredStatusMap.has(name))
-		const phaseBActions: MultiAction[] = remainingDecks.map((deck) => ({
-			action: 'getDeckConfig',
-			params: { deck },
-			version: 6,
-		}))
-		await runMultiOrThrow(
-			client,
-			phaseBActions,
-			(index) => `deck "${remainingDecks[index] ?? `index ${index}`}"`,
-			(index, result) => {
-				const deckName = remainingDecks[index]
-				deckFilteredStatusMap.set(deckName, toDeckDyn(result, 'getDeckConfig', deckName))
-			},
-		)
-
-		// Sort decks deep to shallow so a note in `A::B::C` resolves to `A::B::C`
-		// rather than the matching parent `A::B`. Default is the least likely
-		// home for a Yanki note, so it's appended last.
-		for (const [deck, isFiltered] of deckFilteredStatusMap) {
-			if (!isFiltered && deck !== 'Default') {
-				sortedUnfilteredDeckNames.push(deck)
-			}
-		}
-
-		sortedUnfilteredDeckNames.sort((a, b) => b.split('::').length - a.split('::').length)
-		// Default goes last (least likely to host a Yanki note) — only if it's
-		// actually unfiltered. Probed in Phase B, no longer assumed.
-		if (deckFilteredStatusMap.get('Default') === false) {
-			sortedUnfilteredDeckNames.push('Default')
-		}
-
-		// Phase C — eagerly batch findNotes for every unfiltered deck so the
-		// main loop below can resolve filtered-deck notes synchronously.
-		const phaseCActions: MultiAction[] = sortedUnfilteredDeckNames.map((deck) => ({
-			action: 'findNotes',
-			params: { query: `"deck:${deck}"` },
-			version: 6,
-		}))
-		await runMultiOrThrow(
-			client,
-			phaseCActions,
-			(index) => `deck "${sortedUnfilteredDeckNames[index] ?? `index ${index}`}"`,
-			(index, result) => {
-				const deckName = sortedUnfilteredDeckNames[index]
-				unfilteredDeckNoteIdMap.set(deckName, toNumberArray(result, 'findNotes'))
-			},
-		)
-	}
-
-	// Phase D — synchronous resolution loop. All deck/note lookups are now
-	// served from the maps populated above.
-	const yankiNotes: Array<undefined | YankiNote> = []
 	for (const ankiNote of ankiNotes) {
 		if (ankiNote.noteId === undefined) {
 			yankiNotes.push(undefined)
@@ -758,19 +683,15 @@ async function getRemoteNotesById(
 			throw new Error(`No deck found for cards in note ${ankiNote.noteId}`)
 		}
 
-		if (deckFilteredStatusMap.get(deckName)) {
-			let found = false
-			for (const candidate of sortedUnfilteredDeckNames) {
-				if (unfilteredDeckNoteIdMap.get(candidate)?.includes(ankiNote.noteId)) {
-					deckName = candidate
-					found = true
-					break
-				}
-			}
+		// Look up matching "real" non-filtered decks if the note is in a filtered deck
+		if (filteredDeckNames.has(deckName)) {
+			const homeDeckName = findHomeDeckNameForNote(homeDeckCandidates, ankiNote.noteId)
 
-			if (!found) {
+			if (homeDeckName === undefined) {
 				throw new Error(`No matching non-filtered deck found for note ${ankiNote.noteId}`)
 			}
+
+			deckName = homeDeckName
 		}
 
 		// Picture, sound, etc. fields are never provided
@@ -778,10 +699,10 @@ async function getRemoteNotesById(
 			cards: ankiNote.cards,
 			deckName,
 			fields: {
-				Back: ankiNote.fields.Back.value ?? '',
-				...(ankiNote.fields.Extra !== undefined && { Extra: ankiNote.fields.Extra.value ?? '' }),
-				Front: ankiNote.fields.Front.value ?? '',
-				YankiNamespace: ankiNote.fields.YankiNamespace.value ?? '',
+				Back: getFieldValue(ankiNote.fields.Back),
+				...(ankiNote.fields.Extra !== undefined && { Extra: getFieldValue(ankiNote.fields.Extra) }),
+				Front: getFieldValue(ankiNote.fields.Front),
+				YankiNamespace: getFieldValue(ankiNote.fields.YankiNamespace),
 			},
 			modelName: ankiNote.modelName as YankiModelName, // Checked above
 			noteId: ankiNote.noteId,
@@ -790,6 +711,93 @@ async function getRemoteNotesById(
 	}
 
 	return yankiNotes
+}
+
+/**
+ * Names of the filtered ("dynamic") decks currently holding any of the given
+ * cards. Anki's `deck:filtered` search works on every supported release, while
+ * AnkiConnect 26.10.11.0 and later fail `getDeckConfig` for filtered decks.
+ */
+async function getFilteredDeckNames(
+	client: YankiConnect,
+	cardIdToDeckMap: Map<number, string>,
+): Promise<Set<string>> {
+	const filteredCardIds = await client.card.findCards({ query: 'deck:filtered' })
+	const filteredDeckNames = new Set<string>()
+
+	for (const cardId of filteredCardIds) {
+		const deckName = cardIdToDeckMap.get(cardId)
+		if (deckName !== undefined) {
+			filteredDeckNames.add(deckName)
+		}
+	}
+
+	return filteredDeckNames
+}
+
+type HomeDeckCandidate = {
+	deckName: string
+	/** Notes with a card in this deck or returning to it */
+	noteIds: number[]
+}
+
+/**
+ * Every deck that could be the home deck of a note whose cards are in a
+ * filtered deck, along with the notes each one holds. Filtered decks holding
+ * none of the synced cards remain candidates, but never match.
+ *
+ * Anki's `did:` search matches a card by its current or home deck, and unlike a
+ * `deck:` search it ignores child decks, so a filtered child deck can't make
+ * its parent look like the home deck.
+ *
+ * The per-deck searches are bundled via `multi()` so the lookups that follow
+ * are served from memory.
+ */
+async function getHomeDeckCandidates(
+	client: YankiConnect,
+	filteredDeckNames: Set<string>,
+): Promise<HomeDeckCandidate[]> {
+	const deckNamesAndIds = await client.deck.deckNamesAndIds()
+	const candidateDecks = Object.entries(deckNamesAndIds).filter(
+		([deckName]) => !filteredDeckNames.has(deckName),
+	)
+
+	const homeDeckCandidates: HomeDeckCandidate[] = []
+	const findNotesActions: MultiAction[] = candidateDecks.map(([, deckId]) => ({
+		action: 'findNotes',
+		params: { query: `did:${deckId}` },
+		version: 6,
+	}))
+	await runMultiOrThrow(
+		client,
+		findNotesActions,
+		(index) => `deck "${candidateDecks[index]?.[0] ?? `index ${index}`}"`,
+		(index, result) => {
+			const candidateDeck = candidateDecks[index]
+			if (candidateDeck === undefined) {
+				return
+			}
+
+			homeDeckCandidates.push({
+				deckName: candidateDeck[0],
+				noteIds: toNumberArray(result, 'findNotes'),
+			})
+		},
+	)
+
+	return homeDeckCandidates
+}
+
+/**
+ * Find the home deck of a note whose cards are in a filtered deck.
+ *
+ * @returns The name of the note's home deck, or undefined if none is found.
+ */
+function findHomeDeckNameForNote(
+	homeDeckCandidates: HomeDeckCandidate[],
+	noteId: number,
+): string | undefined {
+	return homeDeckCandidates.find((candidate) => candidate.noteIds.includes(noteId))?.deckName
 }
 
 export async function deleteOrphanedDecks(
@@ -804,95 +812,125 @@ export async function deleteOrphanedDecks(
 		Boolean,
 	)
 
-	// Set that's excluded from set of notes deck names and recently deleted notes deck names
-	const orphanedDeckNames = originalNoteDeckNames.filter(
-		(deckName) => !activeNoteDeckNames.includes(deckName),
+	// Decks that held notes, and whose tree no active note remains in or arrives in
+	const orphanedDeckNames = originalNoteDeckNames.filter((deckName) =>
+		activeNoteDeckNames.every((activeDeckName) => !isInDeckTree(activeDeckName, deckName)),
 	)
 
 	// Check the parent deck of each orphaned deck
 	const orphanedParentDeckNames: string[] = []
 	for (const orphanedDeckName of orphanedDeckNames) {
-		const parts = orphanedDeckName.split('::')
-		if (parts.length === 1) {
-			continue
-		}
-
-		while (parts.length > 1) {
-			parts.pop()
-			const parentDeckName = parts.join('::')
-			if (activeNoteDeckNames.some((deckName) => deckName.startsWith(`${parentDeckName}::`))) {
-				break
-			}
-
-			orphanedParentDeckNames.push(parentDeckName)
-		}
+		orphanedParentDeckNames.push(
+			...getOrphanedParentDeckNames(orphanedDeckName, activeNoteDeckNames),
+		)
 	}
-
-	// This is a dangerous place and (maybe) a potential source of bugs...
-	// https://github.com/kitschpatrol/yanki-obsidian/issues/6
-	// https://github.com/kitschpatrol/yanki-obsidian/issues/14
-	//
-	// Two possible issues:
-	// 1. The order of the decks returned from `getDeckStats` does not necessarily
-	//    match the order of the decks in the `deckDeletionCandidates` array? It's
-	//    looking for a matching deck ID anywhere in the hierarchy, which may or
-	//    may not be the leaf we want. Solution: Call it one deck at a time.
-	// 2. The `total_in_deck` field is apparently not reliable.... sometimes it
-	//    can be zero when there are cards in the deck. In those cases, it appears
-	//    that `new_count + learn_count + review_count` indicates at least a
-	//    partial non-zero quantity. (But it's not the same as `total_in_deck`
-	//    when available.) Solution: Take the max of these sources as the deck count.
 
 	const deckDeletionCandidates = (
 		[...new Set([...orphanedDeckNames, ...orphanedParentDeckNames])] as string[]
-	).sort()
+	).toSorted()
+	if (deckDeletionCandidates.length === 0) {
+		return []
+	}
 
+	const existingDecks = await client.deck.deckNamesAndIds()
+
+	// A dry run leaves every card in place, so subtract the cards a real run
+	// would have cleared out by now: those of deleted notes, and those of notes
+	// moving to another deck, which is never inside a candidate's tree.
+	const activeDeckNames = new Map(activeNotes.map((note) => [note.noteId, note.deckName]))
+	const cardsToRemove = new Set(
+		dryRun
+			? originalNotes
+					.filter((note) => {
+						const activeDeckName = activeDeckNames.get(note.noteId)
+						return activeDeckName === undefined || !isSameDeck(activeDeckName, note.deckName)
+					})
+					.flatMap((note) => note.cards ?? [])
+			: [],
+	)
 	const decksToDelete: string[] = []
 
-	// Ensure all decks are actually empty
 	for (const deckName of deckDeletionCandidates) {
-		// One at a time...
-		const deckStatsObject = await client.deck.getDeckStats({ decks: [deckName] })
-		const deckStatsValues = Object.values(deckStatsObject)
-
-		if (deckStatsValues.length > 1) {
-			// This should never happen, but don't touch it
-			console.warn(`Multiple decks found for deck name: ${deckName}`)
-			continue
-		}
-
-		const deckStats = deckStatsValues.at(0)
-		if (deckStats === undefined) {
-			// Anki claims deck does not exist, but don't touch it
+		if (existingDecks[deckName] === undefined) {
 			console.warn(`Deck not found for deck name: ${deckName}`)
 			continue
 		}
 
-		const cardCount = Math.max(
-			deckStats.total_in_deck,
-			deckStats.new_count + deckStats.learn_count + deckStats.review_count,
-		)
-
-		if (dryRun) {
-			// Get number of original notes in the deck, vs the number of cards in the deck now...
-			// TODO this is not correct, but only affects dry run...
-			// It's a messy card vs. note quantity situation
-			const originalCount = originalNotes.filter((note) => note.deckName === deckName).length
-			const activeCount = activeNotes.filter((note) => note.deckName === deckName).length
-
-			if (cardCount === originalCount && activeCount === 0 && !decksToDelete.includes(deckName)) {
-				decksToDelete.push(deckName)
-			}
-		} else if (cardCount === 0 && !decksToDelete.includes(deckName)) {
+		// Deleting a parent also deletes its descendants. Due counts omit
+		// suspended, buried, and future-due cards, while total_in_deck may
+		// count only the parent's own cards. Search actual cards instead.
+		// Numeric IDs avoid wildcard/quoting rules in deck names. did: also
+		// includes cards whose home deck is here while in a filtered deck.
+		const query = Object.entries(existingDecks)
+			.filter(([name]) => isInDeckTree(name, deckName))
+			.map(([, id]) => `did:${id}`)
+			.join(' OR ')
+		const cards = await client.card.findCards({ query })
+		if (cards.every((card) => cardsToRemove.has(card))) {
 			decksToDelete.push(deckName)
 		}
 	}
 
-	if (!dryRun) {
-		await client.deck.deleteDecks({ cardsToo: true, decks: decksToDelete })
+	if (!dryRun && decksToDelete.length > 0) {
+		await client.deck.deleteDecks({
+			cardsToo: true,
+			decks: withoutDescendantDecks(decksToDelete),
+		})
 	}
 
 	return decksToDelete
+}
+
+/**
+ * Anki treats deck names that differ only by case as the same deck.
+ */
+function isSameDeck(deckName: string, otherDeckName: string): boolean {
+	return deckName.toLowerCase() === otherDeckName.toLowerCase()
+}
+
+/**
+ * Whether a deck is the given root deck or one of its descendants.
+ */
+function isInDeckTree(deckName: string, rootDeckName: string): boolean {
+	return (
+		isSameDeck(deckName, rootDeckName) ||
+		deckName.toLowerCase().startsWith(`${rootDeckName.toLowerCase()}::`)
+	)
+}
+
+/**
+ * Anki removes a deck's children along with the deck itself, and AnkiConnect
+ * 26.x fails a `deleteDecks` request that names a deck an earlier entry already
+ * removed that way. Drop every deck that has an ancestor in the list.
+ */
+function withoutDescendantDecks(deckNames: string[]): string[] {
+	return deckNames.filter((deckName) =>
+		deckNames.every((otherDeckName) => !deckName.startsWith(`${otherDeckName}::`)),
+	)
+}
+
+/**
+ * Walk up an orphaned deck's ancestry, collecting parent deck names until one
+ * is found that still has an active note in its tree.
+ */
+function getOrphanedParentDeckNames(
+	orphanedDeckName: string,
+	activeNoteDeckNames: string[],
+): string[] {
+	const orphanedParentDeckNames: string[] = []
+	const parts = orphanedDeckName.split('::')
+
+	while (parts.length > 1) {
+		parts.pop()
+		const parentDeckName = parts.join('::')
+		if (activeNoteDeckNames.some((deckName) => isInDeckTree(deckName, parentDeckName))) {
+			break
+		}
+
+		orphanedParentDeckNames.push(parentDeckName)
+	}
+
+	return orphanedParentDeckNames
 }
 
 /**
@@ -910,30 +948,30 @@ export async function updateModelStyle(
 	// Create model on demand if necessary
 	let currentCss: string | undefined
 	try {
-		const { css } = await client.model.modelStyling({ modelName })
-		currentCss = css
+		const { css: existingCss } = await client.model.modelStyling({ modelName })
+		currentCss = existingCss
 	} catch (error) {
 		if (error instanceof Error) {
 			if (error.message === `model was not found: ${modelName}`) {
 				// Create the model and try again
 				const model = yankiModels.find((model) => model.modelName === modelName)
 				if (model === undefined) {
-					throw new Error(`Model not found: ${modelName}`)
+					throw new Error(`Model not found: ${modelName}`, { cause: error })
 				}
 
 				if (dryRun) {
 					return false
 				}
 
-				await client.model.createModel(model)
+				await ensureModelExists(client, model)
 
 				return updateModelStyle(client, model.modelName, css, dryRun)
 			}
 
 			throw error
-		} else {
-			throw new TypeError('Unknown error')
 		}
+
+		throw new TypeError('Unknown error', { cause: error })
 	}
 
 	if (currentCss !== undefined && currentCss === css) {
@@ -954,7 +992,7 @@ export async function updateModelStyle(
 
 export async function getModelStyle(
 	client: YankiConnect,
-	modelName: string = yankiModelNames[0],
+	modelName: string = yankiModelNames[0]!,
 ): Promise<string> {
 	const { css } = await client.model.modelStyling({ modelName })
 	return css
@@ -1270,10 +1308,10 @@ async function runMultiInChunks(
  * for successful actions; per-action errors are converted into a thrown Error
  * tagged with the action name and the caller-provided context.
  *
- * Use this for probes that must succeed (e.g. `getDeckConfig`, `findNotes`
- * lookups during note resolution). For best-effort batches that should keep
- * going on partial failure (e.g. media uploads), call `runMultiInChunks`
- * directly and pick a logging policy.
+ * Use this for probes that must succeed (e.g. `findNotes` lookups during note
+ * resolution). For best-effort batches that should keep going on partial
+ * failure (e.g. media uploads), call `runMultiInChunks` directly and pick a
+ * logging policy.
  */
 async function runMultiOrThrow(
 	client: YankiConnect,
@@ -1293,7 +1331,33 @@ async function runMultiOrThrow(
 }
 
 /**
- * Request permission to access Anki through Anki-Connect.
+ * Request permission to access Anki through AnkiConnect, and throw if Anki
+ * can't be reached.
+ *
+ * @throws {Error} If Anki is unreachable, with the
+ *   `AnkiConnectUnreachableError` as its `cause`, or if access is denied
+ */
+export async function requirePermission(client: YankiConnect): Promise<void> {
+	let response: Awaited<ReturnType<YankiConnect['miscellaneous']['requestPermission']>>
+	try {
+		response = await client.miscellaneous.requestPermission()
+	} catch (error) {
+		if (error instanceof AnkiConnectUnreachableError) {
+			throw new Error('Anki is unreachable. Is Anki running?', { cause: error })
+		}
+
+		throw error
+	}
+
+	if (response.permission === 'denied') {
+		throw new Error(
+			'Permission denied, please add this source to the "webCorsOriginList" in the AnkiConnect add-on configuration options.',
+		)
+	}
+}
+
+/**
+ * Request permission to access Anki through AnkiConnect.
  *
  * @returns 'ankiUnreachable' if Anki is not open, or 'granted' if everything is
  *   copacetic
@@ -1303,21 +1367,10 @@ export async function requestPermission(
 	client: YankiConnect,
 ): Promise<'ankiUnreachable' | 'granted'> {
 	try {
-		const { permission } = await client.miscellaneous.requestPermission()
-
-		if (permission === 'denied') {
-			throw new Error(
-				'Permission denied, please add this source to the "webCorsOriginList" in the Anki-Connect add-on configuration options.',
-			)
-		} else {
-			return 'granted'
-		}
+		await requirePermission(client)
+		return 'granted'
 	} catch (error) {
-		if (
-			error instanceof Error &&
-			// Accommodate error message from requestUrl in Obsidian as well
-			(error.message === 'fetch failed' || error.message === 'net::ERR_CONNECTION_REFUSED')
-		) {
+		if (error instanceof Error && error.cause instanceof AnkiConnectUnreachableError) {
 			return 'ankiUnreachable'
 		}
 

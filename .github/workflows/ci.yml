@@ -14,28 +14,39 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # PyPI version (no leading zero): aqt==25.9.2 corresponds to Anki 25.09.2
-  ANKI_VERSION: '25.9.2'
   # Extra startup time for pip-installed Anki in CI
   ANKI_CONNECT_TIMEOUT: '60000'
 
 jobs:
   test:
-    name: Test (${{ matrix.os }})
+    name: Test (${{ matrix.os }}, AnkiConnect ${{ matrix.anki-connect-version }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
+        anki-connect-version: ['25.11.9.0', '26.10.14.0', '26.11.15.0']
         os: [ubuntu-latest, macos-latest, windows-latest]
+        # Each AnkiConnect fixture is paired with the Anki release it was built for.
+        # PyPI omits leading zeros: aqt==26.9.4 is Anki 26.09.4.
+        include:
+          - anki-connect-version: '25.11.9.0'
+            anki-version: '25.9.2'
+          - anki-connect-version: '26.10.14.0'
+            anki-version: '26.9.3'
+          - anki-connect-version: '26.11.15.0'
+            anki-version: '26.9.4'
+
+    env:
+      ANKI_CONNECT_VERSION: ${{ matrix.anki-connect-version }}
+      ANKI_VERSION: ${{ matrix.anki-version }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      # ── Install Anki via pip ──────────────────────────────────────
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -70,34 +81,32 @@ jobs:
             libatspi2.0-0
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.13'
 
       - name: Install Anki
-        run: pip install "aqt==${{ env.ANKI_VERSION }}"
+        shell: bash
+        run: pip install "aqt==${ANKI_VERSION}"
 
       - name: Verify Anki is importable
         run: python -c "from aqt import run; print('aqt OK')"
 
-      # ── Setup pnpm and Node.js ───────────────────────────────────
       - name: Install pnpm
-        uses: pnpm/action-setup@a15d269cd4658e1107c09f1fabf4cbd7bd1f308a # v4.4.0
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '22'
+          node-version: '24'
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm ci
 
-      # ── Build ─────────────────────────────────────────────────────
       - name: Build
         run: pnpm run build
 
-      # ── Test ──────────────────────────────────────────────────────
       - name: Test (Linux)
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum pnpm test

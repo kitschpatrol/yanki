@@ -5,9 +5,8 @@ import path from 'path-browserify-esm'
 import { afterAll, beforeAll, describe, expect } from 'vitest'
 import { YankiConnect } from 'yanki-connect'
 import { normalize } from '../../src/lib/utilities/path'
-import { getHash } from '../../src/lib/utilities/string'
 import { loadTestProfile } from '../utilities/anki-connect'
-import { TEST_PROFILE_NAME } from '../utilities/test-constants'
+import { getTestNamespace, TEST_PROFILE_NAME } from '../utilities/test-constants'
 
 type FixtureOptions = {
 	assetPath: string
@@ -39,7 +38,7 @@ export function describeWithFileFixture(
 			allFiles: [],
 			assetPath: '',
 			markdownFiles: [],
-			namespace: `Yanki Test - ${getHash(description, 16)}`,
+			namespace: getTestNamespace(description),
 			tempAssetPath: '',
 			yankiConnect: new YankiConnect({ autoLaunch: false }),
 		}
@@ -54,7 +53,7 @@ export function describeWithFileFixture(
 			)
 
 			// Copy the asset path to a temp directory
-			// eslint-disable-next-line node/no-unsupported-features/node-builtins
+
 			await fs.cp(context.assetPath, context.tempAssetPath, {
 				force: true,
 				preserveTimestamps: true,
@@ -83,23 +82,23 @@ export function describeWithFileFixture(
 			await loadTestProfile(context.yankiConnect, TEST_PROFILE_NAME)
 
 			// Clean up anki first
-			if (cleanUpAnki) {
-				// Clean up everything, since importing apkg can have other effects...
-				const deckNamesResult = await context.yankiConnect.deck.deckNames()
-				await context.yankiConnect.deck.deleteDecks({
-					cardsToo: true,
-					decks: deckNamesResult,
-				})
-				const deckNamesResultPostClean = await context.yankiConnect.deck.deckNames()
-				expect(deckNamesResultPostClean).toEqual(['Default'])
-
-				// Clean up tags
-				await context.yankiConnect.note.clearUnusedTags()
-				const tags = await context.yankiConnect.note.getTags()
-				expect(tags).toStrictEqual([])
-
-				// Models
+			if (!cleanUpAnki) {
+				return
 			}
+
+			// Clean up everything, since importing apkg can have other effects...
+			const deckNamesResult = await context.yankiConnect.deck.deckNames()
+			await context.yankiConnect.deck.deleteDecks({
+				cardsToo: true,
+				decks: deckNamesResult,
+			})
+			const deckNamesResultPostClean = await context.yankiConnect.deck.deckNames()
+			expect(deckNamesResultPostClean).toEqual(['Default'])
+
+			// Clean up tags
+			await context.yankiConnect.note.clearUnusedTags()
+			const tags = await context.yankiConnect.note.getTags()
+			expect(tags).toStrictEqual([])
 
 			// Setup logic before all tests
 			// console.log(`Setup before all tests: ${JSON.stringify(context, undefined, 2)}`)
@@ -123,7 +122,7 @@ export function describeWithFileFixture(
 				const deckNamesResult = await context.yankiConnect.deck.deckNames()
 				await context.yankiConnect.deck.deleteDecks({
 					cardsToo: true,
-					decks: deckNamesResult,
+					decks: deckNamesResult.filter((deckName) => !deckName.includes('::')),
 				})
 				const deckNamesResultPostClean = await context.yankiConnect.deck.deckNames()
 				expect(deckNamesResultPostClean).toEqual(['Default'])

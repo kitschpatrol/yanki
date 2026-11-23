@@ -26,9 +26,20 @@ import remarkWikiBasic from './wiki-basic/remark-wiki-basic'
 type AstFromMarkdownOptions = Pick<
 	GlobalOptions,
 	'allFilePaths' | 'basePath' | 'cwd' | 'obsidianVault' | 'resolveUrls'
->
+> & {
+	/** Absolute path of the note the Markdown came from. */
+	sourcePath?: string | undefined
+}
 
-const CLOZE_NUMBER_PREFIX_REGEX = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/
+const CLOZE_NUMBER_PREFIX_REGEX = /^[(|]?(\d{1,2})(?:[\s).|]|$)(.*)$/u
+
+// Inside a cloze, Anki reads a literal `::` as the hint separator and a literal
+// `}}` as the terminator. An empty HTML comment between the two characters
+// hides the sequence from Anki's cloze parser without changing what's rendered.
+// See https://docs.ankiweb.net/math.html#cloze-conflicts
+// See https://github.com/kitschpatrol/yanki/issues/28
+const CLOZE_DELIMITER_INTERIOR_REGEX = /(?<=:)(?=:)|(?<=\})(?=\})/u
+const CLOZE_DELIMITER_BREAK = '<!-- -->'
 
 const defaultAstFromMarkdownOptions: AstFromMarkdownOptions = {
 	...defaultGlobalOptions,
@@ -38,7 +49,7 @@ export async function getAstFromMarkdown(
 	markdown: string,
 	options?: Partial<AstFromMarkdownOptions>,
 ): Promise<Root> {
-	const { allFilePaths, basePath, cwd, obsidianVault, resolveUrls } = deepmerge(
+	const { allFilePaths, basePath, cwd, obsidianVault, resolveUrls, sourcePath } = deepmerge(
 		defaultAstFromMarkdownOptions,
 		options ?? {},
 	)
@@ -50,7 +61,14 @@ export async function getAstFromMarkdown(
 		.use(remarkFrontmatter, [{ anywhere: false, marker: '-', type: 'yaml' }])
 		.use(remarkWikiBasic)
 		.use(remarkGfm, { singleTilde: false })
-		.use(remarkResolveLinks, { allFilePaths, basePath, cwd, enabled: resolveUrls, obsidianVault })
+		.use(remarkResolveLinks, {
+			allFilePaths,
+			basePath,
+			cwd,
+			enabled: resolveUrls,
+			obsidianVault,
+			sourcePath,
+		})
 		.use(remarkMath)
 		.use(
 			remarkGithubBetaBlockquoteAdmonitions,
@@ -96,10 +114,12 @@ function isText(node: Node): node is Text {
 
 export function deleteFirstNodeOfType(tree: Root, nodeType: string): Root {
 	visit(tree, nodeType, (_, index, parent) => {
-		if (parent && index !== undefined) {
-			parent.children.splice(index, 1)
-			return EXIT
+		if (!parent || index === undefined) {
+			return
 		}
+
+		parent.children.splice(index, 1)
+		return EXIT
 	})
 
 	return tree
@@ -139,6 +159,102 @@ function trimLeadingAndTrailingSpaces(nodes: PhrasingContent[]): PhrasingContent
 	return nodes
 }
 
+/**
+ * Breaks up any `::` or `}}` sequences in the content of a cloze, so that Anki
+ * does not mistake them for its own cloze syntax.
+ *
+ * @param nodes - The phrasing content nodes inside a single cloze deletion.
+ *
+ * @returns The nodes with an HTML comment between the characters of each
+ *   delimiter sequence.
+ */
+function breakClozeDelimiters(nodes: PhrasingContent[]): PhrasingContent[] {
+	return nodes.flatMap((node): PhrasingContent[] => {
+		if (node.type === 'text') {
+			return node.value
+				.split(CLOZE_DELIMITER_INTERIOR_REGEX)
+				.flatMap((part, index) =>
+					index === 0 ? [u('text', part)] : [u('html', CLOZE_DELIMITER_BREAK), u('text', part)],
+				)
+		}
+
+		if (node.type === 'inlineCode') {
+			const parts = node.value.split(CLOZE_DELIMITER_INTERIOR_REGEX)
+			if (parts.length > 1) {
+				// Inline code has no child nodes in mdast, so the comments have to be
+				// passed through to its `<code>` element in the HTML tree
+				node.data = {
+					...node.data,
+					hChildren: parts.flatMap((part, index) =>
+						index === 0 ? [u('text', part)] : [u('comment', ' '), u('text', part)],
+					),
+				}
+			}
+		} else if ('children' in node) {
+			node.children = breakClozeDelimiters(node.children)
+		}
+
+		return [node]
+	})
+}
+
+/**
+ * Keeps the last character of a cloze's content from combining with the cloze
+ * markup that follows it, as in `}` + `}}` or `:` + `::`.
+ *
+ * @param nodes - The phrasing content nodes that precede the markup.
+ * @param markupCharacter - The character the markup starts with.
+ *
+ * @returns An HTML comment node if the content would otherwise extend the
+ *   markup, or nothing.
+ */
+function breakBeforeClozeMarkup(
+	nodes: PhrasingContent[],
+	markupCharacter: ':' | '}',
+): PhrasingContent[] {
+	const lastNode = nodes.at(-1)
+	return lastNode?.type === 'text' && lastNode.value.endsWith(markupCharacter)
+		? [u('html', CLOZE_DELIMITER_BREAK)]
+		: []
+}
+
+/**
+ * Wraps the content of a cloze deletion in Anki's `{{cN::answer::hint}}`
+ * markup.
+ *
+ * @param nodes - The phrasing content nodes inside a single cloze deletion.
+ * @param clozeIndex - The cloze number.
+ *
+ * @returns The nodes surrounded by cloze markup, with any content that Anki
+ *   would mistake for cloze syntax broken up.
+ */
+function wrapInClozeMarkup(nodes: PhrasingContent[], clozeIndex: number): PhrasingContent[] {
+	// If the last node is an emphasis node, we treat it as a hint
+	const hasHint = nodes.length > 1 && nodes.at(-1)?.type === 'emphasis'
+
+	const answerNodes = breakClozeDelimiters(
+		trimLeadingAndTrailingSpaces(hasHint ? nodes.slice(0, -1) : nodes),
+	)
+
+	if (!hasHint) {
+		return [
+			u('text', `{{c${clozeIndex}::`),
+			...answerNodes,
+			...breakBeforeClozeMarkup(answerNodes, '}'),
+			u('text', '}}'),
+		]
+	}
+
+	return [
+		u('text', `{{c${clozeIndex}::`),
+		...answerNodes,
+		...breakBeforeClozeMarkup(answerNodes, ':'),
+		u('text', '::'),
+		...breakClozeDelimiters(trimLeadingAndTrailingSpaces(nodes.slice(-1))),
+		u('text', '}}'),
+	]
+}
+
 // For Cloze notes
 export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 	let clozeIndex = 1
@@ -155,51 +271,39 @@ export function replaceDeleteNodesWithClozeMarkup(ast: Root): Root {
 
 		// If the first node is a text node with a number in it, we treat it as the
 		// cloze number
-		if (node.children.length > 0 && isText(node.children[0])) {
+		const [firstChild] = node.children
+		if (firstChild !== undefined && isText(firstChild)) {
 			// Detect a bunch of number variations at the start of the cloze...
 			// But there must be extra content after the number, otherwise
 			// the leading number _is_ the cloze
-			const result = CLOZE_NUMBER_PREFIX_REGEX.exec(node.children[0].value)
+			const result = CLOZE_NUMBER_PREFIX_REGEX.exec(firstChild.value)
 
 			if (
 				result !== null &&
 				// Edge case if cloze is just a number with no extra content
 				(node.children.length > 1 || (result.at(2) ?? '').length > 0)
 			) {
-				const possibleClozeIndex = Number.parseInt(result.at(1) ?? '', 10)
+				// Capture group 1 always matches when the regex does, so `at(1)` is
+				// never undefined in practice, but `Number(undefined)` is NaN just like
+				// `Number.parseInt('', 10)` was
+				const possibleClozeIndex = Number(result.at(1))
 
 				if (!Number.isNaN(possibleClozeIndex)) {
 					// Cloze index comes from the first node
 					clozeIndex = possibleClozeIndex
 					// Any leftovers become part of the cloze
 
-					node.children[0].value =
-						(result.at(2)?.trim().length ?? 0) > 0 ? (result.at(2) ?? '') : ''
+					firstChild.value = (result.at(2)?.trim().length ?? 0) > 0 ? (result.at(2) ?? '') : ''
 				}
 			}
 		}
 
-		// If the last node is an emphasis node, we treat it as a hint
-		const lastNode = node.children.at(-1)
-		const clozeNodes =
-			node.children.length > 1 && lastNode?.type === 'emphasis'
-				? [
-						u('text', `{{c${clozeIndex}::`),
-						...trimLeadingAndTrailingSpaces(node.children.slice(0, -1)),
-						u('text', '::'),
-						...trimLeadingAndTrailingSpaces(node.children.slice(-1)),
-						u('text', '}}'),
-					]
-				: [
-						u('text', `{{c${clozeIndex}::`),
-						...trimLeadingAndTrailingSpaces(node.children),
-						u('text', '}}'),
-					]
-
 		// Add the cloze markup around the kids
-		parent.children.splice(index, 1, ...clozeNodes)
+		parent.children.splice(index, 1, ...wrapInClozeMarkup(node.children, clozeIndex))
 
 		clozeIndex += 1
+
+		return CONTINUE
 	})
 
 	return ast
@@ -303,6 +407,8 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 			probableType = `Yanki - Cloze`
 			return EXIT
 		}
+
+		return CONTINUE
 	})
 	if (probableType !== undefined) {
 		return probableType
@@ -337,6 +443,8 @@ export function getYankiModelNameFromTree(ast: Root): YankiModelName {
 		}
 
 		lastNode = node
+
+		return CONTINUE
 	})
 
 	// Not noteworthy... if (probableType === undefined) { Console.warn('Could not
@@ -357,15 +465,16 @@ export function getFrontmatterFromTree(ast: Root): Frontmatter {
 		return EXIT
 	})
 
-	if (!rawYaml) {
+	if (rawYaml === undefined || rawYaml === '') {
 		// Unremarkable
 		// console.warn('No frontmatter found')
 		return {}
 	}
 
-	const parsedYaml = yamlParse(rawYaml) as Frontmatter
+	// The yaml parser returns null for empty documents
+	const parsedYaml = (yamlParse(rawYaml) ?? undefined) as Frontmatter | undefined
 
-	if (!parsedYaml) {
+	if (parsedYaml === undefined) {
 		throw new Error('Could not parse frontmatter')
 	}
 
@@ -373,14 +482,14 @@ export function getFrontmatterFromTree(ast: Root): Frontmatter {
 }
 
 function hasThematicBreak(ast: Root): boolean {
-	let hasThematicBreak = false
+	let foundThematicBreak = false
 
 	visit(ast, 'thematicBreak', () => {
-		hasThematicBreak = true
+		foundThematicBreak = true
 		return EXIT
 	})
 
-	return hasThematicBreak
+	return foundThematicBreak
 }
 
 function isLastVisibleNodeEmphasisWithOthers(ast: Root): boolean {
@@ -403,6 +512,8 @@ function isLastVisibleNodeEmphasisWithOthers(ast: Root): boolean {
 			visibleCount++ // Increment count for every visible node
 			return SKIP
 		}
+
+		return CONTINUE
 	})
 
 	return lastVisibleNode?.type === 'emphasis' && visibleCount > 1
@@ -462,6 +573,8 @@ export function removeLastEmphasis(ast: Root): Emphasis | undefined {
 		lastEmphasisNode = node
 		lastEmphasisParent = parent
 		lastEmphasisIndex = index
+
+		return CONTINUE
 	})
 
 	// Remove the last emphasis node if it exists

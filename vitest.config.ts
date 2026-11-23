@@ -34,14 +34,14 @@ export default defineConfig({
 				: [
 						{
 							test: {
+								// Avoid port conflicts between the VS Code extension and the Vitest CLI.
+								api: {
+									port: 5180,
+									strictPort: true,
+								},
 								// Bench suites are Node-only; opt the browser project out
 								benchmark: { include: [] },
 								browser: {
-									// Conflicts between VS Code extension and vitest CLI command...
-									api: {
-										port: 5180,
-										strictPort: true,
-									},
 									enabled: true,
 									headless: true,
 									// FileParallelism: false at the instance level — top-level
@@ -56,6 +56,12 @@ export default defineConfig({
 								exclude: ['test/**/*.node.test.ts'],
 								include: ['test/**/*.test.ts'],
 								name: 'browser',
+								// Run after the node project, never concurrently with it, since
+								// both projects share Anki state and get their own scheduling
+								// pools that fileParallelism / maxWorkers do not serialize
+								sequence: {
+									groupOrder: 1,
+								},
 								testTimeout: isSlow ? 30_000 : 5000,
 							},
 						},
@@ -72,6 +78,9 @@ export default defineConfig({
 					include: ['test/**/*.test.ts'],
 					name: 'node',
 					root: path.resolve(path.dirname(fileURLToPath(import.meta.url))),
+					sequence: {
+						groupOrder: 0,
+					},
 					testTimeout: isSlow ? 30_000 : 5000,
 				},
 			},

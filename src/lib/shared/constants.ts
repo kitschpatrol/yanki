@@ -1,24 +1,25 @@
 import { u } from 'unist-builder'
-import { css } from '../utilities/string'
 
 // These are configurations that should be relatively static and don't warrant cluttering option arguments.
 // Other defaults are defined in options.ts.
 
 /**
- * The default CSS to use for cards. This matches Anki's default. Stored in the
- * Yanki card models and shared across all Yanki-managed notes regardless of
- * namespace. It does change occasionally, see
+ * The default CSS to use for cards. Stored in the Yanki card models and shared
+ * across all Yanki-managed notes regardless of namespace.
+ *
+ * Matches the CSS Anki gives new note types character for character, so
+ * restoring the default leaves them exactly as Anki created them instead of
+ * rewriting their whitespace. It does change occasionally, see
  * https://github.com/ankitects/anki/blob/main/rslib/src/notetype/styling.css
  */
-export const CSS_DEFAULT_STYLE = css`
-	.card {
-		font-family: arial;
-		font-size: 20px;
-		line-height: 1.5;
-		text-align: center;
-		color: black;
-		background-color: white;
-	}
+export const CSS_DEFAULT_STYLE = `.card {
+    font-family: arial;
+    font-size: 20px;
+    line-height: 1.5;
+    text-align: center;
+    color: black;
+    background-color: white;
+}
 `
 
 /**
@@ -84,7 +85,7 @@ export const NOTE_DEFAULT_EMPTY_HAST = u(
  * How / where to get a hash to determine if media assets have changes.
  */
 type MediaHashMode = 'content' | 'metadata' | 'name'
-export const MEDIA_DEFAULT_HASH_MODE_FILE: MediaHashMode = 'metadata'
+export const MEDIA_DEFAULT_HASH_MODE_FILE: MediaHashMode = 'content'
 export const MEDIA_DEFAULT_HASH_MODE_URL: MediaHashMode = 'metadata'
 
 export const MEDIA_INCLUDE_LEGIBLE_FILENAME = false
@@ -168,8 +169,7 @@ export const MEDIA_SUPPORTED_AUDIO_VIDEO_EXTENSIONS = [
 
 /**
  * Anki seems happy to open PDF files and download markdown files that have been
- * added to the assets folder...
- * https://help.obsidian.md/Files+and+folders/Accepted+file+formats
+ * added to the assets folder... https://obsidian.md/help/file-formats
  */
 export const MEDIA_SUPPORTED_FILE_EXTENSIONS = ['md', 'pdf'] as const
 

@@ -4,17 +4,23 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import slash from 'slash'
 import sortKeys from 'sort-keys'
-import { expect, it } from 'vitest'
+import { afterAll, expect, inject, it } from 'vitest'
 import { formatSyncFilesResult, getNoteFromMarkdown, syncFiles } from '../src/lib'
 import { getAllFrontmatter, setNoteIdInFrontmatter } from '../src/lib/model/frontmatter'
 import { getSlugifiedNamespace } from '../src/lib/utilities/namespace'
 import * as pathExtras from '../src/lib/utilities/path'
 import { getUnicodeCodePoints } from '../src/lib/utilities/string'
 import { describeWithFileFixture } from './fixtures/file-fixture'
+import {
+	FILTERED_DECK_SCENARIOS,
+	getFilteredDeckLoadOptions,
+	getFilteredDeckPackagePath,
+} from './fixtures/filtered-deck-scenarios'
+import { deleteUnusedYankiModels } from './utilities/anki-connect'
 import { countLinesOfFrontmatter } from './utilities/frontmatter-counter'
 import { stableNoteIds, stablePrettyMs, stableResults } from './utilities/stable-sync-results'
 
-const NOTE_ID_REGEX = /noteId: \d+/
+const NOTE_ID_REGEX = /noteId: \d+/v
 
 describeWithFileFixture(
 	'model types',
@@ -382,8 +388,9 @@ for (const targetType of ['basic', 'cloze', 'type', 'reverse']) {
 				for (const { filePath } of results.synced) {
 					const markdown = await fs.readFile(filePath!, 'utf8')
 					const key = path.basename(filePath!, path.extname(filePath!))
-					const updatedMarkdown = markdown.replace(
-						originalFileContents.get(key)!,
+					// Replacer function prevents `$` patterns in the note content from
+					// being interpreted as replacement patterns
+					const updatedMarkdown = markdown.replace(originalFileContents.get(key)!, () =>
 						originalFileContents.get(targetType)!,
 					)
 					await fs.writeFile(filePath!, updatedMarkdown)
@@ -401,7 +408,14 @@ for (const targetType of ['basic', 'cloze', 'type', 'reverse']) {
 					syncMediaAssets: 'off',
 				})
 
-				expect(newModelResults.fixedDatabase).toMatchSnapshot()
+				// AnkiConnect 25.x reassigns the note's model ID directly, which strands
+				// the reversed model's second card when the target model has a single
+				// template and makes Yanki run Anki's database check. AnkiConnect 26.x
+				// converts note types properly, so nothing needs fixing.
+				const legacyUpdateNoteModel = inject('ankiConnectVersion') === '25.11.9.0'
+				expect(newModelResults.fixedDatabase).toBe(
+					legacyUpdateNoteModel && ['basic', 'type'].includes(targetType),
+				)
 				expect(newModelResults.synced.map(({ action }) => action)).toMatchSnapshot()
 				expect(newModelResults.synced.map(({ note }) => note.modelName)).toMatchSnapshot()
 			})
@@ -436,7 +450,7 @@ describeWithFileFixture(
 			})
 
 			// Now change the synced note in a way that would require a model and deck update
-			const note = results.synced[0]
+			const note = results.synced[0]!
 			expect(note.filePath).toBeDefined()
 			const markdown = await fs.readFile(note.filePath!, 'utf8')
 			const updatedMarkdown = markdown.replace(
@@ -478,7 +492,7 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			const newNote = newModelResults.synced[0]
+			const newNote = newModelResults.synced[0]!
 
 			expect(newNote.note.noteId).toEqual(note.note.noteId)
 			expect(newNote.action).toEqual('updated')
@@ -539,7 +553,7 @@ describeWithFileFixture(
 	(context) => {
 		it('handles long frontmatter non-destructively', async () => {
 			// Saw some issues with frontmatter getting split into multiple lines after sync...
-			const initialLinesOfFrontmatter = await countLinesOfFrontmatter(context.markdownFiles[0])
+			const initialLinesOfFrontmatter = await countLinesOfFrontmatter(context.markdownFiles[0]!)
 
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
@@ -552,8 +566,8 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			expect(results.synced[0].filePath).toBeDefined()
-			const postSyncLinesOfFrontmatter = await countLinesOfFrontmatter(results.synced[0].filePath!)
+			expect(results.synced[0]!.filePath).toBeDefined()
+			const postSyncLinesOfFrontmatter = await countLinesOfFrontmatter(results.synced[0]!.filePath!)
 
 			// Make sure the number of frontmatter lines in the output matches the input
 			expect(initialLinesOfFrontmatter).toEqual(postSyncLinesOfFrontmatter)
@@ -582,7 +596,7 @@ describeWithFileFixture(
 				syncMediaAssets: 'off',
 			})
 
-			const syncActions = [...new Set(results.synced.map((syncInfo) => syncInfo.action))].sort()
+			const syncActions = [...new Set(results.synced.map((syncInfo) => syncInfo.action))].toSorted()
 
 			expect(syncActions).toMatchInlineSnapshot(`
 				[
@@ -603,7 +617,7 @@ describeWithFileFixture(
 
 			const secondSyncActions = [
 				...new Set(secondSyncResults.synced.map((syncInfo) => syncInfo.action)),
-			].sort()
+			].toSorted()
 
 			expect(secondSyncActions).toMatchInlineSnapshot(`
 				[
@@ -639,7 +653,7 @@ describeWithFileFixture(
 			expect(stableResults(results)).toMatchSnapshot()
 
 			// Create a duplicate note with the same ID but different content
-			const filePathWithId = context.markdownFiles[0]
+			const filePathWithId = context.markdownFiles[0]!
 			const originalFileContent = await fs.readFile(filePathWithId, 'utf8')
 			const duplicateModifiedFileContent = originalFileContent.replace(
 				'Replace me',
@@ -771,7 +785,7 @@ describeWithFileFixture(
  * Thank you to `@BrianRonin` for the test files.
  *
  * Initially, there was an issue with decks being pruned despite containing
- * notes, due to unusual responses from the Anki-Connect deck stats method. this
+ * notes, due to unusual responses from the AnkiConnect deck stats method. this
  * was preventing notes from being created in a single pass.
  */
 describeWithFileFixture(
@@ -1039,7 +1053,7 @@ describeWithFileFixture(
 			expect(stableResults(results)).toMatchSnapshot()
 
 			const tags = await context.yankiConnect.note.getTags()
-			expect(tags.sort()).toStrictEqual([
+			expect(tags.toSorted()).toStrictEqual([
 				'one::two::three::four',
 				'other',
 				'yes::maybe::no',
@@ -1075,7 +1089,7 @@ describeWithFileFixture(
 			expect(stableResults(results2)).toMatchSnapshot()
 
 			const tags2 = await context.yankiConnect.note.getTags()
-			expect(tags2.sort()).toStrictEqual([
+			expect(tags2.toSorted()).toStrictEqual([
 				'one::two::three::four',
 				'other',
 				'yes::maybe::no',
@@ -1329,13 +1343,13 @@ describeWithFileFixture(
 			expect(stableResults(results)).toMatchSnapshot()
 
 			const deckStats = await context.yankiConnect.deck.getDeckStats({ decks: ['Test Deck'] })
-			const totalInDeck = Object.entries(deckStats)[0][1].total_in_deck
+			const totalInDeck = Object.entries(deckStats)[0]![1].total_in_deck
 			expect(totalInDeck).toBe(2)
 
 			// Now delete the Yanki-managed note from the file system and sync again
-			await fs.unlink(context.markdownFiles[0])
-			context.markdownFiles.splice(0, 1)
-			context.allFiles.splice(0, 1)
+			await fs.unlink(context.markdownFiles[0]!)
+			context.markdownFiles.shift()
+			context.allFiles.shift()
 
 			const results2 = await syncFiles(context.markdownFiles, {
 				allFilePaths: context.allFiles,
@@ -1354,7 +1368,7 @@ describeWithFileFixture(
 
 			// The existing note in the eponymous deck should still be there
 			const deckStats2 = await context.yankiConnect.deck.getDeckStats({ decks: ['Test Deck'] })
-			const totalInDeck2 = Object.entries(deckStats2)[0][1].total_in_deck
+			const totalInDeck2 = Object.entries(deckStats2)[0]![1].total_in_deck
 			expect(totalInDeck2).toBe(1)
 		})
 	},
@@ -1567,7 +1581,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		// TODO this works on macOS but is not stable on Windows...
-		it.skip(`cleans up database when a multi cloze note changes model type`, async () => {
+		it.todo(`cleans up database when a multi cloze note changes model type`, async () => {
 			// First sync
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
@@ -1581,13 +1595,13 @@ describeWithFileFixture(
 			})
 
 			// Change to basic
-			const { filePath } = results.synced[0]
-			const markdown = await fs.readFile(filePath!, 'utf8')
+			const filePath = results.synced[0]!.filePath!
+			const markdown = await fs.readFile(filePath, 'utf8')
 			const updatedMarkdown = markdown
 				.replace('~~Cloze One~~\n', 'Front of card')
 				.replace('~~Cloze Two~~\n', '---')
 				.replace('~~Cloze Three~~\n', 'Back of card')
-			await fs.writeFile(filePath!, updatedMarkdown)
+			await fs.writeFile(filePath, updatedMarkdown)
 
 			expect(stableResults(results)).toMatchSnapshot()
 			const cards = await context.yankiConnect.card.findCards({ query: '*' })
@@ -1635,11 +1649,11 @@ describeWithFileFixture(
 			})
 
 			// Change to basic
-			const { filePath } = results.synced[0]
+			const filePath = results.synced[0]!.filePath!
 
-			const markdown = await fs.readFile(filePath!, 'utf8')
+			const markdown = await fs.readFile(filePath, 'utf8')
 			const updatedMarkdown = `${markdown}\n~~Cloze Four~~\n`
-			await fs.writeFile(filePath!, updatedMarkdown)
+			await fs.writeFile(filePath, updatedMarkdown)
 
 			expect(stableResults(results)).toMatchSnapshot()
 			const cards = await context.yankiConnect.card.findCards({ query: '*' })
@@ -1680,7 +1694,7 @@ describeWithFileFixture(
 	},
 	(context) => {
 		// Skipped until there's a way to handle this automatically
-		it.skip(`cleans up orphaned cards when one of several clozes is removed`, async () => {
+		it.todo(`cleans up orphaned cards when one of several clozes is removed`, async () => {
 			// First sync
 			const results = await syncFiles(context.markdownFiles, {
 				ankiConnectOptions: {
@@ -1694,10 +1708,10 @@ describeWithFileFixture(
 			})
 
 			// Remove one of the clozes
-			const { filePath } = results.synced[0]
-			const markdown = await fs.readFile(filePath!, 'utf8')
+			const filePath = results.synced[0]!.filePath!
+			const markdown = await fs.readFile(filePath, 'utf8')
 			const updatedMarkdown = markdown.replace('~~Cloze Two~~\n', '')
-			await fs.writeFile(filePath!, updatedMarkdown)
+			await fs.writeFile(filePath, updatedMarkdown)
 
 			expect(stableResults(results)).toMatchSnapshot()
 
@@ -1727,159 +1741,88 @@ describeWithFileFixture(
 )
 
 /**
- * Check Filtered / custom study decks Related to
- * https://github.com/kitschpatrol/yanki-obsidian/issues/52
+ * Notes in filtered decks, such as Anki's "Custom Study Session", should sync
+ * like notes in their home decks, and syncing should leave the filtered decks
+ * alone. Earlier versions deleted filtered decks
+ * (https://github.com/kitschpatrol/yanki-obsidian/issues/52), failed on
+ * AnkiConnect 26.10.11.0 and later, which reject `getDeckConfig` for filtered
+ * decks, and mistook the parent of a nested filtered deck for a note's home
+ * deck.
  *
- * Thanks `@edgarguo` for reporting.
- *
- * "I put tags in notes, and then manually created a filtered deck in Anki by
- * search results of the tag. Everything working so far. Now I sync, the
- * filtered deck is deleted. Tags are preserved, only the filtered deck is
- * gone."
- *
- * Tangentially related: https://github.com/FooSoft/anki-connect/issues/147
- * https://forums.ankiweb.net/t/ankiconnect-getting-unsupported-action-error-createfiltereddeck-command-not-working/59387
- *
- * Filtered decks are tagged with: 'dyn': 1 'conf': (absent if the deck is
- * filtered)
- *
- * Deck JSON via:
- * https://github.com/ankidroid/Anki-Android/wiki/Database-Structure#decks-jsonobjects
+ * Each test imports its notes already pulled into filtered decks, from a
+ * package built by `scripts/build-filtered-deck-packages.ts`.
  */
-describeWithFileFixture(
-	'filtered decks',
-	{
-		assetPath: './test/assets/test-filtered-decks',
-		cleanUpAnki: true,
-		cleanUpTempFiles: true,
-	},
-	(context) => {
-		// Skipped until there's a way to handle this without manual user action
-		it.skip('tests filtered decks', { timeout: 30_000 }, async () => {
-			// Sync
-			const results = await syncFiles(context.markdownFiles, {
-				allFilePaths: context.allFiles,
-				ankiConnectOptions: {
-					autoLaunch: false,
-				},
-				ankiWeb: false,
-				dryRun: false,
-				manageFilenames: 'off',
-				namespace: context.namespace,
-				obsidianVault: 'Vault',
-				syncMediaAssets: 'off',
+for (const scenario of FILTERED_DECK_SCENARIOS) {
+	describeWithFileFixture(
+		scenario.description,
+		{
+			assetPath: scenario.assetPath,
+			cleanUpAnki: true,
+			cleanUpTempFiles: true,
+		},
+		(context) => {
+			// AnkiConnect 25.11.9.0 imports packages with Anki's legacy importer,
+			// which turns filtered decks into normal decks
+			const isLegacyImporter = inject('ankiConnectVersion') === '25.11.9.0'
+
+			// Runs after the file fixture removes the imported notes
+			afterAll(async () => {
+				if (!isLegacyImporter) {
+					await deleteUnusedYankiModels(context.yankiConnect)
+				}
 			})
 
-			expect(stableResults(results)).toMatchSnapshot()
-			expect(results.synced.every((synced) => synced.action === 'created')).toBe(true)
+			it.skipIf(isLegacyImporter)(
+				'syncs notes in filtered decks and leaves the filtered decks alone',
+				{ timeout: 60_000 },
+				async () => {
+					await deleteUnusedYankiModels(context.yankiConnect)
+					await context.yankiConnect.miscellaneous.importPackage({
+						path: getFilteredDeckPackagePath(scenario),
+					})
 
-			const tags = await context.yankiConnect.note.getTags()
-			expect(tags).toStrictEqual(['foobar', 'marsupials', 'reticulation', 'splines'])
+					const deckNames = await context.yankiConnect.deck.deckNames()
+					const filteredCards = await context.yankiConnect.card.findCards({
+						query: 'deck:filtered',
+					})
+					expect(filteredCards.length).toBeGreaterThan(0)
 
-			// User action required...
-			console.log(
-				'Manually create a filtered deck (F key) with the query "tag:splines" in the Anki desktop app...',
+					const syncOptions = {
+						...getFilteredDeckLoadOptions(scenario, context),
+						ankiConnectOptions: {
+							autoLaunch: false,
+						},
+						ankiWeb: false,
+						dryRun: false,
+						manageFilenames: 'off',
+					} as const
+
+					// Content matches include each note's deck, so this also checks that
+					// notes resolve to their home decks. Notes created instead of matched
+					// mean the package is stale and needs a rebuild.
+					const results = await syncFiles(context.markdownFiles, syncOptions)
+					expect(results.synced.map(({ action }) => action)).toEqual(
+						context.markdownFiles.map(() => 'matched'),
+					)
+					expect(await context.yankiConnect.deck.deckNames()).toEqual(deckNames)
+					expect(await context.yankiConnect.card.findCards({ query: 'deck:filtered' })).toEqual(
+						filteredCards,
+					)
+
+					// Matched by the note IDs the first sync wrote to the files
+					const secondResults = await syncFiles(context.markdownFiles, syncOptions)
+					expect(secondResults.synced.map(({ action }) => action)).toEqual(
+						context.markdownFiles.map(() => 'unchanged'),
+					)
+					expect(await context.yankiConnect.deck.deckNames()).toEqual(deckNames)
+					expect(await context.yankiConnect.card.findCards({ query: 'deck:filtered' })).toEqual(
+						filteredCards,
+					)
+				},
 			)
-			// Poll every second for an increase in deck count
-			const { length: startingDeckCount } = await context.yankiConnect.deck.deckNames()
-			let currentDeckCount = startingDeckCount
-			while (startingDeckCount === currentDeckCount) {
-				await new Promise((resolve) => {
-					setTimeout(resolve, 1000)
-				})
-				const { length: latestDeckCount } = await context.yankiConnect.deck.deckNames()
-				currentDeckCount = latestDeckCount
-			}
-
-			console.log('Continuing...')
-
-			// Second sync
-			const secondResults = await syncFiles(context.markdownFiles, {
-				allFilePaths: context.allFiles,
-				ankiConnectOptions: {
-					autoLaunch: false,
-				},
-				ankiWeb: false,
-				dryRun: false,
-				manageFilenames: 'off',
-				namespace: context.namespace,
-				obsidianVault: 'Vault',
-				syncMediaAssets: 'off',
-			})
-
-			expect(stableResults(secondResults)).toMatchSnapshot()
-			expect(secondResults.synced.every((synced) => synced.action === 'unchanged')).toBe(true)
-
-			console.log('Good!')
-		})
-	},
-)
-
-describeWithFileFixture(
-	'filtered decks alongside deep nesting',
-	{
-		assetPath: './test/assets/test-obsidian-vault',
-		cleanUpAnki: true,
-		cleanUpTempFiles: true,
-	},
-	(context) => {
-		// Skipped until there's a way to handle this without manual user action
-		it.skip('tests filtered decks alongside deep nesting', { timeout: 60_000 }, async () => {
-			// Sync
-			const results = await syncFiles(context.markdownFiles, {
-				allFilePaths: context.allFiles,
-				ankiConnectOptions: {
-					autoLaunch: false,
-				},
-				ankiWeb: false,
-				basePath: context.tempAssetPath,
-				dryRun: false,
-				manageFilenames: 'off',
-				namespace: context.namespace,
-				obsidianVault: 'test-obsidian-vault',
-				syncMediaAssets: 'off',
-			})
-
-			expect(results.synced.every((synced) => synced.action === 'created')).toBe(true)
-
-			// User action required...
-			console.log(
-				'Manually create a filtered deck (F key) with the query "*" in the Anki desktop app...',
-			)
-			// Poll every second for an increase in deck count
-			const { length: startingDeckCount } = await context.yankiConnect.deck.deckNames()
-			let currentDeckCount = startingDeckCount
-			while (startingDeckCount === currentDeckCount) {
-				await new Promise((resolve) => {
-					setTimeout(resolve, 1000)
-				})
-				const { length: latestDeckCount } = await context.yankiConnect.deck.deckNames()
-				currentDeckCount = latestDeckCount
-			}
-
-			console.log('Continuing...')
-
-			// Second sync
-			const secondResults = await syncFiles(context.markdownFiles, {
-				allFilePaths: context.allFiles,
-				ankiConnectOptions: {
-					autoLaunch: false,
-				},
-				ankiWeb: false,
-				basePath: context.tempAssetPath,
-				dryRun: false,
-				manageFilenames: 'off',
-				namespace: context.namespace,
-				obsidianVault: 'test-obsidian-vault',
-				syncMediaAssets: 'off',
-			})
-
-			expect(secondResults.synced.every((synced) => synced.action === 'unchanged')).toBe(true)
-
-			console.log('Good!')
-		})
-	},
-)
+		},
+	)
+}
 
 /**
  * Reproduces an edge case where media synced to Anki and then manually deleted
@@ -1908,7 +1851,7 @@ describeWithFileFixture(
 			})
 
 			expect(results.synced.length).toBe(1)
-			expect(results.synced[0].action).toBe('created')
+			expect(results.synced[0]!.action).toBe('created')
 
 			// Verify media was uploaded by finding it in Anki
 			const slugifiedNamespace = getSlugifiedNamespace(context.namespace)
@@ -1917,7 +1860,7 @@ describeWithFileFixture(
 			})
 
 			expect(mediaFiles.length).toBeGreaterThan(0)
-			const uploadedMediaFilename = mediaFiles[0]
+			const uploadedMediaFilename = mediaFiles[0]!
 
 			// Simulate user manually deleting the media file in Anki
 			await context.yankiConnect.media.deleteMediaFile({
@@ -1944,7 +1887,7 @@ describeWithFileFixture(
 
 			// The note itself is unchanged
 			expect(results2.synced.length).toBe(1)
-			expect(results2.synced[0].action).toBe('unchanged')
+			expect(results2.synced[0]!.action).toBe('unchanged')
 
 			// But the media should have been re-uploaded
 			const mediaFilesAfterResync = await context.yankiConnect.media.getMediaFilesNames({
@@ -2049,6 +1992,103 @@ describeWithFileFixture(
 			})
 
 			expect(stableResults(results)).toMatchSnapshot()
+		})
+	},
+)
+
+/**
+ * Confirm AnkiConnect error when native Anki cloze markup is used in a
+ * non-cloze Yanki note type.
+ *
+ * Reproduces https://github.com/kitschpatrol/yanki/issues/18
+ *
+ * Thanks `@Splintdewolfcry` for reporting.
+ *
+ * This is a "won't fix" because even in the Anki desktop, it's invalid to put
+ * any cloze markup in a non-cloze note type, and there is no reasonable means
+ * to escape the syntax.
+ */
+describeWithFileFixture(
+	'invalid cloze literal',
+	{
+		assetPath: './test/assets/test-invalid-cloze-literal/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('throws error when native Anki cloze markup is used in a non-cloze note type', async () => {
+			await expect(
+				syncFiles(context.markdownFiles, {
+					ankiConnectOptions: {
+						autoLaunch: false,
+					},
+					ankiWeb: false,
+					dryRun: false,
+					namespace: context.namespace,
+					syncMediaAssets: 'off',
+				}),
+			).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: cannot create note for unknown reason]`)
+		})
+	},
+)
+
+/**
+ * Confirm that the second card of a "Basic (and reversed card with extra)" note
+ * asks with the back of the note and answers with the front.
+ *
+ * Both cards share one note, so Anki's note editor and "Sort Field" column look
+ * identical for each of them. Only the rendered sides show the reversal.
+ *
+ * Prompted by https://github.com/kitschpatrol/yanki-obsidian/issues/89
+ */
+describeWithFileFixture(
+	'reversed card sides',
+	{
+		assetPath: './test/assets/test-minimal-notes/',
+		cleanUpAnki: true,
+		cleanUpTempFiles: true,
+	},
+	(context) => {
+		it('swaps the question and answer on the reversed card', async () => {
+			const front = 'which is sometimes the answer'
+			const back = 'which is sometimes the question'
+			const extra = 'always appears on the back of the card'
+
+			const filePath = context.markdownFiles.find(
+				(file) => path.posix.basename(file) === 'basic-and-reversed-card-with-extra.md',
+			)
+			expect(filePath).toBeDefined()
+
+			const results = await syncFiles([filePath!], {
+				ankiConnectOptions: {
+					autoLaunch: false,
+				},
+				ankiWeb: false,
+				dryRun: false,
+				namespace: context.namespace,
+				syncMediaAssets: 'off',
+			})
+
+			const { noteId } = results.synced[0]!.note
+			expect(noteId).toBeDefined()
+
+			const cardIds = await context.yankiConnect.card.findCards({ query: `nid:${noteId!}` })
+			const cards = await context.yankiConnect.card.cardsInfo({ cards: cardIds })
+			expect(cards).toHaveLength(2)
+
+			const [forwardCard, reversedCard] = cards.toSorted((a, b) => a.ord - b.ord)
+
+			expect(forwardCard!.question).toContain(front)
+			expect(forwardCard!.question).not.toContain(back)
+			expect(forwardCard!.question).not.toContain(extra)
+			expect(forwardCard!.answer).toContain(back)
+			expect(forwardCard!.answer).toContain(extra)
+
+			expect(reversedCard!.question).toContain(back)
+			expect(reversedCard!.question).not.toContain(front)
+			expect(reversedCard!.question).not.toContain(extra)
+			expect(reversedCard!.answer).toContain(front)
+			expect(reversedCard!.answer).toContain(extra)
 		})
 	},
 )

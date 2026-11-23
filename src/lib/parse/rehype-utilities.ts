@@ -5,8 +5,39 @@
 
 import type { Element, ElementContent, Root as HastRoot } from 'hast'
 import type { Root as MdastRoot } from 'mdast'
+import type { HighlighterGeneric } from 'shiki/core'
 import type { Simplify } from 'type-fest'
-import rehypeShiki from '@shikijs/rehype'
+import bash from '@shikijs/langs/bash'
+import c from '@shikijs/langs/c'
+import cpp from '@shikijs/langs/cpp'
+import css from '@shikijs/langs/css'
+import diff from '@shikijs/langs/diff'
+import dockerfile from '@shikijs/langs/dockerfile'
+import go from '@shikijs/langs/go'
+import html from '@shikijs/langs/html'
+import java from '@shikijs/langs/java'
+import javascript from '@shikijs/langs/javascript'
+import json from '@shikijs/langs/json'
+import jsx from '@shikijs/langs/jsx'
+import kotlin from '@shikijs/langs/kotlin'
+import markdown from '@shikijs/langs/markdown'
+import php from '@shikijs/langs/php'
+import python from '@shikijs/langs/python'
+import regex from '@shikijs/langs/regex'
+import ruby from '@shikijs/langs/ruby'
+import rust from '@shikijs/langs/rust'
+import scss from '@shikijs/langs/scss'
+import shellscript from '@shikijs/langs/shellscript'
+import sql from '@shikijs/langs/sql'
+import swift from '@shikijs/langs/swift'
+import toml from '@shikijs/langs/toml'
+import tsx from '@shikijs/langs/tsx'
+import typescript from '@shikijs/langs/typescript'
+import xml from '@shikijs/langs/xml'
+import yaml from '@shikijs/langs/yaml'
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
+import githubDark from '@shikijs/themes/github-dark'
+import githubLight from '@shikijs/themes/github-light'
 import { deepmerge } from 'deepmerge-ts'
 import { toText } from 'hast-util-to-text'
 import rehypeFormat from 'rehype-format'
@@ -14,6 +45,8 @@ import rehypeParse from 'rehype-parse'
 import rehypeRaw from 'rehype-raw'
 import rehypeStringify from 'rehype-stringify'
 import remarkRehype from 'remark-rehype'
+import { createHighlighterCoreSync } from 'shiki/core'
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript'
 import { unified } from 'unified'
 import { u } from 'unist-builder'
 import { CONTINUE, EXIT, visit } from 'unist-util-visit'
@@ -36,7 +69,47 @@ import { getSrcType, isUrl, safeDecodeURI } from '../utilities/url'
 import rehypeMathjaxAnki from './rehype-mathjax-anki'
 import remarkConditionalBreaks from './remark-conditional-breaks'
 
-const DIMENSION_CHARS_REGEX = /^[\dx]+$/
+const DIMENSION_CHARS_REGEX = /^[\dx]+$/u
+
+// Fine-grained Shiki bundle: only the langs/themes listed below ship in the
+// build. Unknown languages fall back to plaintext via `fallbackLanguage`. See
+// https://shiki.style/packages/rehype#fine-grained-bundle
+// Sync variant avoids a top-level await in the bundled output, which would
+// otherwise force consumers (e.g. yanki-obsidian) to target ES2022+.
+const highlighter = createHighlighterCoreSync({
+	engine: createJavaScriptRegexEngine(),
+	langs: [
+		bash,
+		c,
+		cpp,
+		css,
+		diff,
+		dockerfile,
+		go,
+		html,
+		java,
+		javascript,
+		json,
+		jsx,
+		kotlin,
+		markdown,
+		php,
+		python,
+		regex,
+		ruby,
+		rust,
+		scss,
+		shellscript,
+		sql,
+		swift,
+		toml,
+		tsx,
+		typescript,
+		xml,
+		yaml,
+	],
+	themes: [githubDark, githubLight],
+})
 
 function createBaseProcessor() {
 	return (
@@ -60,7 +133,7 @@ function createBaseProcessor() {
 // https://github.com/Microflash/rehype-starry-night
 // https://github.com/rehypejs/rehype-highlight
 const processor = createBaseProcessor()
-	.use(rehypeShiki, {
+	.use(rehypeShikiFromHighlighter, highlighter as HighlighterGeneric<string, string>, {
 		// See https://shiki.style/packages/rehype
 		defaultLanguage: 'plaintext',
 		fallbackLanguage: 'plaintext',
@@ -268,38 +341,31 @@ export async function mdastToHtml(
 					? finalSrc
 					: `${finalSrc}${getQuery(String(node.properties.dataYankiSrcOriginal))}`
 
-				parent.children.splice(
-					index,
-					1,
-					u(
-						'element',
-						{
-							properties: {
-								className: [
-									'yanki-media',
-									`yanki-media-${supportedMedia ? 'file' : 'unsupported'}`,
-								],
-								'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
-								'data-yanki-media-src': absolutePathOrUrl, // Where Anki should grab the media
-								'data-yanki-media-sync': syncEnabled, // Can theoretically be true if PDF or MD file
-								'data-yanki-src': finalSrc, // What anki should call the media
-								'data-yanki-src-original': node.properties.dataYankiSrcOriginal, // Pre-resolved URL, useful for debugging wiki links
-							},
-							tagName: 'span',
+				parent.children[index] = u(
+					'element',
+					{
+						properties: {
+							className: ['yanki-media', `yanki-media-${supportedMedia ? 'file' : 'unsupported'}`],
+							'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
+							'data-yanki-media-src': absolutePathOrUrl, // Where Anki should grab the media
+							'data-yanki-media-sync': syncEnabled, // Can theoretically be true if PDF or MD file
+							'data-yanki-src': finalSrc, // What anki should call the media
+							'data-yanki-src-original': node.properties.dataYankiSrcOriginal, // Pre-resolved URL, useful for debugging wiki links
 						},
-						[
-							u(
-								'element',
-								{
-									properties: {
-										href: finalSourceWithQuery,
-									},
-									tagName: 'a',
+						tagName: 'span',
+					},
+					[
+						u(
+							'element',
+							{
+								properties: {
+									href: finalSourceWithQuery,
 								},
-								[u('text', decodeURI(String(node.properties.dataYankiSrcOriginal)))],
-							),
-						],
-					),
+								tagName: 'a',
+							},
+							[u('text', decodeURI(String(node.properties.dataYankiSrcOriginal)))],
+						),
+					],
 				)
 			} else if ((MEDIA_SUPPORTED_IMAGE_EXTENSIONS as unknown as string[]).includes(extension)) {
 				// Image
@@ -321,27 +387,25 @@ export async function mdastToHtml(
 				// works on desktop, but this breaks on mobile, so we shall use the
 				// [sound:] syntax
 
-				parent.children.splice(
-					index,
-					1,
-					u(
-						'element',
-						{
-							properties: {
-								className: ['yanki-media', 'yanki-media-audio-video'],
-								'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
-								'data-yanki-media-src': absolutePathOrUrl,
-								'data-yanki-media-sync': syncEnabled,
-								'data-yanki-src': finalSrc,
-								'data-yanki-src-original': node.properties.dataYankiSrcOriginal,
-							},
-							tagName: 'span',
+				parent.children[index] = u(
+					'element',
+					{
+						properties: {
+							className: ['yanki-media', 'yanki-media-audio-video'],
+							'data-yanki-alt-text': node.properties.alt, // If available, why not keep it
+							'data-yanki-media-src': absolutePathOrUrl,
+							'data-yanki-media-sync': syncEnabled,
+							'data-yanki-src': finalSrc,
+							'data-yanki-src-original': node.properties.dataYankiSrcOriginal,
 						},
-						[u('text', `[sound:${finalSrc}]`)],
-					),
+						tagName: 'span',
+					},
+					[u('text', `[sound:${finalSrc}]`)],
 				)
 			}
 		})
+
+		return CONTINUE
 	})
 
 	// Run the tree mutation promises over the <img> nodes
@@ -364,7 +428,7 @@ export async function mdastToHtml(
 		}
 
 		// Get dimensions from the alt text
-		const originalAltText = String(node.properties.alt ?? '')
+		const originalAltText = node.properties.alt ?? ''
 		const { alt, height, width } = parseDimensionsFromAltText(originalAltText)
 
 		if (alt === undefined) {
@@ -380,6 +444,8 @@ export async function mdastToHtml(
 		if (width !== undefined) {
 			node.properties.width = width
 		}
+
+		return CONTINUE
 	})
 
 	// Check for emptiness...
@@ -394,31 +460,31 @@ export async function mdastToHtml(
 		? addFirstChildToFirstDiv(hastWithClass, NOTE_DEFAULT_EMPTY_HAST)
 		: hastWithClass
 
-	const html = activeProcessor.stringify(nonEmptyHast)
+	const renderedHtml = activeProcessor.stringify(nonEmptyHast)
 
 	// Add comment, we do this manually here instead of in an AST because
 	// rehype-format does not add a line break after the comments
-	return addBoilerplateComment(html).trim()
+	return addBoilerplateComment(renderedHtml).trim()
 }
 
 const htmlProcessor = unified().use(rehypeParse, { fragment: true })
 
-function addBoilerplateComment(html: string): string {
+function addBoilerplateComment(htmlText: string): string {
 	const boilerplate = `This HTML was generated by Yanki, a Markdown to Anki converter. Do not edit directly.`
-	return `<!-- ${boilerplate} -->\n${html}`
+	return `<!-- ${boilerplate} -->\n${htmlText}`
 }
 
 function hastToPlainText(hast: HastRoot): string {
 	return toText(hast)
 }
 
-function htmlToPlainText(html: string): string {
-	const hast = htmlProcessor.parse(html)
+function htmlToPlainText(htmlText: string): string {
+	const hast = htmlProcessor.parse(htmlText)
 	return hastToPlainText(hast)
 }
 
-export function getAllLinesOfHtmlAsPlainText(html: string): string {
-	const text = htmlToPlainText(html)
+export function getAllLinesOfHtmlAsPlainText(htmlText: string): string {
+	const text = htmlToPlainText(htmlText)
 	return text
 		.split('\n')
 		.map((line) => line.trim())
@@ -426,8 +492,8 @@ export function getAllLinesOfHtmlAsPlainText(html: string): string {
 		.join(' ')
 }
 
-export function getFirstLineOfHtmlAsPlainText(html: string): string {
-	const text = htmlToPlainText(html)
+export function getFirstLineOfHtmlAsPlainText(htmlText: string): string {
+	const text = htmlToPlainText(htmlText)
 	return (
 		text
 			.split('\n')
@@ -441,36 +507,38 @@ export type Media = {
 	originalSrc: string
 }
 
-export function extractMediaFromHtml(html: string): Media[] {
-	const hast = htmlProcessor.parse(html)
+export function extractMediaFromHtml(htmlText: string): Media[] {
+	const hast = htmlProcessor.parse(htmlText)
 	const media: Media[] = []
 
 	// Assumes media-related manipulations performed by
 	// mdastToHtml have already been done
 	visit(hast, 'element', (node) => {
 		if (
-			(node.tagName === 'img' || node.tagName === 'span') &&
+			(node.tagName !== 'img' && node.tagName !== 'span') ||
 			// This has to be camel case...
-			node.properties?.dataYankiMediaSync === 'true'
+			node.properties?.dataYankiMediaSync !== 'true'
 		) {
-			const filename =
-				// <img>
-				node.properties?.src ??
-				// <span>>
-				node.properties?.dataYankiSrc
+			return
+		}
 
-			const originalSrc = node.properties?.dataYankiMediaSrc
-			if (
-				filename !== undefined &&
-				originalSrc !== undefined &&
-				typeof filename === 'string' &&
-				typeof originalSrc === 'string'
-			) {
-				media.push({
-					filename,
-					originalSrc,
-				})
-			}
+		const filename =
+			// <img>
+			node.properties?.src ??
+			// <span>>
+			node.properties?.dataYankiSrc
+
+		const originalSrc = node.properties?.dataYankiMediaSrc
+		if (
+			filename !== undefined &&
+			originalSrc !== undefined &&
+			typeof filename === 'string' &&
+			typeof originalSrc === 'string'
+		) {
+			media.push({
+				filename,
+				originalSrc,
+			})
 		}
 	})
 
@@ -516,7 +584,7 @@ function parseDimensions(dimensions: string): {
 
 	// Try for a single number first
 	if (!dimensions.includes('x')) {
-		const widthOnly = Number.parseInt(dimensions, 10)
+		const widthOnly = Number(dimensions)
 
 		if (!Number.isNaN(widthOnly)) {
 			return { width: widthOnly, height: undefined }
@@ -524,6 +592,7 @@ function parseDimensions(dimensions: string): {
 	}
 
 	// Check for an 'x' separator
+	// eslint-disable-next-line unicorn/prefer-number-coercion -- Split segments can be empty (e.g. 'x100'), which must yield NaN, but Number('') is 0
 	const [width, height] = dimensions.split('x').map((dim) => Number.parseInt(dim, 10)) as [
 		number | undefined,
 		number | undefined,
@@ -551,7 +620,7 @@ function isVisuallyEmpty(tree: HastRoot): boolean {
 
 	visit(tree, (node) => {
 		if (hasVisualContent) {
-			return
+			return EXIT
 		} // Early exit if visual content is found
 
 		if (node.type === 'element') {
@@ -578,7 +647,7 @@ function isVisuallyEmpty(tree: HastRoot): boolean {
 
 			// Check if the element has text content
 			const textContent = toText(element).trim()
-			if (textContent) {
+			if (textContent !== '') {
 				hasVisualContent = true
 				return EXIT
 			}
@@ -588,6 +657,8 @@ function isVisuallyEmpty(tree: HastRoot): boolean {
 			hasVisualContent = true
 			return EXIT
 		}
+
+		return CONTINUE
 	})
 
 	return !hasVisualContent
@@ -604,10 +675,12 @@ function isVisuallyEmpty(tree: HastRoot): boolean {
  */
 function addFirstChildToFirstDiv(tree: HastRoot, newChild: ElementContent): HastRoot {
 	visit(tree, 'element', (node: Element) => {
-		if (node.tagName === 'div') {
-			node.children.unshift(newChild)
-			return EXIT
+		if (node.tagName !== 'div') {
+			return
 		}
+
+		node.children.unshift(newChild)
+		return EXIT
 	})
 
 	return tree

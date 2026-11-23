@@ -16,8 +16,8 @@ import {
 } from '../shared/constants'
 import { emptyIsUndefined, truncateOnWordBoundary } from './string'
 
-const CLOZE_CONTENT_REGEX = /\{\{\w\d*\s?:{0,2}([^:}]+)/
-const FILENAME_INCREMENT_SUFFIX_REGEX = /\s\(\d+\)$/
+const CLOZE_CONTENT_REGEX = /\{\{\w\d*\s?:{0,2}([^:}]+)/u
+const FILENAME_INCREMENT_SUFFIX_REGEX = /\s\(\d+\)$/u
 
 // eslint-disable-next-line complexity
 export function getSafeTitleForNote(
@@ -65,9 +65,11 @@ export function getSafeTitleForNote(
 			// https://github.com/kitschpatrol/yanki-obsidian/issues/32.
 			const cleanFront = getAllLinesOfHtmlAsPlainText(note.fields.Front)
 
-			const textBeforeCloze = emptyIsUndefined(cleanFront.split('{{').at(0) ?? '')
+			const textBeforeCloze = emptyIsUndefined(cleanFront.split('{{', 1).at(0) ?? '')
 			const firstClozeText = emptyIsUndefined(CLOZE_CONTENT_REGEX.exec(cleanFront)?.at(1))
-			const textAfterCloze = emptyIsUndefined(cleanFront.split('}}').at(1)?.split('{{').at(0) ?? '')
+			const textAfterCloze = emptyIsUndefined(
+				cleanFront.split('}}', 2).at(1)?.split('{{', 1).at(0) ?? '',
+			)
 
 			// Always try to provide some semantic value
 			switch (manageFilenames) {
@@ -104,7 +106,7 @@ function getSafeFilename(text: string, maxLength?: number): string {
 		// TODO Filename 7 doesn't tolerate whitespace...
 		replacement: ' ',
 	})
-		.replaceAll(/\s+/g, ' ')
+		.replaceAll(/\s+/gu, ' ')
 		.trim()
 
 	// Edge case where the filename is empty
@@ -143,11 +145,9 @@ export function getUniqueFilePath(filePath: string, existingFilenames: string[])
 export function auditUniqueFilePath(filePath: string, existingFilenames: string[]) {
 	const testPath = appendFilenameIncrement(filePath, 2)
 
-	if (existingFilenames.includes(testPath.toLowerCase())) {
-		return filePath
-	}
-
-	return stripFilenameIncrement(filePath)
+	return existingFilenames.includes(testPath.toLowerCase())
+		? filePath
+		: stripFilenameIncrement(filePath)
 }
 
 /**

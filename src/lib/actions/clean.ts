@@ -15,7 +15,7 @@ import {
 	deleteOrphanedDecks,
 	getRemoteNotes,
 	reconcileMedia,
-	requestPermission,
+	requirePermission,
 	syncToAnkiWeb,
 } from '../utilities/anki-connect'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
@@ -60,10 +60,7 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 
 	const client = new YankiConnect(ankiConnectOptions)
 
-	const permissionStatus = await requestPermission(client)
-	if (permissionStatus === 'ankiUnreachable') {
-		throw new Error('Anki is unreachable. Is Anki running?')
-	}
+	await requirePermission(client)
 
 	const remoteNotes = await getRemoteNotes(client, sanitizedNamespace)
 

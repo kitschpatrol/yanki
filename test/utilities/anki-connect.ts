@@ -2,13 +2,44 @@ import { execa } from 'execa'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { YankiConnect } from 'yanki-connect'
-import { yankiModels } from '../../src/lib/model/model'
+import { defaultYankiConnectOptions, YankiConnect } from 'yanki-connect'
+import { yankiModelNames, yankiModels } from '../../src/lib/model/model'
 import { requestPermission } from '../../src/lib/utilities/anki-connect'
 import { PLATFORM } from '../../src/lib/utilities/platform'
 import { TEST_PROFILE_NAME } from './test-constants'
 
 let ankiPid: number | undefined
+
+/**
+ * Suppresses the expected rejection of a detached Anki child process without
+ * awaiting it, since the process only exits when it's killed during teardown.
+ */
+async function suppressExpectedRejection(child: Promise<unknown>): Promise<void> {
+	try {
+		await child
+	} catch {
+		// Expected: process is killed during closeAnki
+	}
+}
+
+/**
+ * Quits the Anki .app bundle on macOS via AppleScript, falling back to
+ * launchctl. Errors are ignored since Anki may not be running.
+ */
+async function quitAnkiMacAppBundle(): Promise<void> {
+	try {
+		await execa('osascript', ['-e', 'tell application "Anki" to quit'])
+	} catch {
+		try {
+			await execa('sh', [
+				'-c',
+				"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
+			])
+		} catch {
+			// Ignore
+		}
+	}
+}
 
 /**
  * Finds the Anki executable on Windows by checking common installation
@@ -79,11 +110,9 @@ export async function openAnki(basePath: string): Promise<void> {
 			})
 
 			// Suppress the expected rejection when Anki is killed during teardown
-			child.catch(() => {
-				// Expected: process is killed during closeAnki
-			})
+			void suppressExpectedRejection(child)
 			ankiPid = child.pid
-			child.unref()
+			child.nodeChildProcess.unref()
 			break
 		}
 
@@ -104,11 +133,9 @@ export async function openAnki(basePath: string): Promise<void> {
 					stdio: 'ignore',
 				})
 
-				child.catch(() => {
-					// Expected: process is killed during closeAnki
-				})
+				void suppressExpectedRejection(child)
 				ankiPid = child.pid
-				child.unref()
+				child.nodeChildProcess.unref()
 			}
 
 			break
@@ -122,12 +149,10 @@ export async function openAnki(basePath: string): Promise<void> {
 				windowsHide: true,
 			})
 
-			// Suppress the expected rejection when Anki is killed during teardown
-			child.catch(() => {
-				// Expected: process is killed via taskkill during closeAnki
-			})
+			// Suppress the expected rejection when Anki is killed via taskkill during teardown
+			void suppressExpectedRejection(child)
 			ankiPid = child.pid
-			child.unref()
+			child.nodeChildProcess.unref()
 			break
 		}
 
@@ -139,7 +164,11 @@ export async function openAnki(basePath: string): Promise<void> {
 	// Poll until AnkiConnect is reachable
 	const client = new YankiConnect({ autoLaunch: false })
 	// Allow CI to override the timeout (e.g. for launcher first-run download)
-	const maxWait = Number(process.env.ANKI_CONNECT_TIMEOUT) || 30_000
+	const timeoutFromEnvironment = Number(process.env.ANKI_CONNECT_TIMEOUT)
+	const maxWait =
+		timeoutFromEnvironment === 0 || Number.isNaN(timeoutFromEnvironment)
+			? 30_000
+			: timeoutFromEnvironment
 	const start = Date.now()
 	while (Date.now() - start < maxWait) {
 		try {
@@ -183,23 +212,19 @@ export async function closeAnki(): Promise<void> {
 				// Fallback: kill any remaining anki processes by exact name
 				// Using -x for exact match to avoid killing unrelated processes
 				// (e.g. vitest workers in a directory path containing "anki")
-				await execa('pkill', ['-x', 'anki']).catch(() => {
+				try {
+					await execa('pkill', ['-x', 'anki'])
+				} catch {
 					// Ignore if no matching processes
-				})
+				}
+
 				break
 			}
 
 			case 'mac': {
 				if (ankiPid === undefined) {
 					// .app bundle: use AppleScript
-					await execa('osascript', ['-e', 'tell application "Anki" to quit']).catch(async () => {
-						await execa('sh', [
-							'-c',
-							"launchctl stop $(launchctl list | grep ankiweb | awk '{print $3}')",
-						]).catch(() => {
-							// Ignore
-						})
-					})
+					await quitAnkiMacAppBundle()
 				} else {
 					// Kill the entire process group (negative PID)
 					// so Qt/WebEngine child processes are also terminated
@@ -216,25 +241,34 @@ export async function closeAnki(): Promise<void> {
 				// (e.g. in Vitest worker processes that don't share module state
 				// with the global setup). Matches the script path to avoid killing
 				// unrelated processes.
-				await execa('pkill', ['-9', '-f', 'bin/anki']).catch(() => {
+				try {
+					await execa('pkill', ['-9', '-f', 'bin/anki'])
+				} catch {
 					// Ignore if no matching processes
-				})
+				}
+
 				break
 			}
 
 			case 'windows': {
 				// Kill the exact process tree we started (catches Python + Qt children)
 				if (ankiPid !== undefined) {
-					await execa('taskkill', ['/PID', String(ankiPid), '/T', '/F']).catch(() => {
+					try {
+						await execa('taskkill', ['/PID', String(ankiPid), '/T', '/F'])
+					} catch {
 						// Ignore if process already exited
-					})
+					}
+
 					ankiPid = undefined
 				}
 
 				// Also kill any remaining anki processes by name as a fallback
-				await execa('taskkill', ['/IM', 'anki.exe', '/T', '/F']).catch(() => {
+				try {
+					await execa('taskkill', ['/IM', 'anki.exe', '/T', '/F'])
+				} catch {
 					// Ignore if no matching processes
-				})
+				}
+
 				break
 			}
 
@@ -262,7 +296,6 @@ export async function loadTestProfile(client: YankiConnect, testProfileName: str
 		name: testProfileName,
 	})
 
-	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (!loadProfileResult) {
 		throw new Error('Could not load test profile')
 	}
@@ -282,9 +315,49 @@ export async function createModels(client: YankiConnect) {
 				}
 
 				throw error
-			} else {
-				throw new TypeError('Unknown error')
 			}
+
+			throw new TypeError('Unknown error', { cause: error })
 		}
+	}
+}
+
+/**
+ * Deletes Yanki's note types, which must not be in use, so an imported package
+ * keeps its own copies' names instead of getting renamed duplicates. Yanki
+ * recreates note types as needed. Requires AnkiConnect's API v1 (26.x).
+ */
+export async function deleteUnusedYankiModels(client: YankiConnect): Promise<void> {
+	const modelNames = await client.model.modelNames()
+	const noteTypes = yankiModelNames
+		.filter((modelName) => modelNames.includes(modelName))
+		.map((name) => ({ name }))
+
+	if (noteTypes.length === 0) {
+		return
+	}
+
+	const { host, port } = defaultYankiConnectOptions
+	const response = await fetch(`${host}:${String(port)}/api/v1`, {
+		body: JSON.stringify({
+			id: 1,
+			jsonrpc: '2.0',
+			method: 'noteTypes.deleteUnused',
+			params: { noteTypes },
+		}),
+		method: 'POST',
+	})
+	const reply = (await response.json()) as {
+		error?: { message: string }
+		result?: { items: Array<{ error?: { message: string } }> }
+	}
+	const errors = [reply.error, ...(reply.result?.items ?? []).map((item) => item.error)].filter(
+		(error) => error !== undefined,
+	)
+
+	if (errors.length > 0) {
+		throw new Error(
+			`Could not delete Yanki note types: ${errors.map(({ message }) => message).join(', ')}`,
+		)
 	}
 }

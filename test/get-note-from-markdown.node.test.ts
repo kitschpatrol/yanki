@@ -1,5 +1,7 @@
-/* eslint-disable unicorn/prefer-string-raw */
-
+import { toText } from 'hast-util-to-text'
+import rehypeParse from 'rehype-parse'
+import { unified } from 'unified'
+import { visit } from 'unist-util-visit'
 import { expect, it } from 'vitest'
 import { getNoteFromMarkdown } from '../src/lib'
 import { markdown } from '../src/lib/utilities/string'
@@ -10,10 +12,7 @@ function stripUndefinedFields<T extends Record<string, unknown>>(object: T): T {
 	return Object.fromEntries(Object.entries(object).filter(([_, v]) => v !== undefined)) as T
 }
 
-async function getNotesFromMarkdown(
-	markdownVariations: string[],
-	showOriginal = true,
-): Promise<
+async function getNotesFromMarkdown(markdownVariations: string[]): Promise<
 	Array<{
 		back?: string
 		front: string
@@ -27,8 +26,8 @@ async function getNotesFromMarkdown(
 		original?: string
 		type: string
 	}> = []
-	for (const markdown of markdownVariations) {
-		const note = await getNoteFromMarkdown(markdown)
+	for (const markdownVariation of markdownVariations) {
+		const note = await getNoteFromMarkdown(markdownVariation)
 		results.push(
 			stripUndefinedFields({
 				back:
@@ -36,7 +35,7 @@ async function getNotesFromMarkdown(
 						? note.fields.Back.split('\n').slice(2, -1).join('\n')
 						: undefined,
 				front: note.fields.Front.split('\n').slice(2, -1).join('\n'),
-				original: showOriginal ? markdown : undefined,
+				original: markdownVariation,
 				type: note.modelName,
 			}),
 		)
@@ -390,8 +389,8 @@ it('handles a single numeric tag value in frontmatter', async () => {
  * https://github.com/kitschpatrol/yanki-obsidian/issues/56
  */
 it('handles strikethrough before and after a break', async () => {
-	const markdown = `~~cloze~~\n\n---\n\n~~cloze~~`
-	const note = await getNoteFromMarkdown(markdown)
+	const markdownWithStrikethrough = `~~cloze~~\n\n---\n\n~~cloze~~`
+	const note = await getNoteFromMarkdown(markdownWithStrikethrough)
 
 	// Back of card should NOT have Anki cloze markup
 	expect(note.fields.Front).toContain('{{c1::cloze}}')
@@ -466,4 +465,270 @@ it('detects code blocks inside table cells', async () => {
 	// Inline code in the table cell stays unstyled; the back has a real
 	// pre/code block which must reach Shiki.
 	expect(note.fields.Back).toContain('shiki')
+})
+
+/**
+ * MathJax inside a cloze deletion must not contain a literal `}}` substring,
+ * which would cause Anki's non-greedy cloze regex (`\{\{c\d+::(.*?)\}\}`) to
+ * terminate the cloze prematurely.
+ *
+ * Math like `\mathbb{F}_{p^{n}}` ends with `}}` (closing both the inner `{n}`
+ * and the outer `{p^{n}}` brace groups), so when wrapped in a cloze the math
+ * both renders broken and the cloze structure collapses.
+ *
+ * Thanks `@l1mey112` for reporting. Reproduces
+ * https://github.com/kitschpatrol/yanki/issues/15
+ */
+it('handles MathJax with nested braces inside cloze deletions', async () => {
+	// Use String.raw to preserve backslashes (e.g. `\rangle` would otherwise be
+	// interpreted as a carriage return)
+
+	/* Spell-checker: disable */
+
+	const markdownWithMathCloze = String.raw`(32.99 Finite) Let $f \in \mathbb{F}_{p}[x]$ be a monic irreducible polynomial of degree $n$. Prove that $\mathbb{F}_{p^{n}}$ is a splitting field of $f$.
+
+$$
+\mathbb{F}_{p^{n}} \supset \mathbb{F}_{p}
+$$
+
+1) ~~We know $\mathbb{F}_{p^{n}} \cong \mathbb{F}_{p}[x] / \langle f \rangle$. Hence $f$ has a root in $\alpha \in \mathbb{F}_{p^{n}}$.~~
+2) ~~Let $\alpha_{i} = \alpha^{p^{i}}$. We have that $f(\alpha_{i}) = f(\alpha^{p^{i}}) = f(\alpha)^{p^{i}} = 0$ by Frobenius.~~
+3) Hence $f$ has $n$ roots $\alpha_{1}, \alpha_{2}, \dots, \alpha_{n-1}$ and splits into linear factors.`
+
+	/* Spell-checker: enable */
+
+	const note = await getNoteFromMarkdown(markdownWithMathCloze)
+
+	expect(note.modelName).toBe('Yanki - Cloze')
+
+	// Cloze openers and a matching number of cloze terminators should be present
+	expect(note.fields.Front).toContain('{{c1::')
+	expect(note.fields.Front).toContain('{{c2::')
+
+	// Math content should still be present
+	expect(note.fields.Front).toContain(String.raw`\mathbb{F}`)
+	expect(note.fields.Front).toContain(String.raw`\langle f \rangle`)
+
+	// No math segment (`\(...\)` or `\[...\]`) should contain a literal `}}`,
+	// which would collide with Anki's cloze terminator
+	const mathSegments = note.fields.Front.match(/\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]/gv) ?? []
+	expect(mathSegments.length).toBeGreaterThan(0)
+	for (const segment of mathSegments) {
+		expect(segment).not.toContain('}}')
+	}
+
+	expect(note.fields.Front).toMatchSnapshot()
+	expect(note.fields.Back).toMatchSnapshot()
+})
+
+const ANKI_CLOZE_REGEX = /\{\{c(\d+)::(.*?)\}\}/gsv
+const ANKI_CLOZE_HINT_SEPARATOR = '::'
+
+function htmlToText(html: string): string {
+	return toText(unified().use(rehypeParse, { fragment: true }).parse(html))
+}
+
+/**
+ * Minimal model of how Anki reads cloze deletions out of a field, following
+ * `rslib/src/cloze.rs`: a cloze opens at `{{cN::`, closes at the first `}}`,
+ * and its content is split into answer and hint at the first `::`.
+ *
+ * Anki does this on the raw field text, before the HTML is rendered, so the
+ * delimiters are matched literally here and only the resulting pieces are
+ * rendered to text.
+ */
+function readFieldLikeAnki(field: string): {
+	clozes: Array<{ answer: string; hint: string | undefined; index: number }>
+	surroundingText: string
+} {
+	const clozes = Array.from(field.matchAll(ANKI_CLOZE_REGEX), ([, index = '', content = '']) => {
+		const separatorPosition = content.indexOf(ANKI_CLOZE_HINT_SEPARATOR)
+		const hasHint = separatorPosition !== -1
+		return {
+			answer: htmlToText(hasHint ? content.slice(0, separatorPosition) : content),
+			hint: hasHint
+				? htmlToText(content.slice(separatorPosition + ANKI_CLOZE_HINT_SEPARATOR.length))
+				: undefined,
+			index: Number(index),
+		}
+	})
+
+	return {
+		clozes,
+		surroundingText: htmlToText(field.replaceAll(ANKI_CLOZE_REGEX, '[...]')),
+	}
+}
+
+/**
+ * Cloze content containing `::` or `}}` must not be read by Anki as cloze
+ * syntax. A literal `::` is Anki's hint separator, and a literal `}}` is its
+ * cloze terminator, so emitting either unescaped inside `{{cN::...}}` hides
+ * only part of the content and leaks the rest as a hint or as plain text.
+ *
+ * Thanks `@trackoor` for reporting. Reproduces
+ * https://github.com/kitschpatrol/yanki/issues/28
+ */
+it.each([
+	{
+		expectedCloze: { answer: 'std::vector', hint: undefined, index: 1 },
+		expectedSurroundingText: 'A dynamic array in C++ is [...].',
+		markdownWithCloze: 'A dynamic array in C++ is ~~std::vector~~.',
+		name: 'a hint separator in text',
+	},
+	{
+		expectedCloze: { answer: '{a: {b: 1}}', hint: undefined, index: 1 },
+		expectedSurroundingText: 'The nested literal is [...].',
+		markdownWithCloze: 'The nested literal is ~~{a: {b: 1}}~~.',
+		name: 'a cloze terminator in text',
+	},
+	{
+		expectedCloze: { answer: 'std::vector', hint: undefined, index: 1 },
+		expectedSurroundingText: 'A dynamic array in C++ is [...].',
+		markdownWithCloze: 'A dynamic array in C++ is ~~`std::vector`~~.',
+		name: 'a hint separator in inline code',
+	},
+	{
+		expectedCloze: { answer: '{a: {b: 1}}', hint: undefined, index: 1 },
+		expectedSurroundingText: 'The nested literal is [...].',
+		markdownWithCloze: 'The nested literal is ~~`{a: {b: 1}}`~~.',
+		name: 'a cloze terminator in inline code',
+	},
+	{
+		expectedCloze: { answer: 'std::vector', hint: 'container', index: 1 },
+		expectedSurroundingText: 'A dynamic array in C++ is [...].',
+		markdownWithCloze: 'A dynamic array in C++ is ~~std::vector _container_~~.',
+		name: 'a hint separator in text followed by a hint',
+	},
+	{
+		expectedCloze: { answer: 'std::vector', hint: undefined, index: 1 },
+		expectedSurroundingText: 'A dynamic array in C++ is [...].',
+		markdownWithCloze: 'A dynamic array in C++ is ~~**std::vector**~~.',
+		name: 'a hint separator in nested formatting',
+	},
+	{
+		expectedCloze: { answer: '{a: 1}', hint: undefined, index: 1 },
+		expectedSurroundingText: 'The literal is [...].',
+		markdownWithCloze: 'The literal is ~~{a: 1}~~.',
+		name: 'a trailing brace',
+	},
+	{
+		expectedCloze: { answer: 'std:', hint: 'prefix', index: 1 },
+		expectedSurroundingText: 'The namespace prefix is [...].',
+		markdownWithCloze: 'The namespace prefix is ~~std: _prefix_~~.',
+		name: 'a trailing colon followed by a hint',
+	},
+	{
+		expectedCloze: { answer: 'a set of sets', hint: 'like {{1}, {2}}', index: 1 },
+		expectedSurroundingText: 'A family is [...].',
+		markdownWithCloze: 'A family is ~~a set of sets _like {{1}, {2}}_~~.',
+		name: 'a cloze terminator in a hint',
+	},
+	{
+		expectedCloze: { answer: '{{c2::nested}}', hint: undefined, index: 1 },
+		expectedSurroundingText: 'Anki cloze syntax looks like [...].',
+		markdownWithCloze: 'Anki cloze syntax looks like ~~{{c2::nested}}~~.',
+		name: 'literal cloze syntax',
+	},
+])(
+	'handles $name inside cloze deletions',
+	async ({ expectedCloze, expectedSurroundingText, markdownWithCloze }) => {
+		const note = await getNoteFromMarkdown(markdownWithCloze)
+
+		expect(note.modelName).toBe('Yanki - Cloze')
+
+		const { clozes, surroundingText } = readFieldLikeAnki(note.fields.Front)
+
+		expect(clozes).toEqual([expectedCloze])
+		expect(surroundingText).toBe(expectedSurroundingText)
+	},
+)
+
+/**
+ * MathJax inside a cloze deletion must not contain a literal `::` either, since
+ * Anki splits the cloze into answer and hint at the first one it finds.
+ *
+ * TeX ignores spaces in math mode, so the math is compared without them.
+ *
+ * Reproduces https://github.com/kitschpatrol/yanki/issues/28
+ */
+it('handles MathJax with consecutive colons inside cloze deletions', async () => {
+	const markdownWithMathCloze = String.raw`The cons operator has type ~~$a :: [a] \to [a]$ _Haskell_~~.`
+	const note = await getNoteFromMarkdown(markdownWithMathCloze)
+
+	expect(note.modelName).toBe('Yanki - Cloze')
+
+	const { clozes, surroundingText } = readFieldLikeAnki(note.fields.Front)
+	const clozesWithoutSpaces = clozes.map((cloze) => ({
+		...cloze,
+		answer: cloze.answer.replaceAll(/\s/gv, ''),
+	}))
+
+	expect(clozesWithoutSpaces).toEqual([
+		{ answer: String.raw`\(a::[a]\to[a]\)`, hint: 'Haskell', index: 1 },
+	])
+	expect(surroundingText).toBe('The cons operator has type [...].')
+})
+
+function getCodeBlockTexts(html: string): string[] {
+	const codeBlockTexts: string[] = []
+	visit(unified().use(rehypeParse, { fragment: true }).parse(html), 'element', (node) => {
+		if (node.tagName === 'pre') {
+			codeBlockTexts.push(toText(node, { whitespace: 'pre' }))
+		}
+	})
+
+	return codeBlockTexts
+}
+
+/**
+ * Generated HTML must stay stable, since any change to it rewrites the affected
+ * notes in Anki on the next sync.
+ *
+ * A fenced code block keeps its indentation and all but the first of its
+ * leading blank lines. `hast-util-raw` 9.1.1 and later drops that first
+ * newline, applying the HTML rule that ignores a newline right after `<pre>` to
+ * the code nested one level deeper in `<pre><code>`.
+ */
+it.each([
+	{
+		code: 'const a = 1\nconst b = 2',
+		expected: 'const a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'no leading whitespace',
+	},
+	{
+		code: '\nconst a = 1\nconst b = 2',
+		expected: 'const a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'a leading blank line',
+	},
+	{
+		code: '\n\n\nconst a = 1\nconst b = 2',
+		expected: '\n\nconst a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'several leading blank lines',
+	},
+	{
+		code: '\nconst a = 1\nconst b = 2',
+		expected: 'const a = 1\nconst b = 2',
+		language: '',
+		name: 'a leading blank line and no language',
+	},
+	{
+		code: '    const a = 1\nconst b = 2',
+		expected: '    const a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'leading indentation',
+	},
+	{
+		code: '\n    const a = 1\nconst b = 2',
+		expected: '    const a = 1\nconst b = 2',
+		language: 'typescript',
+		name: 'a leading blank line followed by indentation',
+	},
+])('renders fenced code blocks with $name', async ({ code, expected, language }) => {
+	const fence = '```'
+	const note = await getNoteFromMarkdown(`${fence}${language}\n${code}\n${fence}`)
+
+	expect(getCodeBlockTexts(note.fields.Front)).toEqual([expected])
 })

@@ -10,10 +10,11 @@ type Options = {
 	cwd: string
 	enabled?: boolean
 	obsidianVault?: string
+	sourcePath?: string | undefined
 }
 
 const plugin: Plugin<[Options], Root> = function (options) {
-	const { allFilePaths = [], basePath, cwd, enabled = true, obsidianVault } = options
+	const { allFilePaths = [], basePath, cwd, enabled = true, obsidianVault, sourcePath } = options
 
 	return function (tree) {
 		// Disable so we can A/B test
@@ -36,10 +37,17 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				convertFilePathsToProtocol: obsidianVault === undefined ? 'none' : 'obsidian',
 				cwd,
 				obsidianVaultName: obsidianVault,
+				sourcePath,
 				type: 'link',
 			})
 
-			node.url = isUrl(resolvedLink) ? resolvedLink : encodeURI(resolvedLink)
+			// Any `?` or `#` remaining in a resolved file path is a literal part of
+			// a file name, since resolveLink strips legitimate anchor suffixes from
+			// plain paths and `?` has no query meaning in local paths, so encode
+			// them to keep the href intact
+			node.url = isUrl(resolvedLink)
+				? resolvedLink
+				: encodeURI(resolvedLink).replaceAll('?', '%3F').replaceAll('#', '%23')
 
 			// TMI
 			// node.data.hProperties['data-yanki-src-resolved'] = node.url
@@ -60,6 +68,7 @@ const plugin: Plugin<[Options], Root> = function (options) {
 				convertFilePathsToProtocol: obsidianVault === undefined ? 'none' : 'obsidian',
 				cwd,
 				obsidianVaultName: obsidianVault,
+				sourcePath,
 				type: 'embed',
 			})
 

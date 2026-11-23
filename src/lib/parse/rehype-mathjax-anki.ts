@@ -2,6 +2,20 @@ import type { Root } from 'hast'
 import type { Plugin } from 'unified'
 import { CONTINUE, visit } from 'unist-util-visit'
 
+// Runs of consecutive `{` or `}` collide with Anki's cloze syntax (`{{c1::…}}`),
+// causing its non-greedy cloze regex to terminate the cloze inside the math.
+// Consecutive colons collide with it too, since Anki splits a cloze into answer
+// and hint at the first `::`.
+// MathJax ignores whitespace in math mode, so breaking up the runs keeps
+// rendering identical while making the math safe to embed in a cloze.
+// See https://github.com/kitschpatrol/yanki/issues/15
+// See https://github.com/kitschpatrol/yanki/issues/28
+const CLOZE_SYNTAX_COLLISION_REGEX = /[{}](?=[{}])|:(?=:)/gu
+
+function sanitizeClozeSyntaxCollisions(value: string): string {
+	return value.replaceAll(CLOZE_SYNTAX_COLLISION_REGEX, '$& ')
+}
+
 /**
  * Non-rendering replacement for the `rehype-mathjax` plugin, which takes output
  * from `remark-math` and wraps it in Anki-specific syntax.
@@ -20,16 +34,17 @@ const plugin: Plugin<unknown[], Root> = function () {
 
 			// Handle fenced, ```math...``` blocks, which end up inside a `<pre>` element
 			// TODO... clean up
+			const [preChild] = node.children
 			if (
 				node.tagName === 'pre' &&
 				node.children.length === 1 &&
-				node.children[0].type === 'element' &&
-				node.children[0].tagName === 'code' &&
-				Array.isArray(node.children[0].properties.className) &&
-				node.children[0].properties.className.includes('language-math')
+				preChild?.type === 'element' &&
+				preChild.tagName === 'code' &&
+				Array.isArray(preChild.properties.className) &&
+				preChild.properties.className.includes('language-math')
 			) {
 				fenced = true
-				parent.children.splice(index, 1, node.children[0])
+				parent.children[index] = preChild
 			}
 
 			// Handle direct
@@ -52,6 +67,12 @@ const plugin: Plugin<unknown[], Root> = function () {
 				const isBlock = node.properties.className.includes('math-display') || fenced
 				fenced = false
 
+				for (const child of node.children) {
+					if (child.type === 'text') {
+						child.value = sanitizeClozeSyntaxCollisions(child.value)
+					}
+				}
+
 				node.tagName = isBlock ? 'div' : 'span'
 				node.children = [
 					{ type: 'text', value: isBlock ? String.raw`\[` : String.raw`\(` },
@@ -59,6 +80,8 @@ const plugin: Plugin<unknown[], Root> = function () {
 					{ type: 'text', value: isBlock ? String.raw`\]` : String.raw`\)` },
 				]
 			}
+
+			return CONTINUE
 		})
 	}
 }

@@ -6,15 +6,16 @@
 
 <!-- badges -->
 
-[![NPM Package yanki](https://img.shields.io/npm/v/yanki.svg)](https://npmjs.com/package/yanki)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
+[![NPM Package yanki](https://img.shields.io/npm/v/yanki.svg)](https://www.npmjs.com/package/yanki)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit)
 [![CI](https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/yanki/actions/workflows/ci.yml)
+[![Homebrew](https://img.shields.io/badge/Homebrew-kitschpatrol%2Ftap%2Fyanki-FBB040?logo=homebrew&logoColor=white)](https://github.com/kitschpatrol/homebrew-tap/blob/HEAD/Formula/yanki.rb)
 
 <!-- /badges -->
 
 <!-- short-description -->
 
-**A CLI tool and TypeScript library to turn Markdown into Anki flashcards.**
+**CLI tool and TypeScript library to turn Markdown into Anki flashcards.**
 
 <!-- /short-description -->
 
@@ -54,13 +55,13 @@ This package provides both a stand-alone CLI tool and a TypeScript library for e
 
 The library powers the [`yanki-obsidian`](https://github.com/kitschpatrol/yanki-obsidian) Obsidian plugin. For lower-level access to Anki, please take a look at the [`yanki-connect`](https://github.com/kitschpatrol/yanki-connect) TypeScript library.
 
-The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://en.wikipedia.org/wiki/Yankee#/media/File:ヤンキー.jpg).)
+The "Y" prefix in "Yanki" is in the "Yet another" naming tradition; a nod to Anki's robust and occasionally duplicative ecosystem of third-party tools. (Also, appropriately, Yankī are a variety of [truant youth](https://commons.wikimedia.org/wiki/File:ヤンキー.jpg).)
 
 ## Quick start
 
-Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 20.11 or newer.)
+Install [Node.js](https://nodejs.org) if you haven't already. (Yanki requires Node 22.18 or newer.)
 
-Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on installed:
+Assuming you have a folder of Markdown note files, the [Anki app](https://apps.ankiweb.net) is open and has the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on installed:
 
 ```sh
 npx yanki ./folder-of-markdown
@@ -108,7 +109,7 @@ Optionally, you can add a `tags` array to your Markdown file's frontmatter and h
 
 Nested tags are supported, and you may use `/` in addition to `::` as a delimiter in the Markdown frontmatter for compatibility with tools like Obsidian.
 
-Tag array contents _must_ be primitive string values. Any non-string values will br coerced into strings.
+Tag array contents _must_ be primitive string values. Any non-string values will be coerced into strings.
 
 ### Intelligent synchronization
 
@@ -131,14 +132,14 @@ Yanki keeps track the notes it manages with a hidden field in the Anki note mode
 An extended palette of Markdown syntax is available out of the box:
 
 - [GitHub Flavored Markdown](https://github.github.com/gfm/), including `| tables |`, `~~strike-through~~`, `- [x] task lists`, and auto-links.
-- Syntax highlighting via [Shiki](https://shiki.style).
+- Syntax highlighting via [Shiki](https://shiki.style) for 30 common languages.
 - GitHub-style [Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts).
 - The aforementioned [WikiLinks](https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/wikilinks.md).
 - [LaTeX formatted mathematical expressions](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) via Anki's built-in [MathJax](https://www.mathjax.org) rendering support.
 - The [`==highlights==`](https://github.com/ipikuka/remark-flexible-markers) syntax.
 - Compact [furigana](https://en.wikipedia.org/wiki/Furigana) / [Ruby](https://en.wikipedia.org/wiki/Ruby_character) syntax specified by [DenDen Markdown](https://conv.denshochan.com/markdown#ruby), for example: `{東京|とうきょう}` renders as `<ruby>東京<rp>(</rp><rt>とうきょう</rt><rp>)</rp></ruby>`. This matches support in Obsidian provided by the [Markdown Furigana](https://github.com/steven-kraft/obsidian-markdown-furigana) plugin.
-- Obsidian-style [block links](https://help.obsidian.md/links#Link+to+a+block+in+a+note), e.g. `[[Some Note#^37066d]]`
-- Obsidian-style [heading links](https://help.obsidian.md/links#Link+to+a+heading+in+a+note), e.g. `[[Some Note#Heading]]`
+- Obsidian-style [block links](https://obsidian.md/help/links#Link+to+a+block+in+a+note), e.g. `[[Some Note#^37066d]]`
+- Obsidian-style [heading links](https://obsidian.md/help/links#Link+to+a+heading+in+a+note), e.g. `[[Some Note#Heading]]`
 
 ### Custom styles
 
@@ -169,6 +170,8 @@ The rules were designed with the semantic and visual nature of Markdown in mind.
 The most minimal examples to "trigger" different note types are shown below, but the implementation can handle additional weirdness and will generally do the right thing if it encounters elements that might indicate conflicting note types.
 
 You're free to use additional Markdown in your note files to style and structure the front and back of your flashcards.
+
+Note that you _can not_ mix Anki's native syntax (e.g. `{{c1::...` cloze markup) alongside your Yanki Markdown.
 
 ### Basic
 
@@ -288,9 +291,15 @@ _If you delete one of several implicitly numbered clozes (e.g. `~~hidden~~`) fro
 
 ## Getting started
 
+<!-- dependencies -->
+
 ### Dependencies
 
-The `yanki` CLI tool requires Node 20.11+. The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
+- [Node.js](https://nodejs.org/) 22.18.0 or newer (specifically `^22.18.0 || ^24.0.0 || >=26.0.0`)
+
+<!-- /dependencies -->
+
+The exported TypeScript / JavaScript APIs are isomorphic, and can run in both browser-based and Node runtime environments. The Yanki library is ESM-only, is implemented in TypeScript, and bundles a complete set of type definitions.
 
 The tool has been tested on Windows, macOS, and Linux.
 
@@ -299,35 +308,81 @@ _Linux users should note that the Flatpak / Flathub version of Anki is not recom
 #### Prerequisites:
 
 - The [Anki desktop app](https://apps.ankiweb.net)
-- The [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on
+- The [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on
 
-  If you need to install it, select _Tools → Add-ons_ from the menu, click _Get Add-ons..._, and then enter the code `2055492159` in the field to get Anki-Connect.
+  If you need to install it, select _Tools → Add-ons_ from the menu, click _Get Add-ons..._, and then enter the code `2055492159` in the field to get AnkiConnect.
 
-  Anki-Connect may ask for your permission in the Anki application to allow the connection on the first sync.
+  The latest releases of both Anki and AnkiConnect are recommended, and are what Yanki is developed and tested against. The technical minimum is Anki 2.1.55 with AnkiConnect 24.6.17.0. Older releases lack actions that Yanki depends on, and syncing against them will fail.
 
-  If the automatic permission request fails, you might need to configure Anki-Connect to accept connections from your origin.
+  AnkiConnect may ask for your permission in the Anki application to allow the connection on the first sync.
+
+  If the automatic permission request fails, you might need to configure AnkiConnect to accept connections from your origin.
 
   In Anki, select _Tools → Add-ons_ from the menu, then select _AnkiConnect_ from the list, and click the _Config_ button in the lower right. In the ensuing modal, add the host and port from which you're attempting to connect to to the `webCorsOriginList` array.
 
 ### Installation
 
-Invoke directly on Markdown files in a directory:
+Pick the option that matches how you plan to use it.
+
+#### CLI
+
+Run it once without installing:
 
 ```sh
 npx yanki ./folder-to-sync
 ```
 
-...or install globally:
+Or install it globally with Homebrew:
+
+```sh
+brew install kitschpatrol/tap/yanki
+```
+
+Or install it globally with npm:
 
 ```sh
 npm install --global yanki
 ```
 
-...or install locally in your JavaScript or TypeScript project to use the exported APIs:
+#### Library
+
+Add it to your project to import the TypeScript API. This also puts the `yanki` CLI on your project's path:
 
 ```sh
-npm install --save-dev yanki
+npm install yanki
 ```
+
+<!-- skills({ headingLevel: 3 }) -->
+
+### Agent skills
+
+This project bundles an [Agent Skill](https://agentskills.io) in its published package to help coding agents work with yanki.
+
+To link the skill into your project with [pnpm](https://pnpm.io/agent-skills) 12.11 or later, approve the package once and pnpm links its skill on every install:
+
+```sh
+pnpm approve yanki
+```
+
+With other package managers, sync the skill from your project root with Vercel's [skills CLI](https://github.com/vercel-labs/skills):
+
+```sh
+npx skills experimental_sync
+```
+
+Or install globally:
+
+```sh
+npx skills add kitschpatrol/yanki --global
+```
+
+Included skill:
+
+#### Skill: [`yanki`](skills/yanki/SKILL.md)
+
+Create and edit Markdown flashcards for Yanki, choose the correct card syntax, and sync notes to Anki with the Yanki CLI or TypeScript library.
+
+<!-- /skills -->
 
 ## Usage
 
@@ -337,7 +392,7 @@ npm install --save-dev yanki
 
 Create a folder of Markdown files that you'd like to use as Anki notes. (See the [section on Markdown notes](#markdown-note-types) for details on how to structure your document to create different card types in Anki.)
 
-Launch the Anki desktop app. Ensure that the [Anki-Connect](https://ankiweb.net/shared/info/2055492159) add-on is installed and set up.
+Launch the Anki desktop app. Ensure that the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on is installed and set up.
 
 #### Create
 
@@ -361,7 +416,7 @@ Delete the Markdown file locally (not in Anki!) and run `yanki ./your-deck-folde
 
 All available commands and options for advanced use cases are described below, but shouldn't typically be necessary.
 
-<!-- cli-help -->
+<!-- cli-help({ heading: false, headingLevel: 3 }) -->
 
 #### Command: `yanki`
 
@@ -404,7 +459,7 @@ yanki sync <directory> [options]
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------- |
 | `--dry-run`<br>`-d`            | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                                                                                                                                                                                                                                                                                                     | `boolean`                            | `false`                   |
 | `--namespace`<br>`-n`          | Advanced option for managing multiple Yanki synchronization groups. Case insensitive. See the readme for more information.                                                                                                                                                                                                                                                                                                                                                                                                          | `string`                             | `"Yanki"`                 |
-| `--anki-connect`               | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                                                                                                                                                                                                                                                                                                     | `string`                             | `"http://127.0.0.1:8765"` |
+| `--anki-connect`               | Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.                                                                                                                                                                                                                                                                                                                                                                                                       | `string`                             | `"http://127.0.0.1:8765"` |
 | `--anki-auto-launch`<br>`-l`   | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                                                                                                                                                                                                                                                                                                                                                       | `boolean`                            | `false`                   |
 | `--anki-web`<br>`-w`           | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app.                                                                                                                                                                                                                                                                                  | `boolean`                            | `true`                    |
 | `--manage-filenames`<br>`-m`   | Rename local note files to match their content. Useful if you want to have semantically reasonable note file names without managing them by hand. The `"prompt"` option will attempt to create the filename based on the "front" of the card, while `"response"` will prioritize the "back", "Cloze", or "type in the answer" portions of the card. Truncation, sanitization, and deduplication are taken care of.                                                                                                                  | `"off"` `"prompt"` `"response"`      | `"off"`                   |
@@ -431,7 +486,7 @@ yanki list [options]
 | Option                       | Description                                                                                                                                                                                                | Type      | Default                   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
 | `--namespace`<br>`-n`        | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. Pass `'*'` to list all Yanki-created notes in the Anki database. | `string`  | `"Yanki"`                 |
-| `--anki-connect`             | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                            | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-connect`             | Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.                                                                              | `string`  | `"http://127.0.0.1:8765"` |
 | `--anki-auto-launch`<br>`-l` | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                              | `boolean` | `false`                   |
 | `--json`                     | Output the list of notes as JSON to stdout.                                                                                                                                                                | `boolean` | `false`                   |
 | `--help`<br>`-h`             | Show help                                                                                                                                                                                                  | `boolean` |                           |
@@ -451,7 +506,7 @@ yanki delete [options]
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
 | `--dry-run`<br>`-d`          | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                             | `boolean` | `false`                   |
 | `--namespace`<br>`-n`        | Advanced option to list notes in a specific namespace. Case insensitive. Notes from the default internal namespace are listed by default. If you've synced notes to multiple namespaces, Pass `'*'` to delete all Yanki-created notes in the Anki database. | `string`  | `"Yanki"`                 |
-| `--anki-connect`             | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                             | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-connect`             | Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.                                                                                                                               | `string`  | `"http://127.0.0.1:8765"` |
 | `--anki-auto-launch`<br>`-l` | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                                                                               | `boolean` | `false`                   |
 | `--anki-web`<br>`-w`         | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app.          | `boolean` | `true`                    |
 | `--json`                     | Output the list of deleted notes as JSON to stdout.                                                                                                                                                                                                         | `boolean` | `false`                   |
@@ -473,7 +528,7 @@ yanki style [options]
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- |
 | `--dry-run`<br>`-d`          | Run without making any changes to the Anki database. See a report of what would have been done.                                                                                                                                                    | `boolean` | `false`                   |
 | `--css`<br>`-c`              | Path to the CSS stylesheet to set for all Yanki-created notes. If not provided, the default Anki stylesheet is used.                                                                                                                               | `string`  |                           |
-| `--anki-connect`             | Host and port of the Anki-Connect server. The default is usually fine. See the Anki-Connect documentation for more information.                                                                                                                    | `string`  | `"http://127.0.0.1:8765"` |
+| `--anki-connect`             | Host and port of the AnkiConnect server. The default is usually fine. See the AnkiConnect documentation for more information.                                                                                                                      | `string`  | `"http://127.0.0.1:8765"` |
 | `--anki-auto-launch`<br>`-l` | Attempt to open the Anki desktop app if it's not already running. (Experimental, macOS only.)                                                                                                                                                      | `boolean` | `false`                   |
 | `--anki-web`<br>`-w`         | Automatically sync any changes to AnkiWeb after Yanki has finished syncing locally. If false, only local Anki data is updated and you must manually invoke a sync to AnkiWeb. This is the equivalent of pushing the "sync" button in the Anki app. | `boolean` | `true`                    |
 | `--json`                     | Output the list of updated note types / models as JSON to stdout.                                                                                                                                                                                  | `boolean` | `false`                   |
@@ -621,9 +676,9 @@ The rest of the library should work fine in both contexts without special measur
 
 The excellent [unified](https://unifiedjs.com) / [remark](https://remark.js.org) / [rehype](https://github.com/rehypejs/rehype) libraries are used extensively to traverse and render the underlying Markdown ASTs.
 
-[Anki-Connect](https://ankiweb.net/shared/info/2055492159) provides access to Anki's database.
+[AnkiConnect](https://ankiweb.net/shared/info/2055492159) provides access to Anki's database.
 
-For type safety, access to Anki-Connect is managed through my wrapper library, [yanki-connect](https://github.com/kitschpatrol/yanki-connect).
+For type safety, access to AnkiConnect is managed through my wrapper library, [yanki-connect](https://github.com/kitschpatrol/yanki-connect).
 
 Behind the scenes, Yanki creates new note type models to match the four default Anki types. It keeps track of the notes it has ownership of via a hidden `YankiNamespace` field in each note.
 
@@ -646,13 +701,15 @@ Linux testing was performed with Debian 12 and Ubuntu 22, both running on an arm
 
 - The Anki application lets you split the cards from a single note across multiple decks. (E.g. you might have a card with dozens of clozes, some of which you want to study under a different deck.) Yanki does _not_ support this scenario in the notes / cards it manages — it maintains a strict hierarchical relationship in which a note and its cards always live in a single deck. Notes may be deleted / recreated and study progress might be lost if this is attempted.
 
+- Anki does not let you use cloze syntax in note types that aren't explicitly configured to handle them. For this reason, don't [mix and match native Anki syntax](https://github.com/kitschpatrol/yanki/issues/18) alongside Yanki's Markdown syntax. If you do this, you risk receiving cryptic "cannot create note for unknown reason" errors from AnkiConnect.
+
 ## Maintainers
 
 [kitschpatrol](https://github.com/kitschpatrol)
 
 ## Acknowledgments
 
-Thanks to Alex Yatskov for creating [Anki-Connect](https://ankiweb.net/shared/info/2055492159).
+Thanks to Alex Yatskov for creating [AnkiConnect](https://ankiweb.net/shared/info/2055492159).
 
 Thanks to the [unified team](https://github.com/orgs/unifiedjs/people) for their superb ecosystem of AST tools.
 

@@ -2,14 +2,22 @@
 # Also respects .gitignore
 
 # @kitschpatrol/prettier-config boilerplate
-pnpm-lock.yaml
+.claude/
+.agents/
 package-lock.json
+pnpm-lock.yaml
+skills-lock.json
 
 # Customizations
 test/assets/test-cloze-back/
 test/assets/test-obsidian-vault/
-test/assets/test-tags/
 test/assets/test-unexpected-formatting/
 test/assets/test\ obsidian\ vault\ with\ spaces/
 test/benchmarks/baseline.json
-test/fixtures/anki-data-folder/
+test/fixtures/anki-data-folder-*/
+
+# Preserve deliberate leading YAML and thematic-break syntax in parser fixtures.
+test/assets/test-minimal-notes/basic-with-back-and-no-front-with-empty-frontmatter.md
+test/assets/test-minimal-notes/basic-with-back-and-no-front.md
+test/assets/test-minimal-notes/basic-with-cloze-like-back-and-no-front.md
+test/assets/test-minimal-notes/basic-with-type-in-the-answer-like-back-and-no-front.md

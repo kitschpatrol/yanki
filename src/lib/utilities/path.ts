@@ -5,8 +5,13 @@ import path from 'path-browserify-esm'
 import slash from 'slash'
 import { splitAtFirstMatch } from './string'
 
-const WINDOWS_DRIVE_LETTER_REGEX = /^[A-Z]:/i
-const QUERY_FRAGMENT_START_REGEX = /[#?^]/
+const WINDOWS_DRIVE_LETTER_REGEX = /^[A-Z]:/iu
+// Obsidian anchor delimiters: `#heading` and `#^block` (and bare `^block`).
+// `?` is deliberately absent: it has no meaning in Obsidian links or local
+// markdown links, and is a legal file name character on macOS and Linux.
+// Remote URLs (where `?` queries are real) never reach this code.
+// https://github.com/kitschpatrol/yanki/issues/20
+const QUERY_FRAGMENT_START_REGEX = /[#^]/u
 
 // Unused...
 // function stripLeadingSlash(filePath: string): string {
@@ -24,7 +29,7 @@ export function isAbsolute(filePath: string): boolean {
 	return isAbsolutePath.posix(filePath) || isAbsolutePath.win32(filePath)
 }
 
-const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/
+const RE_WINDOWS_EXTENDED_LENGTH_PATH = /^\\\\\?\\.+/u
 
 // Unused
 // const RE_WINDOWS_UNC_PATH = /^\\\\[^\\]+\\[^\\]+/
@@ -53,11 +58,7 @@ export function normalize(filePath: string): string {
 
 	// Tricky cases where we still want leading './' to distinguish between relative and "named"" paths,
 	// otherwise it's stripped by normalization
-	if (basicPath.startsWith('./')) {
-		return `./${normalizedPath}`
-	}
-
-	return normalizedPath
+	return basicPath.startsWith('./') ? `./${normalizedPath}` : normalizedPath
 }
 
 /**
@@ -115,17 +116,14 @@ export function resolveWithBasePath(
 
 	// Absolute
 	if (isAbsolute(filePath)) {
-		// Path is absolute by drive letter on Windows, or there's not base path to prepend
-		if (
+		// Path is absolute by drive letter on Windows, or there's no base path to prepend
+		const isResolved =
 			basePath === undefined ||
 			WINDOWS_DRIVE_LETTER_REGEX.test(filePath) ||
 			(!compoundBase && filePath.startsWith(basePath))
-		) {
-			return filePath
-		}
 
-		// Resolve over base
-		return path.join(basePath, filePath)
+		// Otherwise resolve over base
+		return isResolved ? filePath : path.join(basePath, filePath)
 	}
 
 	// Relative
@@ -141,11 +139,9 @@ export function resolveWithBasePath(
 // }
 
 export function stripBasePath(filePath: string, basePath: string): string {
-	if (filePath.toLowerCase().startsWith(basePath.toLowerCase())) {
-		return filePath.slice(basePath.length)
-	}
-
-	return filePath
+	return filePath.toLowerCase().startsWith(basePath.toLowerCase())
+		? filePath.slice(basePath.length)
+		: filePath
 }
 
 export function getBaseAndQueryParts(filePath: string): [string, string | undefined] {
@@ -155,33 +151,44 @@ export function getBaseAndQueryParts(filePath: string): [string, string | undefi
 	return [path.join(directoryPath, base), query]
 }
 
+/**
+ * Get every plausible base and anchor interpretation of a local link target
+ * that may contain anchor delimiter characters (`#`, `^`), ordered from the
+ * longest literal path (no anchor at all) to the shortest (anchor starts at the
+ * first delimiter, matching Obsidian's anchor syntax).
+ *
+ * This operates on the unnormalized link target and deliberately considers
+ * delimiters before slashes. A slash after a delimiter belongs to the anchor,
+ * not the file path. File and directory names may also legitimately contain
+ * these characters, so callers must normalize only each candidate's `filePath`
+ * and try candidates in order against a list of real files.
+ * https://github.com/kitschpatrol/yanki/issues/20
+ */
+export function getLocalPathCandidates(
+	linkTarget: string,
+): Array<{ anchor: string | undefined; filePath: string }> {
+	const candidates: Array<{ anchor: string | undefined; filePath: string }> = [
+		{ anchor: undefined, filePath: linkTarget },
+	]
+
+	for (let index = linkTarget.length - 1; index >= 0; index--) {
+		if (QUERY_FRAGMENT_START_REGEX.test(linkTarget.charAt(index))) {
+			candidates.push({
+				anchor: linkTarget.slice(index),
+				filePath: linkTarget.slice(0, index),
+			})
+		}
+	}
+
+	return candidates
+}
+
 export function getBase(filePath: string): string {
 	return getBaseAndQueryParts(filePath)[0]
 }
 
 export function getQuery(filePath: string): string {
 	return getBaseAndQueryParts(filePath).at(1) ?? ''
-}
-
-function hasExtension(filePath: string): boolean {
-	return getExtension(filePath) !== ''
-}
-
-export function getExtension(filePath: string): string {
-	return path.extname(getBase(filePath))
-}
-
-export function addExtensionIfMissing(filePath: string, extension: string): string {
-	if (hasExtension(filePath)) {
-		return filePath
-	}
-
-	return addExtension(filePath, extension)
-}
-
-export function addExtension(filePath: string, extension: string): string {
-	const [base, query] = getBaseAndQueryParts(filePath)
-	return `${base}.${extension}${query ?? ''}`
 }
 
 // Function quantifyPathDistance(relativePath: string): { down: number; up: number } {

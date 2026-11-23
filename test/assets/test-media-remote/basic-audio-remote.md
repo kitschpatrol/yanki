@@ -2,84 +2,84 @@
 
 ## 3gp
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.3gp?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.3gp)
 
 ## aac
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.aac?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.aac)
 
 ## avi
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.avi?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.avi)
 
 ## flac
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.flac?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.flac)
 
 ## flv
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.flv?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.flv)
 
 ## m4a
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.m4a?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.m4a)
 
 ## mkv
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mkv?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.mkv)
 
 ## mov
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mov?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.mov)
 
 ## mp3
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mp3?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.mp3)
 
 ## mp4
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mp4?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.mp4)
 
 ## mpeg
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mpeg?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.mpeg)
 
 ## mpg
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.mpg?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.mpg)
 
 ## oga
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.oga?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.oga)
 
 ## ogg
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogg?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.ogg)
 
 ## ogv
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogv?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.ogv)
 
 ## ogx
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.ogx?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.ogx)
 
 ## opus
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.opus?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.opus)
 
 ## spx
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.spx?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.spx)
 
 ## swf
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.swf?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.swf)
 
 ## wav
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.wav?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.wav)
 
 ## webm
 
-![Yanki test audio](https://github.com/kitschpatrol/yanki/raw/main/test/assets/test-media/audio/yanki.webm?raw=true)
+![Yanki test audio](https://raw.githubusercontent.com/kitschpatrol/yanki/main/test/assets/test-media/audio/yanki.webm)

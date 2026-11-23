@@ -1,4 +1,3 @@
-/* eslint-disable node/no-unsupported-features/node-builtins, unicorn/no-useless-undefined */
 import { expect, it, vi } from 'vitest'
 import type { FileAdapter } from '../src/lib/shared/types'
 import {
@@ -68,7 +67,7 @@ it('gets extension from URL via metadata', async () => {
 		status: 200,
 	})
 
-	const result = await getAnkiMediaFilenameExtension('http://example.com/image', fetchAdapter)
+	const result = await getAnkiMediaFilenameExtension('https://example.com/image', fetchAdapter)
 	expect(result).toBe('jpg')
 })
 
@@ -95,7 +94,7 @@ it('checks if remote URL exists', async () => {
 	const fileAdapter = createMockFileAdapter()
 	const fetchAdapter = vi.fn().mockResolvedValue({ status: 200 })
 
-	expect(await mediaAssetExists('http://example.com/image.png', fileAdapter, fetchAdapter)).toBe(
+	expect(await mediaAssetExists('https://example.com/image.png', fileAdapter, fetchAdapter)).toBe(
 		true,
 	)
 })
@@ -104,7 +103,7 @@ it('checks if remote URL does not exist', async () => {
 	const fileAdapter = createMockFileAdapter()
 	const fetchAdapter = vi.fn().mockResolvedValue({ status: 404 })
 
-	expect(await mediaAssetExists('http://example.com/missing.png', fileAdapter, fetchAdapter)).toBe(
+	expect(await mediaAssetExists('https://example.com/missing.png', fileAdapter, fetchAdapter)).toBe(
 		false,
 	)
 })
@@ -180,6 +179,36 @@ it('generates consistent filenames for the same file', async () => {
 		fetchAdapter,
 	)
 	expect(result1).toBe(result2)
+})
+
+it('generates different filenames for different files with identical size and mtime', async () => {
+	// Files copied into a vault in the same millisecond share size and mtimeMs,
+	// but distinct assets must still get distinct Anki media filenames
+	const fileAdapter = createMockFileAdapter({
+		// eslint-disable-next-line ts/require-await
+		async readFileBuffer(filePath: string) {
+			return new Uint8Array(filePath.includes('clip-1') ? [1, 2, 3] : [4, 5, 6])
+		},
+	})
+	const fetchAdapter = vi.fn()
+
+	const result1 = await getSafeAnkiMediaFilename(
+		'/vault/media/clip-1.mp3',
+		'test-namespace',
+		'mp3',
+		fileAdapter,
+		fetchAdapter,
+	)
+	const result2 = await getSafeAnkiMediaFilename(
+		'/vault/media/clip-2.mp3',
+		'test-namespace',
+		'mp3',
+		fileAdapter,
+		fetchAdapter,
+	)
+	expect(result1).toBeDefined()
+	expect(result2).toBeDefined()
+	expect(result1).not.toBe(result2)
 })
 
 it('generates different filenames for different namespaces', async () => {

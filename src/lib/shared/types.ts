@@ -26,7 +26,9 @@ export type FileAdapter = {
 // Options used in more than one place... diamond problem prevents a pure hierarchy
 export type GlobalOptions = {
 	/**
-	 * Used for wiki link resolution
+	 * Absolute paths of all the files links might lead to, used for link
+	 * resolution. When a link matches several files equally well, the one listed
+	 * first wins.
 	 */
 	allFilePaths: string[]
 	ankiConnectOptions: YankiConnectOptions
@@ -39,7 +41,9 @@ export type GlobalOptions = {
 	ankiWeb: boolean
 	/**
 	 * Override where "/" should resolve to... useful in Obsidian to set the vault
-	 * path as the "root"
+	 * path as the "root". Links resolve against it as they would in an Obsidian
+	 * vault. If unset, the deepest directory containing every file in
+	 * `allFilePaths` stands in for it when matching links to files.
 	 */
 	basePath: string | undefined
 	/**
@@ -47,13 +51,17 @@ export type GlobalOptions = {
 	 * card corruption
 	 */
 	checkDatabase: boolean
+	/**
+	 * Directory that links in Markdown are resolved from when the path of the
+	 * note itself isn't given
+	 */
 	cwd: string
 	dryRun: boolean
 	/**
 	 * Exposed for Obsidian, currently only used for getting URL content hashes
 	 * and inferring MIME types of URLs without extensions. Note that
 	 * ankiConnectOptions ALSO has a fetch adapter option specifically for
-	 * communicating with Anki-Connect.
+	 * communicating with AnkiConnect.
 	 */
 	fetchAdapter: FetchAdapter | undefined
 	fileAdapter: FileAdapter | undefined
@@ -139,6 +147,5 @@ export async function getDefaultFileAdapter(): Promise<FileAdapter> {
 }
 
 export function getDefaultFetchAdapter(): FetchAdapter {
-	// eslint-disable-next-line node/no-unsupported-features/node-builtins
 	return fetch.bind(globalThis)
 }

@@ -120,8 +120,9 @@ export async function syncFiles(
 
 	// In Obsidian, note contents might change if the file name changes
 	// because intra-note links might have been updates, so we have to check
-	// for this and reload the notes
-	if (obsidianVault !== undefined) {
+	// for this and reload the notes. Skipped during dry runs, since no files
+	// are actually renamed and the new file paths don't exist on disk.
+	if (obsidianVault !== undefined && !dryRun) {
 		// Check to see if any notes were renamed
 		const notesWereRenamed = renamedLocalNotes.some(
 			(renamedNote) => renamedNote.filePath !== renamedNote.filePathOriginal,
@@ -152,7 +153,7 @@ export async function syncFiles(
 
 			// Replace the renamed notes with the reloaded notes
 			for (const [index, renamedNote] of renamedLocalNotes.entries()) {
-				renamedNote.note = reloadedLocalNotes[index].note
+				renamedNote.note = reloadedLocalNotes[index]!.note
 			}
 		}
 	}
@@ -184,7 +185,7 @@ export async function syncFiles(
 	const liveNotes = synced.filter((note) => note.action !== 'deleted') as SyncedFile[]
 
 	for (const [index, loadedAndRenamedNote] of renamedLocalNotes.entries()) {
-		const liveNote = liveNotes[index]
+		const liveNote = liveNotes[index]!
 
 		if (
 			(loadedAndRenamedNote.note.noteId === undefined ||
@@ -216,7 +217,7 @@ export async function syncFiles(
 			note: note.note,
 		}))
 
-	const syncedAndSorted = [...deletedNotes, ...liveNotes].sort((a, b) =>
+	const syncedAndSorted = [...deletedNotes, ...liveNotes].toSorted((a, b) =>
 		(a.filePath ?? '').localeCompare(b.filePath ?? ''),
 	)
 
@@ -242,16 +243,16 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 	// Aggregate the counts of each action:
 	// eslint-disable-next-line unicorn/no-array-reduce
 	const actionCounts = synced.reduce<Record<string, number>>((acc, note) => {
-		acc[note.action] = (acc[note.action] || 0) + 1
+		acc[note.action] = (acc[note.action] ?? 0) + 1
 		return acc
 	}, {})
 
 	const totalSynced = synced.filter((note) => note.action !== 'deleted').length
 	const totalRenamed = synced.filter((note) => note.filePath !== note.filePathOriginal).length
-	const ankiUnreachable = actionCounts.ankiUnreachable > 0
+	const ankiUnreachable = (actionCounts.ankiUnreachable ?? 0) > 0
 
 	lines.push(
-		`${result.dryRun ? 'Will sync' : ankiUnreachable ? 'Failed to sync' : 'Successfully synced'} ${totalSynced} ${plur('note', totalSynced)} to Anki${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,
+		`${ankiUnreachable ? 'Failed to sync' : result.dryRun ? 'Will sync' : 'Successfully synced'} ${totalSynced} ${plur('note', totalSynced)} to Anki${result.dryRun ? '' : ` in ${prettyMilliseconds(result.duration)}`}.`,
 	)
 
 	if (verbose) {
@@ -286,12 +287,8 @@ export function formatSyncFilesResult(result: SyncFilesResult, verbose = false):
 		}
 
 		lines.push('', result.dryRun ? 'Sync Plan Details:' : 'Sync Details:')
-		for (const { action, filePath, note } of synced) {
-			if (filePath === undefined) {
-				lines.push(`  Note ID ${note.noteId} ${capitalize(action)} (From Anki)`)
-			} else {
-				lines.push(`  Note ID ${note.noteId} ${capitalize(action)} ${filePath}`)
-			}
+		for (const { action, filePath = '(From Anki)', note } of synced) {
+			lines.push(`  Note ID ${note.noteId} ${capitalize(action)} ${filePath}`)
 		}
 	}
 

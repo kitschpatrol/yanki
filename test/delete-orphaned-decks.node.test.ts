@@ -1,14 +1,9 @@
 /**
- * Unit test for the orphaned deck deletion logic, specifically the parent-deck
- * detection fix from https://github.com/kitschpatrol/yanki/pull/7
- *
- * The integration tests in sync.node.test.ts can't reliably exercise this bug
- * because the getDeckStats safety check catches the incorrect orphan candidates
- * in normal operation. The bug only manifests when getDeckStats returns
- * unreliable zero counts (an intermittent Anki issue). This test mocks the Anki
- * client to simulate that scenario.
+ * Regression tests for the parent-deck detection fix from
+ * https://github.com/kitschpatrol/yanki/pull/7. The card search reports empty
+ * decks to isolate candidate selection from the final emptiness check.
  */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { YankiNote } from '../src/lib/model/note'
 import { deleteOrphanedDecks } from '../src/lib/utilities/anki-connect'
 
@@ -27,41 +22,19 @@ function makeNote(deckName: string): YankiNote {
 }
 
 /**
- * Create a mock YankiConnect client where getDeckStats always returns zero
- * counts (simulating the unreliable behavior documented in the source) and
- * deleteDecks records which decks were requested for deletion.
+ * Create a mock client reporting empty decks and recording requested deletions.
  */
-function createMockClient() {
+function createMockClient(deckNames: string[]) {
 	const deletedDecks: string[] = []
-
 	const client = {
+		card: { findCards: vi.fn().mockResolvedValue([]) },
 		deck: {
-			// eslint-disable-next-line ts/require-await
-			async deleteDecks({ decks }: { cardsToo: boolean; decks: string[] }) {
+			deckNamesAndIds: vi
+				.fn()
+				.mockResolvedValue(Object.fromEntries(deckNames.map((name, index) => [name, index + 1]))),
+			deleteDecks: vi.fn().mockImplementation(({ decks }: { decks: string[] }) => {
 				deletedDecks.push(...decks)
-			},
-			// eslint-disable-next-line ts/require-await
-			async getDeckStats({ decks }: { decks: string[] }) {
-				const result: Record<
-					string,
-					{
-						learn_count: number
-						new_count: number
-						review_count: number
-						total_in_deck: number
-					}
-				> = {}
-				for (const deck of decks) {
-					result[deck] = {
-						learn_count: 0,
-						new_count: 0,
-						review_count: 0,
-						total_in_deck: 0,
-					}
-				}
-
-				return result
-			},
+			}),
 		},
 	}
 
@@ -70,7 +43,7 @@ function createMockClient() {
 
 describe('deleteOrphanedDecks parent detection', () => {
 	it('does not mark parent as orphan when sibling child is still active', async () => {
-		const { client, deletedDecks } = createMockClient()
+		const { client, deletedDecks } = createMockClient(['Lang', 'Lang::Grammar', 'Lang::Vocabulary'])
 
 		const activeNotes = [makeNote('Lang::Grammar')]
 		const originalNotes = [makeNote('Lang::Grammar'), makeNote('Lang::Vocabulary')]
@@ -90,21 +63,29 @@ describe('deleteOrphanedDecks parent detection', () => {
 	})
 
 	it('marks parent as orphan when no children are active', async () => {
-		const { client, deletedDecks } = createMockClient()
+		const { client, deletedDecks } = createMockClient(['Lang', 'Lang::Grammar', 'Lang::Vocabulary'])
 
 		const activeNotes: YankiNote[] = []
 		const originalNotes = [makeNote('Lang::Grammar'), makeNote('Lang::Vocabulary')]
 
-		await deleteOrphanedDecks(client as never, activeNotes, originalNotes, false)
+		const decksToDelete = await deleteOrphanedDecks(
+			client as never,
+			activeNotes,
+			originalNotes,
+			false,
+		)
 
 		// Both children orphaned, parent should also be a deletion candidate
-		expect(deletedDecks).toContain('Lang::Vocabulary')
-		expect(deletedDecks).toContain('Lang::Grammar')
-		expect(deletedDecks).toContain('Lang')
+		expect(decksToDelete).toEqual(['Lang', 'Lang::Grammar', 'Lang::Vocabulary'])
+
+		// Anki removes children with their parent, and AnkiConnect 26.x fails a
+		// request that names a deck an earlier entry already removed, so only
+		// the parent is sent
+		expect(deletedDecks).toEqual(['Lang'])
 	})
 
 	it('handles deeply nested decks correctly', async () => {
-		const { client, deletedDecks } = createMockClient()
+		const { client, deletedDecks } = createMockClient(['A', 'A::B', 'A::B::C', 'A::B::D'])
 
 		const activeNotes = [makeNote('A::B::C')]
 		const originalNotes = [makeNote('A::B::C'), makeNote('A::B::D')]
