@@ -1,0 +1,142 @@
+name: Benchmark
+
+# Runs the benchmark suite on a base ref and then on the head ref, back to back
+# on one runner, so each result is reported next to its baseline.
+
+on:
+  pull_request:
+    types: [labeled, synchronize]
+  workflow_dispatch:
+    inputs:
+      base:
+        description: Ref to record the baseline from
+        default: main
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  # Extra startup time for pip-installed Anki in CI
+  ANKI_CONNECT_TIMEOUT: '60000'
+  # Only the newest Anki and AnkiConnect pairing from the CI matrix
+  ANKI_CONNECT_VERSION: '26.11.15.0'
+  ANKI_VERSION: '26.9.4'
+  NO_COLOR: '1'
+
+jobs:
+  benchmark:
+    name: Benchmark against base
+    # Pull requests opt in with the `benchmark` label: run when it is added, and
+    # on later pushes while it is present
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'benchmark') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'benchmark'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # Set on the job so that skipped runs never cancel a benchmark in progress
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.base.sha || inputs.base }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb \
+            libegl1 \
+            libgl1 \
+            libopengl0 \
+            libnss3 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2 \
+            libxtst6 \
+            libxkbcommon0 \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libgbm1 \
+            libasound2t64 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libdrm2 \
+            libpango-1.0-0 \
+            libcairo2 \
+            libatspi2.0-0
+
+      - name: Setup Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.13'
+
+      - name: Install Anki
+        run: pip install "aqt==${ANKI_VERSION}"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install base dependencies
+        run: pnpm ci
+
+      # Calls Vitest directly because a base ref from before the benchmark suite
+      # has no `bench:baseline` script. Such a base records nothing, and the
+      # head run then reports its results without baselines.
+      - name: Record baseline from base
+        env:
+          YANKI_BENCH_RECORD_BASELINE: 'true'
+        run: xvfb-run --auto-servernum pnpm exec vitest bench --run --passWithNoTests
+
+      - name: Checkout head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Keep the git-ignored baseline results recorded from the base
+          clean: false
+
+      - name: Install head dependencies
+        run: pnpm ci
+
+      - name: Benchmark head against baseline
+        shell: bash
+        run: xvfb-run --auto-servernum pnpm bench --reporter=verbose 2>&1 | tee "$RUNNER_TEMP/benchmark-results.txt"
+
+      - name: Summarize results
+        if: always()
+        shell: bash
+        run: |
+          if [[ ! -f "$RUNNER_TEMP/benchmark-results.txt" ]]; then
+            echo 'The head benchmark run produced no output.' >>"$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          {
+            echo '## Benchmark results'
+            echo
+            echo 'Each table shows a benchmark on the head ref next to the "baseline" row recorded from the base ref on the same runner.'
+            echo
+            echo '```text'
+            cat "$RUNNER_TEMP/benchmark-results.txt"
+            echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"

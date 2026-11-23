@@ -10,6 +10,9 @@ const isSlow = isCI || isWindows
 
 export default defineConfig({
 	test: {
+		benchmark: {
+			include: ['test/**/*.bench.ts'],
+		},
 		coverage: {
 			include: ['src/**/*.ts'],
 			provider: 'v8',
@@ -35,6 +38,8 @@ export default defineConfig({
 									port: 5180,
 									strictPort: true,
 								},
+								// Bench suites are Node-only; opt the browser project out
+								benchmark: { include: [] },
 								browser: {
 									enabled: true,
 									headless: true,
@@ -58,6 +63,9 @@ export default defineConfig({
 			// Node project
 			{
 				test: {
+					benchmark: {
+						include: ['test/**/*.bench.ts'],
+					},
 					environment: 'node',
 					exclude: ['test/**/*.browser.test.ts'],
 					include: ['test/**/*.test.ts'],
