@@ -52,7 +52,6 @@
 	],
 	"scripts": {
 		"bench": "vitest bench --run",
-		"bench:baseline": "vitest bench --run --outputJson test/benchmarks/baseline.json",
 		"build": "tsdown && attw -P --profile esm-only && publint",
 		"clean-deep": "shx rm -f pnpm-lock.yaml && git clean -fdX",
 		"coverage": "vitest run --coverage",
