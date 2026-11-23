@@ -17,8 +17,9 @@ const isRecordingBaseline = process.env.YANKI_BENCH_RECORD_BASELINE === 'true'
  * Define a test that runs a single benchmark under the test's own name.
  *
  * When the `YANKI_BENCH_RECORD_BASELINE` environment variable is `true`, the
- * result is stored as the benchmark's baseline in `test/benchmarks`. Otherwise
- * the benchmark is compared against its stored baseline, if it has one.
+ * result is stored as the benchmark's baseline in the git-ignored
+ * `test/benchmarks` directory. Otherwise the benchmark is compared against its
+ * stored baseline, if it has one.
  *
  * @param name Name shared by the test and the benchmark it runs, and the source
  *   of the baseline file name
