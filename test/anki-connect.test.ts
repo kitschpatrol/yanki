@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 
+import { uint8ArrayToBase64 } from 'uint8array-extras'
 import { describe, expect, it, vi } from 'vitest'
 import { AnkiConnectUnreachableError } from 'yanki-connect'
 import type { YankiNote } from '../src/lib/model/note'
@@ -1380,62 +1381,90 @@ describe('reconcileMedia', () => {
 		})
 	})
 
-	it('deletes orphaned media and re-uploads missing media', async () => {
-		const multi = vi
-			.fn()
+	/**
+	 * A client whose Anki media folder holds `presentMedia`, and which stores and
+	 * deletes every file it is asked to.
+	 */
+	function makeMediaClient(presentMedia: string[]) {
+		const multi = makeMultiMock({
 			// eslint-disable-next-line unicorn/no-null
-			.mockResolvedValueOnce([{ error: null, result: 'yanki-test-new-file.png' }])
-			// eslint-disable-next-line unicorn/no-null
-			.mockResolvedValueOnce([{ error: null, result: undefined }])
+			deleteMediaFile: () => null,
+			storeMediaFile: ({ filename }) => filename,
+		})
 		const client = {
-			media: {
-				getMediaFilesNames: vi.fn().mockResolvedValue(['yanki-test-old-file.png']),
-			},
+			media: { getMediaFilesNames: vi.fn().mockResolvedValue(presentMedia) },
 			miscellaneous: { multi },
 		}
 
+		return { client, multi }
+	}
+
+	function makeMediaTag(filename: string, source: string): string {
+		return `<img src="${filename}" data-yanki-media-sync="true" data-yanki-media-src="${source}">`
+	}
+
+	function makeMediaNote(noteId: number, ...mediaTags: string[]): YankiNote {
+		return makeNote({
+			fields: { Back: mediaTags.join(''), Front: 'front', YankiNamespace: 'test' },
+			noteId,
+		})
+	}
+
+	function getActionFilenames(multi: ReturnType<typeof vi.fn>, actionName: string): string[] {
+		return (multi.mock.calls as MultiCall[])
+			.flatMap(([{ actions }]) => actions)
+			.filter(({ action }) => action === actionName)
+			.map(({ params }) => String(params?.filename))
+	}
+
+	it('uploads only missing media and deletes only unreferenced media', async () => {
+		const { client, multi } = makeMediaClient(['yanki-test-kept.png', 'yanki-test-orphan.png'])
 		const notes = [
-			makeNote({
-				fields: {
-					Back: '<img src="yanki-test-new-file.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/img.png">',
-					Front: 'front',
-					YankiNamespace: 'test',
-				},
-			}),
+			makeMediaNote(
+				42,
+				makeMediaTag('yanki-test-kept.png', 'https://example.com/kept.png'),
+				makeMediaTag('yanki-test-missing.png', 'https://example.com/missing.png'),
+			),
 		]
 
 		const result = await reconcileMedia(client as never, notes, 'test', false)
-		expect(result.deleted).toContain('yanki-test-old-file.png')
 
-		const deletionCall = multi.mock.calls.find((call) =>
-			(call[0] as { actions: Array<{ action: string }> }).actions.some(
-				(a) => a.action === 'deleteMediaFile',
-			),
-		)
-		expect(deletionCall).toBeDefined()
+		expect(getActionFilenames(multi, 'storeMediaFile')).toEqual(['yanki-test-missing.png'])
+		expect(getActionFilenames(multi, 'deleteMediaFile')).toEqual(['yanki-test-orphan.png'])
+		expect(result).toEqual({
+			deleted: ['yanki-test-orphan.png'],
+			failedDeletes: [],
+			failedUploads: [],
+			reuploaded: ['yanki-test-missing.png'],
+		})
 	})
 
-	it('warns when no file adapter for local media re-upload', async () => {
-		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
-		const client = {
-			media: {
-				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-			},
-			miscellaneous: { multi: vi.fn().mockResolvedValue([]) },
-		}
-
+	it('leaves Anki untouched when every referenced file is already present', async () => {
+		const { client, multi } = makeMediaClient(['yanki-test-a.png', 'yanki-test-b.png'])
 		const notes = [
-			makeNote({
-				fields: {
-					Back: '<img src="yanki-test-file.png" data-yanki-media-sync="true" data-yanki-media-src="/local/file.png">',
-					Front: 'front',
-					YankiNamespace: 'test',
-				},
-			}),
+			makeMediaNote(1, makeMediaTag('yanki-test-a.png', 'https://example.com/a.png')),
+			makeMediaNote(2, makeMediaTag('yanki-test-b.png', '/local/b.png')),
 		]
 
-		await reconcileMedia(client as never, notes, 'test', false)
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+
+		expect(multi).not.toHaveBeenCalled()
+		expect(result).toEqual({ deleted: [], failedDeletes: [], failedUploads: [], reuploaded: [] })
+	})
+
+	it('reports local media as failed when no file adapter is provided', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const { client, multi } = makeMediaClient([])
+		const notes = [makeMediaNote(42, makeMediaTag('yanki-test-file.png', '/local/file.png'))]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+
 		expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('no file adapter provided'))
+		expect(result.failedUploads).toEqual([
+			{ filename: 'yanki-test-file.png', reason: 'no file adapter provided' },
+		])
+		expect(result.reuploaded).toEqual([])
+		expect(multi).not.toHaveBeenCalled()
 		spyWarn.mockRestore()
 	})
 
@@ -1549,7 +1578,7 @@ describe('reconcileMedia', () => {
 		expect(fileAdapter.readFileBuffer).toHaveBeenCalledWith('/local/file.png')
 	})
 
-	it('omits failed uploads from the reuploaded list (silent partial failure)', async () => {
+	it('reports failed uploads and omits them from the reuploaded list', async () => {
 		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
 		const multi = vi.fn().mockResolvedValue([
 			// eslint-disable-next-line unicorn/no-null
@@ -1580,10 +1609,9 @@ describe('reconcileMedia', () => {
 		spyWarn.mockRestore()
 	})
 
-	it('drops files that fail to read from disk; warns once', async () => {
+	it('reports files that fail to read from disk and uploads the rest', async () => {
 		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
-		// eslint-disable-next-line unicorn/no-null
-		const multi = vi.fn().mockResolvedValue([{ error: null, result: undefined }])
+		const { client, multi } = makeMediaClient([])
 		const fileAdapter = {
 			readFileBuffer: vi.fn().mockImplementation(async (src: string): Promise<Uint8Array> => {
 				await Promise.resolve()
@@ -1594,34 +1622,218 @@ describe('reconcileMedia', () => {
 				return new Uint8Array([1, 2, 3])
 			}),
 		}
-		const client = {
-			media: {
-				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-			},
-			miscellaneous: { multi },
-		}
+		// The unreadable file comes first, so the upload that follows it must
+		// still be attributed to its own filename
 		const notes = [
-			makeNote({
-				fields: {
-					Back: '<img src="yanki-test-ok.png" data-yanki-media-sync="true" data-yanki-media-src="/local/ok.png"><img src="yanki-test-broken.png" data-yanki-media-sync="true" data-yanki-media-src="/local/broken.png">',
-					Front: 'front',
-					YankiNamespace: 'test',
-				},
-				noteId: 42,
-			}),
+			makeMediaNote(
+				42,
+				makeMediaTag('yanki-test-broken.png', '/local/broken.png'),
+				makeMediaTag('yanki-test-ok.png', '/local/ok.png'),
+			),
 		]
 
 		const result = await reconcileMedia(client as never, notes, 'test', false, fileAdapter as never)
-		// Only the readable file is uploaded
+
+		expect(getActionFilenames(multi, 'storeMediaFile')).toEqual(['yanki-test-ok.png'])
 		expect(result.reuploaded).toEqual(['yanki-test-ok.png'])
-		// Hardening B: the broken file is now visible in failedUploads instead of
-		// being a console.warn-only signal.
 		expect(result.failedUploads).toHaveLength(1)
 		expect(result.failedUploads[0]?.filename).toBe('yanki-test-broken.png')
 		expect(result.failedUploads[0]?.reason).toContain('EACCES')
 		expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('yanki-test-broken.png'))
 		spyWarn.mockRestore()
 	})
+
+	it('uploads the contents of each local file under its own filename', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const { client, multi } = makeMediaClient([])
+		const fileCount = 20
+		const unreadableIndices = new Set([0, 11])
+		const getFileContents = (index: number) => new Uint8Array([index, index + 1, index + 2])
+		const getFilename = (index: number) => `yanki-test-${index.toString().padStart(2, '0')}.png`
+
+		// Later files resolve first, so reads complete out of order
+		const fileAdapter = {
+			async readFileBuffer(source: string): Promise<Uint8Array> {
+				const index = Number(source.replace('/local/', ''))
+				await new Promise((resolve) => {
+					setTimeout(resolve, fileCount - index)
+				})
+				if (unreadableIndices.has(index)) {
+					throw new Error(`ENOENT: ${source}`)
+				}
+
+				return getFileContents(index)
+			},
+		}
+		const notes = [
+			makeMediaNote(
+				42,
+				...Array.from({ length: fileCount }, (_, index) =>
+					makeMediaTag(getFilename(index), `/local/${index}`),
+				),
+			),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false, fileAdapter as never)
+
+		const readableIndices = Array.from({ length: fileCount }, (_, index) => index).filter(
+			(index) => !unreadableIndices.has(index),
+		)
+		const storedContents = (multi.mock.calls as MultiCall[])
+			.flatMap(([{ actions }]) => actions)
+			.map(({ params }) => [params?.filename, params?.data])
+		expect(storedContents).toEqual(
+			readableIndices.map((index) => [
+				getFilename(index),
+				uint8ArrayToBase64(getFileContents(index)),
+			]),
+		)
+		expect(result.reuploaded).toEqual(readableIndices.map((index) => getFilename(index)))
+		expect(result.failedUploads.map(({ filename }) => filename).toSorted()).toEqual(
+			Array.from(unreadableIndices, (index) => getFilename(index)),
+		)
+		spyWarn.mockRestore()
+	})
+
+	it('splits uploads across requests to stay within the request size budget', async () => {
+		const { client, multi } = makeMediaClient([])
+		// Five megabytes each, which base64 encoding takes past the eight megabyte
+		// budget once two share a request
+		const fileAdapter = {
+			readFileBuffer: vi.fn().mockResolvedValue(new Uint8Array(5 * 1024 * 1024)),
+		}
+		const filenames = ['yanki-test-a.png', 'yanki-test-b.png', 'yanki-test-c.png']
+		const notes = [
+			makeMediaNote(
+				42,
+				...filenames.map((filename) => makeMediaTag(filename, `/local/${filename}`)),
+			),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false, fileAdapter as never)
+
+		const batchSizes = (multi.mock.calls as MultiCall[]).map(([{ actions }]) => actions.length)
+		expect(batchSizes).toEqual([1, 1, 1])
+		expect(result.reuploaded).toEqual(filenames)
+	})
+
+	it('reports the files of a failed upload request and keeps uploading the rest', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const filenames = Array.from(
+			{ length: 26 },
+			(_, index) => `yanki-test-${index.toString().padStart(2, '0')}.png`,
+		)
+		const multi = vi
+			.fn()
+			.mockRejectedValueOnce(new Error('AnkiConnect response status is 413'))
+			.mockImplementation(({ actions }: { actions: MultiActionInput[] }) =>
+				// eslint-disable-next-line unicorn/no-null
+				actions.map(({ params }) => ({ error: null, result: params?.filename })),
+			)
+		const client = {
+			media: { getMediaFilesNames: vi.fn().mockResolvedValue([]) },
+			miscellaneous: { multi },
+		}
+		const notes = [
+			makeMediaNote(
+				42,
+				...filenames.map((filename) => makeMediaTag(filename, `https://example.com/${filename}`)),
+			),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+
+		expect(result.failedUploads).toEqual(
+			filenames.slice(0, 25).map((filename) => ({
+				filename,
+				reason: 'Error: AnkiConnect response status is 413',
+			})),
+		)
+		expect(result.reuploaded).toEqual(filenames.slice(25))
+		spyWarn.mockRestore()
+	})
+
+	it('reports a file that Anki stored under a different filename', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const multi = makeMultiMock({ storeMediaFile: () => 'yanki-test-renamed.png' })
+		const client = {
+			media: { getMediaFilesNames: vi.fn().mockResolvedValue([]) },
+			miscellaneous: { multi },
+		}
+		const notes = [
+			makeMediaNote(42, makeMediaTag('yanki-test-file.png', 'https://example.com/file.png')),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+
+		expect(result.reuploaded).toEqual([])
+		expect(result.failedUploads).toEqual([
+			{
+				filename: 'yanki-test-file.png',
+				reason: 'stored under a different filename: "yanki-test-renamed.png"',
+			},
+		])
+		spyWarn.mockRestore()
+	})
+
+	it('reports media that Anki could not delete', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const orphaned = ['yanki-test-a.png', 'yanki-test-b.png', 'yanki-test-c.png']
+		const multi = makeMultiMock({
+			deleteMediaFile({ filename }) {
+				if (filename === 'yanki-test-b.png') {
+					throw new Error('file is locked')
+				}
+			},
+		})
+		const client = {
+			media: { getMediaFilesNames: vi.fn().mockResolvedValue(orphaned) },
+			miscellaneous: { multi },
+		}
+
+		const result = await reconcileMedia(client as never, [], 'test', false)
+
+		expect(result.deleted).toEqual(['yanki-test-a.png', 'yanki-test-c.png'])
+		expect(result.failedDeletes).toEqual([
+			{ filename: 'yanki-test-b.png', reason: 'file is locked' },
+		])
+		expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('yanki-test-b.png'))
+		spyWarn.mockRestore()
+	})
+
+	it.each([
+		{ expected: [], freshNoteIds: [1], name: 'a created or updated note', noteIds: [1] },
+		{ expected: [], freshNoteIds: [2], name: 'an existing then a fresh note', noteIds: [1, 2] },
+		{ expected: [], freshNoteIds: [1], name: 'a fresh then an existing note', noteIds: [1, 2] },
+		{
+			expected: ['yanki-test-shared.png'],
+			freshNoteIds: [],
+			name: 'existing notes only',
+			noteIds: [1, 2],
+		},
+	])(
+		'lists media as re-uploaded only when no fresh note references it: $name',
+		async ({ expected, freshNoteIds, noteIds }) => {
+			const { client } = makeMediaClient([])
+			const notes = noteIds.map((noteId) =>
+				makeMediaNote(
+					noteId,
+					makeMediaTag('yanki-test-shared.png', 'https://example.com/shared.png'),
+				),
+			)
+
+			const result = await reconcileMedia(
+				client as never,
+				notes,
+				'test',
+				false,
+				undefined,
+				new Set(freshNoteIds),
+			)
+
+			expect(result.reuploaded).toEqual(expected)
+		},
+	)
 
 	it('dedupes a media filename referenced by multiple fresh notes', async () => {
 		// eslint-disable-next-line unicorn/no-null
@@ -1697,7 +1909,7 @@ describe('reconcileMedia', () => {
 		]
 
 		const result = await reconcileMedia(client as never, notes, 'test', false)
-		expect(result.reuploaded).toHaveLength(fileCount)
+		expect(result.reuploaded).toEqual(filenames)
 		expect(multi).toHaveBeenCalledTimes(2)
 		const sizes = (multi.mock.calls as MultiCall[]).map((call) => call[0].actions.length)
 		expect(sizes).toEqual([25, 1])
@@ -1724,7 +1936,7 @@ describe('reconcileMedia', () => {
 		}
 
 		const result = await reconcileMedia(client as never, [], 'test', false)
-		expect(result.deleted).toHaveLength(orphanedCount)
+		expect(result.deleted).toEqual(orphaned)
 		// 30 deletes split as 25 + 5
 		const sizes = (multi.mock.calls as MultiCall[]).map((call) => call[0].actions.length)
 		expect(sizes).toEqual([25, 5])

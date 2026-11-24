@@ -458,13 +458,21 @@ it('detects code blocks nested inside a list item', async () => {
 	expect(note.fields.Front).toContain('shiki')
 })
 
-it('detects code blocks inside table cells', async () => {
+it('detects a raw HTML code block on the back when the front only has inline code', async () => {
 	const noteMarkdown =
 		'| col |\n| --- |\n| `inline only no shiki` |\n\n---\n\n<pre><code>real</code></pre>'
 	const note = await getNoteFromMarkdown(noteMarkdown)
 	// Inline code in the table cell stays unstyled; the back has a real
 	// pre/code block which must reach Shiki.
 	expect(note.fields.Back).toContain('shiki')
+})
+
+it('applies Shiki highlighting when raw <pre> tags wrap inline code', async () => {
+	// The `pre` comes from raw HTML and the `code` from Markdown, so no single
+	// node holds a code block until the HTML is re-parsed
+	const noteMarkdown = 'Run <pre>`const x = 1`</pre>\n\n---\n\nback'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Front).toContain('shiki')
 })
 
 /**

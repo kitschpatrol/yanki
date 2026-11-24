@@ -59,7 +59,7 @@ export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
 	...defaultGlobalOptions,
 }
 
-const HTML_CODE_TAG_REGEX = /<code\b/iu
+const HTML_CODE_TAG_REGEX = /<(?:code|pre)\b/iu
 
 export async function getNoteFromMarkdown(
 	markdown: string,
@@ -103,15 +103,17 @@ export async function getNoteFromMarkdown(
 
 	// Shiki has a notable performance cost even on plain text, so we skip it when
 	// there are no code blocks. Check the post-frontmatter AST for
-	// fenced/indented code nodes and raw HTML code tags. We do risk
-	// false-positives if we detect `<code>` tags in escaped HTML or without an
-	// adjacent `<pre>` that Shiki will still ultimately skip, but this should be
+	// fenced/indented code nodes and raw HTML `<code>` or `<pre>` tags. We do
+	// risk false-positives if we detect a tag in escaped HTML, or one without
+	// its counterpart that Shiki will still ultimately skip, but this should be
 	// rare and does not affect correctness.
 	//
 	// `inlineCode` mdast nodes are intentionally not in the visit types: the
 	// Shiki rehype plugin only highlights block-level `<pre><code>`, not bare
-	// `<code>`, so inline backticks have no Shiki output to short-circuit. If
-	// `inline: true` is ever passed to `rehypeShiki`, add `inlineCode` here.
+	// `<code>`, so inline backticks have no Shiki output to short-circuit. A raw
+	// `<pre>` tag wrapped around inline backticks does produce `<pre><code>`,
+	// which is why `<pre>` tags are checked. If `inline: true` is ever passed to
+	// `rehypeShiki`, add `inlineCode` here.
 	let hasCodeBlocks = false
 	visit(ast, ['code', 'html'], (node) => {
 		if (node.type === 'code' || (node.type === 'html' && HTML_CODE_TAG_REGEX.test(node.value))) {

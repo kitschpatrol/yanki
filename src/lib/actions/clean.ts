@@ -69,7 +69,19 @@ export async function cleanNotes(options?: PartialDeep<CleanOptions>): Promise<C
 	const deletedDecks = await deleteOrphanedDecks(client, [], remoteNotes, dryRun)
 
 	// Media deletion pass (no fileAdapter needed — liveNotes is empty so re-upload is a no-op)
-	const { deleted: deletedMedia } = await reconcileMedia(client, [], sanitizedNamespace, dryRun)
+	const { deleted: deletedMedia, failedDeletes } = await reconcileMedia(
+		client,
+		[],
+		sanitizedNamespace,
+		dryRun,
+	)
+
+	if (failedDeletes.length > 0) {
+		const failures = failedDeletes.map(({ filename, reason }) => `${filename}: ${reason}`)
+		throw new Error(
+			`Could not delete ${failedDeletes.length} media ${plur('asset', failedDeletes.length)} from Anki:\n  ${failures.join('\n  ')}`,
+		)
+	}
 
 	// AnkiWeb sync
 	const isChanged = remoteNotes.length > 0 || deletedDecks.length > 0

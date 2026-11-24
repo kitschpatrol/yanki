@@ -41,10 +41,8 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 
 /**
  * Ensure that every required Yanki model and deck exists in Anki before any
- * note add/update calls fire.
- *
- * Lifting this out of the per-note path lets the main sync pass skip the
- * "missing model/deck" recovery branches and unblocks future batched calls.
+ * note add/update calls fire, so the batched calls never have to recover from a
+ * missing model or deck.
  *
  * @throws {Error} If a required model name is not a known Yanki model, or if a
  *   deck name is empty.
@@ -59,24 +57,24 @@ export async function ensureModelsAndDecks(
 		throw new Error('Deck name is empty')
 	}
 
-	const responses = await client.miscellaneous.multi({
-		actions: [
-			{ action: 'modelNames', version: 6 },
-			{ action: 'deckNames', version: 6 },
-		],
-	})
-	const modelsResponse = toMultiActionResponse(responses[0])
+	if (dryRun) {
+		return
+	}
+
+	const [modelsResponse, decksResponse] = await sendMulti(client, [
+		{ action: 'modelNames', version: 6 },
+		{ action: 'deckNames', version: 6 },
+	])
+	if (modelsResponse === undefined || decksResponse === undefined) {
+		throw new Error('multi() returned no response for the model and deck name probes')
+	}
+
 	if (modelsResponse.error !== null) {
 		throw new Error(`modelNames failed: ${modelsResponse.error}`)
 	}
 
-	const decksResponse = toMultiActionResponse(responses[1])
 	if (decksResponse.error !== null) {
 		throw new Error(`deckNames failed: ${decksResponse.error}`)
-	}
-
-	if (dryRun) {
-		return
 	}
 
 	const existingModels = new Set(toStringArray(modelsResponse.result, 'modelNames'))
@@ -90,7 +88,8 @@ export async function ensureModelsAndDecks(
 			throw new Error(`Unknown model name: ${modelName}`)
 		}
 
-		await client.model.createModel(model)
+		// Another sync may create the model between the probe and this call
+		await ensureModelExists(client, model)
 	}
 
 	for (const deckName of missingDecks) {
@@ -140,14 +139,21 @@ function describeNote(note: YankiNote): string {
 }
 
 /**
- * Create a batch of notes in a single Anki-Connect roundtrip via `addNotes`.
- * Mutates `localNote.noteId` on each entry as Anki assigns IDs.
+ * Create a batch of notes via `addNotes`, split into as few requests as the
+ * request size budget allows. Mutates `localNote.noteId` on each entry as Anki
+ * assigns IDs.
  *
  * Pre-flighted models/decks (see `ensureModelsAndDecks`) make this the only
  * write to Anki for note creation — no per-note retry on missing model/deck.
  * Media is handled separately by `reconcileMedia` after the full sync pass.
  *
- * @throws {Error} If `addNotes` returns null entries for any note in the batch.
+ * The AnkiConnect releases Yanki is tested against fail the whole request when
+ * a note can't be created. A null entry is treated as a failed note as well, in
+ * case a release reports failures per note instead.
+ *
+ * @throws {Error} If `addNotes` returns a different number of IDs than notes
+ *   sent, or null entries for any note. Notes in requests that succeeded keep
+ *   their assigned IDs.
  */
 export async function executeCreates(
 	client: YankiConnect,
@@ -166,35 +172,41 @@ export async function executeCreates(
 		return
 	}
 
-	const ids = await client.note.addNotes({
-		notes: toCreate.map(({ localNote }) => ({
-			deckName: localNote.deckName,
-			fields: localNote.fields,
-			modelName: localNote.modelName,
-			options: { allowDuplicate: true },
-			tags: localNote.tags,
-		})),
-	})
-
-	if (ids === null) {
-		throw new Error('addNotes returned null for the entire batch')
-	}
-
 	const failedDescriptions: string[] = []
-	for (const [i, id] of ids.entries()) {
-		const entry = toCreate[i]
-		if (entry === undefined) {
-			throw new Error(
-				`addNotes returned more IDs (${ids.length}) than notes sent (${toCreate.length})`,
-			)
+	let noteIndex = 0
+	for (const chunk of chunkForRequest(toCreate)) {
+		const ids = await client.note.addNotes({
+			notes: chunk.map(({ localNote }) => ({
+				audio: localNote.audio,
+				deckName: localNote.deckName,
+				fields: localNote.fields,
+				modelName: localNote.modelName,
+				options: { allowDuplicate: true },
+				picture: localNote.picture,
+				tags: localNote.tags,
+				video: localNote.video,
+			})),
+		})
+
+		if (ids === null) {
+			throw new Error('addNotes returned null for the entire batch')
 		}
 
-		if (id === null) {
-			failedDescriptions.push(`[${i}] ${describeNote(entry.localNote)}`)
-			continue
+		if (ids.length !== chunk.length) {
+			throw new Error(`addNotes returned ${ids.length} IDs for ${chunk.length} notes`)
 		}
 
-		entry.localNote.noteId = id
+		for (const [i, { localNote }] of chunk.entries()) {
+			const id = ids[i]
+			if (id === undefined || id === null) {
+				failedDescriptions.push(`[${noteIndex + i}] ${describeNote(localNote)}`)
+				continue
+			}
+
+			localNote.noteId = id
+		}
+
+		noteIndex += chunk.length
 	}
 
 	if (failedDescriptions.length > 0) {
@@ -204,7 +216,7 @@ export async function executeCreates(
 	}
 }
 
-type UpdateBucketEntry = {
+export type UpdateBucketEntry = {
 	localNote: YankiNote
 	remoteNote: YankiNote
 	syncedIndex: number
@@ -267,8 +279,9 @@ function getUpdateActions(localNote: YankiNote, remoteNote: YankiNote): MultiAct
 
 /**
  * Apply a batch of note updates by bundling per-note actions (`changeDeck`,
- * `updateNoteModel`) into a single `multi()` request. Media uploads happen
- * later in the consolidated `reconcileMedia` pass.
+ * `updateNoteModel`) into as few `multi()` requests as the request size budget
+ * allows. Media uploads happen later in the consolidated `reconcileMedia`
+ * pass.
  *
  * @returns The set of `syncedIndex` values whose notes ended up unchanged (no
  *   diff against their remote) so the caller can downgrade the placeholder
@@ -303,19 +316,22 @@ export async function executeUpdates(
 		return unchangedSyncedIndices
 	}
 
-	const responses = await client.miscellaneous.multi({ actions })
 	const failures: string[] = []
-	for (const [i, response] of responses.entries()) {
-		const { error } = toMultiActionResponse(response)
-		if (error === null) {
-			continue
-		}
+	await runMultiInChunks(
+		client,
+		actions,
+		(index, { error }) => {
+			if (error === null) {
+				return
+			}
 
-		const action = actions[i]
-		const note = actionNotes[i]
-		const noteContext = note === undefined ? '' : ` (${describeNote(note)})`
-		failures.push(`${action?.action ?? `index ${i}`}${noteContext}: ${error}`)
-	}
+			const action = actions[index]
+			const note = actionNotes[index]
+			const noteContext = note === undefined ? '' : ` (${describeNote(note)})`
+			failures.push(`${action?.action ?? `index ${index}`}${noteContext}: ${error}`)
+		},
+		Infinity,
+	)
 
 	if (failures.length > 0) {
 		throw new Error(
@@ -1080,9 +1096,48 @@ async function uploadMediaForNote(
 const MULTI_BATCH_CHUNK_SIZE = 25
 
 /**
- * Cap on simultaneous file reads in `reconcileMedia`. Bigger values shorten
- * cold-sync wall time on small vaults; smaller values keep peak memory bounded
- * on first syncs of large vaults (each read is base64-encoded in memory).
+ * Budget for the serialized size of the items batched into one request.
+ * AnkiConnect 26.x rejects request bodies over 16 MiB, so half of that leaves
+ * room for the request envelope. An item larger than the budget is sent in a
+ * request of its own.
+ */
+const MAX_BATCH_REQUEST_BYTES = 8 * 1024 * 1024
+
+const textEncoder = new TextEncoder()
+
+/**
+ * Split items into consecutive batches for requests that carry many items at
+ * once. A batch is closed when it holds `maxCount` items, or when the next item
+ * would take its serialized size past `MAX_BATCH_REQUEST_BYTES`.
+ */
+function chunkForRequest<T>(items: T[], maxCount = Infinity): T[][] {
+	const chunks: T[][] = []
+	let chunk: T[] = []
+	let chunkBytes = 0
+
+	for (const item of items) {
+		const itemBytes = textEncoder.encode(JSON.stringify(item)).byteLength
+		const isChunkFull = chunk.length >= maxCount || chunkBytes + itemBytes > MAX_BATCH_REQUEST_BYTES
+		if (isChunkFull && chunk.length > 0) {
+			chunks.push(chunk)
+			chunk = []
+			chunkBytes = 0
+		}
+
+		chunk.push(item)
+		chunkBytes += itemBytes
+	}
+
+	if (chunk.length > 0) {
+		chunks.push(chunk)
+	}
+
+	return chunks
+}
+
+/**
+ * Cap on simultaneous file reads in `reconcileMedia`, which bounds the raw file
+ * buffers held in memory while a batch of uploads is being encoded.
  */
 const MEDIA_READ_CONCURRENCY = 8
 
@@ -1128,21 +1183,108 @@ type ReconcileMediaResult = {
 	reuploaded: string[]
 }
 
+type CollectedMedia = { filename: string; originalSrc: string; reuploadEligible: boolean }
+
+type MediaUpload = { action: MultiAction; filename: string; reuploadEligible: boolean }
+
+/**
+ * Build the `storeMediaFile` action for each media file, reading and
+ * base64-encoding local files through the file adapter. Files that can't be
+ * read are left out of the result and recorded in `failedUploads`.
+ */
+async function getMediaUploads(
+	entries: CollectedMedia[],
+	fileAdapter: FileAdapter | undefined,
+	failedUploads: MediaFailure[],
+): Promise<MediaUpload[]> {
+	const uploads: Array<MediaUpload | undefined> = Array.from<MediaUpload | undefined>({
+		length: entries.length,
+	})
+
+	await runWithConcurrency(entries, MEDIA_READ_CONCURRENCY, async (entry, index) => {
+		const { filename, originalSrc, reuploadEligible } = entry
+
+		if (isUrl(originalSrc)) {
+			uploads[index] = {
+				action: {
+					action: 'storeMediaFile',
+					params: { deleteExisting: true, filename, url: originalSrc },
+					version: 6,
+				},
+				filename,
+				reuploadEligible,
+			}
+			return
+		}
+
+		if (fileAdapter === undefined) {
+			const reason = 'no file adapter provided'
+			console.warn(`Could not re-upload local media file "${filename}": ${reason}`)
+			failedUploads.push({ filename, reason })
+			return
+		}
+
+		try {
+			const data = uint8ArrayToBase64(await fileAdapter.readFileBuffer(originalSrc))
+			uploads[index] = {
+				action: {
+					action: 'storeMediaFile',
+					params: { data, deleteExisting: true, filename },
+					version: 6,
+				},
+				filename,
+				reuploadEligible,
+			}
+		} catch (error) {
+			const reason = String(error)
+			console.warn(`Could not read local media file "${filename}": ${reason}`)
+			failedUploads.push({ filename, reason })
+		}
+	})
+
+	return uploads.filter((upload) => upload !== undefined)
+}
+
+/**
+ * Check the response to a `storeMediaFile` action. Anki can store a file under
+ * a different name than the one requested, which leaves the note's media
+ * reference pointing at a file that doesn't exist.
+ *
+ * @returns The reason the upload failed, or undefined if it succeeded.
+ */
+function getStoreMediaFileFailure(
+	filename: string,
+	response: MultiActionResponse,
+): string | undefined {
+	if (response.error !== null) {
+		return response.error
+	}
+
+	if (response.result !== filename) {
+		return `stored under a different filename: ${JSON.stringify(response.result)}`
+	}
+
+	return undefined
+}
+
 /**
  * Reconcile the media files in Anki against the media referenced by the live
  * notes for the given namespace. Missing media is uploaded; orphaned media is
- * deleted. Both passes are bundled via `multi()` in chunks of 25 actions.
+ * deleted. Both passes are bundled via `multi()` in batches of up to 25
+ * actions, bounded by the request size budget.
  *
  * `freshWriteNoteIds` (optional) lists the noteIds whose creation/update was
  * the reason for this sync. Media for those notes uploads silently — only
  * uploads triggered by media that _should_ already have been in Anki for
- * matched/unchanged notes show up in the returned `reuploaded` list, matching
- * the prior reporting semantics.
+ * matched/unchanged notes show up in the returned `reuploaded` list.
  *
  * Per-file failures (missing file adapter, unreadable local file, Anki-Connect
- * error during upload/delete) are surfaced via `failedUploads` /
- * `failedDeletes` rather than aborting the whole pass — partial-success media
- * is recoverable on the next sync, but callers can warn the user explicitly.
+ * error during upload/delete, a failed upload request) are surfaced via
+ * `failedUploads` / `failedDeletes` rather than aborting the whole pass —
+ * partial-success media is recoverable on the next sync, but callers can warn
+ * the user explicitly.
+ *
+ * @throws {Error} If the media listing or a delete request fails as a whole.
  */
 export async function reconcileMedia(
 	client: YankiConnect,
@@ -1160,7 +1302,6 @@ export async function reconcileMedia(
 	// in the Anki media asset manager UI
 	const slugifiedNamespace = getSlugifiedNamespace(namespace)
 
-	type CollectedMedia = { filename: string; originalSrc: string; reuploadEligible: boolean }
 	const collected = new Map<string, CollectedMedia>()
 	for (const note of liveNotes) {
 		const isFreshWrite = note.noteId !== undefined && (freshWriteNoteIds?.has(note.noteId) ?? false)
@@ -1201,71 +1342,48 @@ export async function reconcileMedia(
 
 	const failedUploads: MediaFailure[] = []
 	const failedDeletes: MediaFailure[] = []
+	const reuploaded: string[] = []
 
-	// Read every local file buffer in parallel up-front so the upload bundles
-	// can be sent back-to-back without intermediate I/O. Bounded concurrency so
-	// large media collections don't read every file into memory simultaneously
-	// — peak memory is O(MEDIA_READ_CONCURRENCY × largest file).
-	const buffers: Array<string | undefined> = Array.from<string | undefined>({
-		length: toUpload.length,
-	})
-	await runWithConcurrency(toUpload, MEDIA_READ_CONCURRENCY, async (entry, index) => {
-		if (isUrl(entry.originalSrc)) {
-			return
-		}
+	// Read, encode, and upload one batch of files at a time, so the encoded
+	// files of a batch are released before the next batch is read
+	for (let start = 0; start < toUpload.length; start += MULTI_BATCH_CHUNK_SIZE) {
+		const uploads = await getMediaUploads(
+			toUpload.slice(start, start + MULTI_BATCH_CHUNK_SIZE),
+			fileAdapter,
+			failedUploads,
+		)
 
-		if (fileAdapter === undefined) {
-			const reason = 'no file adapter provided'
-			console.warn(`Could not re-upload local media file "${entry.filename}": ${reason}`)
-			failedUploads.push({ filename: entry.filename, reason })
-			return
-		}
-
+		// A failed request is not fatal: the notes are already in Anki, and the
+		// files it carried are uploaded again on the next sync
+		const unansweredUploads = new Set(uploads)
 		try {
-			buffers[index] = uint8ArrayToBase64(await fileAdapter.readFileBuffer(entry.originalSrc))
+			await runMultiInChunks(
+				client,
+				uploads.map(({ action }) => action),
+				(index, response) => {
+					const upload = uploads[index]
+					if (upload === undefined) {
+						return
+					}
+
+					unansweredUploads.delete(upload)
+					const reason = getStoreMediaFileFailure(upload.filename, response)
+					if (reason !== undefined) {
+						console.warn(`Anki could not store media file "${upload.filename}": ${reason}`)
+						failedUploads.push({ filename: upload.filename, reason })
+					} else if (upload.reuploadEligible) {
+						reuploaded.push(upload.filename)
+					}
+				},
+			)
 		} catch (error) {
 			const reason = String(error)
-			console.warn(`Could not read local media file "${entry.filename}": ${reason}`)
-			failedUploads.push({ filename: entry.filename, reason })
-		}
-	})
-
-	const uploadActions: MultiAction[] = []
-	const uploadMeta: Array<{ filename: string; reuploadEligible: boolean }> = []
-	for (const [i, entry] of toUpload.entries()) {
-		if (isUrl(entry.originalSrc)) {
-			uploadActions.push({
-				action: 'storeMediaFile',
-				params: { deleteExisting: true, filename: entry.filename, url: entry.originalSrc },
-				version: 6,
-			})
-			uploadMeta.push({ filename: entry.filename, reuploadEligible: entry.reuploadEligible })
-		} else if (buffers[i] !== undefined) {
-			uploadActions.push({
-				action: 'storeMediaFile',
-				params: { data: buffers[i], deleteExisting: true, filename: entry.filename },
-				version: 6,
-			})
-			uploadMeta.push({ filename: entry.filename, reuploadEligible: entry.reuploadEligible })
+			for (const { filename } of unansweredUploads) {
+				console.warn(`Anki could not store media file "${filename}": ${reason}`)
+				failedUploads.push({ filename, reason })
+			}
 		}
 	}
-
-	const reuploaded: string[] = []
-	await runMultiInChunks(client, uploadActions, (index, response) => {
-		const meta = uploadMeta[index]
-		if (meta === undefined) {
-			return
-		}
-
-		if (response.error === null) {
-			if (meta.reuploadEligible) {
-				reuploaded.push(meta.filename)
-			}
-		} else {
-			console.warn(`Anki could not store media file "${meta.filename}": ${response.error}`)
-			failedUploads.push({ filename: meta.filename, reason: response.error })
-		}
-	})
 
 	const mediaDeletionActions: MultiAction[] = toDelete.map((filename) => ({
 		action: 'deleteMediaFile',
@@ -1322,22 +1440,59 @@ function toMultiActionResponse(value: unknown): MultiActionResponse {
 }
 
 /**
- * Generic chunked dispatcher for Anki-Connect's `multi()`. The handler sees the
- * raw response, including per-action errors — caller decides whether to throw,
- * log, or recover. For the common throw-on-error case prefer `runMultiOrThrow`,
- * which centralizes the failure path.
+ * Send one `multi()` request and narrow its reply to one `{ error, result }`
+ * envelope per action.
+ *
+ * AnkiConnect checks the API key on every nested action, while yanki-connect
+ * only sends it with the outer request, so the client's key is added to each
+ * action here.
+ *
+ * @throws {Error} If the reply does not hold exactly one response per action.
+ */
+async function sendMulti(
+	client: YankiConnect,
+	actions: MultiAction[],
+): Promise<MultiActionResponse[]> {
+	// The client has no public accessor for its key, and its declaration leaves
+	// the private property untyped
+	// eslint-disable-next-line ts/dot-notation, prefer-destructuring
+	const key: unknown = client['key']
+	const keyedActions: MultiAction[] =
+		typeof key === 'string'
+			? actions.map((action): MultiAction & { key: string } => ({ ...action, key }))
+			: actions
+
+	const responses = await client.miscellaneous.multi({ actions: keyedActions })
+	if (responses.length !== actions.length) {
+		throw new Error(`multi() returned ${responses.length} responses for ${actions.length} actions`)
+	}
+
+	return responses.map((response) => toMultiActionResponse(response))
+}
+
+/**
+ * Generic chunked dispatcher for Anki-Connect's `multi()`. The handler sees
+ * each action's response, including per-action errors — caller decides whether
+ * to throw, log, or recover. For the common throw-on-error case prefer
+ * `runMultiOrThrow`, which centralizes the failure path.
+ *
+ * A request carries at most `maxActionsPerRequest` actions, and fewer when the
+ * request size budget is reached first.
  */
 async function runMultiInChunks(
 	client: YankiConnect,
 	actions: MultiAction[],
 	handleResponse: (index: number, response: MultiActionResponse) => void,
+	maxActionsPerRequest = MULTI_BATCH_CHUNK_SIZE,
 ): Promise<void> {
-	for (let i = 0; i < actions.length; i += MULTI_BATCH_CHUNK_SIZE) {
-		const chunk = actions.slice(i, i + MULTI_BATCH_CHUNK_SIZE)
-		const responses = await client.miscellaneous.multi({ actions: chunk })
-		for (const [j, response] of responses.entries()) {
-			handleResponse(i + j, toMultiActionResponse(response))
+	let chunkStart = 0
+	for (const chunk of chunkForRequest(actions, maxActionsPerRequest)) {
+		const responses = await sendMulti(client, chunk)
+		for (const [i, response] of responses.entries()) {
+			handleResponse(chunkStart + i, response)
 		}
+
+		chunkStart += chunk.length
 	}
 }
 

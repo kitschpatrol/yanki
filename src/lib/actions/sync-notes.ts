@@ -3,7 +3,7 @@ import { deepmerge } from 'deepmerge-ts'
 import { YankiConnect } from 'yanki-connect'
 import type { YankiNote } from '../model/note'
 import type { GlobalOptions } from '../shared/types'
-import type { MediaFailure } from '../utilities/anki-connect'
+import type { MediaFailure, UpdateBucketEntry } from '../utilities/anki-connect'
 import { NOTE_DEFAULT_DECK_NAME, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
 import { defaultGlobalOptions } from '../shared/types'
 import {
@@ -165,19 +165,17 @@ export async function syncNotes(
 	)
 
 	// Pre-create any missing models/decks so the batched calls don't need
-	// per-action recovery from "model not found" or "deck not found". Skip the
-	// probe entirely when there's nothing to create or update — saves one
-	// `multi()` round-trip on no-op syncs.
-	if (plan.toCreate.length > 0 || plan.toUpdate.length > 0) {
+	// per-action recovery from "model not found" or "deck not found". Notes that
+	// already match their remote need neither, so a sync with nothing to create
+	// or change skips the probe and its `multi()` round-trip.
+	if (plan.modelsNeeded.length > 0 || plan.decksNeeded.length > 0) {
 		await ensureModelsAndDecks(client, plan.modelsNeeded, plan.decksNeeded, dryRun)
 	}
 
-	// Single batched `addNotes` call — 5.85× faster than the sequential
-	// `addNote` loop on the established benchmark.
 	await executeCreates(client, plan.toCreate, dryRun)
 
-	// Bundle `changeDeck` and `updateNoteModel` actions into one `multi()`
-	// request, then surface any per-action errors. Returns the indices of
+	// Bundle `changeDeck` and `updateNoteModel` actions into batched `multi()`
+	// requests, then surface any per-action errors. Returns the indices of
 	// notes that ended up unchanged so we can downgrade their placeholder
 	// `'updated'` action below.
 	const unchangedSyncedIndices = await executeUpdates(client, plan.toUpdate, dryRun)
@@ -336,8 +334,7 @@ function findRemoteContentMatchId(
 	return match?.noteId ?? undefined
 }
 
-type CreateBucketEntry = { localNote: YankiNote; syncedIndex: number }
-type UpdateBucketEntry = { localNote: YankiNote; remoteNote: YankiNote; syncedIndex: number }
+type CreateBucketEntry = { localNote: YankiNote }
 
 type SyncPlan = {
 	decksNeeded: string[]
@@ -349,14 +346,17 @@ type SyncPlan = {
 
 /**
  * Walk the local notes once and partition them into create / update / matched
- * buckets without touching Anki. The classification preserves the original
- * iteration-order dependency on `matchedIds` so subsequent content-match
- * lookups behave identically to the legacy interleaved loop.
+ * buckets without touching Anki. Content-match lookups depend on the notes
+ * matched so far, so the notes are classified in input order.
  *
  * `synced` is pre-populated at the input index for every note so the final
  * order of the returned `synced` array mirrors `allLocalNotesCopy`. Update
  * entries start with action `'updated'` as a placeholder; the caller downgrades
- * them to `'unchanged'` after `updateNote` reports no diff.
+ * them to `'unchanged'` after `executeUpdates` reports no diff.
+ *
+ * `modelsNeeded` and `decksNeeded` cover new notes and notes that differ from
+ * their remote. Notes that already match their remote are in a model and deck
+ * that exist.
  */
 function classifyNotes(
 	allLocalNotesCopy: YankiNote[],
@@ -399,7 +399,7 @@ function classifyNotes(
 
 			if (localNote.noteId === undefined) {
 				synced.push({ action: 'created', note: localNote })
-				toCreate.push({ localNote, syncedIndex })
+				toCreate.push({ localNote })
 				modelsNeeded.add(localNote.modelName)
 				decksNeeded.add(localNote.deckName)
 			} else {
@@ -414,8 +414,11 @@ function classifyNotes(
 
 			synced.push({ action: 'updated', note: localNote })
 			toUpdate.push({ localNote, remoteNote, syncedIndex })
-			modelsNeeded.add(localNote.modelName)
-			decksNeeded.add(localNote.deckName)
+			if (!areNotesEqual(localNote, remoteNote)) {
+				modelsNeeded.add(localNote.modelName)
+				decksNeeded.add(localNote.deckName)
+			}
+
 			matchedIds.add(remoteNote.noteId)
 		}
 	}

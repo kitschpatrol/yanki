@@ -17,7 +17,7 @@ export default defineConfig({
 			include: ['src/**/*.ts'],
 			provider: 'v8',
 		},
-		// Disable concurrent test execution across files Yanki's tests count total
+		// Disable concurrent test execution across files. Yanki's tests count total
 		// file counts, irrespective of namespace, before and after each test to
 		// ensure the integrity of pre-existing Anki notes. Running tests
 		// concurrently across files can create race conditions in total note counts
@@ -43,7 +43,7 @@ export default defineConfig({
 								browser: {
 									enabled: true,
 									headless: true,
-									// FileParallelism: false at the instance level — top-level
+									// Set fileParallelism: false at the instance level — top-level
 									// fileParallelism only gates node workers, not browser pages.
 									// Without this, files run concurrently in the single browser and
 									// race against the shared Anki backend (e.g. two syncNotes calls
