@@ -9,10 +9,10 @@ pnpm-lock.yaml
 skills-lock.json
 
 # Customizations
+test/assets/test-cloze-back/
 test/assets/test-obsidian-vault/
 test/assets/test-unexpected-formatting/
 test/assets/test\ obsidian\ vault\ with\ spaces/
-test/assets/test-cloze-back/
 test/fixtures/anki-data-folder-*/
 
 # Preserve deliberate leading YAML and thematic-break syntax in parser fixtures.

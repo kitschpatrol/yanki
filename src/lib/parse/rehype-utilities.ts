@@ -38,7 +38,6 @@ import yaml from '@shikijs/langs/yaml'
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
 import githubDark from '@shikijs/themes/github-dark'
 import githubLight from '@shikijs/themes/github-light'
-import { deepmerge } from 'deepmerge-ts'
 import { toText } from 'hast-util-to-text'
 import rehypeFormat from 'rehype-format'
 import rehypeParse from 'rehype-parse'
@@ -63,6 +62,7 @@ import {
 	getDefaultFileAdapter,
 } from '../shared/types'
 import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
+import { applyDefaults } from '../utilities/options'
 import { getBase, getQuery } from '../utilities/path'
 import { cleanClassName, emptyIsUndefined } from '../utilities/string'
 import { getSrcType, isUrl, safeDecodeURI } from '../utilities/url'
@@ -111,25 +111,28 @@ const highlighter = createHighlighterCoreSync({
 	themes: [githubDark, githubLight],
 })
 
-// Significant performance improvement by reusing the processor
-const processor = unified()
-	.use(remarkConditionalBreaks)
-	// Not needed?
-	.use(remarkRehype, { allowDangerousHtml: true })
-	// Re-parses any raw HTML in the Markdown into the HAST tree,
-	// otherwise it ends up as text in raw-typed nodes. This allows
-	// things like manual <img> tags to be managed as Anki assets, and protects
-	// inline style tags from removal.
-	.use(rehypeRaw)
-	.use(rehypeMathjaxAnki)
-	//  Not needed?
-	// .use(rehypeRemoveComments)
-	// Messes up obsidian links and we should trust ourselves (and probably our plugins, too)
-	// .use(rehypeSanitize)
-	// Super slow...
-	// Other syntax highlighting Rehype plugins:
-	// https://github.com/Microflash/rehype-starry-night
-	// https://github.com/rehypejs/rehype-highlight
+function createBaseProcessor() {
+	return (
+		unified()
+			.use(remarkConditionalBreaks)
+			// Not needed?
+			.use(remarkRehype, { allowDangerousHtml: true })
+			// Re-parses any raw HTML in the Markdown into the HAST tree,
+			// otherwise it ends up as text in raw-typed nodes. This allows
+			// things like manual <img> tags to be managed as Anki assets, and protects
+			// inline style tags from removal.
+			.use(rehypeRaw)
+			.use(rehypeMathjaxAnki)
+	)
+}
+
+// Module-level processors — reused across calls for a significant performance
+// improvement over rebuilding per invocation. Shiki is super slow, so we keep
+// a Shiki-free variant for notes with no code blocks.
+// Other syntax highlighting Rehype plugins:
+// https://github.com/Microflash/rehype-starry-night
+// https://github.com/rehypejs/rehype-highlight
+const processor = createBaseProcessor()
 	.use(rehypeShikiFromHighlighter, highlighter as HighlighterGeneric<string, string>, {
 		// See https://shiki.style/packages/rehype
 		defaultLanguage: 'plaintext',
@@ -143,6 +146,8 @@ const processor = unified()
 	.use(rehypeFormat)
 	.use(rehypeStringify)
 
+const processorWithoutShiki = createBaseProcessor().use(rehypeFormat).use(rehypeStringify)
+
 type MdastToHtmlOptions = Simplify<
 	Pick<
 		GlobalOptions,
@@ -150,6 +155,11 @@ type MdastToHtmlOptions = Simplify<
 	> & {
 		/** CSS class names to apply to the output HTML */
 		cssClassNames?: string[]
+		/**
+		 * Whether the source markdown contains any code blocks (fenced, indented,
+		 * or raw HTML `<code>` blocks), enabling Shiki syntax highlighting
+		 */
+		hasCodeBlocks?: boolean
 		/** Whether to use an empty placeholder if the output is empty */
 		useEmptyPlaceholder?: boolean
 	}
@@ -171,16 +181,18 @@ export async function mdastToHtml(
 		cssClassNames,
 		fetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
+		hasCodeBlocks,
 		namespace,
 		strictLineBreaks,
 		syncMediaAssets,
 		useEmptyPlaceholder,
-	} = deepmerge(defaultMdastToHtmlOptions, options ?? {})
+	} = applyDefaults(defaultMdastToHtmlOptions, options)
 
 	// Pass breaks setting through to the processor via file data...
 	// saves us from recreating the processor in case the setting changes per-file
 	// (though it basically never should)
-	const hast = await processor.run(mdast, { data: { strictLineBreaks } })
+	const activeProcessor = hasCodeBlocks === false ? processorWithoutShiki : processor
+	const hast = await activeProcessor.run(mdast, { data: { strictLineBreaks } })
 
 	// Add a wrapper div with a specific class to the HTML, this is hypothetically
 	// useful for styling the output via CSS
@@ -448,7 +460,7 @@ export async function mdastToHtml(
 		? addFirstChildToFirstDiv(hastWithClass, NOTE_DEFAULT_EMPTY_HAST)
 		: hastWithClass
 
-	const renderedHtml = processor.stringify(nonEmptyHast)
+	const renderedHtml = activeProcessor.stringify(nonEmptyHast)
 
 	// Add comment, we do this manually here instead of in an AST because
 	// rehype-format does not add a line break after the comments
@@ -495,7 +507,16 @@ export type Media = {
 	originalSrc: string
 }
 
+// Attribute names are case-insensitive in HTML
+const MEDIA_SYNC_ATTRIBUTE_REGEX = /data-yanki-media-sync/iu
+
 export function extractMediaFromHtml(htmlText: string): Media[] {
+	// Most notes have no synced media, and this runs for every note of every
+	// sync, so only parse the HTML that could hold some
+	if (!MEDIA_SYNC_ATTRIBUTE_REGEX.test(htmlText)) {
+		return []
+	}
+
 	const hast = htmlProcessor.parse(htmlText)
 	const media: Media[] = []
 

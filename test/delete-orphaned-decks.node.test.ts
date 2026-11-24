@@ -27,7 +27,6 @@ function makeNote(deckName: string): YankiNote {
 function createMockClient(deckNames: string[]) {
 	const deletedDecks: string[] = []
 	const client = {
-		card: { findCards: vi.fn().mockResolvedValue([]) },
 		deck: {
 			deckNamesAndIds: vi
 				.fn()
@@ -35,6 +34,13 @@ function createMockClient(deckNames: string[]) {
 			deleteDecks: vi.fn().mockImplementation(({ decks }: { decks: string[] }) => {
 				deletedDecks.push(...decks)
 			}),
+		},
+		miscellaneous: {
+			// Every card search bundled into the request finds no cards
+			multi: vi.fn().mockImplementation(({ actions }: { actions: unknown[] }) =>
+				// eslint-disable-next-line unicorn/no-null
+				actions.map(() => ({ error: null, result: [] })),
+			),
 		},
 	}
 

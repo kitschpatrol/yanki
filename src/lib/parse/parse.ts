@@ -5,8 +5,8 @@
  */
 
 import type { Root } from 'mdast'
-import { deepmerge } from 'deepmerge-ts'
 import { u } from 'unist-builder'
+import { CONTINUE, EXIT, visit } from 'unist-util-visit'
 import type { YankiNote } from '../model/note'
 import type { GlobalOptions } from '../shared/types'
 import { CSS_DEFAULT_CLASS_NAME } from '../shared/constants'
@@ -16,6 +16,8 @@ import {
 	getDefaultFileAdapter,
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
+import { applyDefaults } from '../utilities/options'
+import { shareHeadRequests } from '../utilities/url'
 import { mdastToHtml } from './rehype-utilities'
 import {
 	deleteFirstNodeOfType,
@@ -58,6 +60,8 @@ export const defaultGetNoteFromMarkdownOptions: GetNoteFromMarkdownOptions = {
 	...defaultGlobalOptions,
 }
 
+const HTML_CODE_TAG_REGEX = /<(?:code|pre)\b/iu
+
 export async function getNoteFromMarkdown(
 	markdown: string,
 	options?: Partial<GetNoteFromMarkdownOptions>,
@@ -66,7 +70,7 @@ export async function getNoteFromMarkdown(
 		allFilePaths,
 		basePath,
 		cwd,
-		fetchAdapter = getDefaultFetchAdapter(),
+		fetchAdapter: unsharedFetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
 		namespace,
 		namespaceValidationAndSanitization,
@@ -75,7 +79,11 @@ export async function getNoteFromMarkdown(
 		sourcePath,
 		strictLineBreaks,
 		syncMediaAssets,
-	} = deepmerge(defaultGetNoteFromMarkdownOptions, options ?? {})
+	} = applyDefaults(defaultGetNoteFromMarkdownOptions, options)
+
+	// The front, back, and extra fields of a note often embed the same remote
+	// media, and each embed takes several lookups
+	const fetchAdapter = shareHeadRequests(unsharedFetchAdapter)
 
 	const sanitizedNamespace = namespaceValidationAndSanitization
 		? validateAndSanitizeNamespace(namespace)
@@ -97,6 +105,29 @@ export async function getNoteFromMarkdown(
 
 	// Remove the frontmatter from the AST
 	ast = deleteFirstNodeOfType(ast, 'yaml')
+
+	// Shiki has a notable performance cost even on plain text, so we skip it when
+	// there are no code blocks. Check the post-frontmatter AST for
+	// fenced/indented code nodes and raw HTML `<code>` or `<pre>` tags. We do
+	// risk false-positives if we detect a tag in escaped HTML, or one without
+	// its counterpart that Shiki will still ultimately skip, but this should be
+	// rare and does not affect correctness.
+	//
+	// `inlineCode` mdast nodes are intentionally not in the visit types: the
+	// Shiki rehype plugin only highlights block-level `<pre><code>`, not bare
+	// `<code>`, so inline backticks have no Shiki output to short-circuit. A raw
+	// `<pre>` tag wrapped around inline backticks does produce `<pre><code>`,
+	// which is why `<pre>` tags are checked. If `inline: true` is ever passed to
+	// `rehypeShiki`, add `inlineCode` here.
+	let hasCodeBlocks = false
+	visit(ast, ['code', 'html'], (node) => {
+		if (node.type === 'code' || (node.type === 'html' && HTML_CODE_TAG_REGEX.test(node.value))) {
+			hasCodeBlocks = true
+			return EXIT
+		}
+
+		return CONTINUE
+	})
 
 	let front = ''
 	let back = ''
@@ -120,8 +151,10 @@ export async function getNoteFromMarkdown(
 				extraPart = newExtraPart
 			}
 
-			// Anki won't create notes if the front field is blank, but we want parity between markdown files and notes at all costs,
-			// so we'll put in a placeholder if the front is empty. It's hard to know if the output is really empty without rendering, due to invisible elements.
+			// Anki won't create notes if the front field is blank, but we want parity
+			// between markdown files and notes at all costs, so we'll put in a
+			// placeholder if the front is empty. It's hard to know if the output is
+			// really empty without rendering, due to invisible elements.
 
 			// Basic and reverse always needs both sides to have content.
 			// Basic can technically have no back , but it's confusing so we throw in the placeholder.
@@ -134,6 +167,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -148,6 +182,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -164,6 +199,7 @@ export async function getNoteFromMarkdown(
 					],
 					fetchAdapter,
 					fileAdapter,
+					hasCodeBlocks,
 					namespace: sanitizedNamespace,
 					strictLineBreaks,
 					syncMediaAssets,
@@ -197,6 +233,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -213,6 +250,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,
@@ -238,6 +276,7 @@ export async function getNoteFromMarkdown(
 					],
 					fetchAdapter,
 					fileAdapter,
+					hasCodeBlocks,
 					namespace: sanitizedNamespace,
 					strictLineBreaks,
 					syncMediaAssets,
@@ -253,6 +292,7 @@ export async function getNoteFromMarkdown(
 				],
 				fetchAdapter,
 				fileAdapter,
+				hasCodeBlocks,
 				namespace: sanitizedNamespace,
 				strictLineBreaks,
 				syncMediaAssets,

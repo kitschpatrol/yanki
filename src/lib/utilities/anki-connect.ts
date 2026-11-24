@@ -3,7 +3,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
 import type { YankiConnect } from 'yanki-connect'
-import { uint8ArrayToBase64 } from 'uint8array-extras'
 import { AnkiConnectUnreachableError } from 'yanki-connect'
 import type { YankiModelName } from '../model/model'
 import type { YankiNote } from '../model/note'
@@ -12,8 +11,11 @@ import type { FileAdapter } from '../shared/types'
 import { legacyYankiModelNames, yankiModelNames, yankiModels } from '../model/model'
 import { extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
+import { fileContentToBase64 } from './file'
 import { getSlugifiedNamespace } from './namespace'
 import { isUrl } from './url'
+
+const MODEL_EXISTS_ERROR = 'Model name already exists'
 
 async function ensureModelExists(
 	client: YankiConnect,
@@ -22,7 +24,7 @@ async function ensureModelExists(
 	try {
 		await client.model.createModel(model)
 	} catch (error) {
-		if (error instanceof Error && error.message === 'Model name already exists') {
+		if (error instanceof Error && error.message === MODEL_EXISTS_ERROR) {
 			return
 		}
 
@@ -36,7 +38,347 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 	}
 
 	const noteIds = notes.map((note) => note.noteId).filter((noteId) => noteId !== undefined)
+	if (noteIds.length === 0) {
+		return
+	}
+
 	await client.note.deleteNotes({ notes: noteIds })
+}
+
+/**
+ * Ensure that every required Yanki model and deck exists in Anki before any
+ * note add/update calls fire, so the batched calls never have to recover from a
+ * missing model or deck.
+ *
+ * @throws {Error} If a required model name is not a known Yanki model, or if a
+ *   deck name is empty.
+ */
+export async function ensureModelsAndDecks(
+	client: YankiConnect,
+	modelNames: string[],
+	deckNames: string[],
+	dryRun: boolean,
+): Promise<void> {
+	if (deckNames.includes('')) {
+		throw new Error('Deck name is empty')
+	}
+
+	if (dryRun) {
+		return
+	}
+
+	const [modelsResponse, decksResponse] = await sendMulti(client, [
+		{ action: 'modelNames', version: 6 },
+		{ action: 'deckNames', version: 6 },
+	])
+	const existingModels = new Set(
+		toStringArray(getMultiResult(modelsResponse, 'modelNames'), 'modelNames'),
+	)
+	const existingDecks = new Set(
+		toStringArray(getMultiResult(decksResponse, 'deckNames'), 'deckNames'),
+	)
+	const missingDecks = new Set(deckNames).difference(existingDecks)
+	const missingModels = Array.from(new Set(modelNames).difference(existingModels), (modelName) => {
+		const model = yankiModels.find((candidate) => candidate.modelName === modelName)
+		if (model === undefined) {
+			throw new Error(`Unknown model name: ${modelName}`)
+		}
+
+		return model
+	})
+
+	// Every missing model and deck is created in one request, however many
+	// there are
+	const creationActions: MultiAction[] = [
+		...missingModels.map((model): MultiAction => ({
+			action: 'createModel',
+			params: model,
+			version: 6,
+		})),
+		...Array.from(missingDecks, (deck): MultiAction => ({
+			action: 'createDeck',
+			params: { deck },
+			version: 6,
+		})),
+	]
+	const createdNames = [...missingModels.map((model) => model.modelName), ...missingDecks]
+
+	await runMultiInChunks(
+		client,
+		creationActions,
+		(index, { error }) => {
+			const action = creationActions[index]?.action
+			// Another sync may create the model between the probe and this request
+			if (error === null || (action === 'createModel' && error === MODEL_EXISTS_ERROR)) {
+				return
+			}
+
+			throw new Error(`${action} failed for "${createdNames[index]}": ${error}`)
+		},
+		Infinity,
+	)
+}
+
+/**
+ * Unwrap the result of one action from a `multi()` reply.
+ *
+ * @throws {Error} If the action has no response or returned an error.
+ */
+function getMultiResult(response: MultiActionResponse | undefined, actionName: string): unknown {
+	if (response === undefined) {
+		throw new Error(`multi() returned no response for ${actionName}`)
+	}
+
+	if (response.error !== null) {
+		throw new Error(`${actionName} failed: ${response.error}`)
+	}
+
+	return response.result
+}
+
+/**
+ * Narrow a `multi()` action result to `string[]`. The yanki-connect typing
+ * leaves the result as a loose union of every possible response shape, so we
+ * verify at runtime that the action returned what we expect.
+ */
+function toStringArray(value: unknown, actionName: string): string[] {
+	if (Array.isArray(value) && value.every((entry) => typeof entry === 'string')) {
+		return value
+	}
+
+	throw new TypeError(`Expected string[] from ${actionName}, got: ${JSON.stringify(value)}`)
+}
+
+/**
+ * Narrow a `multi()` action result to `number[]`. Mirror of `toStringArray` for
+ * `findNotes`-style responses.
+ */
+function toNumberArray(value: unknown, actionName: string): number[] {
+	if (Array.isArray(value) && value.every((entry) => typeof entry === 'number')) {
+		return value
+	}
+
+	throw new TypeError(`Expected number[] from ${actionName}, got: ${JSON.stringify(value)}`)
+}
+
+/**
+ * Short, user-readable identifier for a note in error messages — preferring
+ * `noteId` when present (updates), falling back to a Front-field preview
+ * (creates). Lets users map a batch failure back to a source file without
+ * counting indices.
+ */
+function describeNote(note: YankiNote): string {
+	if (note.noteId !== undefined) {
+		return `noteId ${note.noteId}`
+	}
+
+	const front = note.fields.Front.replaceAll(/\s+/gu, ' ').trim()
+	const preview = front.length > 60 ? `${front.slice(0, 57)}...` : front
+	return preview === '' ? '(empty Front field)' : `front "${preview}"`
+}
+
+/**
+ * Create a batch of notes via `addNotes`, split into as few requests as the
+ * request size budget allows. Mutates `localNote.noteId` on each entry as Anki
+ * assigns IDs.
+ *
+ * Pre-flighted models/decks (see `ensureModelsAndDecks`) make this the only
+ * write to Anki for note creation — no per-note retry on missing model/deck.
+ * Media is handled separately by `reconcileMedia` after the full sync pass.
+ *
+ * The AnkiConnect releases Yanki is tested against fail the whole request when
+ * a note can't be created. A null entry is treated as a failed note as well, in
+ * case a release reports failures per note instead.
+ *
+ * @throws {Error} If `addNotes` returns a different number of IDs than notes
+ *   sent, or null entries for any note. Notes in requests that succeeded keep
+ *   their assigned IDs.
+ */
+export async function executeCreates(
+	client: YankiConnect,
+	toCreate: Array<{ localNote: YankiNote }>,
+	dryRun: boolean,
+): Promise<void> {
+	if (toCreate.length === 0) {
+		return
+	}
+
+	if (dryRun) {
+		for (const { localNote } of toCreate) {
+			localNote.noteId = 0
+		}
+
+		return
+	}
+
+	const failedDescriptions: string[] = []
+	let noteIndex = 0
+	for (const chunk of chunkForRequest(toCreate)) {
+		const ids = await client.note.addNotes({
+			notes: chunk.map(({ localNote }) => ({
+				audio: localNote.audio,
+				deckName: localNote.deckName,
+				fields: localNote.fields,
+				modelName: localNote.modelName,
+				options: { allowDuplicate: true },
+				picture: localNote.picture,
+				tags: localNote.tags,
+				video: localNote.video,
+			})),
+		})
+
+		if (ids === null) {
+			throw new Error('addNotes returned null for the entire batch')
+		}
+
+		if (ids.length !== chunk.length) {
+			throw new Error(`addNotes returned ${ids.length} IDs for ${chunk.length} notes`)
+		}
+
+		for (const [i, { localNote }] of chunk.entries()) {
+			const id = ids[i]
+			if (id === undefined || id === null) {
+				failedDescriptions.push(`[${noteIndex + i}] ${describeNote(localNote)}`)
+				continue
+			}
+
+			localNote.noteId = id
+		}
+
+		noteIndex += chunk.length
+	}
+
+	if (failedDescriptions.length > 0) {
+		throw new Error(
+			`addNotes failed for ${failedDescriptions.length} note(s):\n  ${failedDescriptions.join('\n  ')}`,
+		)
+	}
+}
+
+export type UpdateBucketEntry = {
+	localNote: YankiNote
+	remoteNote: YankiNote
+	syncedIndex: number
+}
+
+type MultiAction = Parameters<YankiConnect['miscellaneous']['multi']>[0]['actions'][number]
+
+/**
+ * Plan the Anki-Connect actions that bring one remote note in line with its
+ * local counterpart. `changeDeck` comes before `updateNoteModel`.
+ *
+ * @returns The actions to run, empty if the notes already match.
+ * @throws {Error} If the local note has no ID, the remote note has no cards, or
+ *   a deck change targets an empty deck name.
+ */
+function getUpdateActions(localNote: YankiNote, remoteNote: YankiNote): MultiAction[] {
+	if (localNote.noteId === undefined) {
+		throw new Error('Local note ID is undefined')
+	}
+
+	if (remoteNote.cards === undefined) {
+		throw new Error('Remote note cards are undefined')
+	}
+
+	const actions: MultiAction[] = []
+
+	if (localNote.deckName !== remoteNote.deckName) {
+		if (localNote.deckName === '') {
+			throw new Error('Local deck name is empty')
+		}
+
+		actions.push({
+			action: 'changeDeck',
+			params: { cards: remoteNote.cards, deck: localNote.deckName },
+			version: 6,
+		})
+	}
+
+	if (
+		!areTagsEqual(localNote.tags ?? [], remoteNote.tags ?? []) ||
+		!areFieldsEqual(localNote.fields, remoteNote.fields) ||
+		localNote.modelName !== remoteNote.modelName
+	) {
+		actions.push({
+			action: 'updateNoteModel',
+			params: {
+				note: {
+					fields: localNote.fields,
+					id: localNote.noteId,
+					modelName: localNote.modelName,
+					tags: localNote.tags ?? [],
+				},
+			},
+			version: 6,
+		})
+	}
+
+	return actions
+}
+
+/**
+ * Apply a batch of note updates by bundling per-note actions (`changeDeck`,
+ * `updateNoteModel`) into as few `multi()` requests as the request size budget
+ * allows. Media uploads happen later in the consolidated `reconcileMedia`
+ * pass.
+ *
+ * @returns The set of `syncedIndex` values whose notes ended up unchanged (no
+ *   diff against their remote) so the caller can downgrade the placeholder
+ *   `'updated'` action in `synced[]` to `'unchanged'`.
+ * @throws {Error} If any bundled action returned an Anki-Connect error.
+ */
+export async function executeUpdates(
+	client: YankiConnect,
+	toUpdate: UpdateBucketEntry[],
+	dryRun: boolean,
+): Promise<Set<number>> {
+	const actions: MultiAction[] = []
+	// Parallel array — one entry per pushed action — that maps a multi() response
+	// index back to the note it touched so per-action errors can name the note.
+	const actionNotes: YankiNote[] = []
+	const unchangedSyncedIndices = new Set<number>()
+
+	for (const { localNote, remoteNote, syncedIndex } of toUpdate) {
+		const noteActions = getUpdateActions(localNote, remoteNote)
+		if (noteActions.length === 0) {
+			unchangedSyncedIndices.add(syncedIndex)
+			continue
+		}
+
+		for (const action of noteActions) {
+			actions.push(action)
+			actionNotes.push(localNote)
+		}
+	}
+
+	if (dryRun || actions.length === 0) {
+		return unchangedSyncedIndices
+	}
+
+	const failures: string[] = []
+	await runMultiInChunks(
+		client,
+		actions,
+		(index, { error }) => {
+			if (error === null) {
+				return
+			}
+
+			const action = actions[index]
+			const note = actionNotes[index]
+			const noteContext = note === undefined ? '' : ` (${describeNote(note)})`
+			failures.push(`${action?.action ?? `index ${index}`}${noteContext}: ${error}`)
+		},
+		Infinity,
+	)
+
+	if (failures.length > 0) {
+		throw new Error(
+			`Update batch had ${failures.length} failed action(s):\n  ${failures.join('\n  ')}`,
+		)
+	}
+
+	return unchangedSyncedIndices
 }
 
 // export async function deleteNote(client: YankiConnect, note: YankiNote, dryRun = false) {
@@ -58,6 +400,12 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
  *
  * Duplicates will be created if present in the source. It's up to the user to
  * manage their Markdown files as they like.
+ *
+ * Note: `syncNotes` no longer hits this path — it pre-flights models/decks via
+ * `ensureModelsAndDecks` and then batches via `executeCreates`. The "just in
+ * time" recovery branches below are kept as defense-in-depth for direct-API
+ * consumers (e.g. downstream packages deep-importing from `dist/lib`) and to
+ * survive races with the Anki UI deleting a model/deck mid-sync.
  *
  * @param client An instance of YankiConnect
  * @param note The note to add
@@ -146,6 +494,10 @@ export async function addNote(
 
 /**
  * Updates a note in Anki.
+ *
+ * Like `addNote`, the per-note recovery branches below are no longer hit by
+ * `syncNotes` (replaced by `executeUpdates`); they're retained as
+ * defense-in-depth for direct-API consumers and Anki-UI races.
  *
  * @param client An instance of YankiConnect
  * @param localNote A note read from a markdown file
@@ -354,6 +706,10 @@ async function getRemoteNotesById(
 	client: YankiConnect,
 	noteIds: number[],
 ): Promise<Array<undefined | YankiNote>> {
+	if (noteIds.length === 0) {
+		return []
+	}
+
 	const ankiNotes = await client.note.notesInfo({ notes: noteIds })
 
 	if (ankiNotes.every((ankiNote) => ankiNote.noteId === undefined)) {
@@ -367,20 +723,12 @@ async function getRemoteNotesById(
 
 	// Have to fish decks out of the card IDs
 	const allCardIds = ankiNotes.flatMap((note) => note.cards ?? [])
-	const deckToCardMap = await client.deck.getDecks({ cards: allCardIds })
+	const { cardIdToDeckMap, filteredDeckNames } = await getCardDecks(client, allCardIds)
 
-	// Map card IDs to deck names for easy lookup
-	const cardIdToDeckMap = new Map<number, string>()
-	for (const [deck, cards] of Object.entries(deckToCardMap)) {
-		for (const card of cards) {
-			cardIdToDeckMap.set(card, deck)
-		}
-	}
-
-	const filteredDeckNames = await getFilteredDeckNames(client, cardIdToDeckMap)
-
-	// Populated on first use, since only notes in filtered decks need it
-	let homeDeckCandidates: HomeDeckCandidate[] | undefined
+	// Only notes in filtered decks need a home deck lookup, so skip the extra
+	// requests entirely when this sync touches no filtered decks
+	const homeDeckCandidates =
+		filteredDeckNames.size > 0 ? await getHomeDeckCandidates(client, filteredDeckNames) : []
 
 	for (const ankiNote of ankiNotes) {
 		if (ankiNote.noteId === undefined) {
@@ -389,22 +737,12 @@ async function getRemoteNotesById(
 		}
 
 		if (![...legacyYankiModelNames, ...yankiModelNames].includes(ankiNote.modelName)) {
-			// Alternately, check if the model name is in the list of models and recreate by setting to undefined?
 			throw new Error(`Unknown model name ${ankiNote.modelName} for note ${ankiNote.noteId}`)
 		}
 
-		// Cards from the same technically can be moved to different decks in Anki
-		// GUI, but Yanki does not support this!
+		// Cards from the same note can technically be moved to different decks in
+		// the Anki GUI, but Yanki does not support this — silently take the first.
 		const deckNamesForNote = [...new Set(ankiNote.cards.map((card) => cardIdToDeckMap.get(card)))]
-
-		if (deckNamesForNote.length > 1) {
-			// No longer considering this an error
-			// Filtered decks sometimes seem to create a second note... sometimes not
-			// console.warn(
-			// 	`Multiple decks found for cards in note ${ankiNote.noteId}. Yanki does not support this.`,
-			// )
-		}
-
 		let deckName = deckNamesForNote.at(0)
 		if (deckName === undefined) {
 			throw new Error(`No deck found for cards in note ${ankiNote.noteId}`)
@@ -412,21 +750,13 @@ async function getRemoteNotesById(
 
 		// Look up matching "real" non-filtered decks if the note is in a filtered deck
 		if (filteredDeckNames.has(deckName)) {
-			homeDeckCandidates ??= await getHomeDeckCandidates(client, filteredDeckNames)
-			const homeDeckName = await findHomeDeckNameForNote(
-				client,
-				homeDeckCandidates,
-				ankiNote.noteId,
-			)
+			const homeDeckName = findHomeDeckNameForNote(homeDeckCandidates, ankiNote.noteId)
 
 			if (homeDeckName === undefined) {
 				throw new Error(`No matching non-filtered deck found for note ${ankiNote.noteId}`)
 			}
 
-			// Update deck name
 			deckName = homeDeckName
-		} else {
-			// Deck is good, leave it alone
 		}
 
 		// Picture, sound, etc. fields are never provided
@@ -449,17 +779,42 @@ async function getRemoteNotesById(
 }
 
 /**
- * Names of the filtered ("dynamic") decks currently holding any of the given
- * cards. Anki's `deck:filtered` search works on every supported release, while
+ * Look up the deck currently holding each of the given cards, and which of
+ * those decks are filtered ("dynamic") decks. Both lookups share one request.
+ *
+ * Anki's `deck:filtered` search works on every supported release, while
  * AnkiConnect 26.10.11.0 and later fail `getDeckConfig` for filtered decks.
+ *
+ * @throws {Error} If either lookup fails or returns an unexpected shape.
  */
-async function getFilteredDeckNames(
+async function getCardDecks(
 	client: YankiConnect,
-	cardIdToDeckMap: Map<number, string>,
-): Promise<Set<string>> {
-	const filteredCardIds = await client.card.findCards({ query: 'deck:filtered' })
-	const filteredDeckNames = new Set<string>()
+	cardIds: number[],
+): Promise<{ cardIdToDeckMap: Map<number, string>; filteredDeckNames: Set<string> }> {
+	const [decksResponse, filteredCardsResponse] = await sendMulti(client, [
+		{ action: 'getDecks', params: { cards: cardIds }, version: 6 },
+		{ action: 'findCards', params: { query: 'deck:filtered' }, version: 6 },
+	])
 
+	const cardIdsByDeckName = getMultiResult(decksResponse, 'getDecks')
+	if (typeof cardIdsByDeckName !== 'object' || cardIdsByDeckName === null) {
+		throw new TypeError(
+			`Expected a map of deck names to cards from getDecks, got: ${JSON.stringify(cardIdsByDeckName)}`,
+		)
+	}
+
+	const cardIdToDeckMap = new Map<number, string>()
+	for (const [deckName, deckCardIds] of Object.entries(cardIdsByDeckName)) {
+		for (const cardId of toNumberArray(deckCardIds, 'getDecks')) {
+			cardIdToDeckMap.set(cardId, deckName)
+		}
+	}
+
+	const filteredCardIds = toNumberArray(
+		getMultiResult(filteredCardsResponse, 'findCards'),
+		'findCards',
+	)
+	const filteredDeckNames = new Set<string>()
 	for (const cardId of filteredCardIds) {
 		const deckName = cardIdToDeckMap.get(cardId)
 		if (deckName !== undefined) {
@@ -467,54 +822,72 @@ async function getFilteredDeckNames(
 		}
 	}
 
-	return filteredDeckNames
+	return { cardIdToDeckMap, filteredDeckNames }
 }
 
 type HomeDeckCandidate = {
-	deckId: number
 	deckName: string
-	/** Notes with a card in this deck or returning to it, fetched on first use */
-	noteIds: number[] | undefined
+	/** Notes with a card in this deck or returning to it */
+	noteIds: number[]
 }
 
 /**
  * Every deck that could be the home deck of a note whose cards are in a
- * filtered deck. Filtered decks holding none of the synced cards remain
- * candidates, but never match.
+ * filtered deck, along with the notes each one holds. Filtered decks holding
+ * none of the synced cards remain candidates, but never match.
+ *
+ * Anki's `did:` search matches a card by its current or home deck, and unlike a
+ * `deck:` search it ignores child decks, so a filtered child deck can't make
+ * its parent look like the home deck.
+ *
+ * The per-deck searches are bundled via `multi()` so the lookups that follow
+ * are served from memory.
  */
 async function getHomeDeckCandidates(
 	client: YankiConnect,
 	filteredDeckNames: Set<string>,
 ): Promise<HomeDeckCandidate[]> {
 	const deckNamesAndIds = await client.deck.deckNamesAndIds()
+	const candidateDecks = Object.entries(deckNamesAndIds).filter(
+		([deckName]) => !filteredDeckNames.has(deckName),
+	)
 
-	return Object.entries(deckNamesAndIds)
-		.filter(([deckName]) => !filteredDeckNames.has(deckName))
-		.map(([deckName, deckId]) => ({ deckId, deckName, noteIds: undefined }))
+	const homeDeckCandidates: HomeDeckCandidate[] = []
+	const findNotesActions: MultiAction[] = candidateDecks.map(([, deckId]) => ({
+		action: 'findNotes',
+		params: { query: `did:${deckId}` },
+		version: 6,
+	}))
+	await runMultiOrThrow(
+		client,
+		findNotesActions,
+		(index) => `deck "${candidateDecks[index]?.[0] ?? `index ${index}`}"`,
+		(index, result) => {
+			const candidateDeck = candidateDecks[index]
+			if (candidateDeck === undefined) {
+				return
+			}
+
+			homeDeckCandidates.push({
+				deckName: candidateDeck[0],
+				noteIds: toNumberArray(result, 'findNotes'),
+			})
+		},
+	)
+
+	return homeDeckCandidates
 }
 
 /**
- * Find the home deck of a note whose cards are in a filtered deck. Anki's
- * `did:` search matches a card by its current or home deck, and unlike a
- * `deck:` search it ignores child decks, so a filtered child deck can't make
- * its parent look like the home deck.
+ * Find the home deck of a note whose cards are in a filtered deck.
  *
  * @returns The name of the note's home deck, or undefined if none is found.
  */
-async function findHomeDeckNameForNote(
-	client: YankiConnect,
+function findHomeDeckNameForNote(
 	homeDeckCandidates: HomeDeckCandidate[],
 	noteId: number,
-): Promise<string | undefined> {
-	for (const candidate of homeDeckCandidates) {
-		candidate.noteIds ??= await client.note.findNotes({ query: `did:${candidate.deckId}` })
-
-		if (candidate.noteIds.includes(noteId)) {
-			return candidate.deckName
-		}
-	}
-
-	return undefined
+): string | undefined {
+	return homeDeckCandidates.find((candidate) => candidate.noteIds.includes(noteId))?.deckName
 }
 
 export async function deleteOrphanedDecks(
@@ -565,28 +938,49 @@ export async function deleteOrphanedDecks(
 					.flatMap((note) => note.cards ?? [])
 			: [],
 	)
-	const decksToDelete: string[] = []
-
-	for (const deckName of deckDeletionCandidates) {
+	const existingCandidates = deckDeletionCandidates.filter((deckName) => {
 		if (existingDecks[deckName] === undefined) {
 			console.warn(`Deck not found for deck name: ${deckName}`)
-			continue
+			return false
 		}
 
-		// Deleting a parent also deletes its descendants. Due counts omit
-		// suspended, buried, and future-due cards, while total_in_deck may
-		// count only the parent's own cards. Search actual cards instead.
-		// Numeric IDs avoid wildcard/quoting rules in deck names. did: also
-		// includes cards whose home deck is here while in a filtered deck.
-		const query = Object.entries(existingDecks)
-			.filter(([name]) => isInDeckTree(name, deckName))
-			.map(([, id]) => `did:${id}`)
-			.join(' OR ')
-		const cards = await client.card.findCards({ query })
-		if (cards.every((card) => cardsToRemove.has(card))) {
-			decksToDelete.push(deckName)
-		}
-	}
+		return true
+	})
+
+	// Deleting a parent also deletes its descendants. Due counts omit
+	// suspended, buried, and future-due cards, while total_in_deck may
+	// count only the parent's own cards. Search actual cards instead.
+	// Numeric IDs avoid wildcard/quoting rules in deck names. did: also
+	// includes cards whose home deck is here while in a filtered deck.
+	const cardSearchActions: MultiAction[] = existingCandidates.map((deckName) => ({
+		action: 'findCards',
+		params: {
+			query: Object.entries(existingDecks)
+				.filter(([name]) => isInDeckTree(name, deckName))
+				.map(([, id]) => `did:${id}`)
+				.join(' OR '),
+		},
+		version: 6,
+	}))
+
+	// The searches for every candidate share one request
+	const decksToDelete: string[] = []
+	await runMultiOrThrow(
+		client,
+		cardSearchActions,
+		(index) => `deck "${existingCandidates[index] ?? `index ${index}`}"`,
+		(index, result) => {
+			const deckName = existingCandidates[index]
+			if (deckName === undefined) {
+				return
+			}
+
+			if (toNumberArray(result, 'findCards').every((card) => cardsToRemove.has(card))) {
+				decksToDelete.push(deckName)
+			}
+		},
+		Infinity,
+	)
 
 	if (!dryRun && decksToDelete.length > 0) {
 		await client.deck.deleteDecks({
@@ -748,7 +1142,7 @@ async function uploadMediaForNote(
 									url: originalSrc,
 								}
 							: {
-									data: uint8ArrayToBase64(await fileAdapter!.readFileBuffer(originalSrc)),
+									data: fileContentToBase64(await fileAdapter!.readFileBuffer(originalSrc)),
 									deleteExisting: true,
 									filename,
 								},
@@ -778,80 +1172,440 @@ async function uploadMediaForNote(
 	return uploadedMedia
 }
 
+const MULTI_BATCH_CHUNK_SIZE = 25
+
+/**
+ * Budget for the serialized size of the items batched into one request.
+ * AnkiConnect 26.x rejects request bodies over 16 MiB, so half of that leaves
+ * room for the request envelope. An item larger than the budget is sent in a
+ * request of its own.
+ */
+const MAX_BATCH_REQUEST_BYTES = 8 * 1024 * 1024
+
+const textEncoder = new TextEncoder()
+
+/**
+ * Split items into consecutive batches for requests that carry many items at
+ * once. A batch is closed when it holds `maxCount` items, or when the next item
+ * would take its serialized size past `MAX_BATCH_REQUEST_BYTES`.
+ */
+function chunkForRequest<T>(items: T[], maxCount = Infinity): T[][] {
+	const chunks: T[][] = []
+	let chunk: T[] = []
+	let chunkBytes = 0
+
+	for (const item of items) {
+		const itemBytes = textEncoder.encode(JSON.stringify(item)).byteLength
+		const isChunkFull = chunk.length >= maxCount || chunkBytes + itemBytes > MAX_BATCH_REQUEST_BYTES
+		if (isChunkFull && chunk.length > 0) {
+			chunks.push(chunk)
+			chunk = []
+			chunkBytes = 0
+		}
+
+		chunk.push(item)
+		chunkBytes += itemBytes
+	}
+
+	if (chunk.length > 0) {
+		chunks.push(chunk)
+	}
+
+	return chunks
+}
+
+/**
+ * Cap on simultaneous file reads in `reconcileMedia`, which bounds the raw file
+ * buffers held in memory while a batch of uploads is being encoded.
+ */
+const MEDIA_READ_CONCURRENCY = 8
+
+/**
+ * Run an async per-item worker over `items` with at most `concurrency`
+ * outstanding promises. Workers receive the source index so they can write back
+ * into a parallel result array without relying on the iteration order of the
+ * worker pool.
+ *
+ * Worker rejections propagate immediately, matching `Promise.all` semantics.
+ */
+async function runWithConcurrency<T>(
+	items: T[],
+	concurrency: number,
+	worker: (item: T, index: number) => Promise<void>,
+): Promise<void> {
+	if (items.length === 0) {
+		return
+	}
+
+	// Every lane pulls from the same iterator, so each item is handed out once
+	const remainingItems = items.entries()
+	const lanes: Array<Promise<void>> = []
+	const next = async (): Promise<void> => {
+		for (const [index, item] of remainingItems) {
+			await worker(item, index)
+		}
+	}
+
+	for (let i = 0; i < Math.min(concurrency, items.length); i++) {
+		lanes.push(next())
+	}
+
+	await Promise.all(lanes)
+}
+
+export type MediaFailure = { filename: string; reason: string }
+
+type ReconcileMediaResult = {
+	deleted: string[]
+	failedDeletes: MediaFailure[]
+	failedUploads: MediaFailure[]
+	reuploaded: string[]
+}
+
+type CollectedMedia = { filename: string; originalSrc: string; reuploadEligible: boolean }
+
+type MediaUpload = { action: MultiAction; filename: string; reuploadEligible: boolean }
+
+/**
+ * Build the `storeMediaFile` action for each media file, reading and
+ * base64-encoding local files through the file adapter. Files that can't be
+ * read are left out of the result and recorded in `failedUploads`.
+ */
+async function getMediaUploads(
+	entries: CollectedMedia[],
+	fileAdapter: FileAdapter | undefined,
+	failedUploads: MediaFailure[],
+): Promise<MediaUpload[]> {
+	const uploads: Array<MediaUpload | undefined> = Array.from<MediaUpload | undefined>({
+		length: entries.length,
+	})
+
+	await runWithConcurrency(entries, MEDIA_READ_CONCURRENCY, async (entry, index) => {
+		const { filename, originalSrc, reuploadEligible } = entry
+
+		if (isUrl(originalSrc)) {
+			uploads[index] = {
+				action: {
+					action: 'storeMediaFile',
+					params: { deleteExisting: true, filename, url: originalSrc },
+					version: 6,
+				},
+				filename,
+				reuploadEligible,
+			}
+			return
+		}
+
+		if (fileAdapter === undefined) {
+			const reason = 'no file adapter provided'
+			console.warn(`Could not re-upload local media file "${filename}": ${reason}`)
+			failedUploads.push({ filename, reason })
+			return
+		}
+
+		try {
+			const data = fileContentToBase64(await fileAdapter.readFileBuffer(originalSrc))
+			uploads[index] = {
+				action: {
+					action: 'storeMediaFile',
+					params: { data, deleteExisting: true, filename },
+					version: 6,
+				},
+				filename,
+				reuploadEligible,
+			}
+		} catch (error) {
+			const reason = String(error)
+			console.warn(`Could not read local media file "${filename}": ${reason}`)
+			failedUploads.push({ filename, reason })
+		}
+	})
+
+	return uploads.filter((upload) => upload !== undefined)
+}
+
+/**
+ * Check the response to a `storeMediaFile` action. Anki can store a file under
+ * a different name than the one requested, which leaves the note's media
+ * reference pointing at a file that doesn't exist.
+ *
+ * @returns The reason the upload failed, or undefined if it succeeded.
+ */
+function getStoreMediaFileFailure(
+	filename: string,
+	response: MultiActionResponse,
+): string | undefined {
+	if (response.error !== null) {
+		return response.error
+	}
+
+	if (response.result !== filename) {
+		return `stored under a different filename: ${JSON.stringify(response.result)}`
+	}
+
+	return undefined
+}
+
+/**
+ * Reconcile the media files in Anki against the media referenced by the live
+ * notes for the given namespace. Missing media is uploaded; orphaned media is
+ * deleted. Both passes are bundled via `multi()` in batches of up to 25
+ * actions, bounded by the request size budget.
+ *
+ * `freshWriteNoteIds` (optional) lists the noteIds whose creation/update was
+ * the reason for this sync. Media for those notes uploads silently — only
+ * uploads triggered by media that _should_ already have been in Anki for
+ * matched/unchanged notes show up in the returned `reuploaded` list.
+ *
+ * Per-file failures (missing file adapter, unreadable local file, Anki-Connect
+ * error during upload/delete, a failed upload request) are surfaced via
+ * `failedUploads` / `failedDeletes` rather than aborting the whole pass —
+ * partial-success media is recoverable on the next sync, but callers can warn
+ * the user explicitly.
+ *
+ * @throws {Error} If the media listing or a delete request fails as a whole.
+ */
 export async function reconcileMedia(
 	client: YankiConnect,
 	liveNotes: YankiNote[],
 	namespace: string,
 	dryRun: boolean,
 	fileAdapter?: FileAdapter,
-): Promise<{ deleted: string[]; reuploaded: string[] }> {
+	freshWriteNoteIds?: Set<number>,
+): Promise<ReconcileMediaResult> {
 	if (dryRun) {
-		return { deleted: [], reuploaded: [] }
+		return { deleted: [], failedDeletes: [], failedUploads: [], reuploaded: [] }
 	}
 
 	// Note this always includes a `yanki-` prefix for ease of identification
 	// in the Anki media asset manager UI
 	const slugifiedNamespace = getSlugifiedNamespace(namespace)
 
-	const expectedMedia: Media[] = []
+	const collected = new Map<string, CollectedMedia>()
 	for (const note of liveNotes) {
-		// Room for optimization to avoid re-parsing the HTML...
+		const isFreshWrite = note.noteId !== undefined && (freshWriteNoteIds?.has(note.noteId) ?? false)
+
 		const mediaPaths = extractMediaFromHtml(
 			`${note.fields.Front}\n${note.fields.Back}\n${note.fields.Extra}`,
 		)
-		for (const media of mediaPaths) {
-			expectedMedia.push(media)
-		}
-	}
 
-	const activeMediaFilenames = new Set(expectedMedia.map(({ filename }) => filename))
-
-	const allMediaInNamespace = await client.media.getMediaFilesNames({
-		pattern: `${slugifiedNamespace}-*`,
-	})
-
-	// Delete media in Anki but NOT in expected list
-	const deletedMediaFilenames: string[] = []
-	for (const remoteMediaFilename of allMediaInNamespace) {
-		if (activeMediaFilenames.has(remoteMediaFilename)) {
-			continue
-		}
-
-		await client.media.deleteMediaFile({ filename: remoteMediaFilename })
-		deletedMediaFilenames.push(remoteMediaFilename)
-	}
-
-	// Re-upload media in expected list but NOT in Anki
-	const reuploadedMediaFilenames: string[] = []
-	for (const { filename, originalSrc } of expectedMedia) {
-		if (!allMediaInNamespace.includes(filename)) {
-			try {
-				if (isUrl(originalSrc)) {
-					await client.media.storeMediaFile({
-						deleteExisting: true,
-						filename,
-						url: originalSrc,
-					})
-					reuploadedMediaFilenames.push(filename)
-				} else if (fileAdapter === undefined) {
-					console.warn(
-						`Could not re-upload local media file "${filename}": no file adapter provided`,
-					)
-				} else {
-					await client.media.storeMediaFile({
-						data: uint8ArrayToBase64(await fileAdapter.readFileBuffer(originalSrc)),
-						deleteExisting: true,
-						filename,
-					})
-					reuploadedMediaFilenames.push(filename)
-				}
-			} catch (error) {
-				console.warn(`Anki could not re-upload media file: "${filename}"\n${String(error)}`)
+		for (const { filename, originalSrc } of mediaPaths) {
+			const existing = collected.get(filename)
+			if (existing === undefined) {
+				collected.set(filename, { filename, originalSrc, reuploadEligible: !isFreshWrite })
+			} else if (isFreshWrite && existing.reuploadEligible) {
+				// A fresh-write reference for the same filename downgrades the entry
+				// to silent upload — matches old per-note upload behavior.
+				existing.reuploadEligible = false
 			}
 		}
 	}
 
-	return { deleted: deletedMediaFilenames, reuploaded: reuploadedMediaFilenames }
+	const presentMedia = new Set(
+		await client.media.getMediaFilesNames({ pattern: `${slugifiedNamespace}-*` }),
+	)
+
+	const toDelete: string[] = []
+	for (const filename of presentMedia) {
+		if (!collected.has(filename)) {
+			toDelete.push(filename)
+		}
+	}
+
+	const toUpload: CollectedMedia[] = []
+	for (const entry of collected.values()) {
+		if (!presentMedia.has(entry.filename)) {
+			toUpload.push(entry)
+		}
+	}
+
+	const failedUploads: MediaFailure[] = []
+	const failedDeletes: MediaFailure[] = []
+	const reuploaded: string[] = []
+
+	// Read, encode, and upload one batch of files at a time, so the encoded
+	// files of a batch are released before the next batch is read
+	for (let start = 0; start < toUpload.length; start += MULTI_BATCH_CHUNK_SIZE) {
+		const uploads = await getMediaUploads(
+			toUpload.slice(start, start + MULTI_BATCH_CHUNK_SIZE),
+			fileAdapter,
+			failedUploads,
+		)
+
+		// A failed request is not fatal: the notes are already in Anki, and the
+		// files it carried are uploaded again on the next sync
+		const unansweredUploads = new Set(uploads)
+		try {
+			await runMultiInChunks(
+				client,
+				uploads.map(({ action }) => action),
+				(index, response) => {
+					const upload = uploads[index]
+					if (upload === undefined) {
+						return
+					}
+
+					unansweredUploads.delete(upload)
+					const reason = getStoreMediaFileFailure(upload.filename, response)
+					if (reason !== undefined) {
+						console.warn(`Anki could not store media file "${upload.filename}": ${reason}`)
+						failedUploads.push({ filename: upload.filename, reason })
+					} else if (upload.reuploadEligible) {
+						reuploaded.push(upload.filename)
+					}
+				},
+			)
+		} catch (error) {
+			const reason = String(error)
+			for (const { filename } of unansweredUploads) {
+				console.warn(`Anki could not store media file "${filename}": ${reason}`)
+				failedUploads.push({ filename, reason })
+			}
+		}
+	}
+
+	const mediaDeletionActions: MultiAction[] = toDelete.map((filename) => ({
+		action: 'deleteMediaFile',
+		params: { filename },
+		version: 6,
+	}))
+
+	const deleted: string[] = []
+	await runMultiInChunks(client, mediaDeletionActions, (index, response) => {
+		const filename = toDelete[index]
+		if (filename === undefined) {
+			return
+		}
+
+		if (response.error === null) {
+			deleted.push(filename)
+		} else {
+			console.warn(`Anki could not delete media file "${filename}": ${response.error}`)
+			failedDeletes.push({ filename, reason: response.error })
+		}
+	})
+
+	return { deleted, failedDeletes, failedUploads, reuploaded }
+}
+
+// Mirrors the wire-level shape returned by Anki-Connect for each `multi()`
+// action. `error` is genuinely `null` (not `undefined`) on the wire, so the
+// `null` here is intentional rather than a stand-in for "absent".
+// eslint-disable-next-line ts/no-restricted-types
+type MultiActionResponse = { error: null | string; result: unknown }
+
+/**
+ * Narrow one entry of a `multi()` response to its `{ error, result }` envelope.
+ * AnkiConnect wraps a nested action's reply this way whenever the action
+ * carries a `version`, as every action sent from this module does, but
+ * yanki-connect types the entries as a union that also covers bare results.
+ *
+ * @throws {TypeError} If the entry is not an `{ error, result }` envelope.
+ */
+function toMultiActionResponse(value: unknown): MultiActionResponse {
+	if (
+		typeof value !== 'object' ||
+		value === null ||
+		!('error' in value) ||
+		!('result' in value) ||
+		(value.error !== null && typeof value.error !== 'string')
+	) {
+		throw new TypeError(
+			`Expected { error, result } from a multi() action, got: ${JSON.stringify(value)}`,
+		)
+	}
+
+	return { error: value.error, result: value.result }
+}
+
+/**
+ * Send one `multi()` request and narrow its reply to one `{ error, result }`
+ * envelope per action.
+ *
+ * AnkiConnect checks the API key on every nested action, while yanki-connect
+ * only sends it with the outer request, so the client's key is added to each
+ * action here.
+ *
+ * @throws {Error} If the reply does not hold exactly one response per action.
+ */
+async function sendMulti(
+	client: YankiConnect,
+	actions: MultiAction[],
+): Promise<MultiActionResponse[]> {
+	// The client has no public accessor for its key, and its declaration leaves
+	// the private property untyped
+	// eslint-disable-next-line ts/dot-notation, prefer-destructuring
+	const key: unknown = client['key']
+	const keyedActions: MultiAction[] =
+		typeof key === 'string'
+			? actions.map((action): MultiAction & { key: string } => ({ ...action, key }))
+			: actions
+
+	const responses = await client.miscellaneous.multi({ actions: keyedActions })
+	if (responses.length !== actions.length) {
+		throw new Error(`multi() returned ${responses.length} responses for ${actions.length} actions`)
+	}
+
+	return responses.map((response) => toMultiActionResponse(response))
+}
+
+/**
+ * Generic chunked dispatcher for Anki-Connect's `multi()`. The handler sees
+ * each action's response, including per-action errors — caller decides whether
+ * to throw, log, or recover. For the common throw-on-error case prefer
+ * `runMultiOrThrow`, which centralizes the failure path.
+ *
+ * A request carries at most `maxActionsPerRequest` actions, and fewer when the
+ * request size budget is reached first.
+ */
+async function runMultiInChunks(
+	client: YankiConnect,
+	actions: MultiAction[],
+	handleResponse: (index: number, response: MultiActionResponse) => void,
+	maxActionsPerRequest = MULTI_BATCH_CHUNK_SIZE,
+): Promise<void> {
+	let chunkStart = 0
+	for (const chunk of chunkForRequest(actions, maxActionsPerRequest)) {
+		const responses = await sendMulti(client, chunk)
+		for (const [i, response] of responses.entries()) {
+			handleResponse(chunkStart + i, response)
+		}
+
+		chunkStart += chunk.length
+	}
+}
+
+/**
+ * Throw-on-error wrapper around `runMultiInChunks`. The handler is only called
+ * for successful actions; per-action errors are converted into a thrown Error
+ * tagged with the action name and the caller-provided context.
+ *
+ * Use this for probes that must succeed (e.g. `findNotes` lookups during note
+ * resolution). For best-effort batches that should keep going on partial
+ * failure (e.g. media uploads), call `runMultiInChunks` directly and pick a
+ * logging policy.
+ */
+async function runMultiOrThrow(
+	client: YankiConnect,
+	actions: MultiAction[],
+	contextFor: (index: number) => string,
+	onSuccess: (index: number, result: unknown) => void,
+	maxActionsPerRequest = MULTI_BATCH_CHUNK_SIZE,
+): Promise<void> {
+	await runMultiInChunks(
+		client,
+		actions,
+		(index, response) => {
+			const context = contextFor(index)
+			const action = actions[index]?.action ?? `action ${index}`
+			if (response.error !== null) {
+				throw new Error(`${action} failed for ${context}: ${response.error}`)
+			}
+
+			onSuccess(index, response.result)
+		},
+		maxActionsPerRequest,
+	)
 }
 
 /**

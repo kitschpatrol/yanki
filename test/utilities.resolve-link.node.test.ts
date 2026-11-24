@@ -1,5 +1,6 @@
 import { expect, it, vi } from 'vitest'
 import { parseObsidianVaultLink, resolveLink } from '../src/lib/utilities/resolve-link'
+import { countReads } from './utilities/count-reads'
 import { permute } from './utilities/permute'
 
 it('resolves links', () => {
@@ -321,6 +322,64 @@ it('resolves links from the directory of the source path instead of the working 
 	expect(resolveLink('./peer', options)).toBe('/vault/Cards/peer.md')
 	expect(resolveLink('image.png', options)).toBe('/vault/Cards/image.png')
 	expect(resolveLink('missing', options)).toBe('/vault/Cards/missing')
+})
+
+it.each([
+	{ basePath: '/vault', name: 'with a known vault root' },
+	{ basePath: undefined, name: 'with a stand-in vault root' },
+])(
+	'reads a list of file paths once for all the links resolved against it, $name',
+	({ basePath }) => {
+		const filePaths = Array.from(
+			{ length: 500 },
+			(_, index) => `/vault/folder-${index % 10}/note-${index}.md`,
+		)
+		const { countedItems, getReads } = countReads(filePaths)
+
+		for (let index = 0; index < 100; index++) {
+			expect(
+				resolveLink(`note-${index}`, {
+					allFilePaths: countedItems,
+					basePath,
+					cwd: '/vault/folder-1',
+					type: 'link',
+				}),
+			).toBe(`/vault/folder-${index % 10}/note-${index}.md`)
+		}
+
+		// One pass over the list, plus a read of each matched file
+		expect(getReads()).toBeLessThan(filePaths.length * 2)
+	},
+)
+
+it('finds a file added to the list after an earlier link was resolved against it', () => {
+	const allFilePaths = ['/vault/first.md']
+	const resolve = (link: string) =>
+		resolveLink(link, { allFilePaths, basePath: '/vault', cwd: '/vault', type: 'link' })
+
+	expect(resolve('first')).toBe('/vault/first.md')
+	expect(resolve('second')).toBe('/vault/second')
+
+	allFilePaths.push('/vault/Deep/second.md')
+	expect(resolve('second')).toBe('/vault/Deep/second.md')
+})
+
+it('resolves an absolute file system path to the first listed file when paths differ only by case', () => {
+	const allFilePaths = ['/vault/Cards/Note.md', '/vault/Cards/note.md']
+	const resolve = (link: string) =>
+		resolveLink(link, { allFilePaths, basePath: '/vault', cwd: '/vault', type: 'link' })
+
+	// Not a path from the vault root, so the file system path is looked up as is
+	expect(resolve('/vault/Cards/note.md')).toBe('/vault/Cards/Note.md')
+	expect(resolve('/vault/Cards/NOTE')).toBe('/vault/Cards/Note.md')
+})
+
+it('keeps the files of separate lists apart', () => {
+	const resolve = (allFilePaths: string[]) =>
+		resolveLink('note', { allFilePaths, basePath: '/vault', cwd: '/vault', type: 'link' })
+
+	expect(resolve(['/vault/One/note.md'])).toBe('/vault/One/note.md')
+	expect(resolve(['/vault/Two/note.md'])).toBe('/vault/Two/note.md')
 })
 
 it('treats the deepest directory containing every file as the vault root when none is given', () => {

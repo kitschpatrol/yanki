@@ -11,6 +11,7 @@ import {
 	safeDecodeURI,
 	safeDecodeURIComponent,
 	safeParseUrl,
+	shareHeadRequests,
 	urlExists,
 	urlToHostAndPort,
 } from '../src/lib/utilities/url'
@@ -369,4 +370,61 @@ it('gets extension from URL query string when no extension in path', async () =>
 		'name',
 	)
 	expect(result).toBe('mp3')
+})
+
+it('shares one response among HEAD requests for the same URL', async () => {
+	const fetchAdapter = vi
+		.fn()
+		.mockImplementation((url: string) => ({ headers: { etag: url }, status: 200 }))
+	const sharedFetchAdapter = shareHeadRequests(fetchAdapter)
+
+	const responses = await Promise.all([
+		sharedFetchAdapter('https://example.com/a.png', { method: 'HEAD' }),
+		sharedFetchAdapter('https://example.com/a.png', { method: 'HEAD' }),
+		sharedFetchAdapter('https://example.com/b.png', { method: 'HEAD' }),
+	])
+
+	expect(responses.map((response) => response?.headers)).toEqual([
+		{ etag: 'https://example.com/a.png' },
+		{ etag: 'https://example.com/a.png' },
+		{ etag: 'https://example.com/b.png' },
+	])
+	expect(fetchAdapter.mock.calls.map(([url]) => url as string)).toEqual([
+		'https://example.com/a.png',
+		'https://example.com/b.png',
+	])
+})
+
+it('sends every request that is not a HEAD request', async () => {
+	const fetchAdapter = vi.fn().mockResolvedValue({ headers: {}, status: 200 })
+	const sharedFetchAdapter = shareHeadRequests(fetchAdapter)
+
+	await sharedFetchAdapter('https://example.com/a.png', { method: 'HEAD' })
+	await sharedFetchAdapter('https://example.com/a.png', { method: 'GET' })
+	await sharedFetchAdapter('https://example.com/a.png', { method: 'GET' })
+	await sharedFetchAdapter('https://example.com/a.png')
+
+	expect(fetchAdapter).toHaveBeenCalledTimes(4)
+})
+
+it('shares a failed HEAD request instead of sending it again', async () => {
+	const fetchAdapter = vi.fn().mockRejectedValue(new Error('offline'))
+	const sharedFetchAdapter = shareHeadRequests(fetchAdapter)
+
+	await expect(sharedFetchAdapter('https://example.com/a.png', { method: 'HEAD' })).rejects.toThrow(
+		'offline',
+	)
+	await expect(sharedFetchAdapter('https://example.com/a.png', { method: 'HEAD' })).rejects.toThrow(
+		'offline',
+	)
+	expect(fetchAdapter).toHaveBeenCalledTimes(1)
+})
+
+it('keeps the responses of separately wrapped adapters apart', async () => {
+	const fetchAdapter = vi.fn().mockResolvedValue({ headers: {}, status: 200 })
+
+	await shareHeadRequests(fetchAdapter)('https://example.com/a.png', { method: 'HEAD' })
+	await shareHeadRequests(fetchAdapter)('https://example.com/a.png', { method: 'HEAD' })
+
+	expect(fetchAdapter).toHaveBeenCalledTimes(2)
 })

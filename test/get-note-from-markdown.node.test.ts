@@ -2,9 +2,10 @@ import { toText } from 'hast-util-to-text'
 import rehypeParse from 'rehype-parse'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
-import { expect, it } from 'vitest'
+import { expect, it, vi } from 'vitest'
 import { getNoteFromMarkdown } from '../src/lib'
 import { markdown } from '../src/lib/utilities/string'
+import { countReads } from './utilities/count-reads'
 import { permute } from './utilities/permute'
 
 // Function to remove undefined fields from an object
@@ -397,6 +398,84 @@ it('handles strikethrough before and after a break', async () => {
 	expect(note.fields.Back).toContain('<del>cloze</del>')
 })
 
+it('applies Shiki highlighting for triple-backtick fenced code blocks', async () => {
+	const noteMarkdown = 'What does this do?\n\n---\n\n```typescript\nconst x = 1\n```'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Back).toContain('shiki')
+})
+
+it('applies Shiki highlighting for triple-tilde fenced code blocks', async () => {
+	const noteMarkdown = 'What does this do?\n\n---\n\n~~~javascript\nconst x = 1\n~~~'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Back).toContain('shiki')
+})
+
+it('applies Shiki highlighting for indented code blocks', async () => {
+	const noteMarkdown = 'What does this do?\n\n---\n\n    const x = 1\n    const y = 2'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Back).toContain('shiki')
+})
+
+it('applies Shiki highlighting for raw HTML code blocks', async () => {
+	const noteMarkdown =
+		'What does this do?\n\n---\n\n<pre><code class="language-ts">const x = 1</code></pre>'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Back).toContain('shiki')
+})
+
+/**
+ * Inline code (single backticks) should NOT load Shiki — the Shiki rehype
+ * plugin only processes block-level `<pre><code>` by default. Locks in the
+ * short-circuit's correctness for inline-only content.
+ */
+it('skips Shiki for notes with only inline code', async () => {
+	const noteMarkdown = 'Use the `console.log()` function\n\n---\n\nThat is all.'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Front).not.toContain('shiki')
+	expect(note.fields.Back).not.toContain('shiki')
+})
+
+/**
+ * Documents the acknowledged false positive: a note that _describes_ HTML tags
+ * as prose still triggers the Shiki path because the bare `<code>` token
+ * appears in a raw-HTML mdast node. Output must remain correct regardless.
+ */
+it('produces correct output even when prose mentions a literal <code> tag', async () => {
+	const noteMarkdown = 'Use the <code> tag for inline code.\n\n---\n\nDone.'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Front).toContain('Use the')
+	expect(note.fields.Back).toContain('Done')
+})
+
+it('detects code blocks nested inside a blockquote', async () => {
+	const noteMarkdown = '> ```js\n> const x = 1\n> ```\n\n---\n\nback'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Front).toContain('shiki')
+})
+
+it('detects code blocks nested inside a list item', async () => {
+	const noteMarkdown = '- item with code:\n\n  ```js\n  const x = 1\n  ```\n\n---\n\nback'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Front).toContain('shiki')
+})
+
+it('detects a raw HTML code block on the back when the front only has inline code', async () => {
+	const noteMarkdown =
+		'| col |\n| --- |\n| `inline only no shiki` |\n\n---\n\n<pre><code>real</code></pre>'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	// Inline code in the table cell stays unstyled; the back has a real
+	// pre/code block which must reach Shiki.
+	expect(note.fields.Back).toContain('shiki')
+})
+
+it('applies Shiki highlighting when raw <pre> tags wrap inline code', async () => {
+	// The `pre` comes from raw HTML and the `code` from Markdown, so no single
+	// node holds a code block until the HTML is re-parsed
+	const noteMarkdown = 'Run <pre>`const x = 1`</pre>\n\n---\n\nback'
+	const note = await getNoteFromMarkdown(noteMarkdown)
+	expect(note.fields.Front).toContain('shiki')
+})
+
 /**
  * MathJax inside a cloze deletion must not contain a literal `}}` substring,
  * which would cause Anki's non-greedy cloze regex (`\{\{c\d+::(.*?)\}\}`) to
@@ -662,3 +741,62 @@ it.each([
 
 	expect(getCodeBlockTexts(note.fields.Front)).toEqual([expected])
 })
+
+it('does not copy or rescan the list of file paths for every note', async () => {
+	const filePaths = Array.from(
+		{ length: 500 },
+		(_, index) => `/vault/folder-${index % 10}/note-${index}.md`,
+	)
+	const { countedItems, getReads } = countReads(filePaths)
+
+	for (let index = 0; index < 20; index++) {
+		const note = await getNoteFromMarkdown(
+			`[[note-${index}]] and [[note-${index + 100}]]\n\n---\n\nBack`,
+			{
+				allFilePaths: countedItems,
+				basePath: '/vault',
+				obsidianVault: 'Vault',
+				sourcePath: '/vault/folder-0/source.md',
+				syncMediaAssets: 'off',
+			},
+		)
+
+		const folder = `folder-${index % 10}`
+		expect(note.fields.Front).toContain(encodeURIComponent(`${folder}/note-${index}.md`))
+		expect(note.fields.Front).toContain(encodeURIComponent(`${folder}/note-${index + 100}.md`))
+	}
+
+	// One pass over the list for the whole run, plus a read of each linked file
+	expect(getReads()).toBeLessThan(filePaths.length * 2)
+})
+
+it.each(['local', 'all'] as const)(
+	'requests each remote image of a note once, syncMediaAssets: %s',
+	async (syncMediaAssets) => {
+		const requests: string[] = []
+		const note = await getNoteFromMarkdown(
+			'![Picture](https://example.com/images/picture.png)\n\n---\n\n![Picture](https://example.com/images/picture.png) and ![Chart](https://example.com/chart)',
+			{
+				async fetchAdapter(url, init) {
+					await Promise.resolve()
+					requests.push(`${init?.method} ${url}`)
+					return {
+						headers: { 'content-type': 'image/png', etag: '"v1"' },
+						json: vi.fn(),
+						status: 200,
+					}
+				},
+				namespace: 'Probe',
+				syncMediaAssets,
+			},
+		)
+
+		// The picture is on both sides of the note, and with media syncing on,
+		// each embed looks up its type, its existence, and its headers
+		expect(requests).toEqual([
+			'HEAD https://example.com/images/picture.png',
+			'HEAD https://example.com/chart',
+		])
+		expect([note.fields.Front, note.fields.Back]).toMatchSnapshot()
+	},
+)

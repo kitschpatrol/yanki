@@ -1,3 +1,6 @@
+/* eslint-disable max-lines */
+
+import { uint8ArrayToBase64 } from 'uint8array-extras'
 import { describe, expect, it, vi } from 'vitest'
 import { AnkiConnectUnreachableError } from 'yanki-connect'
 import type { YankiNote } from '../src/lib/model/note'
@@ -30,6 +33,81 @@ function makeNote(overrides: Partial<YankiNote> = {}): YankiNote {
 	}
 }
 
+type MultiActionInput = { action: string; params?: Record<string, unknown> }
+type ActionHandler = (params: Record<string, unknown>) => unknown
+type MultiCall = [{ actions: MultiActionInput[] }]
+
+/**
+ * Dispatches incoming `multi()` action arrays to the per-action handlers.
+ * Returns one `{error, result}` entry per action — matching Anki-Connect's wire
+ * shape — so the production code's chunked dispatcher can be exercised.
+ *
+ * Handlers may throw to simulate a per-action error response; the thrown
+ * message becomes the response's `error` field.
+ */
+function makeMultiMock(handlers: Record<string, ActionHandler | undefined>) {
+	return vi.fn().mockImplementation(async ({ actions }: { actions: MultiActionInput[] }) =>
+		Promise.all(
+			actions.map(async ({ action, params = {} }) => {
+				const handler = Object.hasOwn(handlers, action) ? handlers[action] : undefined
+				if (handler === undefined) {
+					// eslint-disable-next-line unicorn/no-null
+					return { error: `unhandled action ${action}`, result: null }
+				}
+
+				try {
+					// eslint-disable-next-line unicorn/no-null
+					return { error: null, result: await handler(params) }
+				} catch (error) {
+					return {
+						error: error instanceof Error ? error.message : String(error),
+						// eslint-disable-next-line unicorn/no-null
+						result: null,
+					}
+				}
+			}),
+		),
+	)
+}
+
+type RoutableClient = {
+	card?: { [name: string]: unknown; findCards?: ActionHandler }
+	deck?: { [name: string]: unknown; getDecks?: ActionHandler }
+	note?: { [name: string]: unknown; findNotes?: ActionHandler }
+}
+
+/**
+ * Give a mock client a `multi()` that answers nested deck, card, and note
+ * lookups with the client's own mocks for those actions, the way AnkiConnect
+ * dispatches nested actions to the handlers of the standalone ones.
+ */
+function routeMulti<Client extends RoutableClient>(client: Client) {
+	return {
+		...client,
+		miscellaneous: {
+			multi: makeMultiMock({
+				findCards: client.card?.findCards,
+				findNotes: client.note?.findNotes,
+				getDecks: client.deck?.getDecks,
+			}),
+		},
+	}
+}
+
+function makeAnkiNote(noteId: number, cards: number[]): Record<string, unknown> {
+	return {
+		cards,
+		fields: {
+			Back: { value: `back-${noteId}` },
+			Front: { value: `front-${noteId}` },
+			YankiNamespace: { value: 'test' },
+		},
+		modelName: 'Yanki - Basic',
+		noteId,
+		tags: [],
+	}
+}
+
 /**
  * Create a mock client holding the given cards in the given decks. Deck IDs are
  * the 1-based position of each deck name, and card searches resolve the `did:`
@@ -41,7 +119,7 @@ function makeDeckClient(cardsByDeckName: Record<string, number[]>) {
 		Object.keys(cardsByDeckName).map((deckName, index) => [deckName, index + 1]),
 	)
 
-	return {
+	return routeMulti({
 		card: {
 			findCards: vi
 				.fn()
@@ -55,7 +133,7 @@ function makeDeckClient(cardsByDeckName: Record<string, number[]>) {
 			deckNamesAndIds: vi.fn().mockResolvedValue(deckIds),
 			deleteDecks: vi.fn(),
 		},
-	}
+	})
 }
 
 describe('areNotesEqual', () => {
@@ -176,6 +254,20 @@ describe('deleteNotes', () => {
 
 		await deleteNotes(client as never, [makeNote({ noteId: 42 }), makeNote({ noteId: undefined })])
 		expect(client.note.deleteNotes).toHaveBeenCalledWith({ notes: [42] })
+	})
+
+	it.each([
+		{ name: 'there are no notes', notes: [] },
+		{ name: 'no note has an ID', notes: [makeNote({ noteId: undefined })] },
+	])('does not contact Anki when $name', async ({ notes }) => {
+		const client = {
+			note: {
+				deleteNotes: vi.fn(),
+			},
+		}
+
+		await deleteNotes(client as never, notes)
+		expect(client.note.deleteNotes).not.toHaveBeenCalled()
 	})
 })
 
@@ -677,6 +769,11 @@ describe('syncToAnkiWeb', () => {
 })
 
 describe('getRemoteNotes', () => {
+	/** A `findNotes` mock answering each query from a lookup table */
+	function findNotesByQuery(results: Record<string, number[]>) {
+		return vi.fn().mockImplementation(({ query }: { query: string }) => results[query] ?? [])
+	}
+
 	it('returns empty array when no notes found', async () => {
 		const client = {
 			note: {
@@ -687,10 +784,13 @@ describe('getRemoteNotes', () => {
 
 		const result = await getRemoteNotes(client as never, 'test-namespace')
 		expect(result).toEqual([])
+		expect(client.note.notesInfo).not.toHaveBeenCalled()
 	})
 
 	it('drops phantom IDs when notesInfo resolves nothing', async () => {
+		const multiMock = makeMultiMock({})
 		const client = {
+			miscellaneous: { multi: multiMock },
 			note: {
 				findNotes: vi.fn().mockResolvedValue([1, 2]),
 				notesInfo: vi.fn().mockResolvedValue([{ noteId: undefined }, { noteId: undefined }]),
@@ -699,40 +799,76 @@ describe('getRemoteNotes', () => {
 
 		const result = await getRemoteNotes(client as never, 'test-namespace')
 		expect(result).toEqual([])
+		// The early return skips every deck lookup
+		expect(multiMock).not.toHaveBeenCalled()
 	})
 
 	it('maps notes with deck info correctly', async () => {
-		const client = {
+		const client = routeMulti({
 			card: { findCards: vi.fn().mockResolvedValue([]) },
 			deck: {
+				deckNamesAndIds: vi.fn(),
 				getDecks: vi.fn().mockResolvedValue({ TestDeck: [100] }),
 			},
 			note: {
 				findNotes: vi.fn().mockResolvedValue([1]),
-				notesInfo: vi.fn().mockResolvedValue([
-					{
-						cards: [100],
-						fields: {
-							Back: { value: 'back' },
-							Front: { value: 'front' },
-							YankiNamespace: { value: 'test' },
-						},
-						modelName: 'Yanki - Basic',
-						noteId: 1,
-						tags: ['tag1'],
-					},
-				]),
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
-		}
+		})
 
 		const result = await getRemoteNotes(client as never, 'test')
 		expect(result).toHaveLength(1)
 		expect(result[0]).toMatchObject({
 			deckName: 'TestDeck',
-			fields: { Back: 'back', Front: 'front', YankiNamespace: 'test' },
+			fields: { Back: 'back-1', Front: 'front-1', YankiNamespace: 'test' },
 			modelName: 'Yanki - Basic',
 			noteId: 1,
 		})
+		// The decks of the cards and the filtered deck search share one request
+		expect((client.miscellaneous.multi.mock.calls as MultiCall[]).map(([call]) => call)).toEqual([
+			{
+				actions: [
+					{ action: 'getDecks', params: { cards: [100] }, version: 6 },
+					{ action: 'findCards', params: { query: 'deck:filtered' }, version: 6 },
+				],
+			},
+		])
+		// No filtered decks, so no home deck candidates are ever fetched
+		expect(client.deck.deckNamesAndIds).not.toHaveBeenCalled()
+	})
+
+	it.each([
+		{ getDecksResult: 'not a map', message: 'Expected a map of deck names to cards from getDecks' },
+		{ getDecksResult: { TestDeck: 'not cards' }, message: 'Expected number[] from getDecks' },
+	])(
+		'throws a typed error when getDecks returns $getDecksResult',
+		async ({ getDecksResult, message }) => {
+			const client = routeMulti({
+				card: { findCards: vi.fn().mockResolvedValue([]) },
+				deck: { getDecks: vi.fn().mockResolvedValue(getDecksResult) },
+				note: {
+					findNotes: vi.fn().mockResolvedValue([1]),
+					notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+				},
+			})
+
+			await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(message)
+		},
+	)
+
+	it('throws when the filtered deck search fails', async () => {
+		const client = routeMulti({
+			card: { findCards: vi.fn().mockRejectedValue(new Error('search failed')) },
+			deck: { getDecks: vi.fn().mockResolvedValue({ TestDeck: [100] }) },
+			note: {
+				findNotes: vi.fn().mockResolvedValue([1]),
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+			},
+		})
+
+		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+			'findCards failed: search failed',
+		)
 	})
 
 	it('drops phantom IDs while keeping resolvable notes', async () => {
@@ -743,24 +879,11 @@ describe('getRemoteNotes', () => {
 			},
 			note: {
 				findNotes: vi.fn().mockResolvedValue([1, 2]),
-				notesInfo: vi.fn().mockResolvedValue([
-					{
-						cards: [100],
-						fields: {
-							Back: { value: 'b' },
-							Front: { value: 'f' },
-							YankiNamespace: { value: 'test' },
-						},
-						modelName: 'Yanki - Basic',
-						noteId: 1,
-						tags: [],
-					},
-					{ noteId: undefined },
-				]),
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100]), { noteId: undefined }]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result).toHaveLength(1)
 		expect(result[0]?.noteId).toBe(1)
 	})
@@ -775,17 +898,14 @@ describe('getRemoteNotes', () => {
 				findNotes: vi.fn().mockResolvedValue([1]),
 				notesInfo: vi.fn().mockResolvedValue([
 					{
-						cards: [100],
-						fields: { Back: { value: '' }, Front: { value: '' }, YankiNamespace: { value: '' } },
+						...makeAnkiNote(1, [100]),
 						modelName: 'Unknown Model',
-						noteId: 1,
-						tags: [],
 					},
 				]),
 			},
 		}
 
-		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
 			'Unknown model name Unknown Model for note 1',
 		)
 	})
@@ -798,44 +918,22 @@ describe('getRemoteNotes', () => {
 			},
 			note: {
 				findNotes: vi.fn().mockResolvedValue([1]),
-				notesInfo: vi.fn().mockResolvedValue([
-					{
-						cards: [100],
-						fields: { Back: { value: '' }, Front: { value: '' }, YankiNamespace: { value: '' } },
-						modelName: 'Yanki - Basic',
-						noteId: 1,
-						tags: [],
-					},
-				]),
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
 			'No deck found for cards in note 1',
 		)
 	})
 
-	/** A `notesInfo` entry for a Yanki note with one card */
-	function yankiNoteInfo(noteId: number, cardId: number) {
-		return {
-			cards: [cardId],
-			fields: {
-				Back: { value: 'b' },
-				Front: { value: 'f' },
-				YankiNamespace: { value: 'test' },
-			},
-			modelName: 'Yanki - Basic',
-			noteId,
-			tags: [],
-		}
-	}
-
-	/** A `findNotes` mock answering each query from a lookup table */
-	function findNotesByQuery(results: Record<string, number[]>) {
-		return vi.fn().mockImplementation(({ query }: { query: string }) => results[query] ?? [])
-	}
-
 	it('resolves filtered decks to their real non-filtered deck', async () => {
+		// Like Anki, `did:` matches cards by their current or home deck
+		const findNotes = findNotesByQuery({
+			'"YankiNamespace:test"': [1],
+			'did:2': [1],
+			'did:3': [1],
+		})
 		const client = {
 			card: {
 				findCards: vi
@@ -859,21 +957,22 @@ describe('getRemoteNotes', () => {
 				getDecks: vi.fn().mockResolvedValue({ 'Custom Study Session': [100] }),
 			},
 			note: {
-				// Like Anki, `did:` matches cards by their current or home deck
-				findNotes: findNotesByQuery({
-					'"YankiNamespace:test"': [1],
-					'did:2': [1],
-					'did:3': [1],
-				}),
-				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100)]),
+				findNotes,
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result[0]?.deckName).toBe('RealDeck')
 	})
 
 	it('resolves notes in filtered decks to their exact home deck', async () => {
+		const findNotes = findNotesByQuery({
+			'"YankiNamespace:test"': [1, 2],
+			'did:2': [1, 2],
+			'did:3': [2],
+			'did:4': [1],
+		})
 		const client = {
 			card: { findCards: vi.fn().mockResolvedValue([100, 200]) },
 			deck: {
@@ -883,22 +982,24 @@ describe('getRemoteNotes', () => {
 				getDecks: vi.fn().mockResolvedValue({ Filtered: [100, 200] }),
 			},
 			note: {
-				findNotes: findNotesByQuery({
-					'"YankiNamespace:test"': [1, 2],
-					'did:2': [1, 2],
-					'did:3': [2],
-					'did:4': [1],
-				}),
-				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100), yankiNoteInfo(2, 200)]),
+				findNotes,
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100]), makeAnkiNote(2, [200])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result.map((note) => note.deckName)).toEqual(['Parent::Child', 'Parent'])
 		expect(client.deck.deckNamesAndIds).toHaveBeenCalledTimes(1)
 	})
 
 	it('does not resolve a note to the parent of the filtered deck holding it', async () => {
+		// Like Anki, `deck:` includes child decks, so it would match Parent
+		const findNotes = findNotesByQuery({
+			'"deck:Parent"': [1],
+			'"YankiNamespace:test"': [1],
+			'did:3': [1],
+			'did:4': [1],
+		})
 		const client = {
 			card: { findCards: vi.fn().mockResolvedValue([100]) },
 			deck: {
@@ -908,18 +1009,12 @@ describe('getRemoteNotes', () => {
 				getDecks: vi.fn().mockResolvedValue({ 'Parent::Custom Study Session': [100] }),
 			},
 			note: {
-				// Like Anki, `deck:` includes child decks, so it would match Parent
-				findNotes: findNotesByQuery({
-					'"deck:Parent"': [1],
-					'"YankiNamespace:test"': [1],
-					'did:3': [1],
-					'did:4': [1],
-				}),
-				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100)]),
+				findNotes,
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result[0]?.deckName).toBe('Zeta')
 	})
 
@@ -932,15 +1027,125 @@ describe('getRemoteNotes', () => {
 			},
 			note: {
 				findNotes: vi.fn().mockResolvedValue([1]),
-				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100)]),
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result[0]?.deckName).toBe('TestDeck')
 	})
 
+	it('resolves a filtered note to the Default deck when that is its home deck', async () => {
+		const findNotes = findNotesByQuery({
+			'"YankiNamespace:test"': [1],
+			'did:1': [1],
+			'did:2': [1],
+		})
+		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([100]) },
+			deck: {
+				deckNamesAndIds: vi.fn().mockResolvedValue({ Default: 1, Filtered: 2, Other: 3 }),
+				getDecks: vi.fn().mockResolvedValue({ Filtered: [100] }),
+			},
+			note: {
+				findNotes,
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+			},
+		}
+
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
+		expect(result[0]?.deckName).toBe('Default')
+	})
+
+	it('does not treat a filtered Default deck as a home deck', async () => {
+		// Default gets no special treatment: if it somehow holds the synced cards
+		// as a filtered deck, it is excluded from the home deck candidates
+		const findNotes = findNotesByQuery({
+			'"YankiNamespace:test"': [1],
+			'did:1': [1],
+			'did:2': [1],
+		})
+		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([100]) },
+			deck: {
+				deckNamesAndIds: vi.fn().mockResolvedValue({ Default: 1, RealDeck: 2 }),
+				getDecks: vi.fn().mockResolvedValue({ Default: [100] }),
+			},
+			note: {
+				findNotes,
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+			},
+		}
+
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
+		expect(result[0]?.deckName).toBe('RealDeck')
+		expect(findNotes).not.toHaveBeenCalledWith({ query: 'did:1' })
+	})
+
+	it('handles a sync mixing filtered and unfiltered notes', async () => {
+		const findNotes = findNotesByQuery({
+			'"YankiNamespace:test"': [1, 2],
+			'did:2': [1],
+			'did:3': [2],
+			'did:4': [1],
+		})
+		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([100]) },
+			deck: {
+				deckNamesAndIds: vi
+					.fn()
+					.mockResolvedValue({ Default: 1, Filtered: 2, PlainDeck: 3, RealDeck: 4 }),
+				getDecks: vi.fn().mockResolvedValue({ Filtered: [100], PlainDeck: [200] }),
+			},
+			note: {
+				findNotes,
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100]), makeAnkiNote(2, [200])]),
+			},
+		}
+
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
+		expect(result.map((note) => note.deckName)).toEqual(['RealDeck', 'PlainDeck'])
+	})
+
+	it('looks up each home deck candidate once in a single batch', async () => {
+		const findNotes = findNotesByQuery({
+			'"YankiNamespace:test"': [1, 2],
+			'did:2': [1],
+			'did:3': [2],
+			'did:4': [1, 2],
+		})
+		const client = routeMulti({
+			card: { findCards: vi.fn().mockResolvedValue([100, 200]) },
+			deck: {
+				deckNamesAndIds: vi
+					.fn()
+					.mockResolvedValue({ Default: 1, FilteredA: 2, FilteredB: 3, RealDeck: 4 }),
+				getDecks: vi.fn().mockResolvedValue({ FilteredB: [200], FilteredA: [100] }),
+			},
+			note: {
+				findNotes,
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100]), makeAnkiNote(2, [200])]),
+			},
+		})
+
+		const result = await getRemoteNotes(client as never, 'test')
+		expect(result.map((note) => note.deckName)).toEqual(['RealDeck', 'RealDeck'])
+		// After the request for the decks of the cards, both filtered notes are
+		// resolved from one request holding one search per candidate deck, never
+		// one search per note
+		const requests = (client.miscellaneous.multi.mock.calls as MultiCall[]).map(
+			(call) => call[0].actions,
+		)
+		expect(requests.slice(1)).toEqual([
+			[
+				{ action: 'findNotes', params: { query: 'did:1' }, version: 6 },
+				{ action: 'findNotes', params: { query: 'did:4' }, version: 6 },
+			],
+		])
+	})
+
 	it('throws when no matching non-filtered deck found', async () => {
+		const findNotes = findNotesByQuery({ '"YankiNamespace:test"': [1] })
 		const client = {
 			card: { findCards: vi.fn().mockResolvedValue([100]) },
 			deck: {
@@ -948,14 +1153,95 @@ describe('getRemoteNotes', () => {
 				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
 			},
 			note: {
-				findNotes: findNotesByQuery({ '"YankiNamespace:test"': [1] }),
-				notesInfo: vi.fn().mockResolvedValue([yankiNoteInfo(1, 100)]),
+				findNotes,
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
 			'No matching non-filtered deck found for note 1',
 		)
+	})
+
+	it('throws with deck context when a home deck lookup fails', async () => {
+		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([100]) },
+			deck: {
+				deckNamesAndIds: vi.fn().mockResolvedValue({ Default: 1, Filtered: 2, RealDeck: 3 }),
+				getDecks: vi.fn().mockResolvedValue({ Filtered: [100] }),
+			},
+			note: {
+				findNotes: vi.fn().mockImplementation(({ query }: { query: string }) => {
+					if (query === 'did:3') {
+						throw new Error('simulated findNotes failure')
+					}
+
+					return query === '"YankiNamespace:test"' ? [1] : []
+				}),
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+			},
+		}
+
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
+			'findNotes failed for deck "RealDeck": simulated findNotes failure',
+		)
+	})
+
+	it('throws a typed error when a home deck lookup returns a malformed shape', async () => {
+		const client = {
+			card: { findCards: vi.fn().mockResolvedValue([100]) },
+			deck: {
+				deckNamesAndIds: vi.fn().mockResolvedValue({ Filtered: 1, RealDeck: 2 }),
+				getDecks: vi.fn().mockResolvedValue({ Filtered: [100] }),
+			},
+			note: {
+				findNotes: vi
+					.fn()
+					.mockImplementation(({ query }: { query: string }) =>
+						query === '"YankiNamespace:test"' ? [1] : { notes: [1] },
+					),
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+			},
+		}
+
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
+			'Expected number[] from findNotes',
+		)
+	})
+
+	it('chunks home deck lookups across multiple multi() calls when decks exceed chunk size', async () => {
+		// Default chunk size is 25; 30 candidate decks force two chunks (25 + 5).
+		const candidateDeckCount = 30
+		const deckNamesAndIds: Record<string, number> = { Filtered: candidateDeckCount + 1 }
+		for (let deckId = 1; deckId <= candidateDeckCount; deckId++) {
+			deckNamesAndIds[`Deck${deckId.toString().padStart(2, '0')}`] = deckId
+		}
+
+		// The note's home deck sits past the first chunk boundary
+		const findNotes = findNotesByQuery({
+			'"YankiNamespace:test"': [1],
+			'did:28': [1],
+			'did:31': [1],
+		})
+		const client = routeMulti({
+			card: { findCards: vi.fn().mockResolvedValue([100]) },
+			deck: {
+				deckNamesAndIds: vi.fn().mockResolvedValue(deckNamesAndIds),
+				getDecks: vi.fn().mockResolvedValue({ Filtered: [100] }),
+			},
+			note: {
+				findNotes,
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+			},
+		})
+
+		const result = await getRemoteNotes(client as never, 'test')
+		const chunkSizes = (client.miscellaneous.multi.mock.calls as MultiCall[]).map(
+			(call) => call[0].actions.length,
+		)
+		// The request for the decks of the cards, then the home deck lookups
+		expect(chunkSizes).toEqual([2, 25, 5])
+		expect(result[0]?.deckName).toBe('Deck28')
 	})
 })
 
@@ -973,7 +1259,7 @@ describe('deleteOrphanedDecks', () => {
 			},
 		}
 		const result = await deleteOrphanedDecks(
-			client as never,
+			routeMulti(client) as never,
 			[],
 			[makeNote({ deckName: 'Parent::Managed' })],
 			dryRun,
@@ -994,7 +1280,7 @@ describe('deleteOrphanedDecks', () => {
 			},
 		}
 		const result = await deleteOrphanedDecks(
-			client as never,
+			routeMulti(client) as never,
 			[],
 			[makeNote({ deckName: 'Parent::Managed' })],
 			false,
@@ -1016,7 +1302,7 @@ describe('deleteOrphanedDecks', () => {
 			},
 		}
 		const result = await deleteOrphanedDecks(
-			client as never,
+			routeMulti(client) as never,
 			[],
 			[makeNote({ deckName: 'GhostDeck' })],
 			false,
@@ -1039,7 +1325,12 @@ describe('deleteOrphanedDecks', () => {
 			},
 		}
 		await expect(
-			deleteOrphanedDecks(client as never, [], [makeNote({ deckName: 'Parent::Managed' })], false),
+			deleteOrphanedDecks(
+				routeMulti(client) as never,
+				[],
+				[makeNote({ deckName: 'Parent::Managed' })],
+				false,
+			),
 		).rejects.toThrow('search failed')
 		expect(client.deck.deleteDecks).not.toHaveBeenCalled()
 	})
@@ -1058,7 +1349,7 @@ describe('deleteOrphanedDecks', () => {
 				},
 			}
 			const result = await deleteOrphanedDecks(
-				client as never,
+				routeMulti(client) as never,
 				[],
 				[makeNote({ cards: [11, 12], deckName: 'Parent::Managed' })],
 				true,
@@ -1076,7 +1367,9 @@ describe('deleteOrphanedDecks', () => {
 				deleteDecks: vi.fn(),
 			},
 		}
-		expect(await deleteOrphanedDecks(client as never, [], [makeNote()], true)).toEqual([])
+		expect(await deleteOrphanedDecks(routeMulti(client) as never, [], [makeNote()], true)).toEqual(
+			[],
+		)
 		expect(client.deck.deleteDecks).not.toHaveBeenCalled()
 	})
 
@@ -1161,56 +1454,98 @@ describe('deleteOrphanedDecks', () => {
 describe('reconcileMedia', () => {
 	it('returns empty results in dry run mode', async () => {
 		const result = await reconcileMedia({} as never, [], 'test', true)
-		expect(result).toEqual({ deleted: [], reuploaded: [] })
-	})
-
-	it('deletes orphaned media and re-uploads missing media', async () => {
-		const client = {
-			media: {
-				deleteMediaFile: vi.fn(),
-				getMediaFilesNames: vi.fn().mockResolvedValue(['yanki-test-old-file.png']),
-				storeMediaFile: vi.fn(),
-			},
-		}
-
-		const notes = [
-			makeNote({
-				fields: {
-					Back: '<img src="yanki-test-new-file.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/img.png">',
-					Front: 'front',
-					YankiNamespace: 'test',
-				},
-			}),
-		]
-
-		const result = await reconcileMedia(client as never, notes, 'test', false)
-		expect(result.deleted).toContain('yanki-test-old-file.png')
-		expect(client.media.deleteMediaFile).toHaveBeenCalledWith({
-			filename: 'yanki-test-old-file.png',
+		expect(result).toEqual({
+			deleted: [],
+			failedDeletes: [],
+			failedUploads: [],
+			reuploaded: [],
 		})
 	})
 
-	it('warns when no file adapter for local media re-upload', async () => {
-		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+	/**
+	 * A client whose Anki media folder holds `presentMedia`, and which stores and
+	 * deletes every file it is asked to.
+	 */
+	function makeMediaClient(presentMedia: string[]) {
+		const multi = makeMultiMock({
+			// eslint-disable-next-line unicorn/no-null
+			deleteMediaFile: () => null,
+			storeMediaFile: ({ filename }) => filename,
+		})
 		const client = {
-			media: {
-				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-				storeMediaFile: vi.fn(),
-			},
+			media: { getMediaFilesNames: vi.fn().mockResolvedValue(presentMedia) },
+			miscellaneous: { multi },
 		}
 
+		return { client, multi }
+	}
+
+	function makeMediaTag(filename: string, source: string): string {
+		return `<img src="${filename}" data-yanki-media-sync="true" data-yanki-media-src="${source}">`
+	}
+
+	function makeMediaNote(noteId: number, ...mediaTags: string[]): YankiNote {
+		return makeNote({
+			fields: { Back: mediaTags.join(''), Front: 'front', YankiNamespace: 'test' },
+			noteId,
+		})
+	}
+
+	function getActionFilenames(multi: ReturnType<typeof vi.fn>, actionName: string): string[] {
+		return (multi.mock.calls as MultiCall[])
+			.flatMap(([{ actions }]) => actions)
+			.filter(({ action }) => action === actionName)
+			.map(({ params }) => String(params?.filename))
+	}
+
+	it('uploads only missing media and deletes only unreferenced media', async () => {
+		const { client, multi } = makeMediaClient(['yanki-test-kept.png', 'yanki-test-orphan.png'])
 		const notes = [
-			makeNote({
-				fields: {
-					Back: '<img src="yanki-test-file.png" data-yanki-media-sync="true" data-yanki-media-src="/local/file.png">',
-					Front: 'front',
-					YankiNamespace: 'test',
-				},
-			}),
+			makeMediaNote(
+				42,
+				makeMediaTag('yanki-test-kept.png', 'https://example.com/kept.png'),
+				makeMediaTag('yanki-test-missing.png', 'https://example.com/missing.png'),
+			),
 		]
 
-		await reconcileMedia(client as never, notes, 'test', false)
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+
+		expect(getActionFilenames(multi, 'storeMediaFile')).toEqual(['yanki-test-missing.png'])
+		expect(getActionFilenames(multi, 'deleteMediaFile')).toEqual(['yanki-test-orphan.png'])
+		expect(result).toEqual({
+			deleted: ['yanki-test-orphan.png'],
+			failedDeletes: [],
+			failedUploads: [],
+			reuploaded: ['yanki-test-missing.png'],
+		})
+	})
+
+	it('leaves Anki untouched when every referenced file is already present', async () => {
+		const { client, multi } = makeMediaClient(['yanki-test-a.png', 'yanki-test-b.png'])
+		const notes = [
+			makeMediaNote(1, makeMediaTag('yanki-test-a.png', 'https://example.com/a.png')),
+			makeMediaNote(2, makeMediaTag('yanki-test-b.png', '/local/b.png')),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+
+		expect(multi).not.toHaveBeenCalled()
+		expect(result).toEqual({ deleted: [], failedDeletes: [], failedUploads: [], reuploaded: [] })
+	})
+
+	it('reports local media as failed when no file adapter is provided', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const { client, multi } = makeMediaClient([])
+		const notes = [makeMediaNote(42, makeMediaTag('yanki-test-file.png', '/local/file.png'))]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+
 		expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('no file adapter provided'))
+		expect(result.failedUploads).toEqual([
+			{ filename: 'yanki-test-file.png', reason: 'no file adapter provided' },
+		])
+		expect(result.reuploaded).toEqual([])
+		expect(multi).not.toHaveBeenCalled()
 		spyWarn.mockRestore()
 	})
 
@@ -1219,7 +1554,9 @@ describe('reconcileMedia', () => {
 		const client = {
 			media: {
 				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-				storeMediaFile: vi.fn().mockRejectedValue(new Error('network error')),
+			},
+			miscellaneous: {
+				multi: vi.fn().mockResolvedValue([{ error: 'network error', result: undefined }]),
 			},
 		}
 
@@ -1240,11 +1577,13 @@ describe('reconcileMedia', () => {
 	})
 
 	it('re-uploads URL-based media successfully', async () => {
+		// eslint-disable-next-line unicorn/no-null
+		const multi = vi.fn().mockResolvedValue([{ error: null, result: 'yanki-test-file.png' }])
 		const client = {
 			media: {
 				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-				storeMediaFile: vi.fn(),
 			},
+			miscellaneous: { multi },
 		}
 
 		const notes = [
@@ -1254,22 +1593,35 @@ describe('reconcileMedia', () => {
 					Front: 'front',
 					YankiNamespace: 'test',
 				},
+				noteId: 42, // Not in freshWriteNoteIds — counts as reupload
 			}),
 		]
 
 		const result = await reconcileMedia(client as never, notes, 'test', false)
 		expect(result.reuploaded).toContain('yanki-test-file.png')
-		expect(client.media.storeMediaFile).toHaveBeenCalledWith(
-			expect.objectContaining({ url: 'https://example.com/img.png' }),
-		)
+		expect(multi).toHaveBeenCalledWith({
+			actions: [
+				{
+					action: 'storeMediaFile',
+					params: {
+						deleteExisting: true,
+						filename: 'yanki-test-file.png',
+						url: 'https://example.com/img.png',
+					},
+					version: 6,
+				},
+			],
+		})
 	})
 
 	it('re-uploads local media with file adapter', async () => {
+		// eslint-disable-next-line unicorn/no-null
+		const multi = vi.fn().mockResolvedValue([{ error: null, result: 'yanki-test-file.png' }])
 		const client = {
 			media: {
 				getMediaFilesNames: vi.fn().mockResolvedValue([]),
-				storeMediaFile: vi.fn(),
 			},
+			miscellaneous: { multi },
 		}
 
 		const fileAdapter = {
@@ -1283,14 +1635,391 @@ describe('reconcileMedia', () => {
 					Front: 'front',
 					YankiNamespace: 'test',
 				},
+				noteId: 42, // Not in freshWriteNoteIds — counts as reupload
 			}),
 		]
 
 		const result = await reconcileMedia(client as never, notes, 'test', false, fileAdapter as never)
 		expect(result.reuploaded).toContain('yanki-test-file.png')
-		expect(client.media.storeMediaFile).toHaveBeenCalledWith(
-			// eslint-disable-next-line ts/no-unsafe-assignment
-			expect.objectContaining({ data: expect.any(String) }),
+		expect(multi).toHaveBeenCalledWith({
+			actions: [
+				{
+					action: 'storeMediaFile',
+					// eslint-disable-next-line ts/no-unsafe-assignment
+					params: expect.objectContaining({
+						// eslint-disable-next-line ts/no-unsafe-assignment
+						data: expect.any(String),
+						deleteExisting: true,
+						filename: 'yanki-test-file.png',
+					}),
+					version: 6,
+				},
+			],
+		})
+		expect(fileAdapter.readFileBuffer).toHaveBeenCalledWith('/local/file.png')
+	})
+
+	it('reports failed uploads and omits them from the reuploaded list', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const multi = vi.fn().mockResolvedValue([
+			// eslint-disable-next-line unicorn/no-null
+			{ error: null, result: 'yanki-test-good.png' },
+			{ error: 'disk full', result: undefined },
+		])
+		const client = {
+			media: {
+				getMediaFilesNames: vi.fn().mockResolvedValue([]),
+			},
+			miscellaneous: { multi },
+		}
+		const notes = [
+			makeNote({
+				fields: {
+					Back: '<img src="yanki-test-good.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/good.png"><img src="yanki-test-bad.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/bad.png">',
+					Front: 'front',
+					YankiNamespace: 'test',
+				},
+				noteId: 42,
+			}),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+		expect(result.reuploaded).toEqual(['yanki-test-good.png'])
+		expect(result.failedUploads).toEqual([{ filename: 'yanki-test-bad.png', reason: 'disk full' }])
+		expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('yanki-test-bad.png'))
+		spyWarn.mockRestore()
+	})
+
+	it('reports files that fail to read from disk and uploads the rest', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const { client, multi } = makeMediaClient([])
+		const fileAdapter = {
+			readFileBuffer: vi.fn().mockImplementation(async (src: string): Promise<Uint8Array> => {
+				await Promise.resolve()
+				if (src === '/local/broken.png') {
+					throw new Error('EACCES: permission denied')
+				}
+
+				return new Uint8Array([1, 2, 3])
+			}),
+		}
+		// The unreadable file comes first, so the upload that follows it must
+		// still be attributed to its own filename
+		const notes = [
+			makeMediaNote(
+				42,
+				makeMediaTag('yanki-test-broken.png', '/local/broken.png'),
+				makeMediaTag('yanki-test-ok.png', '/local/ok.png'),
+			),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false, fileAdapter as never)
+
+		expect(getActionFilenames(multi, 'storeMediaFile')).toEqual(['yanki-test-ok.png'])
+		expect(result.reuploaded).toEqual(['yanki-test-ok.png'])
+		expect(result.failedUploads).toHaveLength(1)
+		expect(result.failedUploads[0]?.filename).toBe('yanki-test-broken.png')
+		expect(result.failedUploads[0]?.reason).toContain('EACCES')
+		expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('yanki-test-broken.png'))
+		spyWarn.mockRestore()
+	})
+
+	it('uploads the contents of each local file under its own filename', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const { client, multi } = makeMediaClient([])
+		const fileCount = 20
+		const unreadableIndices = new Set([0, 11])
+		const getFileContents = (index: number) => new Uint8Array([index, index + 1, index + 2])
+		const getFilename = (index: number) => `yanki-test-${index.toString().padStart(2, '0')}.png`
+
+		// Later files resolve first, so reads complete out of order
+		const fileAdapter = {
+			async readFileBuffer(source: string): Promise<Uint8Array> {
+				const index = Number(source.replace('/local/', ''))
+				await new Promise((resolve) => {
+					setTimeout(resolve, fileCount - index)
+				})
+				if (unreadableIndices.has(index)) {
+					throw new Error(`ENOENT: ${source}`)
+				}
+
+				return getFileContents(index)
+			},
+		}
+		const notes = [
+			makeMediaNote(
+				42,
+				...Array.from({ length: fileCount }, (_, index) =>
+					makeMediaTag(getFilename(index), `/local/${index}`),
+				),
+			),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false, fileAdapter as never)
+
+		const readableIndices = Array.from({ length: fileCount }, (_, index) => index).filter(
+			(index) => !unreadableIndices.has(index),
 		)
+		const storedContents = (multi.mock.calls as MultiCall[])
+			.flatMap(([{ actions }]) => actions)
+			.map(({ params }) => [params?.filename, params?.data])
+		expect(storedContents).toEqual(
+			readableIndices.map((index) => [
+				getFilename(index),
+				uint8ArrayToBase64(getFileContents(index)),
+			]),
+		)
+		expect(result.reuploaded).toEqual(readableIndices.map((index) => getFilename(index)))
+		expect(result.failedUploads.map(({ filename }) => filename).toSorted()).toEqual(
+			Array.from(unreadableIndices, (index) => getFilename(index)),
+		)
+		spyWarn.mockRestore()
+	})
+
+	it('splits uploads across requests to stay within the request size budget', async () => {
+		const { client, multi } = makeMediaClient([])
+		// Five megabytes each, which base64 encoding takes past the eight megabyte
+		// budget once two share a request
+		const fileAdapter = {
+			readFileBuffer: vi.fn().mockResolvedValue(new Uint8Array(5 * 1024 * 1024)),
+		}
+		const filenames = ['yanki-test-a.png', 'yanki-test-b.png', 'yanki-test-c.png']
+		const notes = [
+			makeMediaNote(
+				42,
+				...filenames.map((filename) => makeMediaTag(filename, `/local/${filename}`)),
+			),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false, fileAdapter as never)
+
+		const batchSizes = (multi.mock.calls as MultiCall[]).map(([{ actions }]) => actions.length)
+		expect(batchSizes).toEqual([1, 1, 1])
+		expect(result.reuploaded).toEqual(filenames)
+	})
+
+	it('reports the files of a failed upload request and keeps uploading the rest', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const filenames = Array.from(
+			{ length: 26 },
+			(_, index) => `yanki-test-${index.toString().padStart(2, '0')}.png`,
+		)
+		const multi = vi
+			.fn()
+			.mockRejectedValueOnce(new Error('AnkiConnect response status is 413'))
+			.mockImplementation(({ actions }: { actions: MultiActionInput[] }) =>
+				// eslint-disable-next-line unicorn/no-null
+				actions.map(({ params }) => ({ error: null, result: params?.filename })),
+			)
+		const client = {
+			media: { getMediaFilesNames: vi.fn().mockResolvedValue([]) },
+			miscellaneous: { multi },
+		}
+		const notes = [
+			makeMediaNote(
+				42,
+				...filenames.map((filename) => makeMediaTag(filename, `https://example.com/${filename}`)),
+			),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+
+		expect(result.failedUploads).toEqual(
+			filenames.slice(0, 25).map((filename) => ({
+				filename,
+				reason: 'Error: AnkiConnect response status is 413',
+			})),
+		)
+		expect(result.reuploaded).toEqual(filenames.slice(25))
+		spyWarn.mockRestore()
+	})
+
+	it('reports a file that Anki stored under a different filename', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const multi = makeMultiMock({ storeMediaFile: () => 'yanki-test-renamed.png' })
+		const client = {
+			media: { getMediaFilesNames: vi.fn().mockResolvedValue([]) },
+			miscellaneous: { multi },
+		}
+		const notes = [
+			makeMediaNote(42, makeMediaTag('yanki-test-file.png', 'https://example.com/file.png')),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+
+		expect(result.reuploaded).toEqual([])
+		expect(result.failedUploads).toEqual([
+			{
+				filename: 'yanki-test-file.png',
+				reason: 'stored under a different filename: "yanki-test-renamed.png"',
+			},
+		])
+		spyWarn.mockRestore()
+	})
+
+	it('reports media that Anki could not delete', async () => {
+		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
+		const orphaned = ['yanki-test-a.png', 'yanki-test-b.png', 'yanki-test-c.png']
+		const multi = makeMultiMock({
+			deleteMediaFile({ filename }) {
+				if (filename === 'yanki-test-b.png') {
+					throw new Error('file is locked')
+				}
+			},
+		})
+		const client = {
+			media: { getMediaFilesNames: vi.fn().mockResolvedValue(orphaned) },
+			miscellaneous: { multi },
+		}
+
+		const result = await reconcileMedia(client as never, [], 'test', false)
+
+		expect(result.deleted).toEqual(['yanki-test-a.png', 'yanki-test-c.png'])
+		expect(result.failedDeletes).toEqual([
+			{ filename: 'yanki-test-b.png', reason: 'file is locked' },
+		])
+		expect(spyWarn).toHaveBeenCalledWith(expect.stringContaining('yanki-test-b.png'))
+		spyWarn.mockRestore()
+	})
+
+	it.each([
+		{ expected: [], freshNoteIds: [1], name: 'a created or updated note', noteIds: [1] },
+		{ expected: [], freshNoteIds: [2], name: 'an existing then a fresh note', noteIds: [1, 2] },
+		{ expected: [], freshNoteIds: [1], name: 'a fresh then an existing note', noteIds: [1, 2] },
+		{
+			expected: ['yanki-test-shared.png'],
+			freshNoteIds: [],
+			name: 'existing notes only',
+			noteIds: [1, 2],
+		},
+	])(
+		'lists media as re-uploaded only when no fresh note references it: $name',
+		async ({ expected, freshNoteIds, noteIds }) => {
+			const { client } = makeMediaClient([])
+			const notes = noteIds.map((noteId) =>
+				makeMediaNote(
+					noteId,
+					makeMediaTag('yanki-test-shared.png', 'https://example.com/shared.png'),
+				),
+			)
+
+			const result = await reconcileMedia(
+				client as never,
+				notes,
+				'test',
+				false,
+				undefined,
+				new Set(freshNoteIds),
+			)
+
+			expect(result.reuploaded).toEqual(expected)
+		},
+	)
+
+	it('dedupes a media filename referenced by multiple fresh notes', async () => {
+		// eslint-disable-next-line unicorn/no-null
+		const multi = vi.fn().mockResolvedValue([{ error: null, result: 'yanki-test-shared.png' }])
+		const client = {
+			media: {
+				getMediaFilesNames: vi.fn().mockResolvedValue([]),
+			},
+			miscellaneous: { multi },
+		}
+		const sharedHtml =
+			'<img src="yanki-test-shared.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/shared.png">'
+		const notes = [
+			makeNote({
+				fields: { Back: sharedHtml, Front: 'a', YankiNamespace: 'test' },
+				noteId: 1,
+			}),
+			makeNote({
+				fields: { Back: sharedHtml, Front: 'b', YankiNamespace: 'test' },
+				noteId: 2,
+			}),
+		]
+
+		const result = await reconcileMedia(
+			client as never,
+			notes,
+			'test',
+			false,
+			undefined,
+			new Set([1, 2]),
+		)
+		// Single multi() call with one storeMediaFile action
+		const call = multi.mock.calls[0]?.[0] as { actions: MultiActionInput[] }
+		expect(call.actions).toHaveLength(1)
+		// Both notes are fresh writes → silent upload, not in reuploaded
+		expect(result.reuploaded).toEqual([])
+	})
+
+	it('chunks media uploads at the chunk-size boundary (>25 actions)', async () => {
+		const fileCount = 26
+		const filenames = Array.from(
+			{ length: fileCount },
+			(_, i) => `yanki-test-${i.toString().padStart(2, '0')}.png`,
+		)
+		const imgTags = filenames
+			.map(
+				(name, i) =>
+					`<img src="${name}" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/${i}.png">`,
+			)
+			.join('')
+
+		const multi = vi
+			.fn()
+			.mockImplementation(async ({ actions }: { actions: MultiActionInput[] }) => {
+				await Promise.resolve()
+				return actions.map((action) => ({
+					// eslint-disable-next-line unicorn/no-null
+					error: null,
+					result: (action.params as { filename?: string }).filename ?? '',
+				}))
+			})
+		const client = {
+			media: {
+				getMediaFilesNames: vi.fn().mockResolvedValue([]),
+			},
+			miscellaneous: { multi },
+		}
+		const notes = [
+			makeNote({
+				fields: { Back: imgTags, Front: 'front', YankiNamespace: 'test' },
+				noteId: 42,
+			}),
+		]
+
+		const result = await reconcileMedia(client as never, notes, 'test', false)
+		expect(result.reuploaded).toEqual(filenames)
+		expect(multi).toHaveBeenCalledTimes(2)
+		const sizes = (multi.mock.calls as MultiCall[]).map((call) => call[0].actions.length)
+		expect(sizes).toEqual([25, 1])
+	})
+
+	it('deletes orphaned media in chunks when count exceeds chunk size', async () => {
+		const orphanedCount = 30
+		const orphaned = Array.from(
+			{ length: orphanedCount },
+			(_, i) => `yanki-test-orphan-${i.toString().padStart(2, '0')}.png`,
+		)
+		const multi = vi
+			.fn()
+			.mockImplementation(async ({ actions }: { actions: MultiActionInput[] }) => {
+				await Promise.resolve()
+				// eslint-disable-next-line unicorn/no-null
+				return actions.map(() => ({ error: null, result: undefined }))
+			})
+		const client = {
+			media: {
+				getMediaFilesNames: vi.fn().mockResolvedValue(orphaned),
+			},
+			miscellaneous: { multi },
+		}
+
+		const result = await reconcileMedia(client as never, [], 'test', false)
+		expect(result.deleted).toEqual(orphaned)
+		// 30 deletes split as 25 + 5
+		const sizes = (multi.mock.calls as MultiCall[]).map((call) => call[0].actions.length)
+		expect(sizes).toEqual([25, 5])
 	})
 })

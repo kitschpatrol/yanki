@@ -3,18 +3,20 @@ import { deepmerge } from 'deepmerge-ts'
 import { YankiConnect } from 'yanki-connect'
 import type { YankiNote } from '../model/note'
 import type { GlobalOptions } from '../shared/types'
+import type { MediaFailure, UpdateBucketEntry } from '../utilities/anki-connect'
 import { NOTE_DEFAULT_DECK_NAME, SYNC_TO_ANKI_WEB_EVEN_IF_UNCHANGED } from '../shared/constants'
 import { defaultGlobalOptions } from '../shared/types'
 import {
-	addNote,
 	areNotesEqual,
 	deleteNotes,
 	deleteOrphanedDecks,
+	ensureModelsAndDecks,
+	executeCreates,
+	executeUpdates,
 	getRemoteNotes,
 	reconcileMedia,
 	requestPermission,
 	syncToAnkiWeb,
-	updateNote,
 } from '../utilities/anki-connect'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 
@@ -43,6 +45,8 @@ export type SyncNotesResult = Simplify<
 		deletedDecks: string[]
 		deletedMedia: string[]
 		duration: number
+		failedDeletedMedia: MediaFailure[]
+		failedReuploadedMedia: MediaFailure[]
 		fixedDatabase: boolean
 		reuploadedMedia: string[]
 		synced: SyncedNote[]
@@ -81,8 +85,6 @@ export async function syncNotes(
 
 	const sanitizedNamespace = validateAndSanitizeNamespace(namespace)
 
-	const synced: SyncedNote[] = []
-
 	const client = new YankiConnect(ankiConnectOptions)
 
 	const permissionStatus = await requestPermission(client)
@@ -94,6 +96,8 @@ export async function syncNotes(
 			deletedMedia: [],
 			dryRun,
 			duration: performance.now() - startTime,
+			failedDeletedMedia: [],
+			failedReuploadedMedia: [],
 			fixedDatabase: false,
 			namespace: sanitizedNamespace,
 			reuploadedMedia: [],
@@ -126,21 +130,28 @@ export async function syncNotes(
 	// an edge case, but it can happen if users are manually duplicating notes
 	// that have already been synced as a shortcut to create new ones.
 	// Can't really think of a more sane thing to do without access to file metadata.
+	const remoteNotesById = new Map(remoteNotes.map((remoteNote) => [remoteNote.noteId, remoteNote]))
+	const localNotesById = new Map<number, YankiNote[]>()
 	for (const localNote of allLocalNotesCopy) {
 		if (localNote.noteId === undefined) {
 			continue
 		}
 
-		const duplicates = findNotesWithDuplicateIds(allLocalNotesCopy, localNote.noteId)
+		const notesWithSameId = localNotesById.get(localNote.noteId)
+		if (notesWithSameId === undefined) {
+			localNotesById.set(localNote.noteId, [localNote])
+		} else {
+			notesWithSameId.push(localNote)
+		}
+	}
 
+	for (const [noteId, duplicates] of localNotesById) {
 		if (duplicates.length <= 1) {
 			continue
 		}
 
-		const remoteNote = remoteNotes.find((remote) => remote.noteId === localNote.noteId)
-
 		// Defaults to the first note if no content match is found
-		const noteToKeep = selectNoteToKeep(duplicates, remoteNote)
+		const noteToKeep = selectNoteToKeep(duplicates, remoteNotesById.get(noteId))
 
 		// Reset noteId in allLocalNotes for all duplicates except the one to keep
 		for (const duplicate of duplicates) {
@@ -150,87 +161,47 @@ export async function syncNotes(
 		}
 	}
 
-	const matchedIds = new Set<number>(
-		allLocalNotesCopy
-			.filter(
-				(localNote) =>
-					localNote.noteId !== undefined &&
-					remoteNotes.some((remote) => localNote.noteId === remote.noteId),
-			)
-			.map((note) => note.noteId!),
+	// Classify notes into create/update/matched buckets without mutating Anki
+	// state. Pure JS — preserves the iteration-order dependency on `matchedIds`.
+	const plan = classifyNotes(
+		allLocalNotesCopy,
+		allRemoteNotes,
+		remoteNotes,
+		sanitizedNamespace,
+		strictMatching,
 	)
 
-	// Main sync pass
-	for (const localNote of allLocalNotesCopy) {
-		let remoteNote = allRemoteNotes.find((remote) => remote.noteId === localNote.noteId)
-
-		// Handle notes with the same ID in different namespaces
-		if (remoteNote?.fields.YankiNamespace !== sanitizedNamespace) {
-			// Reset local note id, will be recreated...
-			localNote.noteId = undefined
-			remoteNote = undefined
-		}
-
-		// Find matching remote note if it exists
-		if (remoteNote === undefined) {
-			localNote.noteId = strictMatching
-				? undefined
-				: findRemoteContentMatchId(localNote, remoteNotes, matchedIds)
-
-			if (localNote.noteId === undefined) {
-				// No match means it's a new note
-				localNote.noteId = await addNote(
-					client,
-					{ ...localNote, noteId: undefined },
-					dryRun,
-					fileAdapter ?? undefined,
-				)
-				synced.push({
-					action: 'created',
-					note: localNote,
-				})
-			} else {
-				// Match note
-				synced.push({
-					action: 'matched',
-					note: localNote,
-				})
-			}
-		} else {
-			// Update remote notes if they differ
-			if (remoteNote.noteId === undefined) {
-				// Should be unreachable
-				throw new Error('Remote note ID is undefined')
-			}
-
-			// Also handles model updates
-			const wasUpdated = await updateNote(
-				client,
-				localNote,
-				remoteNote,
-				dryRun,
-				fileAdapter ?? undefined,
-			)
-
-			synced.push({
-				action: wasUpdated ? 'updated' : 'unchanged',
-				note: localNote,
-			})
-		}
-
-		if (localNote.noteId === undefined) {
-			// Should be unreachable
-			throw new Error('Note ID is undefined')
-		}
-
-		matchedIds.add(localNote.noteId)
+	// Pre-create any missing models/decks so the batched calls don't need
+	// per-action recovery from "model not found" or "deck not found". Notes that
+	// already match their remote need neither, so a sync with nothing to create
+	// or change skips the probe and its `multi()` round-trip.
+	if (plan.modelsNeeded.length > 0 || plan.decksNeeded.length > 0) {
+		await ensureModelsAndDecks(client, plan.modelsNeeded, plan.decksNeeded, dryRun)
 	}
+
+	await executeCreates(client, plan.toCreate, dryRun)
+
+	// Bundle `changeDeck` and `updateNoteModel` actions into batched `multi()`
+	// requests, then surface any per-action errors. Returns the indices of
+	// notes that ended up unchanged so we can downgrade their placeholder
+	// `'updated'` action below.
+	const unchangedSyncedIndices = await executeUpdates(client, plan.toUpdate, dryRun)
+
+	for (const syncedIndex of unchangedSyncedIndices) {
+		const syncedNote = plan.synced[syncedIndex]
+		if (syncedNote === undefined) {
+			throw new Error(`No synced note at index ${syncedIndex}`)
+		}
+
+		plan.synced[syncedIndex] = { action: 'unchanged', note: syncedNote.note }
+	}
+
+	const { synced } = plan
 
 	// Deletion pass, we need the full info to do deck cleanup later on
 	// TODO does strictMatching have implications here?
-	const orphanedNotes = remoteNotes.filter((remoteNote) =>
-		allLocalNotesCopy.every((localNote) => localNote.noteId !== remoteNote.noteId),
-	)
+	const localNoteIds = new Set(allLocalNotesCopy.map((localNote) => localNote.noteId))
+	const orphanedNotes = remoteNotes.filter((remoteNote) => !localNoteIds.has(remoteNote.noteId))
 
 	await deleteNotes(client, orphanedNotes, dryRun)
 	for (const orphanedNote of orphanedNotes) {
@@ -257,15 +228,16 @@ export async function syncNotes(
 	if (checkDatabase) {
 		// Check for database corruption
 		// (can happen if a model update changes a card count for a note)
-		const updatedModelRemoteNotes = remoteNotes.filter((remoteNote) =>
-			synced.some(
-				(localNote) =>
-					localNote.action === 'updated' &&
-					// TODO does strictMatching have implications here?
-					localNote.note.noteId === remoteNote.noteId &&
-					localNote.note.modelName !== remoteNote.modelName,
-			),
+		// TODO does strictMatching have implications here?
+		const updatedModelNames = new Map(
+			synced
+				.filter(({ action }) => action === 'updated')
+				.map(({ note }) => [note.noteId, note.modelName]),
 		)
+		const updatedModelRemoteNotes = remoteNotes.filter((remoteNote) => {
+			const updatedModelName = updatedModelNames.get(remoteNote.noteId)
+			return updatedModelName !== undefined && updatedModelName !== remoteNote.modelName
+		})
 
 		if (updatedModelRemoteNotes.length > 0) {
 			// Model changes can leave orphaned cards in the database.
@@ -287,13 +259,33 @@ export async function syncNotes(
 		}
 	}
 
-	// Reconcile media: delete unused and re-upload missing
-	const { deleted: deletedMedia, reuploaded: reuploadedMedia } = await reconcileMedia(
+	// Media: collect across all live notes, diff against what's in Anki, then
+	// upload missing and delete orphaned in batched `multi()` chunks. Notes
+	// that we just created or updated this sync go through the silent-upload
+	// path so the returned `reuploaded` list keeps its prior meaning ("media
+	// we restored for notes that should already have had it").
+	const freshWriteNoteIds = new Set<number>()
+	for (const entry of synced) {
+		if (
+			(entry.action === 'created' || entry.action === 'updated') &&
+			entry.note.noteId !== undefined
+		) {
+			freshWriteNoteIds.add(entry.note.noteId)
+		}
+	}
+
+	const {
+		deleted: deletedMedia,
+		failedDeletes: failedDeletedMedia,
+		failedUploads: failedReuploadedMedia,
+		reuploaded: reuploadedMedia,
+	} = await reconcileMedia(
 		client,
 		liveNotes,
 		sanitizedNamespace,
 		dryRun,
 		fileAdapter ?? undefined,
+		freshWriteNoteIds,
 	)
 
 	// AnkiWeb sync
@@ -309,16 +301,13 @@ export async function syncNotes(
 		deletedMedia,
 		dryRun,
 		duration: performance.now() - startTime,
+		failedDeletedMedia,
+		failedReuploadedMedia,
 		fixedDatabase,
 		namespace: sanitizedNamespace,
 		reuploadedMedia,
 		synced,
 	}
-}
-
-// Helper function to find notes with the same noteId
-function findNotesWithDuplicateIds(notes: YankiNote[], noteId: number): YankiNote[] {
-	return notes.filter((note) => note.noteId !== undefined && note.noteId === noteId)
 }
 
 // Function to select the note to keep based on content matching with the remote note
@@ -345,4 +334,103 @@ function findRemoteContentMatchId(
 			areNotesEqual(localNote, remoteNote, false),
 	)
 	return match?.noteId ?? undefined
+}
+
+type CreateBucketEntry = { localNote: YankiNote }
+
+type SyncPlan = {
+	decksNeeded: string[]
+	modelsNeeded: string[]
+	synced: SyncedNote[]
+	toCreate: CreateBucketEntry[]
+	toUpdate: UpdateBucketEntry[]
+}
+
+/**
+ * Walk the local notes once and partition them into create / update / matched
+ * buckets without touching Anki. Content-match lookups depend on the notes
+ * matched so far, so the notes are classified in input order.
+ *
+ * `synced` is pre-populated at the input index for every note so the final
+ * order of the returned `synced` array mirrors `allLocalNotesCopy`. Update
+ * entries start with action `'updated'` as a placeholder; the caller downgrades
+ * them to `'unchanged'` after `executeUpdates` reports no diff.
+ *
+ * `modelsNeeded` and `decksNeeded` cover new notes and notes that differ from
+ * their remote. Notes that already match their remote are in a model and deck
+ * that exist.
+ */
+function classifyNotes(
+	allLocalNotesCopy: YankiNote[],
+	allRemoteNotes: YankiNote[],
+	remoteNotes: YankiNote[],
+	sanitizedNamespace: string,
+	strictMatching: boolean,
+): SyncPlan {
+	const toCreate: CreateBucketEntry[] = []
+	const toUpdate: UpdateBucketEntry[] = []
+	const synced: SyncedNote[] = []
+	const modelsNeeded = new Set<string>()
+	const decksNeeded = new Set<string>()
+
+	const allRemoteNotesById = new Map(
+		allRemoteNotes.map((remoteNote) => [remoteNote.noteId, remoteNote]),
+	)
+	const remoteNoteIds = new Set(remoteNotes.map((remoteNote) => remoteNote.noteId))
+	const matchedIds = new Set<number>()
+	for (const { noteId } of allLocalNotesCopy) {
+		if (noteId !== undefined && remoteNoteIds.has(noteId)) {
+			matchedIds.add(noteId)
+		}
+	}
+
+	for (const localNote of allLocalNotesCopy) {
+		let remoteNote = allRemoteNotesById.get(localNote.noteId)
+
+		// Note with the same ID lives in a different namespace — treat as new.
+		if (remoteNote?.fields.YankiNamespace !== sanitizedNamespace) {
+			localNote.noteId = undefined
+			remoteNote = undefined
+		}
+
+		const syncedIndex = synced.length
+
+		if (remoteNote === undefined) {
+			localNote.noteId = strictMatching
+				? undefined
+				: findRemoteContentMatchId(localNote, remoteNotes, matchedIds)
+
+			if (localNote.noteId === undefined) {
+				synced.push({ action: 'created', note: localNote })
+				toCreate.push({ localNote })
+				modelsNeeded.add(localNote.modelName)
+				decksNeeded.add(localNote.deckName)
+			} else {
+				synced.push({ action: 'matched', note: localNote })
+				matchedIds.add(localNote.noteId)
+			}
+		} else {
+			if (remoteNote.noteId === undefined) {
+				// Should be unreachable
+				throw new Error('Remote note ID is undefined')
+			}
+
+			synced.push({ action: 'updated', note: localNote })
+			toUpdate.push({ localNote, remoteNote, syncedIndex })
+			if (!areNotesEqual(localNote, remoteNote)) {
+				modelsNeeded.add(localNote.modelName)
+				decksNeeded.add(localNote.deckName)
+			}
+
+			matchedIds.add(remoteNote.noteId)
+		}
+	}
+
+	return {
+		decksNeeded: [...decksNeeded],
+		modelsNeeded: [...modelsNeeded],
+		synced,
+		toCreate,
+		toUpdate,
+	}
 }

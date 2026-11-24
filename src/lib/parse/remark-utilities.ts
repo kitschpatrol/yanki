@@ -4,7 +4,6 @@
 // Helpers for working with the Markdown AST
 
 import type { Emphasis, Node, Parent, PhrasingContent, Root, Text } from 'mdast'
-import { deepmerge } from 'deepmerge-ts'
 import remarkRuby from 'remark-denden-ruby'
 import remarkFlexibleMarkers from 'remark-flexible-markers'
 import remarkFrontmatter from 'remark-frontmatter'
@@ -20,6 +19,7 @@ import type { Frontmatter } from '../model/frontmatter'
 import type { YankiModelName } from '../model/model'
 import type { GlobalOptions } from '../shared/types'
 import { defaultGlobalOptions } from '../shared/types'
+import { applyDefaults } from '../utilities/options'
 import remarkResolveLinks from './remark-resolve-links'
 import remarkWikiBasic from './wiki-basic/remark-wiki-basic'
 
@@ -49,9 +49,9 @@ export async function getAstFromMarkdown(
 	markdown: string,
 	options?: Partial<AstFromMarkdownOptions>,
 ): Promise<Root> {
-	const { allFilePaths, basePath, cwd, obsidianVault, resolveUrls, sourcePath } = deepmerge(
+	const { allFilePaths, basePath, cwd, obsidianVault, resolveUrls, sourcePath } = applyDefaults(
 		defaultAstFromMarkdownOptions,
-		options ?? {},
+		options,
 	)
 
 	// Not seeing huge improvements from reusing this...
