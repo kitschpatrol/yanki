@@ -2,7 +2,6 @@
 
 // TODO move this into its own package?
 
-import { deepmerge } from 'deepmerge-ts'
 import path from 'path-browserify-esm'
 import * as pathExtras from './path'
 import {
@@ -88,14 +87,76 @@ type ResolveLinkOptions = {
 	type: ResolveLinkType
 }
 
-const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
-	allFilePaths: [],
-	// TODO consider...
-	// barePathsAreRelativeTo: 'cwd',
-	basePath: undefined,
-	convertFilePathsToProtocol: 'none',
-	obsidianVaultName: undefined,
-	sourcePath: undefined,
+/**
+ * Lookup tables over a list of file paths, standing in for Obsidian's index of
+ * the files in a vault.
+ */
+type FilePathIndex = {
+	/** Number of paths the index was built from. */
+	length: number
+	/**
+	 * Positions in the list of the paths with a given lowercase file name, in
+	 * list order.
+	 */
+	positionsByFileName: Map<string, number[]>
+	/** Position in the list of the first path matching a lowercase path. */
+	positionsByLowerCasePath: Map<string, number>
+	/** First and last of the paths in sort order, undefined for an empty list. */
+	sortedExtremes: undefined | { first: string; last: string }
+}
+
+// Every link in every note of a sync is resolved against the same list of file
+// paths, which can hold every file in a vault, so the index is kept for as long
+// as its list is
+const filePathIndexes = new WeakMap<string[], FilePathIndex>()
+
+/**
+ * Get the index of a list of file paths, building it the first time a list is
+ * seen. A list whose length has changed since is indexed again, but replacing
+ * its entries in place between calls is not detected.
+ */
+function getFilePathIndex(allFilePaths: string[]): FilePathIndex {
+	const existingIndex = filePathIndexes.get(allFilePaths)
+	if (existingIndex?.length === allFilePaths.length) {
+		return existingIndex
+	}
+
+	const index: FilePathIndex = {
+		length: allFilePaths.length,
+		positionsByFileName: new Map(),
+		positionsByLowerCasePath: new Map(),
+		sortedExtremes: undefined,
+	}
+
+	for (const [position, filePath] of allFilePaths.entries()) {
+		const lowerCaseFilePath = filePath.toLowerCase()
+		if (!index.positionsByLowerCasePath.has(lowerCaseFilePath)) {
+			index.positionsByLowerCasePath.set(lowerCaseFilePath, position)
+		}
+
+		// A file is only found by name when its name follows a directory
+		const lastSlashIndex = lowerCaseFilePath.lastIndexOf('/')
+		if (lastSlashIndex !== -1) {
+			const fileName = lowerCaseFilePath.slice(lastSlashIndex + 1)
+			const positions = index.positionsByFileName.get(fileName)
+			if (positions === undefined) {
+				index.positionsByFileName.set(fileName, [position])
+			} else {
+				positions.push(position)
+			}
+		}
+
+		if (index.sortedExtremes === undefined) {
+			index.sortedExtremes = { first: filePath, last: filePath }
+		} else if (filePath < index.sortedExtremes.first) {
+			index.sortedExtremes.first = filePath
+		} else if (filePath > index.sortedExtremes.last) {
+			index.sortedExtremes.last = filePath
+		}
+	}
+
+	filePathIndexes.set(allFilePaths, index)
+	return index
 }
 
 /**
@@ -133,10 +194,12 @@ const defaultResolveLinkOptions: Partial<ResolveLinkOptions> = {
  *       parameters)
  */
 export function resolveLink(filePathOrUrl: string, options: ResolveLinkOptions): string {
-	// Defaults
-	const resolvedOptions =
-		// eslint-disable-next-line ts/no-unnecessary-condition
-		deepmerge(defaultResolveLinkOptions, options ?? {}) as ResolveLinkOptions
+	// Defaults. The options are taken as they are, since copying `allFilePaths`
+	// for every link is costly and would hide the list from its index.
+	const resolvedOptions: ResolveLinkOptions = {
+		...options,
+		convertFilePathsToProtocol: options.convertFilePathsToProtocol ?? 'none',
+	}
 	const { convertFilePathsToProtocol, obsidianVaultName } = resolvedOptions
 
 	// Option validation...
@@ -186,24 +249,21 @@ function resolveLocalLink(decodedLink: string, options: ResolveLinkOptions): str
 	// deepest directory containing every file stands in for it. (Public options
 	// may carry a null basePath from JavaScript callers.)
 	const isVaultRootKnown = typeof basePath === 'string'
-	const vaultRoot = isVaultRootKnown ? basePath : getCommonDirectory(cwd, allFilePaths)
+	const filePathIndex = getFilePathIndex(allFilePaths)
+	const vaultRoot = isVaultRootKnown
+		? basePath
+		: getCommonDirectory(cwd, filePathIndex.sortedExtremes)
 	const sourceDirectory = getVaultPath(cwd, vaultRoot).toLowerCase()
-	const lowerCaseFilePaths = allFilePaths.map((filePath) => filePath.toLowerCase())
 
 	// Stands in for Obsidian's index of the files in a vault by lowercase name
-	const getFilesNamed = (fileName: string): VaultFile[] => {
-		const pathEnding = `/${fileName}`
-
-		return (
-			allFilePaths
-				// Index is in bounds, since the arrays are parallel
-				.filter((_, index) => lowerCaseFilePaths[index]!.endsWith(pathEnding))
-				.map((filePath) => {
-					const vaultPath = getVaultPath(filePath, vaultRoot)
-					return { filePath, vaultPath, vaultPathLowerCase: vaultPath.toLowerCase() }
-				})
-		)
-	}
+	const getFilesNamed = (fileName: string): VaultFile[] =>
+		(filePathIndex.positionsByFileName.get(fileName) ?? [])
+			.map((position) => allFilePaths[position])
+			.filter((filePath) => filePath !== undefined)
+			.map((filePath) => {
+				const vaultPath = getVaultPath(filePath, vaultRoot)
+				return { filePath, vaultPath, vaultPathLowerCase: vaultPath.toLowerCase() }
+			})
 
 	// Obsidian has no notion of absolute file system paths, but they turn up in
 	// Markdown links and `file:` URLs
@@ -213,10 +273,11 @@ function resolveLocalLink(decodedLink: string, options: ResolveLinkOptions): str
 		}
 
 		const target = absolutePath.toLowerCase()
-		const exactIndex = lowerCaseFilePaths.indexOf(target)
-		const index = exactIndex === -1 ? lowerCaseFilePaths.indexOf(`${target}.md`) : exactIndex
+		const position =
+			filePathIndex.positionsByLowerCasePath.get(target) ??
+			filePathIndex.positionsByLowerCasePath.get(`${target}.md`)
 
-		return index === -1 ? undefined : allFilePaths[index]
+		return position === undefined ? undefined : allFilePaths[position]
 	}
 
 	// Obsidian stops relative links at the vault root, but a stand-in root says
@@ -431,26 +492,32 @@ function getVaultPath(filePath: string, vaultRoot: string): string {
  * files.
  *
  * @param directory Normalized absolute path to a directory. (POSIX-style path.)
- * @param filePaths Normalized absolute paths to files. (POSIX-style paths.)
+ * @param sortedExtremes The first and last of the normalized absolute paths to
+ *   the files, in sort order, or undefined if there are no files. (POSIX-style
+ *   paths.)
  *
  * @returns The path to the common directory with a trailing slash, or an empty
  *   string if the paths have nothing in common.
  */
-function getCommonDirectory(directory: string, filePaths: string[]): string {
+function getCommonDirectory(
+	directory: string,
+	sortedExtremes: FilePathIndex['sortedExtremes'],
+): string {
 	// The trailing slash lets the directory itself be the common directory
 	const directoryPath = `${directory.replace(TRAILING_SLASHES_REGEX, '')}/`
 
 	// Whatever the first and last paths in sort order have in common is common
-	// to every path between them, which saves comparing each path's characters.
-	// This runs for every link, and file lists can be long.
+	// to every path between them, which saves comparing each path's characters
 	let firstPath = directoryPath
 	let lastPath = directoryPath
 
-	for (const filePath of filePaths) {
-		if (filePath < firstPath) {
-			firstPath = filePath
-		} else if (filePath > lastPath) {
-			lastPath = filePath
+	if (sortedExtremes !== undefined) {
+		if (sortedExtremes.first < firstPath) {
+			firstPath = sortedExtremes.first
+		}
+
+		if (sortedExtremes.last > lastPath) {
+			lastPath = sortedExtremes.last
 		}
 	}
 

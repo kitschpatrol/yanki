@@ -5,6 +5,7 @@ import { visit } from 'unist-util-visit'
 import { expect, it } from 'vitest'
 import { getNoteFromMarkdown } from '../src/lib'
 import { markdown } from '../src/lib/utilities/string'
+import { countReads } from './utilities/count-reads'
 import { permute } from './utilities/permute'
 
 // Function to remove undefined fields from an object
@@ -739,4 +740,32 @@ it.each([
 	const note = await getNoteFromMarkdown(`${fence}${language}\n${code}\n${fence}`)
 
 	expect(getCodeBlockTexts(note.fields.Front)).toEqual([expected])
+})
+
+it('does not copy or rescan the list of file paths for every note', async () => {
+	const filePaths = Array.from(
+		{ length: 500 },
+		(_, index) => `/vault/folder-${index % 10}/note-${index}.md`,
+	)
+	const { countedItems, getReads } = countReads(filePaths)
+
+	for (let index = 0; index < 20; index++) {
+		const note = await getNoteFromMarkdown(
+			`[[note-${index}]] and [[note-${index + 100}]]\n\n---\n\nBack`,
+			{
+				allFilePaths: countedItems,
+				basePath: '/vault',
+				obsidianVault: 'Vault',
+				sourcePath: '/vault/folder-0/source.md',
+				syncMediaAssets: 'off',
+			},
+		)
+
+		const folder = `folder-${index % 10}`
+		expect(note.fields.Front).toContain(encodeURIComponent(`${folder}/note-${index}.md`))
+		expect(note.fields.Front).toContain(encodeURIComponent(`${folder}/note-${index + 100}.md`))
+	}
+
+	// One pass over the list for the whole run, plus a read of each linked file
+	expect(getReads()).toBeLessThan(filePaths.length * 2)
 })
