@@ -36,6 +36,10 @@ export async function deleteNotes(client: YankiConnect, notes: YankiNote[], dryR
 	}
 
 	const noteIds = notes.map((note) => note.noteId).filter((noteId) => noteId !== undefined)
+	if (noteIds.length === 0) {
+		return
+	}
+
 	await client.note.deleteNotes({ notes: noteIds })
 }
 

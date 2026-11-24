@@ -229,6 +229,20 @@ describe('deleteNotes', () => {
 		await deleteNotes(client as never, [makeNote({ noteId: 42 }), makeNote({ noteId: undefined })])
 		expect(client.note.deleteNotes).toHaveBeenCalledWith({ notes: [42] })
 	})
+
+	it.each([
+		{ name: 'there are no notes', notes: [] },
+		{ name: 'no note has an ID', notes: [makeNote({ noteId: undefined })] },
+	])('does not contact Anki when $name', async ({ notes }) => {
+		const client = {
+			note: {
+				deleteNotes: vi.fn(),
+			},
+		}
+
+		await deleteNotes(client as never, notes)
+		expect(client.note.deleteNotes).not.toHaveBeenCalled()
+	})
 })
 
 describe('addNote', () => {

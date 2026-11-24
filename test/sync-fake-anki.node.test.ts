@@ -272,7 +272,7 @@ describe('syncNotes against a fake AnkiConnect', () => {
 		expect(anki.notes.size).toBe(4)
 	})
 
-	it('does not probe models and decks when every note already matches Anki', async () => {
+	it('only reads from Anki when every note already matches it', async () => {
 		const anki = makeFakeAnki({ 1: 'first front', 2: 'second front' })
 
 		const { synced } = await syncNotes([makeNote(1, 'first front'), makeNote(2, 'second front')], {
@@ -281,7 +281,16 @@ describe('syncNotes against a fake AnkiConnect', () => {
 		})
 
 		expect(synced.map(({ action }) => action)).toEqual(['unchanged', 'unchanged'])
-		expect(anki.actionNames).not.toContain('multi')
+		// Each request has a fixed cost, so an unchanged sync sends no model and
+		// deck probe and no empty deletion
+		expect(anki.actionNames).toEqual([
+			'requestPermission',
+			'findNotes',
+			'notesInfo',
+			'getDecks',
+			'findCards',
+			'getMediaFilesNames',
+		])
 	})
 
 	it('creates the model and deck a new note needs', async () => {
