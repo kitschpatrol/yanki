@@ -2,7 +2,7 @@ import { toText } from 'hast-util-to-text'
 import rehypeParse from 'rehype-parse'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
-import { expect, it } from 'vitest'
+import { expect, it, vi } from 'vitest'
 import { getNoteFromMarkdown } from '../src/lib'
 import { markdown } from '../src/lib/utilities/string'
 import { countReads } from './utilities/count-reads'
@@ -769,3 +769,34 @@ it('does not copy or rescan the list of file paths for every note', async () => 
 	// One pass over the list for the whole run, plus a read of each linked file
 	expect(getReads()).toBeLessThan(filePaths.length * 2)
 })
+
+it.each(['local', 'all'] as const)(
+	'requests each remote image of a note once, syncMediaAssets: %s',
+	async (syncMediaAssets) => {
+		const requests: string[] = []
+		const note = await getNoteFromMarkdown(
+			'![Picture](https://example.com/images/picture.png)\n\n---\n\n![Picture](https://example.com/images/picture.png) and ![Chart](https://example.com/chart)',
+			{
+				async fetchAdapter(url, init) {
+					await Promise.resolve()
+					requests.push(`${init?.method} ${url}`)
+					return {
+						headers: { 'content-type': 'image/png', etag: '"v1"' },
+						json: vi.fn(),
+						status: 200,
+					}
+				},
+				namespace: 'Probe',
+				syncMediaAssets,
+			},
+		)
+
+		// The picture is on both sides of the note, and with media syncing on,
+		// each embed looks up its type, its existence, and its headers
+		expect(requests).toEqual([
+			'HEAD https://example.com/images/picture.png',
+			'HEAD https://example.com/chart',
+		])
+		expect([note.fields.Front, note.fields.Back]).toMatchSnapshot()
+	},
+)

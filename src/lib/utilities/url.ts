@@ -167,6 +167,32 @@ function convertKeysToLowercase(object: Record<string, string>): Record<string, 
 	return result
 }
 
+/**
+ * Wrap a fetch adapter so that repeated `HEAD` requests for the same URL share
+ * one response.
+ *
+ * Working out how to treat a remote media asset takes up to three lookups (its
+ * type, whether it exists, and a hash of its headers), and each would otherwise
+ * send a request of its own. Other requests pass straight through.
+ */
+export function shareHeadRequests(fetchAdapter: FetchAdapter): FetchAdapter {
+	const headResponses = new Map<string, ReturnType<FetchAdapter>>()
+
+	return async (url, init) => {
+		if (init?.method !== 'HEAD') {
+			return fetchAdapter(url, init)
+		}
+
+		let response = headResponses.get(url)
+		if (response === undefined) {
+			response = fetchAdapter(url, init)
+			headResponses.set(url, response)
+		}
+
+		return response
+	}
+}
+
 export async function urlExists(url: string, fetchAdapter: FetchAdapter): Promise<boolean> {
 	try {
 		const response = await fetchAdapter(url, { method: 'HEAD' })

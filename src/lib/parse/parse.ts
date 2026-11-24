@@ -17,6 +17,7 @@ import {
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
 import { applyDefaults } from '../utilities/options'
+import { shareHeadRequests } from '../utilities/url'
 import { mdastToHtml } from './rehype-utilities'
 import {
 	deleteFirstNodeOfType,
@@ -69,7 +70,7 @@ export async function getNoteFromMarkdown(
 		allFilePaths,
 		basePath,
 		cwd,
-		fetchAdapter = getDefaultFetchAdapter(),
+		fetchAdapter: unsharedFetchAdapter = getDefaultFetchAdapter(),
 		fileAdapter = await getDefaultFileAdapter(),
 		namespace,
 		namespaceValidationAndSanitization,
@@ -79,6 +80,10 @@ export async function getNoteFromMarkdown(
 		strictLineBreaks,
 		syncMediaAssets,
 	} = applyDefaults(defaultGetNoteFromMarkdownOptions, options)
+
+	// The front, back, and extra fields of a note often embed the same remote
+	// media, and each embed takes several lookups
+	const fetchAdapter = shareHeadRequests(unsharedFetchAdapter)
 
 	const sanitizedNamespace = namespaceValidationAndSanitization
 		? validateAndSanitizeNamespace(namespace)
