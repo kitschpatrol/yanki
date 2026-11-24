@@ -507,7 +507,16 @@ export type Media = {
 	originalSrc: string
 }
 
+// Attribute names are case-insensitive in HTML
+const MEDIA_SYNC_ATTRIBUTE_REGEX = /data-yanki-media-sync/iu
+
 export function extractMediaFromHtml(htmlText: string): Media[] {
+	// Most notes have no synced media, and this runs for every note of every
+	// sync, so only parse the HTML that could hold some
+	if (!MEDIA_SYNC_ATTRIBUTE_REGEX.test(htmlText)) {
+		return []
+	}
+
 	const hast = htmlProcessor.parse(htmlText)
 	const media: Media[] = []
 
