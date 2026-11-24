@@ -63,6 +63,24 @@ const LARGE_CORPUS_MARKDOWN: readonly string[] = Array.from(
 	(_, index) => `Front of card ${index}\n\n---\n\nBack of card ${index}\n`,
 )
 
+// Large vault: an Obsidian vault passes the path of every file it holds, so
+// that links can be resolved against them. Sized so that any work repeated over
+// the whole list for each note or each link dominates the cost of parsing.
+const VAULT_FILE_COUNT = 10_000
+const VAULT_ROOT = '/vault'
+const VAULT_OPTIONS = {
+	allFilePaths: Array.from(
+		{ length: VAULT_FILE_COUNT },
+		(_, index) => `${VAULT_ROOT}/Folder ${index % 100}/Note ${index}.md`,
+	),
+	basePath: VAULT_ROOT,
+	namespaceValidationAndSanitization: false,
+	obsidianVault: 'Vault',
+	sourcePath: `${VAULT_ROOT}/Folder 0/Note 0.md`,
+	syncMediaAssets: 'off',
+} as const
+const VAULT_FIXTURE_NAMES = new Set<FixtureName>(['basic', 'wikiLinks'])
+
 // Measures what a fresh process pays before its first note. Steady-state
 // benches further down don't surface these first-call costs, so
 // `vi.resetModules` makes every iteration evaluate the parser modules again,
@@ -86,6 +104,21 @@ describe('Tier 1 — public API (in-memory)', () => {
 	for (const [name, markdown] of FIXTURE_MARKDOWN) {
 		benchTest(`getNoteFromMarkdown :: ${name}`, async () => {
 			await getNoteFromMarkdown(markdown, INTERNAL_OPTIONS)
+		})
+	}
+})
+
+describe('Tier 1 — public API (large vault)', () => {
+	// A note without links shows the cost of carrying the file list through the
+	// parser, and a note with wiki links adds the cost of resolving each link
+	// against it.
+	for (const [name, markdown] of FIXTURE_MARKDOWN) {
+		if (!VAULT_FIXTURE_NAMES.has(name)) {
+			continue
+		}
+
+		benchTest(`getNoteFromMarkdown :: ${name}, ${VAULT_FILE_COUNT} vault files`, async () => {
+			await getNoteFromMarkdown(markdown, VAULT_OPTIONS)
 		})
 	}
 })
