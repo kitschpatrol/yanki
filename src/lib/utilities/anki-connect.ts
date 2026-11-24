@@ -15,6 +15,8 @@ import { defaultGlobalOptions } from '../shared/types'
 import { getSlugifiedNamespace } from './namespace'
 import { isUrl } from './url'
 
+const MODEL_EXISTS_ERROR = 'Model name already exists'
+
 async function ensureModelExists(
 	client: YankiConnect,
 	model: (typeof yankiModels)[number],
@@ -22,7 +24,7 @@ async function ensureModelExists(
 	try {
 		await client.model.createModel(model)
 	} catch (error) {
-		if (error instanceof Error && error.message === 'Model name already exists') {
+		if (error instanceof Error && error.message === MODEL_EXISTS_ERROR) {
 			return
 		}
 
@@ -69,36 +71,69 @@ export async function ensureModelsAndDecks(
 		{ action: 'modelNames', version: 6 },
 		{ action: 'deckNames', version: 6 },
 	])
-	if (modelsResponse === undefined || decksResponse === undefined) {
-		throw new Error('multi() returned no response for the model and deck name probes')
-	}
-
-	if (modelsResponse.error !== null) {
-		throw new Error(`modelNames failed: ${modelsResponse.error}`)
-	}
-
-	if (decksResponse.error !== null) {
-		throw new Error(`deckNames failed: ${decksResponse.error}`)
-	}
-
-	const existingModels = new Set(toStringArray(modelsResponse.result, 'modelNames'))
-	const existingDecks = new Set(toStringArray(decksResponse.result, 'deckNames'))
-	const missingModels = new Set(modelNames).difference(existingModels)
+	const existingModels = new Set(
+		toStringArray(getMultiResult(modelsResponse, 'modelNames'), 'modelNames'),
+	)
+	const existingDecks = new Set(
+		toStringArray(getMultiResult(decksResponse, 'deckNames'), 'deckNames'),
+	)
 	const missingDecks = new Set(deckNames).difference(existingDecks)
-
-	for (const modelName of missingModels) {
+	const missingModels = Array.from(new Set(modelNames).difference(existingModels), (modelName) => {
 		const model = yankiModels.find((candidate) => candidate.modelName === modelName)
 		if (model === undefined) {
 			throw new Error(`Unknown model name: ${modelName}`)
 		}
 
-		// Another sync may create the model between the probe and this call
-		await ensureModelExists(client, model)
+		return model
+	})
+
+	// Every missing model and deck is created in one request, however many
+	// there are
+	const creationActions: MultiAction[] = [
+		...missingModels.map((model): MultiAction => ({
+			action: 'createModel',
+			params: model,
+			version: 6,
+		})),
+		...Array.from(missingDecks, (deck): MultiAction => ({
+			action: 'createDeck',
+			params: { deck },
+			version: 6,
+		})),
+	]
+	const createdNames = [...missingModels.map((model) => model.modelName), ...missingDecks]
+
+	await runMultiInChunks(
+		client,
+		creationActions,
+		(index, { error }) => {
+			const action = creationActions[index]?.action
+			// Another sync may create the model between the probe and this request
+			if (error === null || (action === 'createModel' && error === MODEL_EXISTS_ERROR)) {
+				return
+			}
+
+			throw new Error(`${action} failed for "${createdNames[index]}": ${error}`)
+		},
+		Infinity,
+	)
+}
+
+/**
+ * Unwrap the result of one action from a `multi()` reply.
+ *
+ * @throws {Error} If the action has no response or returned an error.
+ */
+function getMultiResult(response: MultiActionResponse | undefined, actionName: string): unknown {
+	if (response === undefined) {
+		throw new Error(`multi() returned no response for ${actionName}`)
 	}
 
-	for (const deckName of missingDecks) {
-		await client.deck.createDeck({ deck: deckName })
+	if (response.error !== null) {
+		throw new Error(`${actionName} failed: ${response.error}`)
 	}
+
+	return response.result
 }
 
 /**
@@ -671,6 +706,10 @@ async function getRemoteNotesById(
 	client: YankiConnect,
 	noteIds: number[],
 ): Promise<Array<undefined | YankiNote>> {
+	if (noteIds.length === 0) {
+		return []
+	}
+
 	const ankiNotes = await client.note.notesInfo({ notes: noteIds })
 
 	if (ankiNotes.every((ankiNote) => ankiNote.noteId === undefined)) {
@@ -684,17 +723,7 @@ async function getRemoteNotesById(
 
 	// Have to fish decks out of the card IDs
 	const allCardIds = ankiNotes.flatMap((note) => note.cards ?? [])
-	const deckToCardMap = await client.deck.getDecks({ cards: allCardIds })
-
-	// Map card IDs to deck names for easy lookup
-	const cardIdToDeckMap = new Map<number, string>()
-	for (const [deck, cards] of Object.entries(deckToCardMap)) {
-		for (const card of cards) {
-			cardIdToDeckMap.set(card, deck)
-		}
-	}
-
-	const filteredDeckNames = await getFilteredDeckNames(client, cardIdToDeckMap)
+	const { cardIdToDeckMap, filteredDeckNames } = await getCardDecks(client, allCardIds)
 
 	// Only notes in filtered decks need a home deck lookup, so skip the extra
 	// requests entirely when this sync touches no filtered decks
@@ -750,17 +779,42 @@ async function getRemoteNotesById(
 }
 
 /**
- * Names of the filtered ("dynamic") decks currently holding any of the given
- * cards. Anki's `deck:filtered` search works on every supported release, while
+ * Look up the deck currently holding each of the given cards, and which of
+ * those decks are filtered ("dynamic") decks. Both lookups share one request.
+ *
+ * Anki's `deck:filtered` search works on every supported release, while
  * AnkiConnect 26.10.11.0 and later fail `getDeckConfig` for filtered decks.
+ *
+ * @throws {Error} If either lookup fails or returns an unexpected shape.
  */
-async function getFilteredDeckNames(
+async function getCardDecks(
 	client: YankiConnect,
-	cardIdToDeckMap: Map<number, string>,
-): Promise<Set<string>> {
-	const filteredCardIds = await client.card.findCards({ query: 'deck:filtered' })
-	const filteredDeckNames = new Set<string>()
+	cardIds: number[],
+): Promise<{ cardIdToDeckMap: Map<number, string>; filteredDeckNames: Set<string> }> {
+	const [decksResponse, filteredCardsResponse] = await sendMulti(client, [
+		{ action: 'getDecks', params: { cards: cardIds }, version: 6 },
+		{ action: 'findCards', params: { query: 'deck:filtered' }, version: 6 },
+	])
 
+	const cardIdsByDeckName = getMultiResult(decksResponse, 'getDecks')
+	if (typeof cardIdsByDeckName !== 'object' || cardIdsByDeckName === null) {
+		throw new TypeError(
+			`Expected a map of deck names to cards from getDecks, got: ${JSON.stringify(cardIdsByDeckName)}`,
+		)
+	}
+
+	const cardIdToDeckMap = new Map<number, string>()
+	for (const [deckName, deckCardIds] of Object.entries(cardIdsByDeckName)) {
+		for (const cardId of toNumberArray(deckCardIds, 'getDecks')) {
+			cardIdToDeckMap.set(cardId, deckName)
+		}
+	}
+
+	const filteredCardIds = toNumberArray(
+		getMultiResult(filteredCardsResponse, 'findCards'),
+		'findCards',
+	)
+	const filteredDeckNames = new Set<string>()
 	for (const cardId of filteredCardIds) {
 		const deckName = cardIdToDeckMap.get(cardId)
 		if (deckName !== undefined) {
@@ -768,7 +822,7 @@ async function getFilteredDeckNames(
 		}
 	}
 
-	return filteredDeckNames
+	return { cardIdToDeckMap, filteredDeckNames }
 }
 
 type HomeDeckCandidate = {
@@ -884,28 +938,49 @@ export async function deleteOrphanedDecks(
 					.flatMap((note) => note.cards ?? [])
 			: [],
 	)
-	const decksToDelete: string[] = []
-
-	for (const deckName of deckDeletionCandidates) {
+	const existingCandidates = deckDeletionCandidates.filter((deckName) => {
 		if (existingDecks[deckName] === undefined) {
 			console.warn(`Deck not found for deck name: ${deckName}`)
-			continue
+			return false
 		}
 
-		// Deleting a parent also deletes its descendants. Due counts omit
-		// suspended, buried, and future-due cards, while total_in_deck may
-		// count only the parent's own cards. Search actual cards instead.
-		// Numeric IDs avoid wildcard/quoting rules in deck names. did: also
-		// includes cards whose home deck is here while in a filtered deck.
-		const query = Object.entries(existingDecks)
-			.filter(([name]) => isInDeckTree(name, deckName))
-			.map(([, id]) => `did:${id}`)
-			.join(' OR ')
-		const cards = await client.card.findCards({ query })
-		if (cards.every((card) => cardsToRemove.has(card))) {
-			decksToDelete.push(deckName)
-		}
-	}
+		return true
+	})
+
+	// Deleting a parent also deletes its descendants. Due counts omit
+	// suspended, buried, and future-due cards, while total_in_deck may
+	// count only the parent's own cards. Search actual cards instead.
+	// Numeric IDs avoid wildcard/quoting rules in deck names. did: also
+	// includes cards whose home deck is here while in a filtered deck.
+	const cardSearchActions: MultiAction[] = existingCandidates.map((deckName) => ({
+		action: 'findCards',
+		params: {
+			query: Object.entries(existingDecks)
+				.filter(([name]) => isInDeckTree(name, deckName))
+				.map(([, id]) => `did:${id}`)
+				.join(' OR '),
+		},
+		version: 6,
+	}))
+
+	// The searches for every candidate share one request
+	const decksToDelete: string[] = []
+	await runMultiOrThrow(
+		client,
+		cardSearchActions,
+		(index) => `deck "${existingCandidates[index] ?? `index ${index}`}"`,
+		(index, result) => {
+			const deckName = existingCandidates[index]
+			if (deckName === undefined) {
+				return
+			}
+
+			if (toNumberArray(result, 'findCards').every((card) => cardsToRemove.has(card))) {
+				decksToDelete.push(deckName)
+			}
+		},
+		Infinity,
+	)
 
 	if (!dryRun && decksToDelete.length > 0) {
 		await client.deck.deleteDecks({
@@ -1515,16 +1590,22 @@ async function runMultiOrThrow(
 	actions: MultiAction[],
 	contextFor: (index: number) => string,
 	onSuccess: (index: number, result: unknown) => void,
+	maxActionsPerRequest = MULTI_BATCH_CHUNK_SIZE,
 ): Promise<void> {
-	await runMultiInChunks(client, actions, (index, response) => {
-		const context = contextFor(index)
-		const action = actions[index]?.action ?? `action ${index}`
-		if (response.error !== null) {
-			throw new Error(`${action} failed for ${context}: ${response.error}`)
-		}
+	await runMultiInChunks(
+		client,
+		actions,
+		(index, response) => {
+			const context = contextFor(index)
+			const action = actions[index]?.action ?? `action ${index}`
+			if (response.error !== null) {
+				throw new Error(`${action} failed for ${context}: ${response.error}`)
+			}
 
-		onSuccess(index, response.result)
-	})
+			onSuccess(index, response.result)
+		},
+		maxActionsPerRequest,
+	)
 }
 
 /**

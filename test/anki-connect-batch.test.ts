@@ -29,7 +29,7 @@ type ActionHandler = (params: Record<string, unknown>) => unknown
  * Mirrors the helper in `anki-connect.test.ts` — duplicated rather than
  * imported to keep the two unit-test files independently runnable.
  */
-function makeMultiMock(handlers: Record<string, ActionHandler>) {
+function makeMultiMock(handlers: Record<string, ActionHandler | undefined>) {
 	type MultiActionInput = { action: string; params?: Record<string, unknown> }
 	return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) =>
 		actions.map(({ action, params = {} }) => {
@@ -513,15 +513,13 @@ describe('ensureModelsAndDecks', () => {
 		const createModel = vi.fn()
 		const createDeck = vi.fn()
 		const multi = makeMultiMock({
+			createDeck,
+			createModel,
 			deckNames: () => ['ExistingDeck'],
 			modelNames: () => ['Yanki - Basic'],
 		})
 		await ensureModelsAndDecks(
-			{
-				deck: { createDeck },
-				miscellaneous: { multi },
-				model: { createModel },
-			} as never,
+			{ miscellaneous: { multi } } as never,
 			['Yanki - Basic', 'Yanki - Cloze'],
 			['ExistingDeck', 'NewDeck'],
 			false,
@@ -529,7 +527,44 @@ describe('ensureModelsAndDecks', () => {
 		expect(createModel).toHaveBeenCalledTimes(1)
 		const modelArgument = createModel.mock.calls[0]?.[0] as { modelName: string }
 		expect(modelArgument.modelName).toBe('Yanki - Cloze')
-		expect(createDeck).toHaveBeenCalledWith({ deck: 'NewDeck' })
+		expect(createDeck.mock.calls).toEqual([[{ deck: 'NewDeck' }]])
+	})
+
+	it('creates every missing model and deck in one request after the probe', async () => {
+		const multi = makeMultiMock({
+			createDeck: () => 1,
+			createModel: () => ({}),
+			deckNames: () => [],
+			modelNames: () => [],
+		})
+		const deckNames = Array.from({ length: 30 }, (_, index) => `Deck ${index}`)
+		await ensureModelsAndDecks(
+			{ miscellaneous: { multi } } as never,
+			['Yanki - Basic', 'Yanki - Cloze'],
+			deckNames,
+			false,
+		)
+		const requests = (multi.mock.calls as Array<[{ actions: Array<{ action: string }> }]>).map(
+			([{ actions }]) => actions.map(({ action }) => action),
+		)
+		expect(requests).toEqual([
+			['modelNames', 'deckNames'],
+			['createModel', 'createModel', ...deckNames.map(() => 'createDeck')],
+		])
+	})
+
+	it('sends no create request when nothing is missing', async () => {
+		const multi = makeMultiMock({
+			deckNames: () => ['TestDeck'],
+			modelNames: () => ['Yanki - Basic'],
+		})
+		await ensureModelsAndDecks(
+			{ miscellaneous: { multi } } as never,
+			['Yanki - Basic'],
+			['TestDeck'],
+			false,
+		)
+		expect(multi).toHaveBeenCalledTimes(1)
 	})
 
 	it('throws "Unknown model name" for an unrecognized Yanki model', async () => {
@@ -543,58 +578,76 @@ describe('ensureModelsAndDecks', () => {
 	})
 
 	it('tolerates a model that another sync created after the probe', async () => {
-		const createModel = vi.fn().mockRejectedValue(new Error('Model name already exists'))
+		const createModel = vi.fn(() => {
+			throw new Error('Model name already exists')
+		})
+		const createDeck = vi.fn()
 		const multi = makeMultiMock({
-			deckNames: () => ['TestDeck'],
+			createDeck,
+			createModel,
+			deckNames: () => [],
 			modelNames: () => [],
 		})
 		await expect(
 			ensureModelsAndDecks(
-				{ miscellaneous: { multi }, model: { createModel } } as never,
+				{ miscellaneous: { multi } } as never,
 				['Yanki - Basic'],
 				['TestDeck'],
 				false,
 			),
 		).resolves.toBeUndefined()
 		expect(createModel).toHaveBeenCalledTimes(1)
+		expect(createDeck).toHaveBeenCalledTimes(1)
 	})
 
-	it('rethrows other model creation errors', async () => {
-		const createModel = vi.fn().mockRejectedValue(new Error('collection is not available'))
+	it.each([
+		{
+			handlers: {
+				createModel() {
+					throw new Error('collection is not available')
+				},
+			},
+			message: 'createModel failed for "Yanki - Basic": collection is not available',
+		},
+		{
+			handlers: {
+				createDeck() {
+					throw new Error('Model name already exists')
+				},
+				createModel: () => ({}),
+			},
+			message: 'createDeck failed for "TestDeck": Model name already exists',
+		},
+	])('throws when a model or deck can not be created: $message', async ({ handlers, message }) => {
 		const multi = makeMultiMock({
+			...handlers,
 			deckNames: () => [],
 			modelNames: () => [],
 		})
 		await expect(
 			ensureModelsAndDecks(
-				{ miscellaneous: { multi }, model: { createModel } } as never,
+				{ miscellaneous: { multi } } as never,
 				['Yanki - Basic'],
-				[],
+				['TestDeck'],
 				false,
 			),
-		).rejects.toThrow('collection is not available')
+		).rejects.toThrow(message)
 	})
 
 	it('does not contact Anki in dry run mode even with missing entries', async () => {
-		const createModel = vi.fn()
-		const createDeck = vi.fn()
 		const multi = makeMultiMock({
+			createDeck: () => 1,
+			createModel: () => ({}),
 			deckNames: () => [],
 			modelNames: () => [],
 		})
 		await ensureModelsAndDecks(
-			{
-				deck: { createDeck },
-				miscellaneous: { multi },
-				model: { createModel },
-			} as never,
+			{ miscellaneous: { multi } } as never,
 			['Yanki - Basic'],
 			['NewDeck'],
 			true,
 		)
 		expect(multi).not.toHaveBeenCalled()
-		expect(createModel).not.toHaveBeenCalled()
-		expect(createDeck).not.toHaveBeenCalled()
 	})
 
 	it('throws when deckNames probe returns an error', async () => {

@@ -32,19 +32,25 @@ type FakeAnkiOptions = {
  * after its note.
  */
 class FakeAnki {
-	readonly decks = new Set<string>()
+	/** Deck IDs by deck name */
+	readonly decks = new Map<string, number>()
 	readonly media = new Set<string>()
 	readonly models = new Set<string>()
 	readonly notes = new Map<number, FakeNote>()
 	readonly requests: FakeRequest[] = []
-	/** Names of the requests received, with nested `multi` actions flattened in */
-	get actionNames(): string[] {
-		return this.requests.flatMap((request) => [
-			request.action,
-			...((request.params?.actions as FakeRequest[] | undefined) ?? []).map(
-				(nested) => nested.action,
-			),
-		])
+	/**
+	 * One entry per request received. A `multi` request lists the distinct
+	 * actions nested in it, as in `multi(getDecks, findCards)`.
+	 */
+	get requestNames(): string[] {
+		return this.requests.map((request) => {
+			if (request.action !== 'multi') {
+				return request.action
+			}
+
+			const nestedNames = (request.params?.actions as FakeRequest[]).map((nested) => nested.action)
+			return `multi(${[...new Set(nestedNames)].join(', ')})`
+		})
 	}
 	private nextNoteId = 1000
 
@@ -54,9 +60,15 @@ class FakeAnki {
 		this.options = options
 	}
 
+	addDeck(deckName: string): number {
+		const deckId = this.decks.get(deckName) ?? this.decks.size + 1
+		this.decks.set(deckName, deckId)
+		return deckId
+	}
+
 	addNote(note: FakeNote): void {
 		this.notes.set(note.noteId, note)
-		this.decks.add(note.deckName)
+		this.addDeck(note.deckName)
 		this.models.add(note.modelName)
 	}
 
@@ -100,9 +112,12 @@ class FakeAnki {
 				})
 			}
 
+			case 'cardsInfo': {
+				return []
+			}
+
 			case 'createDeck': {
-				this.decks.add(params.deck as string)
-				return 1
+				return this.addDeck(params.deck as string)
 			}
 
 			case 'createModel': {
@@ -111,7 +126,20 @@ class FakeAnki {
 			}
 
 			case 'deckNames': {
-				return [...this.decks]
+				return this.decks.keys().toArray()
+			}
+
+			case 'deckNamesAndIds': {
+				return Object.fromEntries(this.decks)
+			}
+
+			case 'deleteDecks': {
+				for (const deckName of params.decks as string[]) {
+					this.decks.delete(deckName)
+				}
+
+				// eslint-disable-next-line unicorn/no-null
+				return null
 			}
 
 			case 'deleteMediaFile': {
@@ -135,7 +163,15 @@ class FakeAnki {
 			}
 
 			case 'findCards': {
-				return []
+				// No deck is ever filtered, and every other search is for the cards
+				// of decks by ID
+				const query = params.query as string
+				const deckIds = new Set(query.matchAll(/did:(\d+)/gv).map(([, deckId]) => Number(deckId)))
+				return this.notes
+					.values()
+					.filter((note) => deckIds.has(this.decks.get(note.deckName) ?? 0))
+					.map((note) => note.noteId)
+					.toArray()
 			}
 
 			case 'findNotes': {
@@ -283,12 +319,11 @@ describe('syncNotes against a fake AnkiConnect', () => {
 		expect(synced.map(({ action }) => action)).toEqual(['unchanged', 'unchanged'])
 		// Each request has a fixed cost, so an unchanged sync sends no model and
 		// deck probe and no empty deletion
-		expect(anki.actionNames).toEqual([
+		expect(anki.requestNames).toEqual([
 			'requestPermission',
 			'findNotes',
 			'notesInfo',
-			'getDecks',
-			'findCards',
+			'multi(getDecks, findCards)',
 			'getMediaFilesNames',
 		])
 	})
@@ -302,8 +337,144 @@ describe('syncNotes against a fake AnkiConnect', () => {
 		})
 
 		expect([...anki.models]).toEqual(['Yanki - Basic'])
-		expect([...anki.decks]).toEqual(['Deck'])
+		expect(anki.decks.keys().toArray()).toEqual(['Deck'])
 		expect(synced.map(({ action, note }) => [action, note.noteId])).toEqual([['created', 1000]])
+	})
+
+	it('creates and removes any number of decks with one request each', async () => {
+		const anki = makeFakeAnki({})
+		const deckNames = Array.from({ length: 30 }, (_, index) => `Deck ${index}`)
+		const options = {
+			ankiConnectOptions: { autoLaunch: false, fetchAdapter: anki.fetchAdapter },
+			namespace: 'test',
+		}
+
+		await syncNotes(
+			deckNames.map((deckName, index) => ({ ...makeNote(undefined, `front ${index}`), deckName })),
+			options,
+		)
+
+		expect(anki.requestNames).toEqual([
+			'requestPermission',
+			'findNotes',
+			'multi(modelNames, deckNames)',
+			'multi(createModel, createDeck)',
+			'addNotes',
+			'getMediaFilesNames',
+		])
+		expect(anki.decks.keys().toArray()).toEqual(deckNames)
+
+		anki.requests.length = 0
+		const { deletedDecks } = await syncNotes([], options)
+
+		expect(anki.requestNames).toEqual([
+			'requestPermission',
+			'findNotes',
+			'notesInfo',
+			'multi(getDecks, findCards)',
+			'deleteNotes',
+			'deckNamesAndIds',
+			'multi(findCards)',
+			'deleteDecks',
+			'getMediaFilesNames',
+		])
+		expect(deletedDecks).toEqual(deckNames.toSorted())
+		expect(anki.decks.size).toBe(0)
+	})
+
+	it('keeps the local note matching Anki when several share its ID, and creates the rest', async () => {
+		const anki = makeFakeAnki({ 1: 'original front' })
+
+		const { synced } = await syncNotes(
+			[makeNote(1, 'first copy'), makeNote(1, 'original front'), makeNote(1, 'second copy')],
+			{
+				ankiConnectOptions: { autoLaunch: false, fetchAdapter: anki.fetchAdapter },
+				namespace: 'test',
+			},
+		)
+
+		expect(synced.map(({ action, note }) => [action, note.noteId, note.fields.Front])).toEqual([
+			['created', 1000, 'first copy'],
+			['unchanged', 1, 'original front'],
+			['created', 1001, 'second copy'],
+		])
+	})
+
+	it('keeps the first local note when several share an ID and none matches Anki', async () => {
+		const anki = makeFakeAnki({ 1: 'original front' })
+
+		const { synced } = await syncNotes([makeNote(1, 'first copy'), makeNote(1, 'second copy')], {
+			ankiConnectOptions: { autoLaunch: false, fetchAdapter: anki.fetchAdapter },
+			namespace: 'test',
+		})
+
+		expect(synced.map(({ action, note }) => [action, note.noteId, note.fields.Front])).toEqual([
+			['updated', 1, 'first copy'],
+			['created', 1000, 'second copy'],
+		])
+	})
+
+	it('does not content-match a note onto an ID that a later local note already holds', async () => {
+		const anki = makeFakeAnki({ 1: 'shared front' })
+
+		const { synced } = await syncNotes(
+			[makeNote(undefined, 'shared front'), makeNote(1, 'shared front')],
+			{
+				ankiConnectOptions: { autoLaunch: false, fetchAdapter: anki.fetchAdapter },
+				namespace: 'test',
+			},
+		)
+
+		expect(synced.map(({ action, note }) => [action, note.noteId])).toEqual([
+			['created', 1000],
+			['unchanged', 1],
+		])
+	})
+
+	it('deletes notes that are only in Anki and leaves other namespaces alone', async () => {
+		const anki = makeFakeAnki({ 1: 'kept front', 2: 'orphaned front', 3: 'another orphan' })
+		anki.addNote({
+			...makeNote(7, 'front in another namespace'),
+			fields: { Back: 'back', Front: 'front in another namespace', YankiNamespace: 'other' },
+			noteId: 7,
+			tags: [],
+		})
+
+		// The last local note carries the ID of the note in the other namespace
+		const { synced } = await syncNotes(
+			[makeNote(1, 'kept front'), makeNote(7, 'front with a borrowed ID')],
+			{
+				ankiConnectOptions: { autoLaunch: false, fetchAdapter: anki.fetchAdapter },
+				namespace: 'test',
+			},
+		)
+
+		expect(synced.map(({ action, note }) => [action, note.noteId])).toEqual([
+			['unchanged', 1],
+			['created', 1000],
+			['deleted', 2],
+			['deleted', 3],
+		])
+		expect(anki.notes.keys().toArray()).toEqual([1, 7, 1000])
+	})
+
+	it('checks the cards of notes whose model changed, and only those', async () => {
+		const anki = makeFakeAnki({ 1: 'first front', 2: 'second front', 3: 'third front' })
+
+		await syncNotes(
+			[
+				{ ...makeNote(1, 'first front'), modelName: 'Yanki - Cloze' },
+				makeNote(2, 'second front edited'),
+				makeNote(3, 'third front'),
+			],
+			{
+				ankiConnectOptions: { autoLaunch: false, fetchAdapter: anki.fetchAdapter },
+				namespace: 'test',
+			},
+		)
+
+		const cardChecks = anki.requests.filter(({ action }) => action === 'cardsInfo')
+		expect(cardChecks.map(({ params }) => params)).toEqual([{ cards: [1] }])
 	})
 
 	it('syncs through an AnkiConnect that requires an API key', async () => {
@@ -322,7 +493,7 @@ describe('syncNotes against a fake AnkiConnect', () => {
 		const spyWarn = vi.spyOn(console, 'warn').mockReturnValue()
 		const anki = makeFakeAnki({}, { mediaUploadStatus: 413 })
 		anki.models.add('Yanki - Basic')
-		anki.decks.add('Deck')
+		anki.addDeck('Deck')
 		const back =
 			'<img src="yanki-test-big.png" data-yanki-media-sync="true" data-yanki-media-src="https://example.com/big.png">'
 

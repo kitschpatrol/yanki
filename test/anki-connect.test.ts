@@ -45,27 +45,53 @@ type MultiCall = [{ actions: MultiActionInput[] }]
  * Handlers may throw to simulate a per-action error response; the thrown
  * message becomes the response's `error` field.
  */
-function makeMultiMock(handlers: Record<string, ActionHandler>) {
-	return vi.fn().mockImplementation(({ actions }: { actions: MultiActionInput[] }) =>
-		actions.map(({ action, params = {} }) => {
-			const handler = Object.hasOwn(handlers, action) ? handlers[action] : undefined
-			if (handler === undefined) {
-				// eslint-disable-next-line unicorn/no-null
-				return { error: `unhandled action ${action}`, result: null }
-			}
-
-			try {
-				// eslint-disable-next-line unicorn/no-null
-				return { error: null, result: handler(params) }
-			} catch (error) {
-				return {
-					error: error instanceof Error ? error.message : String(error),
+function makeMultiMock(handlers: Record<string, ActionHandler | undefined>) {
+	return vi.fn().mockImplementation(async ({ actions }: { actions: MultiActionInput[] }) =>
+		Promise.all(
+			actions.map(async ({ action, params = {} }) => {
+				const handler = Object.hasOwn(handlers, action) ? handlers[action] : undefined
+				if (handler === undefined) {
 					// eslint-disable-next-line unicorn/no-null
-					result: null,
+					return { error: `unhandled action ${action}`, result: null }
 				}
-			}
-		}),
+
+				try {
+					// eslint-disable-next-line unicorn/no-null
+					return { error: null, result: await handler(params) }
+				} catch (error) {
+					return {
+						error: error instanceof Error ? error.message : String(error),
+						// eslint-disable-next-line unicorn/no-null
+						result: null,
+					}
+				}
+			}),
+		),
 	)
+}
+
+type RoutableClient = {
+	card?: { [name: string]: unknown; findCards?: ActionHandler }
+	deck?: { [name: string]: unknown; getDecks?: ActionHandler }
+	note?: { [name: string]: unknown; findNotes?: ActionHandler }
+}
+
+/**
+ * Give a mock client a `multi()` that answers nested deck, card, and note
+ * lookups with the client's own mocks for those actions, the way AnkiConnect
+ * dispatches nested actions to the handlers of the standalone ones.
+ */
+function routeMulti<Client extends RoutableClient>(client: Client) {
+	return {
+		...client,
+		miscellaneous: {
+			multi: makeMultiMock({
+				findCards: client.card?.findCards,
+				findNotes: client.note?.findNotes,
+				getDecks: client.deck?.getDecks,
+			}),
+		},
+	}
 }
 
 function makeAnkiNote(noteId: number, cards: number[]): Record<string, unknown> {
@@ -93,7 +119,7 @@ function makeDeckClient(cardsByDeckName: Record<string, number[]>) {
 		Object.keys(cardsByDeckName).map((deckName, index) => [deckName, index + 1]),
 	)
 
-	return {
+	return routeMulti({
 		card: {
 			findCards: vi
 				.fn()
@@ -107,7 +133,7 @@ function makeDeckClient(cardsByDeckName: Record<string, number[]>) {
 			deckNamesAndIds: vi.fn().mockResolvedValue(deckIds),
 			deleteDecks: vi.fn(),
 		},
-	}
+	})
 }
 
 describe('areNotesEqual', () => {
@@ -758,6 +784,7 @@ describe('getRemoteNotes', () => {
 
 		const result = await getRemoteNotes(client as never, 'test-namespace')
 		expect(result).toEqual([])
+		expect(client.note.notesInfo).not.toHaveBeenCalled()
 	})
 
 	it('drops phantom IDs when notesInfo resolves nothing', async () => {
@@ -777,19 +804,17 @@ describe('getRemoteNotes', () => {
 	})
 
 	it('maps notes with deck info correctly', async () => {
-		const multiMock = makeMultiMock({})
-		const client = {
+		const client = routeMulti({
 			card: { findCards: vi.fn().mockResolvedValue([]) },
 			deck: {
 				deckNamesAndIds: vi.fn(),
 				getDecks: vi.fn().mockResolvedValue({ TestDeck: [100] }),
 			},
-			miscellaneous: { multi: multiMock },
 			note: {
 				findNotes: vi.fn().mockResolvedValue([1]),
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
-		}
+		})
 
 		const result = await getRemoteNotes(client as never, 'test')
 		expect(result).toHaveLength(1)
@@ -799,9 +824,51 @@ describe('getRemoteNotes', () => {
 			modelName: 'Yanki - Basic',
 			noteId: 1,
 		})
+		// The decks of the cards and the filtered deck search share one request
+		expect((client.miscellaneous.multi.mock.calls as MultiCall[]).map(([call]) => call)).toEqual([
+			{
+				actions: [
+					{ action: 'getDecks', params: { cards: [100] }, version: 6 },
+					{ action: 'findCards', params: { query: 'deck:filtered' }, version: 6 },
+				],
+			},
+		])
 		// No filtered decks, so no home deck candidates are ever fetched
 		expect(client.deck.deckNamesAndIds).not.toHaveBeenCalled()
-		expect(multiMock).not.toHaveBeenCalled()
+	})
+
+	it.each([
+		{ getDecksResult: 'not a map', message: 'Expected a map of deck names to cards from getDecks' },
+		{ getDecksResult: { TestDeck: 'not cards' }, message: 'Expected number[] from getDecks' },
+	])(
+		'throws a typed error when getDecks returns $getDecksResult',
+		async ({ getDecksResult, message }) => {
+			const client = routeMulti({
+				card: { findCards: vi.fn().mockResolvedValue([]) },
+				deck: { getDecks: vi.fn().mockResolvedValue(getDecksResult) },
+				note: {
+					findNotes: vi.fn().mockResolvedValue([1]),
+					notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+				},
+			})
+
+			await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(message)
+		},
+	)
+
+	it('throws when the filtered deck search fails', async () => {
+		const client = routeMulti({
+			card: { findCards: vi.fn().mockRejectedValue(new Error('search failed')) },
+			deck: { getDecks: vi.fn().mockResolvedValue({ TestDeck: [100] }) },
+			note: {
+				findNotes: vi.fn().mockResolvedValue([1]),
+				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
+			},
+		})
+
+		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+			'findCards failed: search failed',
+		)
 	})
 
 	it('drops phantom IDs while keeping resolvable notes', async () => {
@@ -816,7 +883,7 @@ describe('getRemoteNotes', () => {
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result).toHaveLength(1)
 		expect(result[0]?.noteId).toBe(1)
 	})
@@ -838,7 +905,7 @@ describe('getRemoteNotes', () => {
 			},
 		}
 
-		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
 			'Unknown model name Unknown Model for note 1',
 		)
 	})
@@ -855,7 +922,7 @@ describe('getRemoteNotes', () => {
 			},
 		}
 
-		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
 			'No deck found for cards in note 1',
 		)
 	})
@@ -889,14 +956,13 @@ describe('getRemoteNotes', () => {
 					),
 				getDecks: vi.fn().mockResolvedValue({ 'Custom Study Session': [100] }),
 			},
-			miscellaneous: { multi: makeMultiMock({ findNotes }) },
 			note: {
 				findNotes,
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result[0]?.deckName).toBe('RealDeck')
 	})
 
@@ -915,14 +981,13 @@ describe('getRemoteNotes', () => {
 					.mockResolvedValue({ Default: 1, Filtered: 2, Parent: 3, 'Parent::Child': 4 }),
 				getDecks: vi.fn().mockResolvedValue({ Filtered: [100, 200] }),
 			},
-			miscellaneous: { multi: makeMultiMock({ findNotes }) },
 			note: {
 				findNotes,
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100]), makeAnkiNote(2, [200])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result.map((note) => note.deckName)).toEqual(['Parent::Child', 'Parent'])
 		expect(client.deck.deckNamesAndIds).toHaveBeenCalledTimes(1)
 	})
@@ -943,14 +1008,13 @@ describe('getRemoteNotes', () => {
 					.mockResolvedValue({ Default: 1, Parent: 2, 'Parent::Custom Study Session': 3, Zeta: 4 }),
 				getDecks: vi.fn().mockResolvedValue({ 'Parent::Custom Study Session': [100] }),
 			},
-			miscellaneous: { multi: makeMultiMock({ findNotes }) },
 			note: {
 				findNotes,
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result[0]?.deckName).toBe('Zeta')
 	})
 
@@ -967,7 +1031,7 @@ describe('getRemoteNotes', () => {
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result[0]?.deckName).toBe('TestDeck')
 	})
 
@@ -983,14 +1047,13 @@ describe('getRemoteNotes', () => {
 				deckNamesAndIds: vi.fn().mockResolvedValue({ Default: 1, Filtered: 2, Other: 3 }),
 				getDecks: vi.fn().mockResolvedValue({ Filtered: [100] }),
 			},
-			miscellaneous: { multi: makeMultiMock({ findNotes }) },
 			note: {
 				findNotes,
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result[0]?.deckName).toBe('Default')
 	})
 
@@ -1008,14 +1071,13 @@ describe('getRemoteNotes', () => {
 				deckNamesAndIds: vi.fn().mockResolvedValue({ Default: 1, RealDeck: 2 }),
 				getDecks: vi.fn().mockResolvedValue({ Default: [100] }),
 			},
-			miscellaneous: { multi: makeMultiMock({ findNotes }) },
 			note: {
 				findNotes,
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result[0]?.deckName).toBe('RealDeck')
 		expect(findNotes).not.toHaveBeenCalledWith({ query: 'did:1' })
 	})
@@ -1035,14 +1097,13 @@ describe('getRemoteNotes', () => {
 					.mockResolvedValue({ Default: 1, Filtered: 2, PlainDeck: 3, RealDeck: 4 }),
 				getDecks: vi.fn().mockResolvedValue({ Filtered: [100], PlainDeck: [200] }),
 			},
-			miscellaneous: { multi: makeMultiMock({ findNotes }) },
 			note: {
 				findNotes,
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100]), makeAnkiNote(2, [200])]),
 			},
 		}
 
-		const result = await getRemoteNotes(client as never, 'test')
+		const result = await getRemoteNotes(routeMulti(client) as never, 'test')
 		expect(result.map((note) => note.deckName)).toEqual(['RealDeck', 'PlainDeck'])
 	})
 
@@ -1053,8 +1114,7 @@ describe('getRemoteNotes', () => {
 			'did:3': [2],
 			'did:4': [1, 2],
 		})
-		const multiMock = makeMultiMock({ findNotes })
-		const client = {
+		const client = routeMulti({
 			card: { findCards: vi.fn().mockResolvedValue([100, 200]) },
 			deck: {
 				deckNamesAndIds: vi
@@ -1062,18 +1122,21 @@ describe('getRemoteNotes', () => {
 					.mockResolvedValue({ Default: 1, FilteredA: 2, FilteredB: 3, RealDeck: 4 }),
 				getDecks: vi.fn().mockResolvedValue({ FilteredB: [200], FilteredA: [100] }),
 			},
-			miscellaneous: { multi: multiMock },
 			note: {
 				findNotes,
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100]), makeAnkiNote(2, [200])]),
 			},
-		}
+		})
 
 		const result = await getRemoteNotes(client as never, 'test')
 		expect(result.map((note) => note.deckName)).toEqual(['RealDeck', 'RealDeck'])
-		// Both filtered notes are resolved from one request holding one search per
-		// candidate deck, never one search per note
-		expect((multiMock.mock.calls as MultiCall[]).map((call) => call[0].actions)).toEqual([
+		// After the request for the decks of the cards, both filtered notes are
+		// resolved from one request holding one search per candidate deck, never
+		// one search per note
+		const requests = (client.miscellaneous.multi.mock.calls as MultiCall[]).map(
+			(call) => call[0].actions,
+		)
+		expect(requests.slice(1)).toEqual([
 			[
 				{ action: 'findNotes', params: { query: 'did:1' }, version: 6 },
 				{ action: 'findNotes', params: { query: 'did:4' }, version: 6 },
@@ -1089,63 +1152,59 @@ describe('getRemoteNotes', () => {
 				deckNamesAndIds: vi.fn().mockResolvedValue({ Default: 1, FilteredDeck: 2 }),
 				getDecks: vi.fn().mockResolvedValue({ FilteredDeck: [100] }),
 			},
-			miscellaneous: { multi: makeMultiMock({ findNotes }) },
 			note: {
 				findNotes,
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
 			'No matching non-filtered deck found for note 1',
 		)
 	})
 
 	it('throws with deck context when a home deck lookup fails', async () => {
-		const multiMock = makeMultiMock({
-			findNotes({ query }) {
-				if (query === 'did:3') {
-					throw new Error('simulated findNotes failure')
-				}
-
-				return []
-			},
-		})
 		const client = {
 			card: { findCards: vi.fn().mockResolvedValue([100]) },
 			deck: {
 				deckNamesAndIds: vi.fn().mockResolvedValue({ Default: 1, Filtered: 2, RealDeck: 3 }),
 				getDecks: vi.fn().mockResolvedValue({ Filtered: [100] }),
 			},
-			miscellaneous: { multi: multiMock },
 			note: {
-				findNotes: vi.fn().mockResolvedValue([1]),
+				findNotes: vi.fn().mockImplementation(({ query }: { query: string }) => {
+					if (query === 'did:3') {
+						throw new Error('simulated findNotes failure')
+					}
+
+					return query === '"YankiNamespace:test"' ? [1] : []
+				}),
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
 			'findNotes failed for deck "RealDeck": simulated findNotes failure',
 		)
 	})
 
 	it('throws a typed error when a home deck lookup returns a malformed shape', async () => {
-		// eslint-disable-next-line unicorn/no-null
-		const multiMock = vi.fn().mockResolvedValue([{ error: null, result: { notes: [1] } }])
 		const client = {
 			card: { findCards: vi.fn().mockResolvedValue([100]) },
 			deck: {
 				deckNamesAndIds: vi.fn().mockResolvedValue({ Filtered: 1, RealDeck: 2 }),
 				getDecks: vi.fn().mockResolvedValue({ Filtered: [100] }),
 			},
-			miscellaneous: { multi: multiMock },
 			note: {
-				findNotes: vi.fn().mockResolvedValue([1]),
+				findNotes: vi
+					.fn()
+					.mockImplementation(({ query }: { query: string }) =>
+						query === '"YankiNamespace:test"' ? [1] : { notes: [1] },
+					),
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
 		}
 
-		await expect(getRemoteNotes(client as never, 'test')).rejects.toThrow(
+		await expect(getRemoteNotes(routeMulti(client) as never, 'test')).rejects.toThrow(
 			'Expected number[] from findNotes',
 		)
 	})
@@ -1164,23 +1223,24 @@ describe('getRemoteNotes', () => {
 			'did:28': [1],
 			'did:31': [1],
 		})
-		const multiMock = makeMultiMock({ findNotes })
-		const client = {
+		const client = routeMulti({
 			card: { findCards: vi.fn().mockResolvedValue([100]) },
 			deck: {
 				deckNamesAndIds: vi.fn().mockResolvedValue(deckNamesAndIds),
 				getDecks: vi.fn().mockResolvedValue({ Filtered: [100] }),
 			},
-			miscellaneous: { multi: multiMock },
 			note: {
 				findNotes,
 				notesInfo: vi.fn().mockResolvedValue([makeAnkiNote(1, [100])]),
 			},
-		}
+		})
 
 		const result = await getRemoteNotes(client as never, 'test')
-		const chunkSizes = (multiMock.mock.calls as MultiCall[]).map((call) => call[0].actions.length)
-		expect(chunkSizes).toEqual([25, 5])
+		const chunkSizes = (client.miscellaneous.multi.mock.calls as MultiCall[]).map(
+			(call) => call[0].actions.length,
+		)
+		// The request for the decks of the cards, then the home deck lookups
+		expect(chunkSizes).toEqual([2, 25, 5])
 		expect(result[0]?.deckName).toBe('Deck28')
 	})
 })
@@ -1199,7 +1259,7 @@ describe('deleteOrphanedDecks', () => {
 			},
 		}
 		const result = await deleteOrphanedDecks(
-			client as never,
+			routeMulti(client) as never,
 			[],
 			[makeNote({ deckName: 'Parent::Managed' })],
 			dryRun,
@@ -1220,7 +1280,7 @@ describe('deleteOrphanedDecks', () => {
 			},
 		}
 		const result = await deleteOrphanedDecks(
-			client as never,
+			routeMulti(client) as never,
 			[],
 			[makeNote({ deckName: 'Parent::Managed' })],
 			false,
@@ -1242,7 +1302,7 @@ describe('deleteOrphanedDecks', () => {
 			},
 		}
 		const result = await deleteOrphanedDecks(
-			client as never,
+			routeMulti(client) as never,
 			[],
 			[makeNote({ deckName: 'GhostDeck' })],
 			false,
@@ -1265,7 +1325,12 @@ describe('deleteOrphanedDecks', () => {
 			},
 		}
 		await expect(
-			deleteOrphanedDecks(client as never, [], [makeNote({ deckName: 'Parent::Managed' })], false),
+			deleteOrphanedDecks(
+				routeMulti(client) as never,
+				[],
+				[makeNote({ deckName: 'Parent::Managed' })],
+				false,
+			),
 		).rejects.toThrow('search failed')
 		expect(client.deck.deleteDecks).not.toHaveBeenCalled()
 	})
@@ -1284,7 +1349,7 @@ describe('deleteOrphanedDecks', () => {
 				},
 			}
 			const result = await deleteOrphanedDecks(
-				client as never,
+				routeMulti(client) as never,
 				[],
 				[makeNote({ cards: [11, 12], deckName: 'Parent::Managed' })],
 				true,
@@ -1302,7 +1367,9 @@ describe('deleteOrphanedDecks', () => {
 				deleteDecks: vi.fn(),
 			},
 		}
-		expect(await deleteOrphanedDecks(client as never, [], [makeNote()], true)).toEqual([])
+		expect(await deleteOrphanedDecks(routeMulti(client) as never, [], [makeNote()], true)).toEqual(
+			[],
+		)
 		expect(client.deck.deleteDecks).not.toHaveBeenCalled()
 	})
 
