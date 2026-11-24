@@ -130,21 +130,28 @@ export async function syncNotes(
 	// an edge case, but it can happen if users are manually duplicating notes
 	// that have already been synced as a shortcut to create new ones.
 	// Can't really think of a more sane thing to do without access to file metadata.
+	const remoteNotesById = new Map(remoteNotes.map((remoteNote) => [remoteNote.noteId, remoteNote]))
+	const localNotesById = new Map<number, YankiNote[]>()
 	for (const localNote of allLocalNotesCopy) {
 		if (localNote.noteId === undefined) {
 			continue
 		}
 
-		const duplicates = findNotesWithDuplicateIds(allLocalNotesCopy, localNote.noteId)
+		const notesWithSameId = localNotesById.get(localNote.noteId)
+		if (notesWithSameId === undefined) {
+			localNotesById.set(localNote.noteId, [localNote])
+		} else {
+			notesWithSameId.push(localNote)
+		}
+	}
 
+	for (const [noteId, duplicates] of localNotesById) {
 		if (duplicates.length <= 1) {
 			continue
 		}
 
-		const remoteNote = remoteNotes.find((remote) => remote.noteId === localNote.noteId)
-
 		// Defaults to the first note if no content match is found
-		const noteToKeep = selectNoteToKeep(duplicates, remoteNote)
+		const noteToKeep = selectNoteToKeep(duplicates, remoteNotesById.get(noteId))
 
 		// Reset noteId in allLocalNotes for all duplicates except the one to keep
 		for (const duplicate of duplicates) {
@@ -193,9 +200,8 @@ export async function syncNotes(
 
 	// Deletion pass, we need the full info to do deck cleanup later on
 	// TODO does strictMatching have implications here?
-	const orphanedNotes = remoteNotes.filter((remoteNote) =>
-		allLocalNotesCopy.every((localNote) => localNote.noteId !== remoteNote.noteId),
-	)
+	const localNoteIds = new Set(allLocalNotesCopy.map((localNote) => localNote.noteId))
+	const orphanedNotes = remoteNotes.filter((remoteNote) => !localNoteIds.has(remoteNote.noteId))
 
 	await deleteNotes(client, orphanedNotes, dryRun)
 	for (const orphanedNote of orphanedNotes) {
@@ -222,15 +228,16 @@ export async function syncNotes(
 	if (checkDatabase) {
 		// Check for database corruption
 		// (can happen if a model update changes a card count for a note)
-		const updatedModelRemoteNotes = remoteNotes.filter((remoteNote) =>
-			synced.some(
-				(localNote) =>
-					localNote.action === 'updated' &&
-					// TODO does strictMatching have implications here?
-					localNote.note.noteId === remoteNote.noteId &&
-					localNote.note.modelName !== remoteNote.modelName,
-			),
+		// TODO does strictMatching have implications here?
+		const updatedModelNames = new Map(
+			synced
+				.filter(({ action }) => action === 'updated')
+				.map(({ note }) => [note.noteId, note.modelName]),
 		)
+		const updatedModelRemoteNotes = remoteNotes.filter((remoteNote) => {
+			const updatedModelName = updatedModelNames.get(remoteNote.noteId)
+			return updatedModelName !== undefined && updatedModelName !== remoteNote.modelName
+		})
 
 		if (updatedModelRemoteNotes.length > 0) {
 			// Model changes can leave orphaned cards in the database.
@@ -303,11 +310,6 @@ export async function syncNotes(
 	}
 }
 
-// Helper function to find notes with the same noteId
-function findNotesWithDuplicateIds(notes: YankiNote[], noteId: number): YankiNote[] {
-	return notes.filter((note) => note.noteId !== undefined && note.noteId === noteId)
-}
-
 // Function to select the note to keep based on content matching with the remote note
 function selectNoteToKeep(duplicates: YankiNote[], remoteNote: undefined | YankiNote): YankiNote {
 	return (
@@ -371,18 +373,19 @@ function classifyNotes(
 	const modelsNeeded = new Set<string>()
 	const decksNeeded = new Set<string>()
 
-	const matchedIds = new Set<number>(
-		allLocalNotesCopy
-			.filter(
-				(localNote) =>
-					localNote.noteId !== undefined &&
-					remoteNotes.some((remote) => localNote.noteId === remote.noteId),
-			)
-			.map((note) => note.noteId!),
+	const allRemoteNotesById = new Map(
+		allRemoteNotes.map((remoteNote) => [remoteNote.noteId, remoteNote]),
 	)
+	const remoteNoteIds = new Set(remoteNotes.map((remoteNote) => remoteNote.noteId))
+	const matchedIds = new Set<number>()
+	for (const { noteId } of allLocalNotesCopy) {
+		if (noteId !== undefined && remoteNoteIds.has(noteId)) {
+			matchedIds.add(noteId)
+		}
+	}
 
 	for (const localNote of allLocalNotesCopy) {
-		let remoteNote = allRemoteNotes.find((remote) => remote.noteId === localNote.noteId)
+		let remoteNote = allRemoteNotesById.get(localNote.noteId)
 
 		// Note with the same ID lives in a different namespace — treat as new.
 		if (remoteNote?.fields.YankiNamespace !== sanitizedNamespace) {
