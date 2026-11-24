@@ -1,5 +1,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
+import { uint8ArrayToBase64 } from 'uint8array-extras'
 import type { FileAdapter } from '../shared/types'
 import { MEDIA_DEFAULT_HASH_MODE_FILE } from '../shared/constants'
 import { getHash } from './string'
@@ -14,6 +15,27 @@ export async function fileExists(
 	} catch {
 		return false
 	}
+}
+
+/**
+ * Base64-encode the content of a file.
+ *
+ * Runtimes with a native `Uint8Array.prototype.toBase64` encode many times
+ * faster than the JavaScript implementation, which matters when a sync uploads
+ * a lot of media. Both produce the same standard, padded encoding.
+ */
+export function fileContentToBase64(fileContent: Uint8Array): string {
+	return hasNativeBase64(fileContent) ? fileContent.toBase64() : uint8ArrayToBase64(fileContent)
+}
+
+/**
+ * Whether a typed array has the native base64 method, which is too recent to be
+ * in the TypeScript library types this project builds against.
+ */
+function hasNativeBase64(
+	fileContent: Uint8Array,
+): fileContent is Uint8Array & { toBase64: () => string } {
+	return 'toBase64' in fileContent && typeof fileContent.toBase64 === 'function'
 }
 
 export async function getFileContentHash(

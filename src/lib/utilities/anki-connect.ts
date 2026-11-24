@@ -3,7 +3,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
 import type { YankiConnect } from 'yanki-connect'
-import { uint8ArrayToBase64 } from 'uint8array-extras'
 import { AnkiConnectUnreachableError } from 'yanki-connect'
 import type { YankiModelName } from '../model/model'
 import type { YankiNote } from '../model/note'
@@ -12,6 +11,7 @@ import type { FileAdapter } from '../shared/types'
 import { legacyYankiModelNames, yankiModelNames, yankiModels } from '../model/model'
 import { extractMediaFromHtml } from '../parse/rehype-utilities'
 import { defaultGlobalOptions } from '../shared/types'
+import { fileContentToBase64 } from './file'
 import { getSlugifiedNamespace } from './namespace'
 import { isUrl } from './url'
 
@@ -1142,7 +1142,7 @@ async function uploadMediaForNote(
 									url: originalSrc,
 								}
 							: {
-									data: uint8ArrayToBase64(await fileAdapter!.readFileBuffer(originalSrc)),
+									data: fileContentToBase64(await fileAdapter!.readFileBuffer(originalSrc)),
 									deleteExisting: true,
 									filename,
 								},
@@ -1304,7 +1304,7 @@ async function getMediaUploads(
 		}
 
 		try {
-			const data = uint8ArrayToBase64(await fileAdapter.readFileBuffer(originalSrc))
+			const data = fileContentToBase64(await fileAdapter.readFileBuffer(originalSrc))
 			uploads[index] = {
 				action: {
 					action: 'storeMediaFile',
