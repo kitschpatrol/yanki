@@ -24,6 +24,17 @@ const MANY_DECKS_NAMESPACE = 'Yanki Bench Many Decks'
 // visibly dominates the warm sync: with localhost AnkiConnect round trips of
 // a few ms each, ~100 sequential requests add up to hundreds of ms.
 const MANY_DECKS_COUNT = 100
+const DECK_CHURN_NAMESPACE = 'Yanki Bench Deck Churn'
+// One note per deck. Sized so that a request per deck, at tens of milliseconds
+// each, dominates the handful of requests the rest of a sync needs.
+const DECK_CHURN_COUNT = 50
+const LARGE_NAMESPACE = 'Yanki Bench Large'
+// Sized so that any bookkeeping in `syncNotes` that scans every note once per
+// note takes longer than the requests of an unchanged sync.
+const LARGE_NOTE_COUNT = 5000
+// Notes are seeded directly through AnkiConnect, a batch at a time, to keep each
+// request short
+const LARGE_SEED_BATCH_SIZE = 1000
 
 // Each bench iteration touches Anki over HTTP and is comparatively slow.
 // Keep enough samples for a stable comparison without dragging the suite out.
@@ -37,18 +48,15 @@ let warmNotes: YankiNote[] = []
 let coldMediaNotes: YankiNote[] = []
 let manyDecksWarmNotes: YankiNote[] = []
 
-async function clearBenchNamespace(): Promise<void> {
-	const remote = await getRemoteNotes(client, BENCH_NAMESPACE)
+async function clearNamespace(namespace: string): Promise<void> {
+	const remote = await getRemoteNotes(client, namespace)
 	if (remote.length > 0) {
 		await deleteNotes(client, remote, false)
 	}
 }
 
-async function clearManyDecksNamespace(): Promise<void> {
-	const remote = await getRemoteNotes(client, MANY_DECKS_NAMESPACE)
-	if (remote.length > 0) {
-		await deleteNotes(client, remote, false)
-	}
+async function clearBenchNamespace(): Promise<void> {
+	await clearNamespace(BENCH_NAMESPACE)
 }
 
 async function clearBenchNamespaceMedia(): Promise<void> {
@@ -107,7 +115,7 @@ beforeAll(async () => {
 	// doesn't pollute other benches. Initial sync creates the decks and notes;
 	// subsequent bench iterations re-sync the same set unchanged, exercising the
 	// deck resolution in `getRemoteNotesById` across many unique decks.
-	await clearManyDecksNamespace()
+	await clearNamespace(MANY_DECKS_NAMESPACE)
 	const manyDecksColdNotes: YankiNote[] = Array.from({ length: MANY_DECKS_COUNT }, (_, index) => ({
 		deckName: `${MANY_DECKS_NAMESPACE}::Deck ${String(index).padStart(3, '0')}`,
 		fields: {
@@ -128,7 +136,7 @@ beforeAll(async () => {
 afterAll(async () => {
 	await clearBenchNamespace()
 	await clearBenchNamespaceMedia()
-	await clearManyDecksNamespace()
+	await clearNamespace(MANY_DECKS_NAMESPACE)
 }, 60_000)
 
 describe('Tier 4 — syncNotes (cold)', () => {
@@ -312,6 +320,99 @@ describe('Tier 4 — syncNotes (media batching)', () => {
 				fileAdapter,
 				namespace: BENCH_NAMESPACE,
 			})
+		},
+		BENCH_OPTIONS,
+	)
+})
+
+describe('Tier 4 — syncNotes (deck churn)', () => {
+	const deckChurnNotes: YankiNote[] = Array.from({ length: DECK_CHURN_COUNT }, (_, index) => ({
+		deckName: `${DECK_CHURN_NAMESPACE}::Deck ${String(index).padStart(3, '0')}`,
+		fields: {
+			Back: `Back of card ${index}`,
+			Front: `Front of card ${index}`,
+			YankiNamespace: DECK_CHURN_NAMESPACE,
+		},
+		modelName: 'Yanki - Basic',
+		noteId: undefined,
+		tags: [],
+	}))
+
+	// Leaves nothing behind if a run is interrupted between the two syncs
+	afterAll(async () => {
+		await syncNotes([], { namespace: DECK_CHURN_NAMESPACE })
+	}, 120_000)
+
+	// Every iteration creates a deck for each note, then removes the notes and
+	// the decks they leave empty. Guards against sending a request per deck when
+	// creating missing decks, or when checking which orphaned decks are empty.
+	benchTest(
+		`syncNotes :: create then remove ${DECK_CHURN_COUNT} notes across ${DECK_CHURN_COUNT} decks`,
+		async () => {
+			await syncNotes(deckChurnNotes, { namespace: DECK_CHURN_NAMESPACE })
+			await syncNotes([], { namespace: DECK_CHURN_NAMESPACE })
+		},
+		BENCH_OPTIONS,
+	)
+})
+
+// Kept last, with its notes seeded and removed inside the suite: every sync
+// loads the Yanki notes of all namespaces, so these would slow the other
+// benchmarks down while they exist.
+describe('Tier 4 — syncNotes (large collection)', () => {
+	let largeWarmNotes: YankiNote[] = []
+
+	beforeAll(async () => {
+		await clearNamespace(LARGE_NAMESPACE)
+		await client.deck.createDeck({ deck: LARGE_NAMESPACE })
+
+		const largeNotes: YankiNote[] = Array.from({ length: LARGE_NOTE_COUNT }, (_, index) => ({
+			deckName: LARGE_NAMESPACE,
+			fields: {
+				Back: `Back of card ${index}`,
+				Front: `Front of card ${index}`,
+				YankiNamespace: LARGE_NAMESPACE,
+			},
+			modelName: 'Yanki - Basic',
+			noteId: undefined,
+			tags: [],
+		}))
+
+		const noteIds: number[] = []
+		for (let start = 0; start < largeNotes.length; start += LARGE_SEED_BATCH_SIZE) {
+			const batchNoteIds = await client.note.addNotes({
+				notes: largeNotes.slice(start, start + LARGE_SEED_BATCH_SIZE).map((note) => ({
+					deckName: note.deckName,
+					fields: note.fields,
+					modelName: note.modelName,
+					options: { allowDuplicate: true },
+					tags: note.tags,
+				})),
+			})
+			noteIds.push(...batchNoteIds)
+		}
+
+		largeWarmNotes = largeNotes.map((note, index) => {
+			const noteId = noteIds[index]
+			if (noteId === undefined) {
+				throw new Error(`Large collection bench setup: missing noteId at index ${index}`)
+			}
+
+			return { ...note, noteId }
+		})
+	}, 300_000)
+
+	afterAll(async () => {
+		await clearNamespace(LARGE_NAMESPACE)
+		await client.deck.deleteDecks({ cardsToo: true, decks: [LARGE_NAMESPACE] })
+	}, 300_000)
+
+	// An unchanged sync of a large collection, where the requests are few and
+	// the time goes to loading the notes and matching them up locally.
+	benchTest(
+		`syncNotes :: ${LARGE_NOTE_COUNT} unchanged notes`,
+		async () => {
+			await syncNotes(largeWarmNotes, { namespace: LARGE_NAMESPACE })
 		},
 		BENCH_OPTIONS,
 	)
