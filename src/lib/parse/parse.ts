@@ -5,7 +5,6 @@
  */
 
 import type { Root } from 'mdast'
-import { deepmerge } from 'deepmerge-ts'
 import { u } from 'unist-builder'
 import { CONTINUE, EXIT, visit } from 'unist-util-visit'
 import type { YankiNote } from '../model/note'
@@ -17,6 +16,7 @@ import {
 	getDefaultFileAdapter,
 } from '../shared/types'
 import { validateAndSanitizeNamespace } from '../utilities/namespace'
+import { applyDefaults } from '../utilities/options'
 import { mdastToHtml } from './rehype-utilities'
 import {
 	deleteFirstNodeOfType,
@@ -78,7 +78,7 @@ export async function getNoteFromMarkdown(
 		sourcePath,
 		strictLineBreaks,
 		syncMediaAssets,
-	} = deepmerge(defaultGetNoteFromMarkdownOptions, options ?? {})
+	} = applyDefaults(defaultGetNoteFromMarkdownOptions, options)
 
 	const sanitizedNamespace = namespaceValidationAndSanitization
 		? validateAndSanitizeNamespace(namespace)

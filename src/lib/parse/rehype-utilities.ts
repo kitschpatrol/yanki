@@ -38,7 +38,6 @@ import yaml from '@shikijs/langs/yaml'
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
 import githubDark from '@shikijs/themes/github-dark'
 import githubLight from '@shikijs/themes/github-light'
-import { deepmerge } from 'deepmerge-ts'
 import { toText } from 'hast-util-to-text'
 import rehypeFormat from 'rehype-format'
 import rehypeParse from 'rehype-parse'
@@ -63,6 +62,7 @@ import {
 	getDefaultFileAdapter,
 } from '../shared/types'
 import { getAnkiMediaFilenameExtension, getSafeAnkiMediaFilename } from '../utilities/media'
+import { applyDefaults } from '../utilities/options'
 import { getBase, getQuery } from '../utilities/path'
 import { cleanClassName, emptyIsUndefined } from '../utilities/string'
 import { getSrcType, isUrl, safeDecodeURI } from '../utilities/url'
@@ -186,7 +186,7 @@ export async function mdastToHtml(
 		strictLineBreaks,
 		syncMediaAssets,
 		useEmptyPlaceholder,
-	} = deepmerge(defaultMdastToHtmlOptions, options ?? {})
+	} = applyDefaults(defaultMdastToHtmlOptions, options)
 
 	// Pass breaks setting through to the processor via file data...
 	// saves us from recreating the processor in case the setting changes per-file
