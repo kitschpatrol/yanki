@@ -3,6 +3,7 @@
 import { uint8ArrayToBase64 } from 'uint8array-extras'
 import type { FileAdapter } from '../shared/types'
 import { MEDIA_DEFAULT_HASH_MODE_FILE } from '../shared/constants'
+import { ENVIRONMENT } from './platform'
 import { getHash } from './string'
 
 export async function fileExists(
@@ -18,14 +19,25 @@ export async function fileExists(
 }
 
 /**
- * Base64-encode the content of a file.
- *
- * Runtimes with a native `Uint8Array.prototype.toBase64` encode many times
- * faster than the JavaScript implementation, which matters when a sync uploads
- * a lot of media. Both produce the same standard, padded encoding.
+ * Base64-encode the content of a file, by the fastest means the runtime has.
+ * This matters when a sync uploads a lot of media: the JavaScript
+ * implementation is 20 to 50 times slower than either native one. All three
+ * produce the same standard, padded encoding.
  */
 export function fileContentToBase64(fileContent: Uint8Array): string {
-	return hasNativeBase64(fileContent) ? fileContent.toBase64() : uint8ArrayToBase64(fileContent)
+	if (hasNativeBase64(fileContent)) {
+		return fileContent.toBase64()
+	}
+
+	// Node 22 and 24 have no base64 method on typed arrays, but encode natively
+	// through Buffer. The Buffer shares the content's memory instead of copying it.
+	if (ENVIRONMENT === 'node') {
+		return Buffer.from(fileContent.buffer, fileContent.byteOffset, fileContent.byteLength).toString(
+			'base64',
+		)
+	}
+
+	return uint8ArrayToBase64(fileContent)
 }
 
 /**
